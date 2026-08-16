@@ -120,6 +120,7 @@ jobs:
           # Hosted runners are Windows Server; the product must refuse with exit 3 (UnsupportedPlatform).
           if ($code -ne 3) { throw "expected 'otw doctor' to exit 3 on a Windows Server runner, got $code" }
           Write-Host "otw doctor refused Windows Server as designed (exit 3)."
+          exit 0   # the wrapper would otherwise re-exit with the last native exit code
 
       - name: Upload coverage report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
