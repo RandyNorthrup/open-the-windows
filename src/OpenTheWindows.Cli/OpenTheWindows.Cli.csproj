@@ -19,7 +19,7 @@
     <!-- Self-contained / single-file are publish-time decisions (build/publish.ps1);
          setting them here would make test projects unable to reference this exe (NETSDK1151). -->
     <RollForward>LatestPatch</RollForward>
-    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <IsTrimmable>true</IsTrimmable>
   </PropertyGroup>
 
   <ItemGroup>

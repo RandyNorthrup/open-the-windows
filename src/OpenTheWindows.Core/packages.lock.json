@@ -56,6 +56,8 @@
         "resolved": "10.32.0.713",
         "contentHash": "7GiMslvghy0n0t7r2oEAVbBeKTnYTXUOQPtZCwuN5FvtM+9vxf4BR4FVrq5o4KYUziHF/5NLR5SHQ3guBqYPow=="
       }
-    }
+    },
+    "net10.0/win-arm64": {},
+    "net10.0/win-x64": {}
   }
 }

@@ -39,6 +39,10 @@
     <!-- Every project is Windows-only by design; the analyzer still validates
          API availability against the declared minimum OS (Windows 11 = 22000). -->
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!-- Every project declares both runtime identifiers so that the locked restore
+         graph (packages.lock.json) is identical for `dotnet build` and for
+         `dotnet publish -r win-x64|win-arm64` (otherwise NU1004 in CI). -->
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
   </PropertyGroup>
 

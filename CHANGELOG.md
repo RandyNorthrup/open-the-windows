@@ -24,6 +24,13 @@ what was planned (plans live in `PLAN.md`).
 
 - PLAN.md section 8 is now an index/status board over the milestone specs.
 
+### Fixed
+
+- CI publish failed with NU1004 (locked restore vs RID/trim publish graph). Every
+  project now declares `RuntimeIdentifiers` (Directory.Build.props) and the
+  Windows/CLI projects are `IsTrimmable`, so `packages.lock.json` matches both
+  build and publish restores; lock files regenerated.
+
 ## [0.1.0] - 2026-08-16
 
 Milestone M0: repository scaffold, quality gates, research.

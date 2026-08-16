@@ -53,6 +53,8 @@
       "openthewindows.core": {
         "type": "Project"
       }
-    }
+    },
+    "net10.0/win-arm64": {},
+    "net10.0/win-x64": {}
   }
 }

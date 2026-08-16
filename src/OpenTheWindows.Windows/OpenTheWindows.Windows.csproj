@@ -13,6 +13,9 @@
     <AssemblyName>OpenTheWindows.Windows</AssemblyName>
     <IsPackable>false</IsPackable>
     <Platforms>AnyCPU;x64;ARM64</Platforms>
+    <!-- Trim-analyzed so the single-file CLI can be published with TrimMode=partial;
+         also keeps Microsoft.NET.ILLink.Tasks in the lock file for locked publish restores. -->
+    <IsTrimmable>true</IsTrimmable>
   </PropertyGroup>
 
   <ItemGroup>
