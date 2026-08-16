@@ -58,11 +58,17 @@ foreach ($file in @('AGENTS.md', 'CLAUDE.md', '.github/copilot-instructions.md')
 $changelog = Get-Content (Join-Path $repoRoot 'CHANGELOG.md') -Raw
 if ($changelog -notmatch '(?m)^## \[Unreleased\]') { Add-Failure 'CHANGELOG.md has no [Unreleased] section.' }
 
-$schema = Get-Content (Join-Path $repoRoot 'catalog/schema/tweak.schema.json') -Raw | ConvertFrom-Json
-$kinds = @($schema.'$defs'.action.properties.kind.enum)
-$guide = Get-Content (Join-Path $repoRoot 'docs/catalog-format.md') -Raw
-foreach ($kind in $kinds) {
-    if ($guide -notmatch "\| ``$kind`` \|") { Add-Failure "docs/catalog-format.md does not document action kind '$kind'." }
+$schemaPath = Join-Path $repoRoot 'catalog/schema/tweak.schema.json'
+if (Test-Path $schemaPath) {
+    $schema = Get-Content $schemaPath -Raw | ConvertFrom-Json
+    $kinds = @($schema.'$defs'.action.properties.kind.enum)
+    $guide = Get-Content (Join-Path $repoRoot 'docs/catalog-format.md') -Raw
+    foreach ($kind in $kinds) {
+        if ($guide -notmatch "\| ``$kind`` \|") { Add-Failure "docs/catalog-format.md does not document action kind '$kind'." }
+    }
+}
+else {
+    Write-Host 'PLAN CHECK: catalog/schema/tweak.schema.json not present yet (M1 pending); skipping action-kind check.' -ForegroundColor Yellow
 }
 
 $settings = Get-Content (Join-Path $repoRoot '.claude/settings.json') -Raw

@@ -7,7 +7,8 @@
   "exitCode": 1,
   "absolute": false,
   "gitignore": true,
-  "format": ["csharp", "xml", "powershell", "yaml", "json", "markdown"],
+  "format": ["csharp", "xml", "powershell", "yaml", "json"],
+  "$comment": "markdown is deliberately excluded: the Linux tokenizer reports code fences (```text) as clones across unrelated docs; prose duplication is not the risk this gate exists for.",
   "ignore": [
     "**/artifacts/**",
     "**/node_modules/**",

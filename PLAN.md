@@ -257,6 +257,7 @@ shipped `core-6.1.0-windows` profile.
 | `.editorconfig` `[tests/**]` | CA1707, CA2007, CA1515, CA1861, CA1062, CA1812, CA1822 none | test conventions | never |
 | `PSScriptAnalyzerSettings.psd1` | `PSUseShouldProcessForStateChangingFunctions`, `PSAvoidUsingWriteHost`, `PSAvoidUsingPositionalParameters` excluded | imperative build scripts calling native tools | never |
 | `.markdownlint-cli2.jsonc` | `docs/research/**` ignored | generated reference reports with wide tables/raw URLs | never |
+| `.jscpd.json` | `markdown` not scanned | code fences produce false clones across unrelated docs (seen in CI on Linux); prose duplication is not what the gate guards | never |
 | `.gitleaks.toml` | dir-scan allowlist for `.venv-tools/`, `node_modules/`, `artifacts/`, `temp/` | gitignored, third-party or local-only; history scan unaffected | never |
 | `BannedSymbols.txt` | applies to `src/` only | tests use HKCU sandbox keys and DateTime in assertions | never |
 
