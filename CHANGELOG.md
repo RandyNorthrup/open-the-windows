@@ -51,6 +51,9 @@ Milestone M0: repository scaffold, quality gates, research.
 
 - Product tagline removed the same day it was proposed (product decision); the
   product ships with the title only.
+- Windows Update pausing/holding declared a first-class feature (PLAN.md D21);
+  the refusal list narrowed to permanent Disabled start types and
+  WaaSMedicSvc/UsoSvc ownership hacks. README and agent instructions updated.
 
 ### Verified
 
