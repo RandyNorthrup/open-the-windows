@@ -1,0 +1,90 @@
+# Agent instructions — Open the Windows
+
+These rules apply to any AI coding agent working in this repository. They
+restate the project's standards; the authoritative details are in
+`PLAN.md`, `CONTRIBUTING.md`, `docs/adr/` and `docs/research/`.
+
+## What this project is
+
+A free, MIT-licensed, enterprise-grade Windows 11 privacy / Windows Update /
+security-hardening / performance / debloat tool. .NET 10, WPF GUI + `otw.exe`
+CLI over one Core engine. It runs **elevated** and changes OS state, so
+correctness and reversibility are the product.
+
+## Non-negotiables
+
+- Never write code that disables Windows Update, Defender, UAC, or protected
+  services (WaaSMedicSvc, wuauserv, UsoSvc, DoSvc, BITS, TrustedInstaller,
+  SecurityHealthService, WinDefend, wscsvc, EventLog); never hosts-block
+  Microsoft endpoints; never remove Edge/WebView2. These are refusals, not
+  options (`docs/research/03`, `05` §7).
+- Per-user settings target the **interactive user's** `HKU\<SID>`, never
+  `Registry.CurrentUser` (banned API in `src/`).
+- Policy keys are written through the Local GPO path and mirrored; managed
+  (MDM/GPO) settings are reported, not overridden.
+- Every state change is journaled **before** it happens and verified after.
+- Tweaks are catalogue **data** with sources, revert path, risk tier, level,
+  `appliesTo` and `verifiedOn`; only the closed set of action kinds executes.
+- No telemetry, no network access unless the user opts into the update check.
+
+## Code standards (enforced by the build)
+
+- `TreatWarningsAsErrors`, `AnalysisLevel latest-all`, `EnforceCodeStyleInBuild`,
+  Roslynator/Sonar/Meziantou/IDisposable/VS-Threading analyzers, banned APIs,
+  ReferenceTrimmer, nullable everywhere. Fix the finding; do not suppress it.
+  If a suppression is genuinely right: name the rule, state why inline, add a
+  row to `PLAN.md` §7.3.
+- No magic numbers/strings/timeouts: constants, enums, or schema-validated
+  configuration. `0`, `1`, `-1`, empty collections and direct booleans are fine.
+- No dead code, commented-out code, unused files/exports/packages.
+- No placeholders, mocks or fake implementations in `src/`. A function that
+  cannot do its job throws or returns an explicit failure.
+- Time via `TimeProvider`; processes only via the guarded command runner.
+- One type per file (MA0048); file-scoped namespaces; explicit types unless
+  apparent; `Async` suffix; `_camelCase` private fields.
+- Windows APIs only in `OpenTheWindows.Windows`. Core stays `net10.0` and
+  Windows-free.
+
+## Testing rules
+
+- Unit tests use the fakes in `tests/OpenTheWindows.TestSupport`; no OS calls.
+- Windows integration tests read real OS state only when safe; anything that
+  writes runs on the lab VM behind `OTW_INTEGRATION=1` and elevation.
+- Every test has a case that would fail without the behaviour; assertions
+  target the behaviour, not a downstream symptom.
+- Coverage thresholds (line 85 / branch 75, rising) are gates; do not lower them.
+
+## Quality gates
+
+Run `pwsh build/quality.ps1` before finishing any task. It must be green. Gates:
+restore (NuGetAudit), format, build, test, coverage, secrets (gitleaks), sast
+(semgrep), duplication (jscpd), markdown, powershell (PSScriptAnalyzer). New
+gates must be shown to fail on a broken input and logged in `PLAN.md` §7.2.
+
+## Documentation, changelog, planning discipline
+
+- `README.md` only contains commands that have been run successfully.
+- `CHANGELOG.md` (Keep a Changelog) gets an entry for every meaningful change.
+- `PLAN.md` holds decisions, open questions, escape hatches, milestone status;
+  a milestone is complete only when its certification checklist passes.
+- Shaping decisions get an ADR in `docs/adr/`.
+- Package versions are pinned in `Directory.Packages.props`; verify
+  compatibility (peer/transitive) before adding anything, and record the
+  source in `PLAN.md` §7.1. Nothing is added without purpose.
+
+## Security rules
+
+- Secrets never enter the repo (`temp/` and `.env` are gitignored; gitleaks
+  runs on history and tree). Never print credentials in logs or tool output.
+- Do not modify global user memory, machine-wide agent instructions, or IDE
+  settings; project-local files only.
+- Do not add global installs unless documented in `README.md`.
+
+## Environment notes for agents
+
+- Use `C:\Program Files\dotnet\dotnet.exe` (x64) if `dotnet` resolves to the
+  x86 host; `build/*.ps1` already do.
+- Tests run on Microsoft.Testing.Platform (`global.json`); do not add
+  `Microsoft.NET.Test.Sdk` or `xunit.runner.visualstudio`.
+- Bash heredocs in this environment mangle non-ASCII and backslashes; write
+  files with dedicated file tools.

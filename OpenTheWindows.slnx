@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/OpenTheWindows.App/OpenTheWindows.App.csproj" />
+    <Project Path="src/OpenTheWindows.Cli/OpenTheWindows.Cli.csproj" />
+    <Project Path="src/OpenTheWindows.Core/OpenTheWindows.Core.csproj" />
+    <Project Path="src/OpenTheWindows.Windows/OpenTheWindows.Windows.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/OpenTheWindows.App.Tests/OpenTheWindows.App.Tests.csproj" />
+    <Project Path="tests/OpenTheWindows.Cli.Tests/OpenTheWindows.Cli.Tests.csproj" />
+    <Project Path="tests/OpenTheWindows.Core.Tests/OpenTheWindows.Core.Tests.csproj" />
+    <Project Path="tests/OpenTheWindows.TestSupport/OpenTheWindows.TestSupport.csproj" />
+    <Project Path="tests/OpenTheWindows.Windows.Tests/OpenTheWindows.Windows.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,21 @@
+{
+  // markdownlint-cli2 configuration. Line length is relaxed for tables and
+  // code blocks (research reports carry wide tables); everything else applies.
+  "config": {
+    "default": true,
+    "MD013": { "line_length": 120, "tables": false, "code_blocks": false, "headings": false },
+    "MD033": { "allowed_elements": ["br", "sub", "sup", "kbd", "details", "summary"] },
+    "MD041": false,
+    "MD024": { "siblings_only": true }
+  },
+  "globs": ["**/*.md"],
+  "ignores": [
+    "node_modules/**",
+    ".venv-tools/**",
+    "artifacts/**",
+    "temp/**",
+    // Research reports are generated reference material (wide tables, raw
+    // URLs). They are not maintained prose; lint would only churn them.
+    "docs/research/**"
+  ]
+}

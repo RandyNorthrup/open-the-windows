@@ -1,0 +1,39 @@
+# Gitleaks configuration for Open The Windows.
+# Extends the built-in default ruleset; adds project-specific rules.
+#   history:      gitleaks git --redact -c .gitleaks.toml
+#   working tree: gitleaks dir . --redact -c .gitleaks.toml
+
+title = "Open The Windows"
+
+[extend]
+useDefault = true
+
+# Project-specific: the local VM inventory format used during development
+# (temp/ is gitignored, but belt and braces). Markdown is excluded at the
+# rule level because policy docs legitimately contain "password: <state>".
+[[rules]]
+id = "otw-vm-inventory-password"
+description = "VM inventory password line (temp/creds.md format)"
+regex = '''(?im)^[a-z0-9_-]*pass(word)?\s*[:=]\s*\S{6,}\s*$'''
+keywords = ["pass", "password"]
+  [rules.allowlist]
+  paths = ['''\.md$''']
+  regexes = ['''(?i)<redacted>|<your-password>|\$\{?[A-Z_]+\}?''']
+
+# Global allowlist for the working-tree ("dir") scan only: these directories are
+# gitignored and hold third-party or local-only material (semgrep venv, node
+# modules, build output, VM credentials). The history ("git") scan is unaffected
+# because none of these paths are ever committed.
+[allowlist]
+paths = [
+  '''^\.venv-tools/''',
+  '''^node_modules/''',
+  '''^artifacts/''',
+  '''^temp/''',
+]
+
+[[rules]]
+id = "otw-openssh-private-key"
+description = "OpenSSH private key block"
+regex = '''-----BEGIN OPENSSH PRIVATE KEY-----'''
+keywords = ["OPENSSH PRIVATE KEY"]

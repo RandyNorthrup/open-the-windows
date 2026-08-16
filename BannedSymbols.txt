@@ -1,0 +1,12 @@
+# Banned APIs (Microsoft.CodeAnalysis.BannedApiAnalyzers, RS0030).
+# Applies to src/ projects only (see Directory.Build.targets). Each line: symbol;reason.
+# A justified exception is a local `#pragma warning disable RS0030 // <reason>` and an entry in PLAN.md "Escape hatches".
+
+P:Microsoft.Win32.Registry.CurrentUser;Never write the elevating account's HKCU. Resolve the interactive user's SID and use HKEY_USERS\<SID> via the Core user-scope abstraction (docs/research/07, section 9).
+M:System.Environment.Exit(System.Int32);Return an ExitCodes value from the command instead of terminating the process; finalizers, journal flush and logging must run.
+M:System.Environment.FailFast(System.String);Same as Environment.Exit.
+P:System.DateTime.Now;Use TimeProvider (injected) so journal/report timestamps are testable and always UTC.
+P:System.DateTime.UtcNow;Use TimeProvider (injected) so journal/report timestamps are testable.
+P:System.DateTimeOffset.Now;Use TimeProvider (injected).
+P:System.DateTimeOffset.UtcNow;Use TimeProvider (injected).
+T:System.Diagnostics.Process;Spawning processes bypasses the journal and the action model. Only the guarded command-action runner in OpenTheWindows.Windows may use it, with a local justified suppression.

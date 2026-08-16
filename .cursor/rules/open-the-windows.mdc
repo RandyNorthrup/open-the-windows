@@ -1,0 +1,24 @@
+---
+description: Project rules for Open the Windows (elevated Windows 11 utility, .NET 10)
+globs: ["**/*"]
+alwaysApply: true
+---
+
+Read AGENTS.md; it is authoritative. Key points:
+
+- Safety first: never disable Windows Update / Defender / UAC / protected services,
+  never hosts-block Microsoft endpoints, never override MDM/GPO managed settings
+  without the documented break-glass flag.
+- Windows APIs only in src/OpenTheWindows.Windows; Core stays net10.0 and pure.
+- Per-user registry writes target the interactive user's HKU\<SID>;
+  Registry.CurrentUser, DateTime.Now/UtcNow, Environment.Exit and Process are
+  banned in src/ (BannedSymbols.txt).
+- Tweaks are catalogue JSON entries with sources, revert, risk, level, appliesTo,
+  verifiedOn; actions are a closed set of typed kinds.
+- Warnings are errors; analyzers at maximum. Fix findings; suppressions need an
+  inline reason and a PLAN.md section 7.3 row.
+- No placeholders, dead code, or magic literals. One type per file.
+- Tests: xunit.v3 on Microsoft.Testing.Platform; fakes in tests/OpenTheWindows.TestSupport;
+  every test must be able to fail. Coverage thresholds are gates.
+- Run `pwsh build/quality.ps1` before finishing. Update CHANGELOG.md, PLAN.md, README.md.
+- Package versions only in Directory.Packages.props, verified before adding.

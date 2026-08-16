@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Windows: the ONLY project that touches the operating system. Implements the
+    Core abstractions with Win32 / WinRT / COM / WMI. Targets the Windows 11
+    24H2 SDK projection so WinRT APIs (e.g. PackageManager) are available, with
+    a minimum supported OS of Windows 11 21H2 (build 22000).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.22000.0</SupportedOSPlatformVersion>
+    <RootNamespace>OpenTheWindows.Windows</RootNamespace>
+    <AssemblyName>OpenTheWindows.Windows</AssemblyName>
+    <IsPackable>false</IsPackable>
+    <Platforms>AnyCPU;x64;ARM64</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OpenTheWindows.Core\OpenTheWindows.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="OpenTheWindows.Windows.Tests" />
+  </ItemGroup>
+
+</Project>

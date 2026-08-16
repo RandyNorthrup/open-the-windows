@@ -1,0 +1,93 @@
+<!--
+  Open The Windows — repository-wide MSBuild defaults.
+
+  Every project under this directory inherits these settings. This file turns
+  the compiler and the Roslyn analyzers into a hard gate: every warning is a
+  build error, every shipped analyzer rule is on, and IDE style rules are
+  enforced in the build (not just in the editor). Per-project relaxations are
+  deliberate, conditional, and documented inline. Analyzer *severities* live in
+  .editorconfig; analyzer *packages* live in Directory.Packages.props.
+-->
+<Project>
+
+  <!-- ─── Identity ──────────────────────────────────────────────────────── -->
+  <PropertyGroup>
+    <Product>Open the Windows</Product>
+    <Company>Open The Windows contributors</Company>
+    <Authors>Randy Northrup and Open The Windows contributors</Authors>
+    <Copyright>Copyright (c) 2026 Randy Northrup and Open The Windows contributors</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/RandyNorthrup/open-the-windows</RepositoryUrl>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <!-- Single source of truth for the version. Release CI overrides with -p:Version=. -->
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <VersionSuffix Condition="'$(VersionSuffix)' == '' and '$(CI)' != 'true'">local</VersionSuffix>
+  </PropertyGroup>
+
+  <!-- ─── Language & compiler ───────────────────────────────────────────── -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningLevel>9999</WarningLevel>
+    <!-- Nullable-flow warnings that are off by default in the SDK. -->
+    <WarningsAsErrors>$(WarningsAsErrors);nullable;CS8600;CS8602;CS8603;CS8604;CS8618;CS8625</WarningsAsErrors>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    <!-- Every project is Windows-only by design; the analyzer still validates
+         API availability against the declared minimum OS (Windows 11 = 22000). -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+  </PropertyGroup>
+
+  <!-- ─── Analyzers ─────────────────────────────────────────────────────── -->
+  <PropertyGroup>
+    <!-- latest-all = every shipped Microsoft analyzer rule, including the ones
+         off by default. Severities are tuned in .editorconfig. -->
+    <AnalysisLevel>latest-all</AnalysisLevel>
+    <AnalysisMode>All</AnalysisMode>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <!-- Without this, IDExxxx style rules only show in the IDE and never fail
+         a build. With it, .editorconfig "warning" severities are real gates. -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+    <ReportAnalyzer>true</ReportAnalyzer>
+    <!-- Doc generation on so IDE0005 (unnecessary using) and CS16xx fire.
+         CS1591 (missing XML comment on public member) is deliberately off:
+         a comment on every public member is busywork; the other doc rules stay. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <!-- ─── Supply chain ──────────────────────────────────────────────────── -->
+  <PropertyGroup>
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
+    <!-- Lock files: `dotnet restore` in locked mode (CI) fails on drift. -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode Condition="'$(CI)' == 'true'">true</RestoreLockedMode>
+    <!-- Central Package Management is configured in Directory.Packages.props. -->
+  </PropertyGroup>
+
+  <!-- ─── Output layout ─────────────────────────────────────────────────── -->
+  <PropertyGroup>
+    <!-- All bin/obj/publish output under /artifacts (gitignored) instead of
+         per-project bin/ obj/ trees. -->
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
+  </PropertyGroup>
+
+  <!-- ─── Test projects ─────────────────────────────────────────────────── -->
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <!-- GenerateDocumentationFile stays ON for tests too: IDE0005 (unnecessary
+         using) and ReferenceTrimmer only work with /doc. CS1591 is already off.
+         Test-only relaxations are in .editorconfig [tests/**/*.cs]. -->
+  </PropertyGroup>
+
+</Project>

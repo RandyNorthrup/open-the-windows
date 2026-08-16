@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Core: domain model, catalogue, engine, journal, abstractions.
+    Deliberately targets plain net10.0 with NO Windows API references so it is
+    unit-testable anywhere and the OS boundary stays in OpenTheWindows.Windows.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>OpenTheWindows.Core</RootNamespace>
+    <AssemblyName>OpenTheWindows.Core</AssemblyName>
+    <IsPackable>false</IsPackable>
+    <IsTrimmable>true</IsTrimmable>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="OpenTheWindows.Core.Tests" />
+  </ItemGroup>
+
+</Project>

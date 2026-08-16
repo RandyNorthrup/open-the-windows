@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    CLI: otw.exe. Headless entry point for automation (Intune remediation,
+    SCCM, scheduled tasks, scripts). Runs asInvoker: read-only commands work
+    unelevated; commands that need elevation exit with ExitCodes.ElevationRequired
+    instead of triggering a UAC prompt from a non-interactive context.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.22000.0</SupportedOSPlatformVersion>
+    <RootNamespace>OpenTheWindows.Cli</RootNamespace>
+    <AssemblyName>otw</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon />
+    <IsPackable>false</IsPackable>
+    <Platforms>AnyCPU;x64;ARM64</Platforms>
+    <!-- Self-contained / single-file are publish-time decisions (build/publish.ps1);
+         setting them here would make test projects unable to reference this exe (NETSDK1151). -->
+    <RollForward>LatestPatch</RollForward>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OpenTheWindows.Core\OpenTheWindows.Core.csproj" />
+    <ProjectReference Include="..\OpenTheWindows.Windows\OpenTheWindows.Windows.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="OpenTheWindows.Cli.Tests" />
+  </ItemGroup>
+
+</Project>

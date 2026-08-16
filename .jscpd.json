@@ -1,0 +1,24 @@
+{
+  "$schema": "https://raw.githubusercontent.com/kucherenko/jscpd/master/packages/jscpd/schema.json",
+  "threshold": 0,
+  "minLines": 8,
+  "minTokens": 60,
+  "reporters": ["consoleFull"],
+  "exitCode": 1,
+  "absolute": false,
+  "gitignore": true,
+  "format": ["csharp", "xml", "powershell", "yaml", "json", "markdown"],
+  "ignore": [
+    "**/artifacts/**",
+    "**/node_modules/**",
+    "**/.venv-tools/**",
+    "**/obj/**",
+    "**/bin/**",
+    "**/*.g.cs",
+    "**/*.Designer.cs",
+    "**/packages.lock.json",
+    "**/package-lock.json",
+    "docs/research/**",
+    "temp/**"
+  ]
+}

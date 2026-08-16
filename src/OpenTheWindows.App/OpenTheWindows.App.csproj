@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    App: WPF GUI (OpenTheWindows.exe). Thin MVVM shell over Core/Windows.
+    Runs requireAdministrator: the GUI's purpose is to apply changes and a
+    single elevation at start is the standard model for this class of tool.
+    Per-user writes still target the interactive user's hive, never HKCU of
+    the elevating account (see docs/research/07-enterprise-safety-architecture.md).
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.22000.0</SupportedOSPlatformVersion>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>OpenTheWindows.App</RootNamespace>
+    <AssemblyName>OpenTheWindows</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <IsPackable>false</IsPackable>
+    <Platforms>AnyCPU;x64;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <RollForward>LatestPatch</RollForward>
+    <!-- WPF has no trimming / Native AOT support. -->
+    <PublishTrimmed>false</PublishTrimmed>
+    <!-- WPF0001: the Fluent ThemeMode API is marked [Experimental] by the WPF
+         team. We accept the API on purpose (ADR 0001); tracked in PLAN.md
+         "Escape hatches". Remove when the attribute is dropped upstream. -->
+    <NoWarn>$(NoWarn);WPF0001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The Application class is DesktopApp (not "App") to avoid the type/namespace
+         name clash CA1724/MA0049 with the OpenTheWindows.App namespace. -->
+    <ApplicationDefinition Include="DesktopApp.xaml" />
+    <Page Remove="DesktopApp.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OpenTheWindows.Core\OpenTheWindows.Core.csproj" />
+    <ProjectReference Include="..\OpenTheWindows.Windows\OpenTheWindows.Windows.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="OpenTheWindows.App.Tests" />
+  </ItemGroup>
+
+</Project>

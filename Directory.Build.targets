@@ -1,0 +1,22 @@
+<!--
+  Open The Windows — repository-wide MSBuild targets.
+
+  Imported AFTER each project file, so project properties such as OutputType
+  are known here (they are not yet known in Directory.Build.props).
+-->
+<Project>
+
+  <!-- CA2007 (ConfigureAwait) is required in Core/Windows libraries and is
+       deliberately not required in the CLI/App entry points, where continuing
+       on the captured (UI) context is the intended behaviour. -->
+  <PropertyGroup Condition="'$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe'">
+    <NoWarn>$(NoWarn);CA2007</NoWarn>
+  </PropertyGroup>
+
+  <!-- Banned-API list applies to shipping code only; tests may use HKCU for
+       sandboxed registry fixtures and DateTime for assertions. -->
+  <ItemGroup Condition="!$(MSBuildProjectName.EndsWith('.Tests')) and '$(MSBuildProjectName)' != 'OpenTheWindows.TestSupport'">
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" Link="BannedSymbols.txt" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,26 @@
+# Dependabot keeps pinned versions current via PRs; every bump still has to pass CI.
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      analyzers:
+        patterns: ["*Analyzer*", "Roslynator*", "SonarAnalyzer*", "Meziantou*", "ReferenceTrimmer", "DotNet.ReproducibleBuilds"]
+      microsoft-extensions:
+        patterns: ["Microsoft.Extensions.*"]
+      testing:
+        patterns: ["xunit*", "Microsoft.Testing.*"]
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: pip
+    directory: /build
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

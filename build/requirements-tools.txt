@@ -1,0 +1,3 @@
+# Python tools used by build/quality.ps1 (installed into .venv-tools, gitignored).
+# Pinned; bump deliberately. Verified on Windows 11 x64 + Python 3.14 on 2026-08-16.
+semgrep==1.173.0

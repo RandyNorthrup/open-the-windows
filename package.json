@@ -1,0 +1,19 @@
+{
+  "name": "open-the-windows-tooling",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Repository tooling only (copy-paste detection, markdown lint). The product is .NET; see README.md.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "jscpd": "jscpd --config .jscpd.json",
+    "markdownlint": "markdownlint-cli2",
+    "markdownlint:fix": "markdownlint-cli2 --fix"
+  },
+  "devDependencies": {
+    "jscpd": "5.0.15",
+    "markdownlint-cli2": "0.23.2"
+  }
+}
