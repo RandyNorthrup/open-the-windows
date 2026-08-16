@@ -302,7 +302,10 @@ exist yet; every later milestone uses `docs/certification/Mx.md`.
 - [x] GUI screenshot captured (`build/smoke-gui.ps1`)
 - [x] publish: `otw.exe` single-file trimmed 13 MB (x64); App self-contained 158 MB unpacked
 - [x] SBOM + SHA256SUMS produced
-- [x] CI green on `main` (run 31978989596, 2026-08-16) after four fixes found only by the real runner: NU1004 locked-restore vs RID publish, jscpd markdown false clones on Linux, plan gate before the schema exists, and `otw doctor` correctly refusing the Windows Server runner (now asserted, exit 3)
+- [x] CI green on `main` (run 31978989596, 2026-08-16) after four fixes found only by the
+  real runner: NU1004 locked-restore vs RID publish, jscpd markdown false clones on Linux,
+  plan gate before the schema exists, and `otw doctor` correctly refusing the Windows Server
+  runner (now asserted, exit 3)
 
 ### M1 — Catalogue (in progress)
 
