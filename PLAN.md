@@ -302,7 +302,7 @@ exist yet; every later milestone uses `docs/certification/Mx.md`.
 - [x] GUI screenshot captured (`build/smoke-gui.ps1`)
 - [x] publish: `otw.exe` single-file trimmed 13 MB (x64); App self-contained 158 MB unpacked
 - [x] SBOM + SHA256SUMS produced
-- [x] CI: repository pushed 2026-08-16; first run status is recorded in `docs/certification/M1.md` when M1 closes (see §11)
+- [x] CI green on `main` (run 31978989596, 2026-08-16) after four fixes found only by the real runner: NU1004 locked-restore vs RID publish, jscpd markdown false clones on Linux, plan gate before the schema exists, and `otw doctor` correctly refusing the Windows Server runner (now asserted, exit 3)
 
 ### M1 — Catalogue (in progress)
 
@@ -352,7 +352,7 @@ experiment, ARM64 device smoke, Sysmon helper (Q5), localisation packs.
 
 | Item | Status | Reason / plan |
 | ------ | -------- | --------------- |
-| CI workflow green on GitHub | pushed 2026-08-16 (private repo `RandyNorthrup/open-the-windows`); first run result to be recorded in `docs/certification/M1.md` | actions SHA-pinned; verify with `gh run watch` |
+| CI workflow green on GitHub | **done** (run 31978989596, 2026-08-16; private repo `RandyNorthrup/open-the-windows`) | actions SHA-pinned; both jobs green |
 | CodeQL workflow | not added | add with the first push (needs the repository on GitHub); semgrep covers SAST locally meanwhile |
 | semgrep registry rules individually verified | partial | mechanism verified with an inline rule; ruleset content is Semgrep's |
 | ARM64 runtime smoke | deferred | no ARM64 device; CI publishes win-arm64 |
