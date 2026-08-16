@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/RandyNorthrup/open-the-windows/catalog/schema/tweak.schema.json",
+  "title": "Open the Windows catalogue document",
+  "description": "A catalogue file: an array of tweak entries. Enum values use the C# member names (PascalCase). Structural rules that the schema cannot express (unique ids, protected services, value/type agreement, references) are enforced by CatalogValidator.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["entries"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "entries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/tweak" }
+    }
+  },
+  "$defs": {
+    "tweakId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 96,
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(\\.[a-z0-9]+(-[a-z0-9]+)*)*$"
+    },
+    "category": { "enum": ["Privacy", "Updates", "Security", "Performance", "Debloat", "Shell"] },
+    "level": { "enum": ["Basic", "Balanced", "Strict", "Paranoid"] },
+    "risk": { "enum": ["Safe", "Caution", "Advanced", "Breaking"] },
+    "scope": { "enum": ["Machine", "User", "AllUsers"] },
+    "status": { "enum": ["Draft", "Verified", "Deprecated"] },
+    "restart": { "enum": ["None", "ExplorerRestart", "SignOut", "Reboot"] },
+    "edition": { "enum": ["Home", "Pro", "Enterprise", "Education"] },
+    "architecture": { "enum": ["x64", "arm64"] },
+    "build": { "type": "integer", "minimum": 22000, "maximum": 99999 },
+    "httpsUrl": { "type": "string", "format": "uri", "pattern": "^https://" },
+    "appliesTo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["editions", "minBuild", "maxBuild", "architectures"],
+      "properties": {
+        "editions": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/edition" } },
+        "minBuild": { "oneOf": [{ "$ref": "#/$defs/build" }, { "type": "null" }] },
+        "maxBuild": { "oneOf": [{ "$ref": "#/$defs/build" }, { "type": "null" }] },
+        "architectures": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/architecture" } }
+      }
+    },
+    "managedBy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policyCsp", "groupPolicyPath"],
+      "properties": {
+        "policyCsp": { "type": ["string", "null"], "minLength": 1 },
+        "groupPolicyPath": { "type": ["string", "null"], "minLength": 1 }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["build", "edition", "date", "evidence"],
+      "properties": {
+        "build": { "$ref": "#/$defs/build" },
+        "edition": { "$ref": "#/$defs/edition" },
+        "date": { "type": "string", "format": "date" },
+        "evidence": { "type": "string", "minLength": 1 }
+      }
+    },
+    "registryValue": {
+      "description": "Number for Dword/Qword, string for Sz/ExpandSz/Binary (base64), string array for MultiSz.",
+      "oneOf": [
+        { "type": "integer", "minimum": 0 },
+        { "type": "string" },
+        { "type": "array", "items": { "type": "string" } }
+      ]
+    },
+    "action": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": { "kind": { "enum": ["Registry", "Service", "ScheduledTask", "Appx", "OptionalFeature", "DefenderPreference", "PowerSetting", "Command"] } },
+      "oneOf": [
+        { "$ref": "#/$defs/registryAction" },
+        { "$ref": "#/$defs/serviceAction" },
+        { "$ref": "#/$defs/scheduledTaskAction" },
+        { "$ref": "#/$defs/appxAction" },
+        { "$ref": "#/$defs/optionalFeatureAction" },
+        { "$ref": "#/$defs/defenderPreferenceAction" },
+        { "$ref": "#/$defs/powerSettingAction" },
+        { "$ref": "#/$defs/commandAction" }
+      ]
+    },
+    "registryAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "hive", "path", "name", "type", "value", "default", "valueKind"],
+      "properties": {
+        "kind": { "const": "Registry" },
+        "hive": { "enum": ["LocalMachine", "User"] },
+        "path": { "type": "string", "minLength": 1, "pattern": "^[^\\\\][^\\n]*$" },
+        "name": { "type": "string" },
+        "type": { "enum": ["Dword", "Qword", "Sz", "ExpandSz", "MultiSz", "Binary"] },
+        "value": { "$ref": "#/$defs/registryValue" },
+        "default": { "oneOf": [{ "$ref": "#/$defs/registryValue" }, { "type": "null" }] },
+        "valueKind": { "enum": ["Preference", "Policy"] }
+      }
+    },
+    "serviceAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name", "startType", "default", "stopIfRunning"],
+      "properties": {
+        "kind": { "const": "Service" },
+        "name": { "type": "string", "minLength": 1 },
+        "startType": { "enum": ["Automatic", "AutomaticDelayed", "Manual", "Disabled"] },
+        "default": { "enum": ["Automatic", "AutomaticDelayed", "Manual", "Disabled"] },
+        "stopIfRunning": { "type": "boolean" }
+      }
+    },
+    "scheduledTaskAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "path", "enabled", "default"],
+      "properties": {
+        "kind": { "const": "ScheduledTask" },
+        "path": { "type": "string", "minLength": 2 },
+        "enabled": { "type": "boolean" },
+        "default": { "type": "boolean" }
+      }
+    },
+    "appxAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "packageFamilyName", "mode", "reinstallHint"],
+      "properties": {
+        "kind": { "const": "Appx" },
+        "packageFamilyName": { "type": "string", "minLength": 3 },
+        "mode": { "enum": ["CurrentUser", "AllUsersAndDeprovision"] },
+        "reinstallHint": { "type": "string", "minLength": 1 }
+      }
+    },
+    "optionalFeatureAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name", "enabled", "default"],
+      "properties": {
+        "kind": { "const": "OptionalFeature" },
+        "name": { "type": "string", "minLength": 1 },
+        "enabled": { "type": "boolean" },
+        "default": { "type": "boolean" }
+      }
+    },
+    "defenderPreferenceAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "property", "value", "default"],
+      "properties": {
+        "kind": { "const": "DefenderPreference" },
+        "property": { "type": "string", "minLength": 1 },
+        "value": {},
+        "default": {}
+      }
+    },
+    "powerSettingAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "subgroupGuid", "settingGuid", "acValue", "dcValue"],
+      "properties": {
+        "kind": { "const": "PowerSetting" },
+        "subgroupGuid": { "type": "string", "format": "uuid" },
+        "settingGuid": { "type": "string", "format": "uuid" },
+        "acValue": { "type": "integer", "minimum": 0 },
+        "dcValue": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "commandAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "executable", "arguments", "revertArguments"],
+      "properties": {
+        "kind": { "const": "Command" },
+        "executable": { "enum": ["powercfg.exe", "netsh.exe", "auditpol.exe", "secedit.exe", "dism.exe", "fsutil.exe"] },
+        "arguments": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "revertArguments": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+      }
+    },
+    "tweak": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "title", "description", "rationale", "category", "level", "risk", "scope", "status",
+        "appliesTo", "actions", "requires", "dependsOn", "conflictsWith", "managedBy",
+        "sideEffects", "sources", "verifiedOn", "tags"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/tweakId" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "description": { "type": "string", "minLength": 1 },
+        "rationale": { "type": "string", "minLength": 1 },
+        "category": { "$ref": "#/$defs/category" },
+        "level": { "$ref": "#/$defs/level" },
+        "risk": { "$ref": "#/$defs/risk" },
+        "scope": { "$ref": "#/$defs/scope" },
+        "status": { "$ref": "#/$defs/status" },
+        "appliesTo": { "$ref": "#/$defs/appliesTo" },
+        "actions": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/action" } },
+        "requires": { "$ref": "#/$defs/restart" },
+        "dependsOn": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/tweakId" } },
+        "conflictsWith": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/tweakId" } },
+        "managedBy": { "oneOf": [{ "$ref": "#/$defs/managedBy" }, { "type": "null" }] },
+        "sideEffects": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "sources": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/httpsUrl" } },
+        "verifiedOn": { "type": "array", "items": { "$ref": "#/$defs/verification" } },
+        "tags": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+      }
+    }
+  }
+}

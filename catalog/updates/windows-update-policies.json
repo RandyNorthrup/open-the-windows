@@ -1,0 +1,165 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "updates.drivers.exclude-from-quality-updates",
+      "title": "Exclude drivers from Windows Update",
+      "description": "Stops Windows Update from offering driver updates together with quality updates. Drivers can still be installed manually or from the vendor.",
+      "rationale": "Vendor drivers (GPU, audio, chipset) are often newer or better tuned than the ones Windows Update pushes, and a bad automatic driver is a common cause of regressions.",
+      "category": "Updates",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "ExcludeWUDriversInQualityUpdate",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Update/ExcludeWUDriversInQualityUpdate",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Update\\Manage updates offered from Windows Update\\Do not include drivers with Windows Updates"
+      },
+      "sideEffects": ["New hardware may need a manually installed driver; security fixes shipped as driver updates are not offered automatically."],
+      "sources": [
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update",
+        "https://learn.microsoft.com/windows/deployment/update/waas-configure-wufb"
+      ],
+      "verifiedOn": [],
+      "tags": ["drivers"]
+    },
+    {
+      "id": "updates.restart.no-auto-reboot-with-logged-on-users",
+      "title": "No automatic restart while users are signed in",
+      "description": "Windows Update waits for a signed-in user to restart instead of restarting automatically to finish installing updates.",
+      "rationale": "Prevents work loss from surprise restarts; updates still download and install, only the restart is deferred to the user.",
+      "category": "Updates",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
+          "name": "NoAutoRebootWithLoggedOnUsers",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Update/NoAutoRebootWithLoggedOnUsers",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Update\\Legacy Policies\\No auto-restart with logged on users for scheduled automatic updates installations"
+      },
+      "sideEffects": ["A machine can stay pending-restart (unpatched in memory) until someone restarts it; deadline policies override this."],
+      "sources": [
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
+      ],
+      "verifiedOn": [],
+      "tags": ["restart"]
+    },
+    {
+      "id": "updates.delivery-optimization.lan-only",
+      "title": "Delivery Optimization: LAN peers only",
+      "description": "Sets Delivery Optimization download mode to LAN (1) so update content is shared with devices on the same local network but never uploaded to the internet.",
+      "rationale": "Stops upstream bandwidth use and internet peer connections while keeping the LAN caching benefit; Windows Update itself is unaffected.",
+      "category": "Updates",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization",
+          "name": "DODownloadMode",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "DeliveryOptimization/DODownloadMode",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Delivery Optimization\\Download Mode"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/windows/deployment/do/waas-delivery-optimization-reference",
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-deliveryoptimization"
+      ],
+      "verifiedOn": [],
+      "tags": ["bandwidth"]
+    },
+    {
+      "id": "updates.insider.block-preview-builds",
+      "title": "Block Windows Insider preview builds",
+      "description": "Prevents the device from being enrolled in Windows Insider flighting and receiving preview builds.",
+      "rationale": "Preview builds are unsupported on production machines and change behaviour under any hardening profile.",
+      "category": "Updates",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "ManagePreviewBuilds",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "ManagePreviewBuildsPolicyValue",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Update/ManagePreviewBuilds",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Update\\Manage updates offered from Windows Update\\Manage preview builds"
+      },
+      "sideEffects": ["The Windows Insider Program page in Settings is disabled."],
+      "sources": [
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
+      ],
+      "verifiedOn": [],
+      "tags": ["insider"]
+    }
+  ]
+}

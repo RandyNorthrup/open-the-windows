@@ -1,6 +1,7 @@
 using System.CommandLine;
 using System.Text.Json;
 using OpenTheWindows.Core;
+using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.TestSupport.Fakes;
 
@@ -13,7 +14,7 @@ public sealed class DoctorCommandTests
         var doctor = new DoctorService(
             new FakeOperatingSystemInfo(win11 ? FakeOperatingSystemInfo.Windows11Pro24H2() : FakeOperatingSystemInfo.Windows10Pro22H2()),
             new FakeElevationContext(elevated));
-        RootCommand root = CommandLineBuilder.Build(doctor);
+        RootCommand root = CommandLineBuilder.Build(new CliServices(doctor, _ => CatalogLoader.LoadBuiltIn()));
         return (root, new StringWriter(), new StringWriter());
     }
 

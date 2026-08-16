@@ -9,6 +9,12 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M1 (in progress): catalogue model (`OpenTheWindows.Core.Catalog`), JSON
+  Schema `catalog/schema/tweak.schema.json`, embedded loader with directory
+  overrides and structural validator (stable rule ids), 29 Draft entries across
+  six categories, CLI `otw catalog list|show|validate`. Tests and the `catalog`
+  gate are still to be written (see docs/milestones/M1-catalogue.md).
+
 - Executable milestone specifications `docs/milestones/M1..M8` with a runbook
   and certification template (`docs/milestones/README.md`); catalogue
   authoring guide `docs/catalog-format.md`.

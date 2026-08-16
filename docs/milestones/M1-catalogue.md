@@ -135,7 +135,7 @@ Schema violation, location = JSON pointer) and `json` (parse errors).
 
 ## Initial catalogue content (all `Draft`, ≥ 1 source each)
 
-Already authored (24 entries): privacy ×9 (`diagnostic-data.json`,
+Already authored (29 entries): privacy ×9 (`diagnostic-data.json`,
 `personalization.json`), updates ×4, security ×6, performance ×4, debloat ×3,
 shell ×3. Do not add more in M1; M4 populates from research.
 
@@ -187,7 +187,7 @@ status + §7.1 (JsonSchema.Net 9.4.0 already listed).
 
 ## Acceptance criteria
 
-1. `otw catalog validate` → exit 0, `Catalogue valid: 24 entries` (warnings allowed, listed).
+1. `otw catalog validate` → exit 0, `Catalogue valid: 29 entries` (warnings allowed, listed).
 2. `otw catalog validate --catalog-dir tests/fixtures/catalog-bad` → exit 4 with rule ids.
 3. `otw catalog list --category Privacy --level Basic` lists only Basic privacy entries.
 4. `otw catalog show privacy.advertising-id.disable --json` round-trips through the schema.

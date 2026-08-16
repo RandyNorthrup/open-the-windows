@@ -1,0 +1,243 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "security.credentials.lsa-protection",
+      "title": "Enable LSA protection (RunAsPPL)",
+      "description": "Runs the Local Security Authority as a protected process so unsigned code cannot inject into it or read credentials from its memory. Uses the value that does not set a UEFI lock, so it can be reverted.",
+      "rationale": "Mitigates credential dumping (Mirror of Microsoft Security Baseline and STIG). Windows 11 22H2+ enables it on new installs; upgraded machines often lack it.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SYSTEM\\CurrentControlSet\\Control\\Lsa",
+          "name": "RunAsPPL",
+          "type": "Dword",
+          "value": 2,
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "LocalSecurityAuthority/ConfigureLsaProtectedProcess",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Local Security Authority\\Configures LSASS to run as a protected process"
+      },
+      "sideEffects": ["Unsigned or improperly signed LSA plug-ins, authentication packages and some third-party credential providers fail to load until updated."],
+      "sources": [
+        "https://learn.microsoft.com/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection",
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-localsecurityauthority"
+      ],
+      "verifiedOn": [],
+      "tags": ["credentials", "baseline", "stig"]
+    },
+    {
+      "id": "security.network.disable-llmnr",
+      "title": "Disable LLMNR name resolution",
+      "description": "Turns off Link-Local Multicast Name Resolution, a fallback name-resolution protocol that answers to anyone on the local network.",
+      "rationale": "LLMNR enables classic credential-relay/poisoning attacks (Responder). DNS keeps working; mDNS is untouched.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\DNSClient",
+          "name": "EnableMulticast",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "ADMX_DnsClient/Turn_Off_Multicast",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Network\\DNS Client\\Turn off multicast name resolution"
+      },
+      "sideEffects": ["Devices reachable only by LLMNR (some NAS/printers without DNS or mDNS names) may stop resolving by name."],
+      "sources": [
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-admx-dnsclient",
+        "https://learn.microsoft.com/windows/security/operating-system-security/device-management/windows-security-configuration-framework/windows-security-baselines"
+      ],
+      "verifiedOn": [],
+      "tags": ["network", "baseline", "stig"]
+    },
+    {
+      "id": "security.autoplay.disable-autorun",
+      "title": "Disable AutoRun and AutoPlay for all drives",
+      "description": "Turns off AutoRun for every drive type and disables AutoRun commands, so inserting media never launches anything automatically.",
+      "rationale": "Removes a classic malware delivery path; the user still opens media by hand.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+          "name": "NoDriveTypeAutoRun",
+          "type": "Dword",
+          "value": 255,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+          "name": "NoAutorun",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Autoplay/DisallowAutoplayForNonVolumeDevices",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\AutoPlay Policies\\Turn off Autoplay"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-autoplay",
+        "https://learn.microsoft.com/windows/security/operating-system-security/device-management/windows-security-configuration-framework/windows-security-baselines"
+      ],
+      "verifiedOn": [],
+      "tags": ["removable-media", "baseline", "stig"]
+    },
+    {
+      "id": "security.smb.disable-insecure-guest-auth",
+      "title": "Block insecure guest logons to SMB shares",
+      "description": "Prevents the SMB client from using unauthenticated guest access to shares.",
+      "rationale": "Guest logons cannot be signed or encrypted, so a network attacker can tamper with data in transit. Windows Enterprise already blocks them; Home/Pro allow them.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\LanmanWorkstation",
+          "name": "AllowInsecureGuestAuth",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "LanmanWorkstation/EnableInsecureGuestLogons",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Network\\Lanman Workstation\\Enable insecure guest logons"
+      },
+      "sideEffects": ["Consumer NAS boxes and shares configured for guest (no-password) access stop being reachable until they get an account."],
+      "sources": [
+        "https://learn.microsoft.com/windows-server/storage/file-server/enable-insecure-guest-logons-smb2-and-smb3",
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-lanmanworkstation"
+      ],
+      "verifiedOn": [],
+      "tags": ["smb", "baseline"]
+    },
+    {
+      "id": "security.powershell.script-block-logging",
+      "title": "Enable PowerShell script block logging",
+      "description": "Logs the content of every PowerShell script block that runs (Event ID 4104), including de-obfuscated code.",
+      "rationale": "The single most useful PowerShell forensic control; required by the Microsoft baseline and STIG. Slight log volume increase.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging",
+          "name": "EnableScriptBlockLogging",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "WindowsPowerShell/TurnOnPowerShellScriptBlockLogging",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows PowerShell\\Turn on PowerShell Script Block Logging"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_logging_windows",
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-windowspowershell"
+      ],
+      "verifiedOn": [],
+      "tags": ["logging", "baseline", "stig"]
+    },
+    {
+      "id": "security.installer.disable-always-install-elevated",
+      "title": "Never let Windows Installer install with elevated privileges",
+      "description": "Explicitly disables the AlwaysInstallElevated policy for the machine so MSI packages run with the invoking user's rights.",
+      "rationale": "AlwaysInstallElevated is a well-known local privilege escalation; the STIG rates it CAT I. Setting 0 pins the safe state even if another tool enables it.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Installer",
+          "name": "AlwaysInstallElevated",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "ApplicationManagement/MSIAlwaysInstallWithElevatedPrivileges",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Installer\\Always install with elevated privileges"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-applicationmanagement",
+        "https://learn.microsoft.com/windows/win32/msi/alwaysinstallelevated"
+      ],
+      "verifiedOn": [],
+      "tags": ["installer", "stig"]
+    }
+  ]
+}

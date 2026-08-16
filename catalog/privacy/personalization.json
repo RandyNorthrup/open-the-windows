@@ -1,0 +1,225 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "privacy.advertising-id.disable",
+      "title": "Disable the advertising ID",
+      "description": "Turns off the per-user advertising identifier that apps use to show personalised ads.",
+      "rationale": "Apps can still show ads; they just cannot correlate them across apps through the ID. No functional loss.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo",
+          "name": "Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Privacy/DisableAdvertisingId",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\User Profiles\\Turn off the advertising ID"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-privacy"
+      ],
+      "verifiedOn": [],
+      "tags": ["ads"]
+    },
+    {
+      "id": "privacy.tailored-experiences.disable",
+      "title": "Turn off tailored experiences",
+      "description": "Stops Microsoft from using diagnostic data to personalise tips, ads and recommendations for this user.",
+      "rationale": "Pure marketing personalisation; nothing depends on it.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Privacy",
+          "name": "TailoredExperiencesWithDiagnosticDataEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Experience/AllowTailoredExperiencesWithDiagnosticData",
+        "groupPolicyPath": "User Configuration\\Administrative Templates\\Windows Components\\Cloud Content\\Do not use diagnostic data for tailored experiences"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-experience",
+        "https://learn.microsoft.com/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
+      ],
+      "verifiedOn": [],
+      "tags": ["ads"]
+    },
+    {
+      "id": "privacy.activity-history.disable",
+      "title": "Disable activity history collection and upload",
+      "description": "Stops Windows from collecting the user's activity history (Timeline data) and from uploading it to Microsoft.",
+      "rationale": "Activity history is a detailed log of documents and apps used; cross-device resume needs it, most users do not.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "PublishUserActivities",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "UploadUserActivities",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Privacy/EnableActivityFeed",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\OS Policies\\Allow publishing of User Activities"
+      },
+      "sideEffects": ["Cross-device 'resume where you left off' and the activity-based Settings > Privacy > Activity history list stop working."],
+      "sources": [
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-privacy",
+        "https://learn.microsoft.com/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
+      ],
+      "verifiedOn": [],
+      "tags": ["timeline"]
+    },
+    {
+      "id": "privacy.input.disable-inking-typing-personalization",
+      "title": "Turn off inking and typing personalisation",
+      "description": "Stops Windows from collecting inking and typing data and contacts to build a personal dictionary and improve suggestions.",
+      "rationale": "Keystroke and handwriting samples are among the most sensitive telemetry; local spell-check keeps working.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\InputPersonalization",
+          "name": "RestrictImplicitInkCollection",
+          "type": "Dword",
+          "value": 1,
+          "default": 0,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\InputPersonalization",
+          "name": "RestrictImplicitTextCollection",
+          "type": "Dword",
+          "value": 1,
+          "default": 0,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\InputPersonalization\\TrainedDataStore",
+          "name": "HarvestContacts",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "TextInput/AllowLinguisticDataCollection",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Control Panel\\Regional and Language Options\\Allow users to enable online speech recognition services"
+      },
+      "sideEffects": ["Personalised typing suggestions and the personal dictionary stop learning."],
+      "sources": [
+        "https://learn.microsoft.com/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-textinput"
+      ],
+      "verifiedOn": [],
+      "tags": ["input"]
+    },
+    {
+      "id": "privacy.start.disable-web-search",
+      "title": "Disable web results in Start search",
+      "description": "Applies the user policy that removes Bing web results and suggestions from Start menu search.",
+      "rationale": "Every keystroke in Start is otherwise sent to Bing; local file/app search is unaffected.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Policies\\Microsoft\\Windows\\Explorer",
+          "name": "DisableSearchBoxSuggestions",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Search/DisableSearchBoxSuggestions",
+        "groupPolicyPath": "User Configuration\\Administrative Templates\\Windows Components\\File Explorer\\Turn off display of recent search entries in the File Explorer search box"
+      },
+      "sideEffects": ["Web results, search highlights and Bing suggestions disappear from Start search."],
+      "sources": [
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-search",
+        "https://learn.microsoft.com/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
+      ],
+      "verifiedOn": [],
+      "tags": ["search", "bing"]
+    }
+  ]
+}
