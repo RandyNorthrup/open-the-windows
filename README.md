@@ -89,6 +89,22 @@ Publish (single-file trimmed CLI + self-contained app + SBOM + hashes):
 pwsh build/publish.ps1 -Runtime win-x64        # or omit -Runtime for x64 + arm64
 ```
 
+## Working on a milestone (humans and agents)
+
+The plan is executable: `PLAN.md` §8 indexes one specification per milestone
+under `docs/milestones/`, and `docs/milestones/README.md` is the runbook.
+Enforcement is built in:
+
+```powershell
+pwsh build/setup-dev.ps1                          # once per clone: git hooks (format/build/test/plan + CHANGELOG rule)
+pwsh build/start-milestone.ps1 -Milestone M1      # prints AGENTS.md + runbook + spec, records the acknowledgement
+pwsh build/quality.ps1                            # all gates incl. `plan` (PLAN/spec/certification consistency)
+```
+
+The project-local Claude Code hook (`.claude/settings.json`) blocks edits under
+`src/`, `tests/`, `catalog/`, `build/` until `start-milestone.ps1` has been run
+in the last 12 hours; CI and the git pre-commit hook run the `plan` gate.
+
 ## Quality gates
 
 One command runs everything and fails on any blocking issue:
@@ -111,6 +127,7 @@ pwsh build/quality.ps1 -Only test # a single gate
 | duplication | `npx jscpd --config .jscpd.json .` | `threshold: 0`, `exitCode: 1` |
 | markdown | `npx markdownlint-cli2` | default rules, 120-col |
 | powershell | `Invoke-ScriptAnalyzer -Path build -Recurse -Settings PSScriptAnalyzerSettings.psd1` | runner fails on **any** record (not `-EnableExit`, which a wrapper can mask) |
+| plan | `pwsh build/check-plan.ps1` | PLAN.md milestone table, `docs/milestones/*.md`, `docs/certification/*.md`, agent instruction files and the catalogue guide must agree; exit 1 otherwise |
 
 Every gate above has been observed to fail on a deliberately broken input
 before being trusted; the log is in [PLAN.md §7.2](PLAN.md).

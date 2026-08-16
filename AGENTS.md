@@ -4,6 +4,26 @@ These rules apply to any AI coding agent working in this repository. They
 restate the project's standards; the authoritative details are in
 `PLAN.md`, `CONTRIBUTING.md`, `docs/adr/` and `docs/research/`.
 
+## Mandatory sequence (enforced by hooks and gates)
+
+1. Read this file and `docs/milestones/README.md` (the runbook).
+2. Run `pwsh build/start-milestone.ps1 -Milestone <Mx>` for the milestone you
+   are working on (PLAN.md section 8 says which is in progress). It prints the
+   milestone specification `docs/milestones/<Mx>-*.md` into your context and
+   records an acknowledgement. Until then, the Claude Code PreToolUse hook
+   (`.claude/settings.json` -> `build/hooks/pre-edit.ps1`) **blocks** Edit/Write
+   under `src/`, `tests/`, `catalog/`, `build/`, `.github/` and the root build
+   files. Documentation edits are always allowed.
+3. Follow the spec's implementation steps in order; do not invent scope.
+4. `pwsh build/quality.ps1` must be green before you start and before you
+   finish; the `plan` gate (`build/check-plan.ps1`) fails if PLAN.md, specs,
+   certification records and these instruction files disagree.
+5. Commits: git pre-commit hook (`pwsh build/setup-dev.ps1` once) runs
+   format/build/test/plan and requires a `CHANGELOG.md` change whenever
+   `src/`, `tests/`, `catalog/` or `build/` change.
+6. A milestone is done only with `docs/certification/<Mx>.md` filled from the
+   template in the runbook and PLAN.md updated. Never mark DONE without it.
+
 ## What this project is
 
 A free, MIT-licensed, enterprise-grade Windows 11 privacy / Windows Update /
@@ -48,6 +68,37 @@ correctness and reversibility are the product.
   apparent; `Async` suffix; `_camelCase` private fields.
 - Windows APIs only in `OpenTheWindows.Windows`. Core stays `net10.0` and
   Windows-free.
+
+## Analyzer expectations (learned; fix these up front instead of suppressing)
+
+- One type per file, file name = type name (MA0048); a type must not share
+  its name with its namespace (MA0049/CA1724 — e.g. `TweakCatalog`, not
+  `Catalog`; `DesktopApp`, not `App`).
+- No type names in identifiers (CA1720): registry types are `Sz`, `ExpandSz`,
+  `MultiSz`, not `String`.
+- Abstract records with no implementation must be interfaces (S1694).
+- `var` when the type is apparent on the right-hand side (IDE0007), explicit
+  type otherwise; expression-bodied members where single-line.
+- Prefer concrete collection types for locals/parameters when the analyzer
+  asks (CA1859); `[.. x]` collection expressions (IDE0300/IDE0305).
+- Dispose struct enumerators explicitly (`using var e = element.EnumerateArray()`),
+  IDISP004 flags `foreach` over `JsonElement.EnumerateArray()`.
+- `Assert.Contains(x, collection, StringComparer.Ordinal)` for strings (MA0002);
+  `string.Create(CultureInfo.InvariantCulture, $"...")` for interpolated output.
+- Executable projects: types `internal` (CA1515); WPF classes need
+  `x:ClassModifier="internal"` in XAML.
+- ReferenceTrimmer (RT0002/RT0003) fails on unused ProjectReference/PackageReference;
+  remove them instead of "using" something to silence it.
+- Banned: `Registry.CurrentUser`, `DateTime.Now/UtcNow`, `Environment.Exit`,
+  `System.Diagnostics.Process` in `src/` (RS0030 with the reason text).
+- STJ: source-generated contexts only; `UnmappedMemberHandling = Disallow` for
+  catalogue/profile/journal files; polymorphism via `[JsonPolymorphic]` on the
+  interface with `FailSerialization` for unknown kinds.
+- XML comments in .props/.csproj/.targets must not contain `--`.
+- ReportGenerator thresholds: bare `minimumCoverageThresholds:lineCoverage=NN`
+  tokens (other forms are silently ignored).
+- Tests: xunit.v3 on Microsoft.Testing.Platform (`global.json`); no
+  `Microsoft.NET.Test.Sdk`; coverage via `dotnet test --coverage`.
 
 ## Testing rules
 

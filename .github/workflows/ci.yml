@@ -102,6 +102,9 @@ jobs:
           $records = @(Invoke-ScriptAnalyzer -Path build -Recurse -Settings ./PSScriptAnalyzerSettings.psd1)
           if ($records.Count -gt 0) { $records | Format-Table -AutoSize | Out-String | Write-Host; exit 1 }
 
+      - name: Plan / spec / certification consistency
+        run: pwsh build/check-plan.ps1
+
       - name: Publish (win-x64, smoke)
         run: pwsh build/publish.ps1 -Runtime win-x64
 

@@ -21,7 +21,8 @@
       sast         semgrep (p/csharp, p/secrets, p/github-actions)
       duplication  jscpd
       markdown     markdownlint-cli2
-      powershell   PSScriptAnalyzer -EnableExit over build/ scripts
+      powershell   PSScriptAnalyzer over build/ scripts (fails on any record)
+      plan         build/check-plan.ps1: PLAN.md, milestone specs, certification records and agent files agree
 
     Every gate has been observed to fail on a deliberately broken input before
     being trusted (see PLAN.md "Gate verification log").
@@ -29,7 +30,7 @@
 [CmdletBinding()]
 param(
     [switch] $Ci,
-    [ValidateSet('all', 'restore', 'format', 'build', 'test', 'coverage', 'secrets', 'sast', 'duplication', 'markdown', 'powershell')]
+    [ValidateSet('all', 'restore', 'format', 'build', 'test', 'coverage', 'secrets', 'sast', 'duplication', 'markdown', 'powershell', 'plan')]
     [string] $Only = 'all'
 )
 
@@ -211,6 +212,10 @@ Invoke-Gate 'powershell' {
         $records | Format-Table -AutoSize | Out-String | Write-Host
         throw "PSScriptAnalyzer reported $($records.Count) finding(s)."
     }
+}
+
+Invoke-Gate 'plan' {
+    & pwsh -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repoRoot 'build/check-plan.ps1')
 }
 
 Write-Host ''

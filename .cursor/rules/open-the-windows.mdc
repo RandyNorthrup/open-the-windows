@@ -6,6 +6,11 @@ alwaysApply: true
 
 Read AGENTS.md; it is authoritative. Key points:
 
+- MANDATORY before editing code: read docs/milestones/README.md, then run
+  `pwsh build/start-milestone.ps1 -Milestone <Mx>` (prints the milestone spec and
+  records the acknowledgement the pre-edit hook checks). Follow the spec in order.
+  A milestone is done only with `docs/certification/Mx.md` and a green
+  `pwsh build/quality.ps1` (incl. the `plan` gate).
 - Safety first: pausing/holding/deferring Windows Update is a feature (PLAN.md D21);
   never permanently break it (WaaSMedic/wuauserv ACL hacks, Disabled start types),
   never disable Defender / UAC / protected services, never hosts-block Microsoft

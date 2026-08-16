@@ -7,6 +7,23 @@ what was planned (plans live in `PLAN.md`).
 
 ## [Unreleased]
 
+### Added
+
+- Executable milestone specifications `docs/milestones/M1..M8` with a runbook
+  and certification template (`docs/milestones/README.md`); catalogue
+  authoring guide `docs/catalog-format.md`.
+- Enforcement: `build/start-milestone.ps1` (prints rules + spec, records an
+  acknowledgement), project-local Claude Code hooks (`.claude/settings.json`,
+  `build/hooks/*.ps1`) that block code edits without an acknowledgement, git
+  pre-commit hook (`.githooks/pre-commit`, enabled by `build/setup-dev.ps1`),
+  and the `plan` consistency gate (`build/check-plan.ps1`) in `quality.ps1`
+  and CI.
+- AGENTS.md: mandatory sequence and analyzer expectations learned in M0/M1.
+
+### Changed
+
+- PLAN.md section 8 is now an index/status board over the milestone specs.
+
 ## [0.1.0] - 2026-08-16
 
 Milestone M0: repository scaffold, quality gates, research.

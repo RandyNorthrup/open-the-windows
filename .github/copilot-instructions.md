@@ -2,6 +2,11 @@
 
 Follow AGENTS.md (authoritative). In short:
 
+- MANDATORY before editing code: read docs/milestones/README.md, then run
+  `pwsh build/start-milestone.ps1 -Milestone <Mx>` (prints the milestone spec and
+  records the acknowledgement the pre-edit hook checks). Follow the spec in order.
+  A milestone is done only with `docs/certification/Mx.md` and a green
+  `pwsh build/quality.ps1` (incl. the `plan` gate).
 - Elevated Windows 11 utility (.NET 10, WPF + `otw.exe`). Pausing/holding/deferring
   Windows Update is a feature (PLAN.md D21). Never generate code that permanently
   breaks Windows Update (WaaSMedic/wuauserv ACL hacks, Disabled start types),

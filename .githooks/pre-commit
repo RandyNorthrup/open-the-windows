@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+# Open the Windows pre-commit hook. Enable once per clone:
+#     pwsh build/setup-dev.ps1        (sets core.hooksPath=.githooks)
+# 1) If code/catalogue changed, CHANGELOG.md must be part of the commit.
+# 2) Runs the fast gates (format, build, test) - CI runs the full set.
+set -e
+staged=$(git diff --cached --name-only)
+if printf '%s\n' "$staged" | grep -Eq '^(src|tests|catalog|build)/' ; then
+  if ! printf '%s\n' "$staged" | grep -q '^CHANGELOG.md$'; then
+    echo "pre-commit: src/tests/catalog/build changed but CHANGELOG.md is not staged. Add an [Unreleased] entry." >&2
+    exit 1
+  fi
+fi
+pwsh -NoProfile -ExecutionPolicy Bypass -File build/quality.ps1 -Only format || exit 1
+pwsh -NoProfile -ExecutionPolicy Bypass -File build/quality.ps1 -Only build || exit 1
+pwsh -NoProfile -ExecutionPolicy Bypass -File build/quality.ps1 -Only test || exit 1
+pwsh -NoProfile -ExecutionPolicy Bypass -File build/quality.ps1 -Only plan || exit 1

@@ -1,0 +1,20 @@
+{
+  "$comment": "Project-local Claude Code settings (committed). Hooks enforce the milestone runbook: no code edits without acknowledging the milestone spec. See docs/milestones/README.md.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File build/hooks/session-start.ps1" }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          { "type": "command", "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File build/hooks/pre-edit.ps1" }
+        ]
+      }
+    ]
+  }
+}

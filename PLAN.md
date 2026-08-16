@@ -262,164 +262,64 @@ shipped `core-6.1.0-windows` profile.
 
 ## 8. Milestones
 
-Every milestone: goal · scope · files · steps · acceptance criteria · tests ·
-gates · docs · security checks · performance checks · certification checklist.
-**A milestone is not complete until its certification checklist passes.**
+The executable specification of every milestone lives in `docs/milestones/`
+(one file each); this section is the index and the status board. The runbook
+`docs/milestones/README.md` says how to execute a milestone and what the
+certification record must contain. **Enforcement:** `pwsh build/start-milestone.ps1
+-Milestone <Mx>` must be run before code edits (the Claude Code hook in
+`.claude/settings.json` blocks `src/ tests/ catalog/ build/` edits otherwise);
+the `plan` gate (`build/check-plan.ps1`, in `quality.ps1`, CI and the git
+pre-commit hook) fails when this table, the specs, the certification records
+or the agent instruction files disagree.
+
+| # | Spec | Status | Certification |
+| --- | ------ | -------- | --------------- |
+| M0 | Scaffold, gates, research (recorded inline below) | DONE 2026-08-16 | inline (§8.1) |
+| M1 | [docs/milestones/M1-catalogue.md](docs/milestones/M1-catalogue.md) — catalogue model, schema, loader, `otw catalog` | in progress (uncommitted WIP; see spec "Current WIP") | `docs/certification/M1.md` (pending) |
+| M2 | [docs/milestones/M2-scan.md](docs/milestones/M2-scan.md) — detection engine, health checks, reports | not started | pending |
+| M3 | [docs/milestones/M3-apply.md](docs/milestones/M3-apply.md) — apply/verify/revert, journal, restore points, Event Log | not started | pending |
+| M4 | [docs/milestones/M4-catalogue-population.md](docs/milestones/M4-catalogue-population.md) — ≥ 300 entries + VM verification + WU guardrails | not started | pending |
+| M5 | [docs/milestones/M5-profiles-enterprise.md](docs/milestones/M5-profiles-enterprise.md) — profiles, all-users, MDM/GPO awareness, drift task | not started | pending |
+| M6 | [docs/milestones/M6-gui.md](docs/milestones/M6-gui.md) — WPF GUI | not started | pending |
+| M7 | [docs/milestones/M7-packaging.md](docs/milestones/M7-packaging.md) — MSI, ZIP, winget, release workflow | not started | pending |
+| M8 | [docs/milestones/M8-audit.md](docs/milestones/M8-audit.md) — baseline audit mode and reports | not started | pending |
+
+Milestone headings below exist for the `plan` gate (`### Mx ...`; "DONE" in
+the heading requires `docs/certification/Mx.md`, except M0).
 
 ### M0 — Scaffold, gates, research (DONE 2026-08-16)
 
-- Goal: production-grade repository from commit one; research complete.
-- Scope/files: everything currently in the repository (see `README.md`
-  "Project structure").
-- Acceptance: all gates green on the scaffold; `otw doctor` runs on the dev box
-  and on the 25H2 lab VM; GUI launches elevated and renders the system check;
-  seven research reports written.
-- Certification checklist:
-  - [x] `pwsh build/quality.ps1` — all 10 gates PASS
-  - [x] every gate proven to fail on a broken input (§7.2)
-  - [x] 43 tests pass; coverage 88% line / 83% branch (thresholds 85/75)
-  - [x] `otw doctor` (text + `--json`) exit 0 locally; exit 0 on VM 25H2 (elevated)
-  - [x] GUI screenshot captured (`build/smoke-gui.ps1`)
-  - [x] publish: `otw.exe` single-file trimmed 13 MB (x64); App self-contained 158 MB unpacked
-  - [x] SBOM + SHA256SUMS produced
-  - [ ] CI workflow run green on GitHub — **not yet possible: repository not pushed** (deferred, see §11)
+Certification recorded here (§8.1) because the certification template did not
+exist yet; every later milestone uses `docs/certification/Mx.md`.
 
-### M1 — Catalogue model, schema, loader, `catalog` commands
+#### 8.1 M0 certification
 
-- Goal: the data model from §5.2 as C# records + JSON Schema; embedded built-in
-  catalogue loader with directory overrides; catalogue tests.
-- Scope: `Core/Catalog/*` (records, `CatalogLoader`, `CatalogValidator`,
-  `CatalogSchema` embedded), `catalog/schema/tweak.schema.json`,
-  `catalog/**` (start with ~20 entries across all six categories, all
-  `verifiedOn` empty until M3), CLI `otw catalog list|show|validate`,
-  `--json`.
-- Steps: schema → records → loader → validator rules (unique ids, ≥1 source,
-  revert path, known action kinds, level/risk set, `appliesTo` sane) → CLI →
-  tests → docs.
-- Acceptance: `otw catalog validate` exits 0 on the built-in catalogue and 4 on
-  a broken file; every entry renders `otw catalog show <id>` with sources.
-- Tests: schema tests, validator negative cases (one per rule), loader
-  override/merge tests, CLI tests.
-- Gates: all + new `catalog` gate = `otw catalog validate` in `quality.ps1`.
-- Docs: `docs/catalog-format.md`, README commands, CHANGELOG.
-- Security: schema forbids unknown action kinds; `command` kind allow-list
-  documented; no path traversal in override loading (tests).
-- Performance: loading 1 000 entries < 200 ms (benchmark test).
-- Certification: gates green; catalogue gate proven to fail; docs updated.
+- [x] `pwsh build/quality.ps1` — all gates PASS (10 at the time; `plan` added later, PASS)
+- [x] every gate proven to fail on a broken input (§7.2)
+- [x] 43 tests pass; coverage 88% line / 83% branch (thresholds 85/75)
+- [x] `otw doctor` (text + `--json`) exit 0 locally; exit 0 on VM 25H2 (elevated)
+- [x] GUI screenshot captured (`build/smoke-gui.ps1`)
+- [x] publish: `otw.exe` single-file trimmed 13 MB (x64); App self-contained 158 MB unpacked
+- [x] SBOM + SHA256SUMS produced
+- [x] CI: repository pushed 2026-08-16; first run status is recorded in `docs/certification/M1.md` when M1 closes (see §11)
 
-### M2 — Detection engine (`scan`) and health checks
+### M1 — Catalogue (in progress)
 
-- Goal: read-only state readers for every action kind + 28 health checks
-  (research 04 §5) + drift report; exit codes 0/1/2.
-- Scope: `Core/Engine/Scan*`, `Windows/Readers/*` (registry incl. `HKU\<SID>`,
-  services, tasks, Appx, features, Defender WMI, powercfg, firewall, audit
-  policy, secedit), `Core/Reports/*` (JSON/CSV/HTML/SARIF), CLI `otw scan
-  --profile <p> [--json|--sarif|--html]`, `otw health`.
-- Acceptance: `otw scan` on the VM reports drift for a known-changed key and 0
-  when compliant; managed settings show `managedBy`.
-- Tests: reader unit tests with fakes; Windows integration tests behind
-  `OTW_INTEGRATION=1` and elevation; report golden files (Verify).
-- Gates: all; add Stryker mutation run for Core (report only at first,
-  threshold at M3).
-- Security: readers are read-only (analyzer-enforced: no write APIs in
-  `Windows/Readers`); SARIF output validated against schema.
-- Performance: full scan of ~500 entries < 5 s on the VM.
-- Certification: VM run recorded in `docs/certification/M2.md` with output.
+See `docs/milestones/M1-catalogue.md`.
 
-### M3 — Apply/verify/revert engine, journal, restore points
+### M2 — Scan (not started)
 
-- Goal: transactional apply per §5.3; journal at
-  `%ProgramData%\OpenTheWindows\journal`; `otw apply`, `otw revert`,
-  `otw history`, `--what-if`, System Restore integration; Event Log source.
-- Scope: `Core/Engine/Apply*`, `Core/Journal/*`, `Windows/Writers/*` (registry
-  incl. GPO policy path via `IGroupPolicyObject` + PReg fallback, service start
-  type, tasks, Appx removal/deprovision + `Deprovisioned` marker, features,
-  Defender preferences, powercfg, firewall, auditpol/secedit), Explorer restart
-  for the interactive session, Event Log source registration (installer/first
-  elevated run).
-- Acceptance: on the VM, apply a Balanced privacy profile → verify → revert →
-  verify original state byte-for-byte per journal; a forced mid-apply failure
-  rolls back completely; a policy write survives `gpupdate /force`.
-- Tests: engine unit tests with an in-memory OS fake (ordering, rollback,
-  idempotency, journal hash chain); integration tests on VM (documented runbook
-  `build/vm.ps1` extension + checkpoint/restore per Q1).
-- Gates: all; coverage thresholds raised to 90/80; Stryker threshold ≥ 70 on
-  Core engine.
-- Security: journal ACL (Administrators + SYSTEM only); no writes without a
-  journal record (fault-injection test); refuse-list of protected services
-  enforced by tests; break-glass requires flag + logs an Event ID 4xxx.
-- Performance: apply of 100 registry entries < 3 s; journal write O(n).
-- Certification: `docs/certification/M3.md` with VM evidence and screenshots of
-  Event Viewer entries.
+### M3 — Apply (not started)
 
-### M4 — Catalogue population (privacy, updates, security, perf/debloat)
+### M4 — Catalogue population (not started)
 
-- Goal: convert research 01/03/04/05 into catalogue entries with sources,
-  levels, risk, `appliesTo`, `verifiedOn` (verified on the lab VM 25H2 and at
-  least one 24H2 image; Home edition rows marked best-effort where policies are
-  Pro+ only).
-- Scope: `catalog/privacy/*.json`, `catalog/updates/*.json`,
-  `catalog/security/*.json`, `catalog/performance/*.json`,
-  `catalog/debloat/*.json`, `catalog/shell/*.json`; the explicit refusal list
-  as `docs/refusals.md`; the snake-oil list as `docs/not-included.md`.
-- Acceptance: ≥ 300 entries; 100% schema-valid; every `Balanced`-or-lower
-  entry verified on the VM (apply → verify → revert) with evidence links;
-  Windows Update guardrails (35-day cap, EOS warning, resume-now) implemented
-  and tested; Defender signature updates provably unaffected by any entry.
-- Tests: catalogue tests (per-rule), per-entry integration test generated from
-  `verifiedOn` expectations, EOS engine unit tests with fixed clock.
-- Gates: all + catalogue gate; markdownlint on the new docs.
-- Security: security-category entries map to MS baseline / STIG / CIS IDs;
-  a "read-only compliance score" mode exists (`otw audit --baseline ms-25h2`).
-- Performance: entries with `measurableBenefit=false` are excluded from
-  Balanced or lower.
-- Certification: `docs/certification/M4.md` (verification matrix build ×
-  edition × entry).
+### M5 — Profiles and enterprise (not started)
 
-### M5 — Profiles, levels, all-users scope, MDM/GPO awareness, drift task
+### M6 — GUI (not started)
 
-- Goal: named profiles + custom profiles (JSON, optional ES256 signature and
-  pinned org keys), per-category level dial, all-users application (live
-  hives, loaded hives, Default profile, Active Setup), managed-setting
-  detection, scheduled re-enforcement (`otw remediate`) with build-change
-  trigger, Intune detection/remediation script templates.
-- Acceptance: signed profile with a wrong key is rejected; managed value is
-  reported and not written; all-users apply reaches a logged-off profile and a
-  new user; the scheduled task re-applies after a simulated build change.
-- Tests/gates/docs/security/perf per pattern; `docs/enterprise.md`.
-- Certification: `docs/certification/M5.md`.
+### M7 — Packaging (not started)
 
-### M6 — WPF GUI
-
-- Goal: full GUI: navigation by category, level dials, tweak list with search,
-  filter, risk badges and "managed" badges, per-tweak info panel with sources,
-  what-if diff view, apply progress with per-item status, history/undo
-  timeline, health dashboard, profile import/export, settings; accessibility
-  (UIA names, keyboard, high contrast), dark/light, DPI; resx localisation
-  infrastructure; "Can apply changes: True" → "Yes" (M0 polish item).
-- Tests: view-model tests; FlaUI smoke on the VM (launch, navigate, apply a
-  Safe tweak, revert); screenshot set per page in `docs/certification/M6.md`.
-- Gates: all + UI smoke; performance: cold start < 2 s on the VM, list of 500
-  entries virtualised (< 16 ms frame).
-- Certification: manual accessibility check record + screenshots.
-
-### M7 — Packaging and release
-
-- Goal: MSI (WiX 7; per-machine, Event Log source, Start menu, optional PATH
-  for `otw`), portable ZIP, winget manifest, release workflow with SBOM,
-  SHA256SUMS, GitHub build-provenance attestation, `CHANGELOG`-driven notes;
-  documentation for organisations to re-sign and to author WDAC/AppLocker
-  rules; framework-dependent variant (Q3).
-- Acceptance: MSI installs/uninstalls cleanly on the VM (Home + Pro images),
-  `winget validate` passes, attestation verifies with `gh attestation verify`.
-- Certification: `docs/certification/M7.md`.
-
-### M8 — Hardening audit mode and reports
-
-- Goal: `otw audit` scoring against MS baseline 25H2 / STIG V2R8 / CIS section
-  IDs (IDs only), HTML/JSON/CSV/SARIF exports, compliance report signing (SHA-
-  256 content hash), scheduled report drop for fleet collection.
-- Certification: `docs/certification/M8.md`.
+### M8 — Audit (not started)
 
 Backlog (post-M8): PowerShell module wrapping the CLI, WinUI 3 front-end
 experiment, ARM64 device smoke, Sysmon helper (Q5), localisation packs.
@@ -451,7 +351,7 @@ experiment, ARM64 device smoke, Sysmon helper (Q5), localisation packs.
 
 | Item | Status | Reason / plan |
 | ------ | -------- | --------------- |
-| CI workflow green on GitHub | **deferred** | repository not yet pushed; `ci.yml` authored, actions pinned, will be verified on first push |
+| CI workflow green on GitHub | pushed 2026-08-16 (private repo `RandyNorthrup/open-the-windows`); first run result to be recorded in `docs/certification/M1.md` | actions SHA-pinned; verify with `gh run watch` |
 | CodeQL workflow | not added | add with the first push (needs the repository on GitHub); semgrep covers SAST locally meanwhile |
 | semgrep registry rules individually verified | partial | mechanism verified with an inline rule; ruleset content is Semgrep's |
 | ARM64 runtime smoke | deferred | no ARM64 device; CI publishes win-arm64 |

@@ -3,6 +3,11 @@
 Project-local instructions for Claude Code. The full rule set is in
 [AGENTS.md](AGENTS.md); read it first. Summary:
 
+- MANDATORY before editing code: read docs/milestones/README.md, then run
+  `pwsh build/start-milestone.ps1 -Milestone <Mx>` (prints the milestone spec and
+  records the acknowledgement the pre-edit hook checks). Follow the spec in order.
+  A milestone is done only with `docs/certification/Mx.md` and a green
+  `pwsh build/quality.ps1` (incl. the `plan` gate).
 - This is an elevated Windows 11 system utility (.NET 10, WPF + CLI). Safety and
   reversibility are the product. Pausing/holding/deferring Windows Update is a
   feature (PLAN.md D21); permanently breaking it (WaaSMedic/wuauserv ACL hacks,
