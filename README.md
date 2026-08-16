@@ -15,8 +15,10 @@ reversibility, drift detection and remediation, and an audit trail. GUI
 
 - Turn off telemetry/diagnostic data, ads, activity history, Recall/Copilot
   features, and similar tracking — selectively, by level.
-- Pause / defer / target Windows Update with guardrails (35-day pause cap by
-  default, end-of-servicing warnings, one-click "resume now").
+- Pause / hold / defer / target Windows Update with guardrails: 35-day pause
+  by default, an extended pause (Advanced tier, with warnings and a
+  configurable ceiling), end-of-servicing warnings, per-update hide, and a
+  one-click "resume now".
 - Apply security hardening mapped to the Microsoft Security Baseline, DISA STIG
   and CIS section IDs; read-only compliance scoring.
 - Apply measurable performance tweaks and remove inbox bloat safely
@@ -24,8 +26,10 @@ reversibility, drift detection and remediation, and an audit trail. GUI
 - Journal every change first, verify after, roll back on failure, revert on
   demand; detect drift and remediate on a schedule; write to the Windows Event
   Log.
-- **Never** disable Windows Update, Defender, UAC or protected services; never
-  hosts-block Microsoft endpoints; never fight MDM/GPO managed settings
+- **Never** permanently break Windows Update (no `WaaSMedicSvc`/`wuauserv`
+  ACL hacks or Disabled start types — Windows reverts them and they break the
+  Store and Defender), never disable Defender, UAC or protected services;
+  never hosts-block Microsoft endpoints; never fight MDM/GPO managed settings
   without an explicit break-glass flag; never ship placebo tweaks.
 
 The research behind every category is in [docs/research/](docs/research/).

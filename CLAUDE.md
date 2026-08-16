@@ -4,8 +4,10 @@ Project-local instructions for Claude Code. The full rule set is in
 [AGENTS.md](AGENTS.md); read it first. Summary:
 
 - This is an elevated Windows 11 system utility (.NET 10, WPF + CLI). Safety and
-  reversibility are the product. Never disable Windows Update / Defender / UAC /
-  protected services; never hosts-block Microsoft; never fight MDM/GPO.
+  reversibility are the product. Pausing/holding/deferring Windows Update is a
+  feature (PLAN.md D21); permanently breaking it (WaaSMedic/wuauserv ACL hacks,
+  Disabled start types), disabling Defender/UAC/protected services, hosts-blocking
+  Microsoft, or fighting MDM/GPO are refusals.
 - Per-user writes go to the interactive user's `HKU\<SID>`; `Registry.CurrentUser`
   is banned. Policy writes go through the Local GPO and are mirrored.
 - Tweaks are catalogue data (sources, revert, risk, level, appliesTo, verifiedOn);

@@ -13,11 +13,15 @@ correctness and reversibility are the product.
 
 ## Non-negotiables
 
-- Never write code that disables Windows Update, Defender, UAC, or protected
-  services (WaaSMedicSvc, wuauserv, UsoSvc, DoSvc, BITS, TrustedInstaller,
-  SecurityHealthService, WinDefend, wscsvc, EventLog); never hosts-block
-  Microsoft endpoints; never remove Edge/WebView2. These are refusals, not
-  options (`docs/research/03`, `05` §7).
+- Pausing / holding / deferring Windows Update is a **feature** (Settings pause
+  keys incl. extended pause at Advanced tier, WUfB policies, per-update hide,
+  supervised temporary stop of `wuauserv`/`UsoSvc`/`BITS`/`DoSvc` in the
+  hold/repair flow). What is refused: permanently Disabled start types or
+  ownership/ACL hacks on `WaaSMedicSvc`/`UsoSvc` (WaaSMedic reverts them and
+  they break Store/Defender), disabling Defender, UAC, or protected services
+  (`TrustedInstaller`, `SecurityHealthService`, `WinDefend`, `wscsvc`,
+  `EventLog`), hosts-blocking Microsoft endpoints, removing Edge/WebView2
+  (`docs/research/03`, `05` §7, PLAN.md D21).
 - Per-user settings target the **interactive user's** `HKU\<SID>`, never
   `Registry.CurrentUser` (banned API in `src/`).
 - Policy keys are written through the Local GPO path and mirrored; managed

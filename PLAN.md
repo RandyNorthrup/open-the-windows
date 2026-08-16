@@ -28,8 +28,18 @@ Principles (non-negotiable):
    tier and the builds it was verified on. Nothing is applied that is not
    journaled first. Nothing "placebo" ships (see the snake-oil list in
    `docs/research/05-performance-debloat-catalog.md` §7).
-2. **Never disable Windows Update, Defender, UAC, or protected services.**
-   Refusals are explicit and documented (research 03 §"refuse", 05 §7).
+2. **Pausing Windows Update is a core feature; permanently breaking it is
+   not.** Pause, hold, defer, target and schedule updates through the
+   mechanisms Windows honours (Settings pause keys, WUfB policies, AU options,
+   Delivery Optimization, per-update hide) — including extended pauses beyond
+   the 35-day UI cap at Advanced tier with clear warnings and a "resume now"
+   button — while keeping Defender signature updates flowing. What is refused
+   is the self-defeating class of hacks: taking ownership of / ACL-locking
+   `WaaSMedicSvc`, setting `wuauserv`/`UsoSvc` to Disabled as an "update
+   blocker" (WaaSMedic reverts it and it breaks Store, Defender and optional
+   features), `DoNotConnectToWindowsUpdateInternetLocations` on consumer
+   machines, and hosts-file blocking (research 03 §"refuse", 05 §7). Defender,
+   UAC and PPL/protected services are likewise never disabled.
 3. **Respect management.** Managed (MDM/GPO) settings are shown as managed and
    not overridden without a documented break-glass flag.
 4. **Zero telemetry of our own. Offline first.** No network access unless the
@@ -73,6 +83,7 @@ Principles (non-negotiable):
 | D18 | Localisation: en-US strings now; resx infrastructure at M6 | Assumption | cheap to reverse |
 | D19 | ReportGenerator threshold syntax is the bare `minimumCoverageThresholds:...` token | Resolved | `-settings:` forms silently ignored (verified) |
 | D20 | Coverage collector: `Microsoft.Testing.Extensions.CodeCoverage`, not coverlet | Resolved | coverlet hooks VSTest targets |
+| D21 | Windows Update **pause/hold is first-class**: (a) Settings pause via the `UX\Settings` pause keys, default cap 35 days, **extended pause** (configurable ceiling, default 365 days) at Advanced tier with warnings + reminders + one-click resume; (b) WUfB defer/target/AU/deadline/DO policies; (c) per-update hide via WUA COM; (d) supervised "hold and repair" flow that stops `wuauserv`/`UsoSvc`/`BITS`/`DoSvc` temporarily. Refused: permanent Disabled start types and ownership/ACL hacks on `WaaSMedicSvc`/`UsoSvc` (reverted by WaaSMedic; break Store/Defender/optional features). Defender signature updates are never blocked. | Resolved by owner (2026-08-16: "we do want to be able to pause Windows core services, i.e. Windows Update") | research 03 |
 
 ## 4. Open questions
 
@@ -143,13 +154,16 @@ revert).
 ### 5.5 Safety rails (research 07 §7, research 02 §4)
 
 Interactive-user hive resolution; GPO-aware policy writes; MDM/GPO managed
-detection (`PolicyManager`, RSOP, GP history); never touch WaaSMedicSvc,
-wuauserv, UsoSvc, DoSvc, BITS, TrustedInstaller, SecurityHealthService,
-WinDefend, wscsvc, EventLog and other protected/PPL services; no hosts-file or
-firewall blocking of Microsoft endpoints; Windows Update pause capped at 35 days
-by default (extension only behind a warning and a hard ceiling); Defender
-signature updates never blocked; Edge/WebView2 never removed; OneDrive removal
-warns about Known Folder Move; feature-update re-apply via a scheduled task that
+detection (`PolicyManager`, RSOP, GP history); Windows Update services
+(`wuauserv`, `UsoSvc`, `BITS`, `DoSvc`) may be **stopped temporarily** inside
+the supervised hold/repair flow but are never set to Disabled, and
+`WaaSMedicSvc`, `TrustedInstaller`, `SecurityHealthService`, `WinDefend`,
+`wscsvc`, `EventLog` and other protected/PPL services are never touched; no
+hosts-file or firewall blocking of Microsoft endpoints; Windows Update pause
+defaults to the 35-day cap with an Advanced-tier extended pause behind a
+warning, a configurable ceiling and a "resume now" action; Defender signature
+updates never blocked; Edge/WebView2 never removed; OneDrive removal warns
+about Known Folder Move; feature-update re-apply via a scheduled task that
 compares build/UBR; Explorer restart implemented for the correct session.
 
 ## 6. Research digest (all reports under `docs/research/`)
