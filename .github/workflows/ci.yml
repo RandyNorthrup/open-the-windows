@@ -111,10 +111,15 @@ jobs:
       - name: CLI smoke on runner
         shell: pwsh
         run: |
+          # GitHub's pwsh wrapper turns any native non-zero exit into a terminating error;
+          # we want to inspect the exit code ourselves.
+          $PSNativeCommandUseErrorActionPreference = $false
           artifacts/publish/win-x64/cli/otw.exe --version
           artifacts/publish/win-x64/cli/otw.exe doctor --json
+          $code = $LASTEXITCODE
           # Hosted runners are Windows Server; the product must refuse with exit 3 (UnsupportedPlatform).
-          if ($LASTEXITCODE -ne 3) { throw "expected 'otw doctor' to exit 3 on a Windows Server runner, got $LASTEXITCODE" }
+          if ($code -ne 3) { throw "expected 'otw doctor' to exit 3 on a Windows Server runner, got $code" }
+          Write-Host "otw doctor refused Windows Server as designed (exit 3)."
 
       - name: Upload coverage report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
