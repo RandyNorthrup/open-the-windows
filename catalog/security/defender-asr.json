@@ -134,7 +134,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -164,7 +164,14 @@
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "defender",
         "cloud",
@@ -181,7 +188,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -211,7 +218,14 @@
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "defender",
         "cloud",
@@ -229,7 +243,7 @@
       "level": "Basic",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -259,7 +273,14 @@
         "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations",
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "defender",
         "pua",
@@ -277,7 +298,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -309,7 +330,14 @@
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
         "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "defender",
         "network",
@@ -375,7 +403,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -407,7 +435,14 @@
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
         "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "defender",
         "ransomware",

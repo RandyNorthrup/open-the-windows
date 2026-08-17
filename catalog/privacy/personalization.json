@@ -11,7 +11,12 @@
       "risk": "Safe",
       "scope": "User",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -37,7 +42,9 @@
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-privacy"
       ],
       "verifiedOn": [],
-      "tags": ["ads"]
+      "tags": [
+        "ads"
+      ]
     },
     {
       "id": "privacy.tailored-experiences.disable",
@@ -49,7 +56,12 @@
       "risk": "Safe",
       "scope": "User",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -75,7 +87,9 @@
         "https://learn.microsoft.com/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
       ],
       "verifiedOn": [],
-      "tags": ["ads"]
+      "tags": [
+        "ads"
+      ]
     },
     {
       "id": "privacy.activity-history.disable",
@@ -86,8 +100,13 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -117,13 +136,24 @@
         "policyCsp": "Privacy/EnableActivityFeed",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\OS Policies\\Allow publishing of User Activities"
       },
-      "sideEffects": ["Cross-device 'resume where you left off' and the activity-based Settings > Privacy > Activity history list stop working."],
+      "sideEffects": [
+        "Cross-device 'resume where you left off' and the activity-based Settings > Privacy > Activity history list stop working."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-privacy",
         "https://learn.microsoft.com/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
       ],
-      "verifiedOn": [],
-      "tags": ["timeline"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "timeline"
+      ]
     },
     {
       "id": "privacy.input.disable-inking-typing-personalization",
@@ -135,7 +165,12 @@
       "risk": "Caution",
       "scope": "User",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -175,13 +210,17 @@
         "policyCsp": "TextInput/AllowLinguisticDataCollection",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Control Panel\\Regional and Language Options\\Allow users to enable online speech recognition services"
       },
-      "sideEffects": ["Personalised typing suggestions and the personal dictionary stop learning."],
+      "sideEffects": [
+        "Personalised typing suggestions and the personal dictionary stop learning."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-textinput"
       ],
       "verifiedOn": [],
-      "tags": ["input"]
+      "tags": [
+        "input"
+      ]
     },
     {
       "id": "privacy.start.disable-web-search",
@@ -193,7 +232,12 @@
       "risk": "Caution",
       "scope": "User",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -213,13 +257,18 @@
         "policyCsp": "Search/DisableSearchBoxSuggestions",
         "groupPolicyPath": "User Configuration\\Administrative Templates\\Windows Components\\File Explorer\\Turn off display of recent search entries in the File Explorer search box"
       },
-      "sideEffects": ["Web results, search highlights and Bing suggestions disappear from Start search."],
+      "sideEffects": [
+        "Web results, search highlights and Bing suggestions disappear from Start search."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-search",
         "https://learn.microsoft.com/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
       ],
       "verifiedOn": [],
-      "tags": ["search", "bing"]
+      "tags": [
+        "search",
+        "bing"
+      ]
     }
   ]
 }

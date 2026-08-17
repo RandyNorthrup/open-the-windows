@@ -417,7 +417,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -453,7 +453,14 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-settings"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "nags",
         "suggestions"
@@ -850,7 +857,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -898,7 +905,14 @@
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-start",
         "https://github.com/Raphire/Win11Debloat"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "content",
         "suggestions",

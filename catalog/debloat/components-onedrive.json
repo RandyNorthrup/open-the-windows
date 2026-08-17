@@ -10,7 +10,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -41,7 +41,14 @@
         "https://github.com/ChrisTitusTech/winutil",
         "https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "debloat",
         "oem"

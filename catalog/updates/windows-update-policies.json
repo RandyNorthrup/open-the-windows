@@ -10,8 +10,17 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -31,13 +40,24 @@
         "policyCsp": "Update/ExcludeWUDriversInQualityUpdate",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Update\\Manage updates offered from Windows Update\\Do not include drivers with Windows Updates"
       },
-      "sideEffects": ["New hardware may need a manually installed driver; security fixes shipped as driver updates are not offered automatically."],
+      "sideEffects": [
+        "New hardware may need a manually installed driver; security fixes shipped as driver updates are not offered automatically."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update",
         "https://learn.microsoft.com/windows/deployment/update/waas-configure-wufb"
       ],
-      "verifiedOn": [],
-      "tags": ["drivers"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "drivers"
+      ]
     },
     {
       "id": "updates.restart.no-auto-reboot-with-logged-on-users",
@@ -48,8 +68,17 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -69,12 +98,23 @@
         "policyCsp": "Update/NoAutoRebootWithLoggedOnUsers",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Update\\Legacy Policies\\No auto-restart with logged on users for scheduled automatic updates installations"
       },
-      "sideEffects": ["A machine can stay pending-restart (unpatched in memory) until someone restarts it; deadline policies override this."],
+      "sideEffects": [
+        "A machine can stay pending-restart (unpatched in memory) until someone restarts it; deadline policies override this."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
-      "verifiedOn": [],
-      "tags": ["restart"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "restart"
+      ]
     },
     {
       "id": "updates.delivery-optimization.lan-only",
@@ -85,8 +125,13 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -111,8 +156,17 @@
         "https://learn.microsoft.com/windows/deployment/do/waas-delivery-optimization-reference",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-deliveryoptimization"
       ],
-      "verifiedOn": [],
-      "tags": ["bandwidth"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "bandwidth"
+      ]
     },
     {
       "id": "updates.insider.block-preview-builds",
@@ -123,8 +177,17 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -154,12 +217,23 @@
         "policyCsp": "Update/ManagePreviewBuilds",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Update\\Manage updates offered from Windows Update\\Manage preview builds"
       },
-      "sideEffects": ["The Windows Insider Program page in Settings is disabled."],
+      "sideEffects": [
+        "The Windows Insider Program page in Settings is disabled."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
-      "verifiedOn": [],
-      "tags": ["insider"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "insider"
+      ]
     }
   ]
 }

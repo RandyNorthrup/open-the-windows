@@ -6,10 +6,13 @@ Free, open-source (MIT), enterprise-grade Windows 11 control panel for
 reversibility, drift detection and remediation, and an audit trail. GUI
 (WPF) and CLI (`otw.exe`) over one shared engine.
 
-> Status: **M0 complete; M1 (catalogue) in progress.** The engine is being
-> built milestone by milestone — see [PLAN.md](PLAN.md). Today the CLI provides
-> the pre-flight `doctor` check and read-only `catalog` commands (list, show,
-> validate); nothing changes your system yet.
+> Status: **M0–M3 complete; M4 (catalogue population) finishing.** The engine is
+> built milestone by milestone — see [PLAN.md](PLAN.md). The catalogue ships
+> **435 entries** (`otw catalog validate` green); the CLI can scan, apply, revert
+> and inspect history, and pause/resume Windows Update. 144 Basic/Balanced
+> machine-scope entries are `Verified` on Windows 11 25H2 (evidence under
+> [docs/certification/M4/](docs/certification/M4/)); the rest ship as `Draft`
+> until verified. Only `Verified` entries apply unless you pass `--include-draft`.
 
 ## What it will do (and what it will never do)
 

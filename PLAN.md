@@ -496,12 +496,32 @@ log + JSONL trail); `resume` returns all six values to absent and `status` repor
 had reverted only the most-recent pause, restoring an earlier one) — see the
 CHANGELOG; regressioned by `Resume_after_a_restacked_pause_clears_every_active_pause`.
 
-Remaining for M4: the per-entry VM verification of the Basic/Balanced catalogue
-entries (acceptance #2) and the consolidated M4 certification record
-(`docs/certification/M4.md`). Note the M3-discovered limitation: over headless SSH
-the interactive-user resolver returns null, so per-user (`User`-hive) entries
-cannot be VM-verified from the lab session and stay `Draft` pending the M5
-console-session fallback; machine-scope entries verify normally.
+**Acceptance #2 (machine-scope VM verification) DONE** — see
+[docs/certification/M4.md](docs/certification/M4.md) and the per-entry transcript
+[docs/certification/M4/machine-scope-verification.md](docs/certification/M4/machine-scope-verification.md).
+144 Basic/Balanced entries are now `Verified` on 25H2 (131 by full apply →
+independent-read → revert → pre-state round-trip, 13 already-compliant). Of the 340
+Basic/Balanced entries, 190 were exercisable over the headless SSH session and 150
+were deferred (75 per-user hive — the M3 null-interactive-user limitation; 47
+network/remote-access/auth entries that would sever the SSH session; 28 Appx
+removals that are intentionally not round-trip reversible). Of the 190, the 46 not
+verified are documented honestly: Tamper Protection blocks Defender/ASR
+`Set-MpPreference` writes (confirmed `IsTamperProtected=True`); two TrustedInstaller
+-owned keys deny writes even elevated; sixteen entries target components absent on
+this image or are edition-gated to Enterprise/Education; the rest are Local-GPO
+`registry.pol` write contention.
+
+**Verification findings → candidate product hardening (§7.3 / follow-up):** the
+engine does not retry the Local-GPO `registry.pol` lock (`0x80070020`) that separate
+elevated invocations contend on; Defender/ASR configuration via `Set-MpPreference`
+is blocked by Tamper Protection and needs a GPO/Intune path; a Policy write over an
+OS-default-populated key deletes rather than restores the original value on revert;
+`security.media.dma-disable-under-lock` shows a scan-compliance discrepancy (engine
+reports compliant while the value is absent).
+
+Remaining for M4: a console-session verification pass for the 150 deferred entries
+is M5 work (the interactive-user resolver returns null over headless SSH, and the
+network/auth entries need a session that is not the one being reconfigured).
 
 ### M5 — Profiles and enterprise (not started)
 

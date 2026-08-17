@@ -315,6 +315,22 @@ what was planned (plans live in `PLAN.md`).
 
 ### Changed
 
+- M4 acceptance #2 — machine-scope VM verification. 144 Basic/Balanced entries
+  are now `Verified` on Windows 11 Pro 25H2 (26200.9168): each was applied alone
+  (`otw apply --only <id>`), confirmed by an independent native read (registry /
+  service / scheduled-task / optional-feature / Defender preference — never the
+  CLI's own detection), reverted, and confirmed back at its pre-state. 131 by full
+  round-trip, 13 already-compliant on 25H2. Evidence per entry in
+  [docs/certification/M4/machine-scope-verification.md](docs/certification/M4/machine-scope-verification.md);
+  the certification matrix and honest deviations are in
+  [docs/certification/M4.md](docs/certification/M4.md). Of the 340 Basic/Balanced
+  entries, 190 were exercisable over the headless SSH lab session (150 deferred:
+  75 per-user hive, 47 network/remote-access that would sever the session, 28 Appx
+  removals that are not round-trip reversible); of the 190, the 46 not verified are
+  documented (Tamper Protection blocking Defender/ASR writes, TrustedInstaller-owned
+  keys, components absent or edition-gated on this image, and Local-GPO
+  `registry.pol` write contention). These verification findings are recorded in
+  PLAN.md as candidate product hardening.
 - PLAN.md section 8 is now an index/status board over the milestone specs.
 - Milestone M2 (Scan) certified and marked DONE: `docs/certification/M2.md`
   records all 12 gates green (line 89.3% / branch 75.3%) and the five acceptance

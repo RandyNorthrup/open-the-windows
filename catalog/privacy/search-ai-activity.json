@@ -10,8 +10,13 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -49,8 +54,18 @@
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-search"
       ],
-      "verifiedOn": [],
-      "tags": ["search", "bing"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "search",
+        "bing"
+      ]
     },
     {
       "id": "privacy.search.disable-search-highlights",
@@ -62,7 +77,12 @@
       "risk": "Safe",
       "scope": "User",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": 22000, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22000,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -90,7 +110,10 @@
         "https://github.com/farag2/Sophia-Script-for-Windows"
       ],
       "verifiedOn": [],
-      "tags": ["search", "bing"]
+      "tags": [
+        "search",
+        "bing"
+      ]
     },
     {
       "id": "privacy.search.disable-cortana",
@@ -101,8 +124,17 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -129,8 +161,18 @@
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience"
       ],
-      "verifiedOn": [],
-      "tags": ["search", "cortana"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "search",
+        "cortana"
+      ]
     },
     {
       "id": "privacy.search.disable-device-history",
@@ -142,7 +184,12 @@
       "risk": "Safe",
       "scope": "User",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -158,7 +205,10 @@
       "requires": "None",
       "dependsOn": [],
       "conflictsWith": [],
-      "managedBy": { "policyCsp": null, "groupPolicyPath": null },
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
       "sideEffects": [
         "Recent searches are no longer suggested in the search box."
       ],
@@ -167,7 +217,10 @@
         "https://github.com/Raphire/Win11Debloat"
       ],
       "verifiedOn": [],
-      "tags": ["search", "history"]
+      "tags": [
+        "search",
+        "history"
+      ]
     },
     {
       "id": "privacy.search.disable-cloud-search",
@@ -178,8 +231,17 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -206,8 +268,18 @@
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-search",
         "https://github.com/undergroundwires/privacy.sexy"
       ],
-      "verifiedOn": [],
-      "tags": ["search", "cloud"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "search",
+        "cloud"
+      ]
     },
     {
       "id": "privacy.ai.disable-copilot",
@@ -219,7 +291,16 @@
       "risk": "Safe",
       "scope": "User",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": 22621, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -247,7 +328,10 @@
         "https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot"
       ],
       "verifiedOn": [],
-      "tags": ["ai", "copilot"]
+      "tags": [
+        "ai",
+        "copilot"
+      ]
     },
     {
       "id": "privacy.ai.hide-copilot-button",
@@ -259,7 +343,12 @@
       "risk": "Safe",
       "scope": "User",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": 22621, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -275,7 +364,10 @@
       "requires": "ExplorerRestart",
       "dependsOn": [],
       "conflictsWith": [],
-      "managedBy": { "policyCsp": null, "groupPolicyPath": null },
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
       "sideEffects": [
         "Applies to the 22H2/23H2 taskbar Copilot button; on newer builds, where the button was removed, it has no effect."
       ],
@@ -284,7 +376,10 @@
         "https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot"
       ],
       "verifiedOn": [],
-      "tags": ["ai", "copilot"]
+      "tags": [
+        "ai",
+        "copilot"
+      ]
     },
     {
       "id": "privacy.ai.disable-click-to-do",
@@ -295,8 +390,17 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": 26100, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": 26100,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -323,8 +427,18 @@
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai",
         "https://learn.microsoft.com/en-us/windows/client-management/manage-click-to-do"
       ],
-      "verifiedOn": [],
-      "tags": ["ai", "click-to-do"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "ai",
+        "click-to-do"
+      ]
     },
     {
       "id": "privacy.ai.disable-paint-ai",
@@ -335,8 +449,17 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": 22621, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -383,8 +506,18 @@
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai",
         "https://github.com/Raphire/Win11Debloat"
       ],
-      "verifiedOn": [],
-      "tags": ["ai", "paint"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "ai",
+        "paint"
+      ]
     },
     {
       "id": "privacy.ai.disable-notepad-ai",
@@ -395,8 +528,13 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": 22000, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22000,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -412,7 +550,10 @@
       "requires": "None",
       "dependsOn": [],
       "conflictsWith": [],
-      "managedBy": { "policyCsp": null, "groupPolicyPath": null },
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
       "sideEffects": [
         "Notepad's AI (Rewrite/Summarize) menu is hidden.",
         "This registry value is not documented by Microsoft; it ships with the Notepad Store app's ADMX and is community-verified (Win11Debloat)."
@@ -420,8 +561,19 @@
       "sources": [
         "https://github.com/Raphire/Win11Debloat"
       ],
-      "verifiedOn": [],
-      "tags": ["ai", "notepad", "unverified-ms"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "ai",
+        "notepad",
+        "unverified-ms"
+      ]
     },
     {
       "id": "privacy.ai.remap-copilot-key",
@@ -433,7 +585,16 @@
       "risk": "Safe",
       "scope": "User",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": 22621, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -461,7 +622,10 @@
         "https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot"
       ],
       "verifiedOn": [],
-      "tags": ["ai", "copilot"]
+      "tags": [
+        "ai",
+        "copilot"
+      ]
     },
     {
       "id": "privacy.activity.disable-activity-feed-policy",
@@ -472,8 +636,17 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -501,8 +674,18 @@
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy",
         "https://github.com/ChrisTitusTech/winutil"
       ],
-      "verifiedOn": [],
-      "tags": ["activity", "timeline"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "activity",
+        "timeline"
+      ]
     }
   ]
 }

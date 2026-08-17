@@ -10,8 +10,13 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -36,8 +41,17 @@
         "https://learn.microsoft.com/windows/privacy/configure-windows-diagnostic-data-in-your-organization",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-system"
       ],
-      "verifiedOn": [],
-      "tags": ["telemetry"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "telemetry"
+      ]
     },
     {
       "id": "privacy.diagnostic-data.limit-log-collection",
@@ -48,8 +62,13 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -83,8 +102,17 @@
       "sources": [
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-system"
       ],
-      "verifiedOn": [],
-      "tags": ["telemetry"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "telemetry"
+      ]
     },
     {
       "id": "privacy.feedback.disable-notifications",
@@ -95,8 +123,13 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -120,8 +153,18 @@
       "sources": [
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-experience"
       ],
-      "verifiedOn": [],
-      "tags": ["telemetry", "feedback"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "telemetry",
+        "feedback"
+      ]
     },
     {
       "id": "privacy.recall.disable",
@@ -132,8 +175,13 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": 26100, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 26100,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -153,13 +201,25 @@
         "policyCsp": "WindowsAI/DisableAIDataAnalysis",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows AI\\Turn off saving snapshots for Windows"
       },
-      "sideEffects": ["Recall and its timeline are unavailable."],
+      "sideEffects": [
+        "Recall and its timeline are unavailable."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-windowsai",
         "https://learn.microsoft.com/windows/client-management/manage-recall"
       ],
-      "verifiedOn": [],
-      "tags": ["ai", "recall"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "ai",
+        "recall"
+      ]
     }
   ]
 }

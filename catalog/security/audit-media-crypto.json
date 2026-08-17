@@ -10,8 +10,13 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -51,13 +56,30 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Event Log Service\\Security\\Specify the maximum log file size (KB)"
       },
-      "sideEffects": ["Consumes roughly 260 MB of additional disk for the log files."],
+      "sideEffects": [
+        "Consumes roughly 260 MB of additional disk for the log files."
+      ],
       "sources": [
         "https://stigaview.com/products/win11/v2r8/",
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
       ],
-      "verifiedOn": [],
-      "tags": ["audit", "logging", "baseline", "stig", "stig-wn11-au-000500", "cis", "acsc"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "audit",
+        "logging",
+        "baseline",
+        "stig",
+        "stig-wn11-au-000500",
+        "cis",
+        "acsc"
+      ]
     },
     {
       "id": "security.audit.force-subcategory-policy",
@@ -69,7 +91,12 @@
       "risk": "Safe",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -95,7 +122,13 @@
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
       ],
       "verifiedOn": [],
-      "tags": ["audit", "baseline", "stig", "stig-wn11-so-000030", "cis"]
+      "tags": [
+        "audit",
+        "baseline",
+        "stig",
+        "stig-wn11-so-000030",
+        "cis"
+      ]
     },
     {
       "id": "security.audit.process-cmdline",
@@ -106,8 +139,13 @@
       "level": "Basic",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -121,19 +159,38 @@
         }
       ],
       "requires": "None",
-      "dependsOn": ["security.audit.detailed-tracking"],
+      "dependsOn": [
+        "security.audit.detailed-tracking"
+      ],
       "conflictsWith": [],
       "managedBy": {
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Audit Process Creation\\Include command line in process creation events"
       },
-      "sideEffects": ["Command lines that carry secrets (passwords passed as arguments) are written to the Security log, so keep read access to that log restricted."],
+      "sideEffects": [
+        "Command lines that carry secrets (passwords passed as arguments) are written to the Security log, so keep read access to that log restricted."
+      ],
       "sources": [
         "https://stigaview.com/products/win11/v2r8/",
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
       ],
-      "verifiedOn": [],
-      "tags": ["audit", "logging", "baseline", "stig", "stig-wn11-cc-000066", "cis", "acsc"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "audit",
+        "logging",
+        "baseline",
+        "stig",
+        "stig-wn11-cc-000066",
+        "cis",
+        "acsc"
+      ]
     },
     {
       "id": "security.audit.powershell-module-logging",
@@ -144,8 +201,13 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -175,13 +237,28 @@
         "policyCsp": "WindowsPowerShell/TurnOnModuleLogging",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows PowerShell\\Turn on Module Logging"
       },
-      "sideEffects": ["Increases event log volume noticeably on machines that use PowerShell heavily."],
+      "sideEffects": [
+        "Increases event log volume noticeably on machines that use PowerShell heavily."
+      ],
       "sources": [
         "https://stigaview.com/products/win11/v2r8/",
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
       ],
-      "verifiedOn": [],
-      "tags": ["audit", "logging", "powershell", "baseline", "stig"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "audit",
+        "logging",
+        "powershell",
+        "baseline",
+        "stig"
+      ]
     },
     {
       "id": "security.audit.powershell-transcription",
@@ -192,8 +269,13 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -223,13 +305,27 @@
         "policyCsp": "WindowsPowerShell/EnableTranscripting",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows PowerShell\\Turn on PowerShell Transcription"
       },
-      "sideEffects": ["With no OutputDirectory set, transcripts land in the user's Documents folder, which the user can read and delete; point OutputDirectory at a protected location for tamper resistance. Transcripts can contain secrets typed at the console."],
+      "sideEffects": [
+        "With no OutputDirectory set, transcripts land in the user's Documents folder, which the user can read and delete; point OutputDirectory at a protected location for tamper resistance. Transcripts can contain secrets typed at the console."
+      ],
       "sources": [
         "https://stigaview.com/products/win11/v2r8/",
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
       ],
-      "verifiedOn": [],
-      "tags": ["audit", "logging", "powershell", "baseline"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "audit",
+        "logging",
+        "powershell",
+        "baseline"
+      ]
     },
     {
       "id": "security.audit.account-logon",
@@ -241,13 +337,28 @@
       "risk": "Safe",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Credential Validation", "/success:enable", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:Credential Validation", "/success:disable", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Credential Validation",
+            "/success:enable",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Credential Validation",
+            "/success:disable",
+            "/failure:disable"
+          ]
         }
       ],
       "requires": "None",
@@ -257,13 +368,20 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Advanced Audit Policy Configuration\\System Audit Policies\\Account Logon"
       },
-      "sideEffects": ["Adds authentication events to the Security log; mitigated by the larger Security log size."],
+      "sideEffects": [
+        "Adds authentication events to the Security log; mitigated by the larger Security log size."
+      ],
       "sources": [
         "https://stigaview.com/products/win11/v2r8/",
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
       ],
       "verifiedOn": [],
-      "tags": ["audit", "logon", "baseline", "stig"]
+      "tags": [
+        "audit",
+        "logon",
+        "baseline",
+        "stig"
+      ]
     },
     {
       "id": "security.audit.account-management",
@@ -275,25 +393,56 @@
       "risk": "Safe",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Security Group Management", "/success:enable"],
-          "revertArguments": ["/set", "/subcategory:Security Group Management", "/success:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Security Group Management",
+            "/success:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Security Group Management",
+            "/success:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:User Account Management", "/success:enable", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:User Account Management", "/success:disable", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:User Account Management",
+            "/success:enable",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:User Account Management",
+            "/success:disable",
+            "/failure:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Other Account Management Events", "/success:enable"],
-          "revertArguments": ["/set", "/subcategory:Other Account Management Events", "/success:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Other Account Management Events",
+            "/success:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Other Account Management Events",
+            "/success:disable"
+          ]
         }
       ],
       "requires": "None",
@@ -303,13 +452,20 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Advanced Audit Policy Configuration\\System Audit Policies\\Account Management"
       },
-      "sideEffects": ["Adds account and group change events to the Security log."],
+      "sideEffects": [
+        "Adds account and group change events to the Security log."
+      ],
       "sources": [
         "https://stigaview.com/products/win11/v2r8/",
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
       ],
       "verifiedOn": [],
-      "tags": ["audit", "logon", "baseline", "stig"]
+      "tags": [
+        "audit",
+        "logon",
+        "baseline",
+        "stig"
+      ]
     },
     {
       "id": "security.audit.detailed-tracking",
@@ -320,20 +476,41 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Process Creation", "/success:enable"],
-          "revertArguments": ["/set", "/subcategory:Process Creation", "/success:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Process Creation",
+            "/success:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Process Creation",
+            "/success:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Plug and Play Events", "/success:enable"],
-          "revertArguments": ["/set", "/subcategory:Plug and Play Events", "/success:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Plug and Play Events",
+            "/success:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Plug and Play Events",
+            "/success:disable"
+          ]
         }
       ],
       "requires": "None",
@@ -343,13 +520,26 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Advanced Audit Policy Configuration\\System Audit Policies\\Detailed Tracking"
       },
-      "sideEffects": ["Process creation auditing adds an event for every launched process; mitigated by the larger Security log size."],
+      "sideEffects": [
+        "Process creation auditing adds an event for every launched process; mitigated by the larger Security log size."
+      ],
       "sources": [
         "https://stigaview.com/products/win11/v2r8/",
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
       ],
-      "verifiedOn": [],
-      "tags": ["audit", "baseline", "stig"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "audit",
+        "baseline",
+        "stig"
+      ]
     },
     {
       "id": "security.audit.logon-logoff",
@@ -361,43 +551,100 @@
       "risk": "Safe",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Logon", "/success:enable", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:Logon", "/success:disable", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Logon",
+            "/success:enable",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Logon",
+            "/success:disable",
+            "/failure:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Logoff", "/success:enable"],
-          "revertArguments": ["/set", "/subcategory:Logoff", "/success:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Logoff",
+            "/success:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Logoff",
+            "/success:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Account Lockout", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:Account Lockout", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Account Lockout",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Account Lockout",
+            "/failure:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Special Logon", "/success:enable"],
-          "revertArguments": ["/set", "/subcategory:Special Logon", "/success:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Special Logon",
+            "/success:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Special Logon",
+            "/success:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Group Membership", "/success:enable"],
-          "revertArguments": ["/set", "/subcategory:Group Membership", "/success:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Group Membership",
+            "/success:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Group Membership",
+            "/success:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Other Logon/Logoff Events", "/success:enable", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:Other Logon/Logoff Events", "/success:disable", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Other Logon/Logoff Events",
+            "/success:enable",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Other Logon/Logoff Events",
+            "/success:disable",
+            "/failure:disable"
+          ]
         }
       ],
       "requires": "None",
@@ -407,13 +654,20 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Advanced Audit Policy Configuration\\System Audit Policies\\Logon/Logoff"
       },
-      "sideEffects": ["Adds logon and logoff events to the Security log."],
+      "sideEffects": [
+        "Adds logon and logoff events to the Security log."
+      ],
       "sources": [
         "https://stigaview.com/products/win11/v2r8/",
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
       ],
       "verifiedOn": [],
-      "tags": ["audit", "logon", "baseline", "stig"]
+      "tags": [
+        "audit",
+        "logon",
+        "baseline",
+        "stig"
+      ]
     },
     {
       "id": "security.audit.policy-change",
@@ -425,37 +679,84 @@
       "risk": "Safe",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Audit Policy Change", "/success:enable"],
-          "revertArguments": ["/set", "/subcategory:Audit Policy Change", "/success:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Audit Policy Change",
+            "/success:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Audit Policy Change",
+            "/success:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Authentication Policy Change", "/success:enable"],
-          "revertArguments": ["/set", "/subcategory:Authentication Policy Change", "/success:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Authentication Policy Change",
+            "/success:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Authentication Policy Change",
+            "/success:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Authorization Policy Change", "/success:enable"],
-          "revertArguments": ["/set", "/subcategory:Authorization Policy Change", "/success:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Authorization Policy Change",
+            "/success:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Authorization Policy Change",
+            "/success:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:MPSSVC Rule-Level Policy Change", "/success:enable", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:MPSSVC Rule-Level Policy Change", "/success:disable", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:MPSSVC Rule-Level Policy Change",
+            "/success:enable",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:MPSSVC Rule-Level Policy Change",
+            "/success:disable",
+            "/failure:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Other Policy Change Events", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:Other Policy Change Events", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Other Policy Change Events",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Other Policy Change Events",
+            "/failure:disable"
+          ]
         }
       ],
       "requires": "None",
@@ -465,13 +766,19 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Advanced Audit Policy Configuration\\System Audit Policies\\Policy Change"
       },
-      "sideEffects": ["Adds policy-change events to the Security log."],
+      "sideEffects": [
+        "Adds policy-change events to the Security log."
+      ],
       "sources": [
         "https://stigaview.com/products/win11/v2r8/",
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
       ],
       "verifiedOn": [],
-      "tags": ["audit", "baseline", "stig"]
+      "tags": [
+        "audit",
+        "baseline",
+        "stig"
+      ]
     },
     {
       "id": "security.audit.privilege-use",
@@ -482,14 +789,29 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Sensitive Privilege Use", "/success:enable", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:Sensitive Privilege Use", "/success:disable", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Sensitive Privilege Use",
+            "/success:enable",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Sensitive Privilege Use",
+            "/success:disable",
+            "/failure:disable"
+          ]
         }
       ],
       "requires": "None",
@@ -499,13 +821,26 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Advanced Audit Policy Configuration\\System Audit Policies\\Privilege Use"
       },
-      "sideEffects": ["Sensitive privilege use can be moderately noisy on busy systems; mitigated by the larger Security log size."],
+      "sideEffects": [
+        "Sensitive privilege use can be moderately noisy on busy systems; mitigated by the larger Security log size."
+      ],
       "sources": [
         "https://stigaview.com/products/win11/v2r8/",
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
       ],
-      "verifiedOn": [],
-      "tags": ["audit", "baseline", "stig"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "audit",
+        "baseline",
+        "stig"
+      ]
     },
     {
       "id": "security.audit.system",
@@ -516,38 +851,87 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Other System Events", "/success:enable", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:Other System Events", "/success:disable", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Other System Events",
+            "/success:enable",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Other System Events",
+            "/success:disable",
+            "/failure:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Security State Change", "/success:enable"],
-          "revertArguments": ["/set", "/subcategory:Security State Change", "/success:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Security State Change",
+            "/success:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Security State Change",
+            "/success:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Security System Extension", "/success:enable"],
-          "revertArguments": ["/set", "/subcategory:Security System Extension", "/success:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Security System Extension",
+            "/success:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Security System Extension",
+            "/success:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:System Integrity", "/success:enable", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:System Integrity", "/success:disable", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:System Integrity",
+            "/success:enable",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:System Integrity",
+            "/success:disable",
+            "/failure:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:IPsec Driver", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:IPsec Driver", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:IPsec Driver",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:IPsec Driver",
+            "/failure:disable"
+          ]
         }
       ],
       "requires": "None",
@@ -557,13 +941,26 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Advanced Audit Policy Configuration\\System Audit Policies\\System"
       },
-      "sideEffects": ["Adds system and integrity events to the Security log."],
+      "sideEffects": [
+        "Adds system and integrity events to the Security log."
+      ],
       "sources": [
         "https://stigaview.com/products/win11/v2r8/",
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
       ],
-      "verifiedOn": [],
-      "tags": ["audit", "baseline", "stig"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "audit",
+        "baseline",
+        "stig"
+      ]
     },
     {
       "id": "security.audit.object-access",
@@ -574,20 +971,45 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Removable Storage", "/success:enable", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:Removable Storage", "/success:disable", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Removable Storage",
+            "/success:enable",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Removable Storage",
+            "/success:disable",
+            "/failure:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Other Object Access Events", "/success:enable", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:Other Object Access Events", "/success:disable", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Other Object Access Events",
+            "/success:enable",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Other Object Access Events",
+            "/success:disable",
+            "/failure:disable"
+          ]
         }
       ],
       "requires": "None",
@@ -597,13 +1019,26 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Advanced Audit Policy Configuration\\System Audit Policies\\Object Access"
       },
-      "sideEffects": ["Removable Storage auditing logs each file access on USB media."],
+      "sideEffects": [
+        "Removable Storage auditing logs each file access on USB media."
+      ],
       "sources": [
         "https://stigaview.com/products/win11/v2r8/",
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
       ],
-      "verifiedOn": [],
-      "tags": ["audit", "baseline", "stig"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "audit",
+        "baseline",
+        "stig"
+      ]
     },
     {
       "id": "security.audit.object-access-detailed",
@@ -614,44 +1049,105 @@
       "level": "Balanced",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:File Share", "/success:enable", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:File Share", "/success:disable", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:File Share",
+            "/success:enable",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:File Share",
+            "/success:disable",
+            "/failure:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Detailed File Share", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:Detailed File Share", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Detailed File Share",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Detailed File Share",
+            "/failure:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Registry", "/success:enable", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:Registry", "/success:disable", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Registry",
+            "/success:enable",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Registry",
+            "/success:disable",
+            "/failure:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Handle Manipulation", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:Handle Manipulation", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Handle Manipulation",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Handle Manipulation",
+            "/failure:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:Kernel Object", "/success:enable", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:Kernel Object", "/success:disable", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:Kernel Object",
+            "/success:enable",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:Kernel Object",
+            "/success:disable",
+            "/failure:disable"
+          ]
         },
         {
           "kind": "Command",
           "executable": "auditpol.exe",
-          "arguments": ["/set", "/subcategory:SAM", "/success:enable", "/failure:enable"],
-          "revertArguments": ["/set", "/subcategory:SAM", "/success:disable", "/failure:disable"]
+          "arguments": [
+            "/set",
+            "/subcategory:SAM",
+            "/success:enable",
+            "/failure:enable"
+          ],
+          "revertArguments": [
+            "/set",
+            "/subcategory:SAM",
+            "/success:disable",
+            "/failure:disable"
+          ]
         }
       ],
       "requires": "None",
@@ -661,13 +1157,25 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Advanced Audit Policy Configuration\\System Audit Policies\\Object Access"
       },
-      "sideEffects": ["Registry, handle and kernel-object auditing can generate high event volume on busy systems even though it only fires where SACLs are set."],
+      "sideEffects": [
+        "Registry, handle and kernel-object auditing can generate high event volume on busy systems even though it only fires where SACLs are set."
+      ],
       "sources": [
         "https://stigaview.com/products/win11/v2r8/",
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
       ],
-      "verifiedOn": [],
-      "tags": ["audit", "stig"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "audit",
+        "stig"
+      ]
     },
     {
       "id": "security.media.removable-deny-execute",
@@ -679,7 +1187,12 @@
       "risk": "Advanced",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -694,18 +1207,25 @@
       ],
       "requires": "Reboot",
       "dependsOn": [],
-      "conflictsWith": ["security.media.removable-deny-all"],
+      "conflictsWith": [
+        "security.media.removable-deny-all"
+      ],
       "managedBy": {
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Removable Storage Access\\Removable Disks: Deny execute access"
       },
-      "sideEffects": ["Portable applications launched from a USB drive stop working; copy them to a local disk first."],
+      "sideEffects": [
+        "Portable applications launched from a USB drive stop working; copy them to a local disk first."
+      ],
       "sources": [
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
         "https://github.com/scipag/HardeningKitty"
       ],
       "verifiedOn": [],
-      "tags": ["media", "removable-media"]
+      "tags": [
+        "media",
+        "removable-media"
+      ]
     },
     {
       "id": "security.media.removable-deny-write",
@@ -717,7 +1237,12 @@
       "risk": "Breaking",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -742,18 +1267,27 @@
       ],
       "requires": "Reboot",
       "dependsOn": [],
-      "conflictsWith": ["security.media.removable-deny-all"],
+      "conflictsWith": [
+        "security.media.removable-deny-all"
+      ],
       "managedBy": {
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Removable Storage Access\\Removable Disks: Deny write access"
       },
-      "sideEffects": ["Users can no longer copy files to USB sticks, external drives, phones or cameras. Legitimate transfers must use another channel."],
+      "sideEffects": [
+        "Users can no longer copy files to USB sticks, external drives, phones or cameras. Legitimate transfers must use another channel."
+      ],
       "sources": [
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
         "https://github.com/scipag/HardeningKitty"
       ],
       "verifiedOn": [],
-      "tags": ["media", "removable-media", "cis", "acsc"]
+      "tags": [
+        "media",
+        "removable-media",
+        "cis",
+        "acsc"
+      ]
     },
     {
       "id": "security.media.removable-deny-all",
@@ -765,7 +1299,12 @@
       "risk": "Breaking",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -780,18 +1319,28 @@
       ],
       "requires": "Reboot",
       "dependsOn": [],
-      "conflictsWith": ["security.media.removable-deny-write", "security.media.removable-deny-execute"],
+      "conflictsWith": [
+        "security.media.removable-deny-write",
+        "security.media.removable-deny-execute"
+      ],
       "managedBy": {
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Removable Storage Access\\All Removable Storage classes: Deny all access"
       },
-      "sideEffects": ["USB sticks, external drives, optical media, phones and cameras become completely inaccessible until the policy is reverted."],
+      "sideEffects": [
+        "USB sticks, external drives, optical media, phones and cameras become completely inaccessible until the policy is reverted."
+      ],
       "sources": [
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
         "https://github.com/scipag/HardeningKitty"
       ],
       "verifiedOn": [],
-      "tags": ["media", "removable-media", "cis", "acsc"]
+      "tags": [
+        "media",
+        "removable-media",
+        "cis",
+        "acsc"
+      ]
     },
     {
       "id": "security.media.bitlocker-deny-write-removable",
@@ -803,7 +1352,16 @@
       "risk": "Breaking",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -833,13 +1391,21 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\BitLocker Drive Encryption\\Removable Data Drives\\Deny write access to removable drives not protected by BitLocker"
       },
-      "sideEffects": ["Writing to a removable drive requires encrypting it with BitLocker To Go first; other operating systems may be unable to read such drives."],
+      "sideEffects": [
+        "Writing to a removable drive requires encrypting it with BitLocker To Go first; other operating systems may be unable to read such drives."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
       ],
       "verifiedOn": [],
-      "tags": ["media", "removable-media", "bitlocker", "baseline", "cis"]
+      "tags": [
+        "media",
+        "removable-media",
+        "bitlocker",
+        "baseline",
+        "cis"
+      ]
     },
     {
       "id": "security.media.block-dma-device-classes",
@@ -851,7 +1417,12 @@
       "risk": "Breaking",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -921,13 +1492,19 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Device Installation\\Device Installation Restrictions\\Prevent installation of devices that match any of these device IDs"
       },
-      "sideEffects": ["Thunderbolt docks and eGPUs, FireWire audio interfaces and SBP-2 devices stop installing and working."],
+      "sideEffects": [
+        "Thunderbolt docks and eGPUs, FireWire audio interfaces and SBP-2 devices stop installing and working."
+      ],
       "sources": [
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
         "https://github.com/scipag/HardeningKitty"
       ],
       "verifiedOn": [],
-      "tags": ["media", "dma", "cis"]
+      "tags": [
+        "media",
+        "dma",
+        "cis"
+      ]
     },
     {
       "id": "security.media.dma-disable-under-lock",
@@ -939,7 +1516,12 @@
       "risk": "Advanced",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -959,13 +1541,21 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\BitLocker Drive Encryption\\Disable new DMA devices when this computer is locked"
       },
-      "sideEffects": ["A Thunderbolt device that needs a DMA-remapping-incompatible driver will not start until the user signs in."],
+      "sideEffects": [
+        "A Thunderbolt device that needs a DMA-remapping-incompatible driver will not start until the user signs in."
+      ],
       "sources": [
         "https://stigaview.com/products/win11/v2r8/",
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
       ],
       "verifiedOn": [],
-      "tags": ["media", "dma", "baseline", "stig", "stig-wn11-ep-000310"]
+      "tags": [
+        "media",
+        "dma",
+        "baseline",
+        "stig",
+        "stig-wn11-ep-000310"
+      ]
     },
     {
       "id": "security.media.dma-enumeration-policy",
@@ -977,7 +1567,12 @@
       "risk": "Breaking",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -997,13 +1592,19 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Kernel DMA Protection\\Enumeration policy for external devices incompatible with Kernel DMA Protection"
       },
-      "sideEffects": ["Thunderbolt or PCIe devices whose drivers do not support DMA remapping will not work at all."],
+      "sideEffects": [
+        "Thunderbolt or PCIe devices whose drivers do not support DMA remapping will not work at all."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
         "https://github.com/scipag/HardeningKitty"
       ],
       "verifiedOn": [],
-      "tags": ["media", "dma", "baseline"]
+      "tags": [
+        "media",
+        "dma",
+        "baseline"
+      ]
     },
     {
       "id": "security.crypto.disable-tls-10",
@@ -1015,7 +1616,12 @@
       "risk": "Breaking",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -1061,14 +1667,23 @@
       "requires": "Reboot",
       "dependsOn": [],
       "conflictsWith": [],
-      "managedBy": { "policyCsp": null, "groupPolicyPath": null },
-      "sideEffects": ["Old applications or appliances pinned to TLS 1.0 (legacy management consoles, old SQL/ODBC drivers, printer and IoT web UIs, some VPN clients) can no longer connect."],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Old applications or appliances pinned to TLS 1.0 (legacy management consoles, old SQL/ODBC drivers, printer and IoT web UIs, some VPN clients) can no longer connect."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/windows/win32/secauthn/tls-10-11-deprecation-in-windows",
         "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
       ],
       "verifiedOn": [],
-      "tags": ["crypto", "tls", "acsc"]
+      "tags": [
+        "crypto",
+        "tls",
+        "acsc"
+      ]
     },
     {
       "id": "security.crypto.disable-tls-11",
@@ -1080,7 +1695,12 @@
       "risk": "Breaking",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -1126,14 +1746,23 @@
       "requires": "Reboot",
       "dependsOn": [],
       "conflictsWith": [],
-      "managedBy": { "policyCsp": null, "groupPolicyPath": null },
-      "sideEffects": ["Applications or appliances pinned to TLS 1.1 stop connecting; use TLS 1.2 or 1.3 instead."],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Applications or appliances pinned to TLS 1.1 stop connecting; use TLS 1.2 or 1.3 instead."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/windows/win32/secauthn/tls-10-11-deprecation-in-windows",
         "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
       ],
       "verifiedOn": [],
-      "tags": ["crypto", "tls", "acsc"]
+      "tags": [
+        "crypto",
+        "tls",
+        "acsc"
+      ]
     },
     {
       "id": "security.crypto.disable-ssl-30",
@@ -1145,7 +1774,12 @@
       "risk": "Advanced",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -1191,14 +1825,23 @@
       "requires": "Reboot",
       "dependsOn": [],
       "conflictsWith": [],
-      "managedBy": { "policyCsp": null, "groupPolicyPath": null },
-      "sideEffects": ["Extremely old hosts that only speak SSL 3.0 become unreachable; such systems are unsafe to talk to anyway."],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Extremely old hosts that only speak SSL 3.0 become unreachable; such systems are unsafe to talk to anyway."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/windows/win32/secauthn/tls-10-11-deprecation-in-windows",
         "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
       ],
       "verifiedOn": [],
-      "tags": ["crypto", "tls", "acsc"]
+      "tags": [
+        "crypto",
+        "tls",
+        "acsc"
+      ]
     },
     {
       "id": "security.crypto.fips-mode",
@@ -1210,7 +1853,12 @@
       "risk": "Breaking",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -1230,13 +1878,20 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\System cryptography: Use FIPS compliant algorithms for encryption, hashing, and signing"
       },
-      "sideEffects": ["Applications that use MD5, RC4 or other non-validated crypto throw errors; some VPN and SSH clients break; BitLocker recovery-password behaviour changes. Enable only where regulation requires it."],
+      "sideEffects": [
+        "Applications that use MD5, RC4 or other non-validated crypto throw errors; some VPN and SSH clients break; BitLocker recovery-password behaviour changes. Enable only where regulation requires it."
+      ],
       "sources": [
         "https://stigaview.com/products/win11/v2r8/",
         "https://cyber.trackr.live/stig/Windows_11/2/8"
       ],
       "verifiedOn": [],
-      "tags": ["crypto", "fips", "stig", "stig-wn11-so-000230"]
+      "tags": [
+        "crypto",
+        "fips",
+        "stig",
+        "stig-wn11-so-000230"
+      ]
     },
     {
       "id": "security.crypto.system-objects-hardening",
@@ -1247,8 +1902,13 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -1283,8 +1943,21 @@
         "https://stigaview.com/products/win11/v2r8/",
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
       ],
-      "verifiedOn": [],
-      "tags": ["crypto", "baseline", "stig", "stig-wn11-so-000240", "cis"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "crypto",
+        "baseline",
+        "stig",
+        "stig-wn11-so-000240",
+        "cis"
+      ]
     }
   ]
 }

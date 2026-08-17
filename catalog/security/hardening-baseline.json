@@ -11,7 +11,12 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -31,13 +36,19 @@
         "policyCsp": "LocalSecurityAuthority/ConfigureLsaProtectedProcess",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Local Security Authority\\Configures LSASS to run as a protected process"
       },
-      "sideEffects": ["Unsigned or improperly signed LSA plug-ins, authentication packages and some third-party credential providers fail to load until updated."],
+      "sideEffects": [
+        "Unsigned or improperly signed LSA plug-ins, authentication packages and some third-party credential providers fail to load until updated."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-localsecurityauthority"
       ],
       "verifiedOn": [],
-      "tags": ["credentials", "baseline", "stig"]
+      "tags": [
+        "credentials",
+        "baseline",
+        "stig"
+      ]
     },
     {
       "id": "security.network.disable-llmnr",
@@ -48,8 +59,13 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -69,13 +85,26 @@
         "policyCsp": "ADMX_DnsClient/Turn_Off_Multicast",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Network\\DNS Client\\Turn off multicast name resolution"
       },
-      "sideEffects": ["Devices reachable only by LLMNR (some NAS/printers without DNS or mDNS names) may stop resolving by name."],
+      "sideEffects": [
+        "Devices reachable only by LLMNR (some NAS/printers without DNS or mDNS names) may stop resolving by name."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-admx-dnsclient",
         "https://learn.microsoft.com/windows/security/operating-system-security/device-management/windows-security-configuration-framework/windows-security-baselines"
       ],
-      "verifiedOn": [],
-      "tags": ["network", "baseline", "stig"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "network",
+        "baseline",
+        "stig"
+      ]
     },
     {
       "id": "security.autoplay.disable-autorun",
@@ -86,8 +115,13 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -122,8 +156,19 @@
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-autoplay",
         "https://learn.microsoft.com/windows/security/operating-system-security/device-management/windows-security-configuration-framework/windows-security-baselines"
       ],
-      "verifiedOn": [],
-      "tags": ["removable-media", "baseline", "stig"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "removable-media",
+        "baseline",
+        "stig"
+      ]
     },
     {
       "id": "security.smb.disable-insecure-guest-auth",
@@ -135,7 +180,12 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -155,13 +205,18 @@
         "policyCsp": "LanmanWorkstation/EnableInsecureGuestLogons",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Network\\Lanman Workstation\\Enable insecure guest logons"
       },
-      "sideEffects": ["Consumer NAS boxes and shares configured for guest (no-password) access stop being reachable until they get an account."],
+      "sideEffects": [
+        "Consumer NAS boxes and shares configured for guest (no-password) access stop being reachable until they get an account."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows-server/storage/file-server/enable-insecure-guest-logons-smb2-and-smb3",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-lanmanworkstation"
       ],
       "verifiedOn": [],
-      "tags": ["smb", "baseline"]
+      "tags": [
+        "smb",
+        "baseline"
+      ]
     },
     {
       "id": "security.powershell.script-block-logging",
@@ -172,8 +227,13 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -198,8 +258,19 @@
         "https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_logging_windows",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-windowspowershell"
       ],
-      "verifiedOn": [],
-      "tags": ["logging", "baseline", "stig"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "logging",
+        "baseline",
+        "stig"
+      ]
     },
     {
       "id": "security.installer.disable-always-install-elevated",
@@ -210,8 +281,13 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -236,8 +312,18 @@
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-applicationmanagement",
         "https://learn.microsoft.com/windows/win32/msi/alwaysinstallelevated"
       ],
-      "verifiedOn": [],
-      "tags": ["installer", "stig"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "installer",
+        "stig"
+      ]
     }
   ]
 }

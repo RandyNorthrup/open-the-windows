@@ -11,9 +11,20 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "AJRouter", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "AJRouter",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -27,7 +38,10 @@
         "https://learn.microsoft.com/en-us/windows/whats-new/removed-features"
       ],
       "verifiedOn": [],
-      "tags": ["service", "debloat"]
+      "tags": [
+        "service",
+        "debloat"
+      ]
     },
     {
       "id": "performance.services.disable-activex-installer",
@@ -38,10 +52,21 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "AxInstSV", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "AxInstSV",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -53,8 +78,18 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
-      "verifiedOn": [],
-      "tags": ["service", "debloat"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "service",
+        "debloat"
+      ]
     },
     {
       "id": "performance.services.disable-fax",
@@ -66,9 +101,20 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "Fax", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "Fax",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -81,7 +127,10 @@
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
       "verifiedOn": [],
-      "tags": ["service", "debloat"]
+      "tags": [
+        "service",
+        "debloat"
+      ]
     },
     {
       "id": "performance.services.disable-mobile-hotspot",
@@ -92,10 +141,21 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "icssvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "icssvc",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -107,8 +167,18 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
-      "verifiedOn": [],
-      "tags": ["service", "network"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "service",
+        "network"
+      ]
     },
     {
       "id": "performance.services.disable-geolocation",
@@ -120,9 +190,20 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "lfsvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "lfsvc",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -138,7 +219,10 @@
         "https://github.com/ChrisTitusTech/winutil"
       ],
       "verifiedOn": [],
-      "tags": ["service", "privacy"]
+      "tags": [
+        "service",
+        "privacy"
+      ]
     },
     {
       "id": "performance.services.disable-downloaded-maps-manager",
@@ -149,10 +233,21 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "MapsBroker", "startType": "Disabled", "default": "AutomaticDelayed", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "MapsBroker",
+          "startType": "Disabled",
+          "default": "AutomaticDelayed",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -165,8 +260,18 @@
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server",
         "https://github.com/ChrisTitusTech/winutil"
       ],
-      "verifiedOn": [],
-      "tags": ["service", "debloat"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "service",
+        "debloat"
+      ]
     },
     {
       "id": "performance.services.disable-network-device-auto-setup",
@@ -177,10 +282,21 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "NcdAutoSetup", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "NcdAutoSetup",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -192,8 +308,18 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
-      "verifiedOn": [],
-      "tags": ["service", "privacy"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "service",
+        "privacy"
+      ]
     },
     {
       "id": "performance.services.disable-program-compatibility-assistant",
@@ -204,10 +330,21 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "PcaSvc", "startType": "Disabled", "default": "AutomaticDelayed", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "PcaSvc",
+          "startType": "Disabled",
+          "default": "AutomaticDelayed",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -220,8 +357,18 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
-      "verifiedOn": [],
-      "tags": ["service", "telemetry"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "service",
+        "telemetry"
+      ]
     },
     {
       "id": "performance.services.disable-phone-service",
@@ -233,9 +380,20 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "PhoneSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "PhoneSvc",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -248,7 +406,10 @@
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
       "verifiedOn": [],
-      "tags": ["service", "debloat"]
+      "tags": [
+        "service",
+        "debloat"
+      ]
     },
     {
       "id": "performance.services.disable-push-to-install",
@@ -259,10 +420,21 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "PushToInstall", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "PushToInstall",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -274,8 +446,18 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
-      "verifiedOn": [],
-      "tags": ["service", "privacy"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "service",
+        "privacy"
+      ]
     },
     {
       "id": "performance.services.disable-remote-registry",
@@ -287,9 +469,20 @@
       "risk": "Safe",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "RemoteRegistry", "startType": "Disabled", "default": "Disabled", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "RemoteRegistry",
+          "startType": "Disabled",
+          "default": "Disabled",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -302,7 +495,10 @@
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
       "verifiedOn": [],
-      "tags": ["service", "security"]
+      "tags": [
+        "service",
+        "security"
+      ]
     },
     {
       "id": "performance.services.disable-retail-demo",
@@ -313,10 +509,21 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "RetailDemo", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "RetailDemo",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -328,8 +535,18 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
-      "verifiedOn": [],
-      "tags": ["service", "debloat"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "service",
+        "debloat"
+      ]
     },
     {
       "id": "performance.services.disable-nfc-payments",
@@ -340,10 +557,21 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "SEMgrSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "SEMgrSvc",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -355,8 +583,18 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
-      "verifiedOn": [],
-      "tags": ["service", "debloat"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "service",
+        "debloat"
+      ]
     },
     {
       "id": "performance.services.disable-recommended-troubleshooting",
@@ -367,10 +605,21 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "TroubleshootingSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "TroubleshootingSvc",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -382,8 +631,18 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
-      "verifiedOn": [],
-      "tags": ["service", "privacy"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "service",
+        "privacy"
+      ]
     },
     {
       "id": "performance.services.disable-wallet-service",
@@ -394,10 +653,21 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "WalletService", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "WalletService",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -409,8 +679,18 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
-      "verifiedOn": [],
-      "tags": ["service", "debloat"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "service",
+        "debloat"
+      ]
     },
     {
       "id": "performance.services.disable-webclient-webdav",
@@ -421,10 +701,21 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "WebClient", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "WebClient",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -436,8 +727,18 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features"
       ],
-      "verifiedOn": [],
-      "tags": ["service", "security"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "service",
+        "security"
+      ]
     },
     {
       "id": "performance.services.disable-windows-insider",
@@ -448,10 +749,21 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "wisvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "wisvc",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -463,8 +775,18 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
-      "verifiedOn": [],
-      "tags": ["service", "debloat"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "service",
+        "debloat"
+      ]
     },
     {
       "id": "performance.services.disable-wmp-network-sharing",
@@ -475,10 +797,21 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "WMPNetworkSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "WMPNetworkSvc",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -490,8 +823,18 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
-      "verifiedOn": [],
-      "tags": ["service", "debloat"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "service",
+        "debloat"
+      ]
     },
     {
       "id": "performance.services.disable-parental-controls",
@@ -502,10 +845,21 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "WpcMonSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "WpcMonSvc",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -517,8 +871,18 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
-      "verifiedOn": [],
-      "tags": ["service", "debloat"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "service",
+        "debloat"
+      ]
     },
     {
       "id": "performance.services.disable-ai-fabric",
@@ -530,9 +894,20 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": 26100, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 26100,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "WSAIFabricSvc", "startType": "Disabled", "default": "Automatic", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "WSAIFabricSvc",
+          "startType": "Disabled",
+          "default": "Automatic",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -547,7 +922,11 @@
         "https://github.com/ChrisTitusTech/winutil"
       ],
       "verifiedOn": [],
-      "tags": ["service", "privacy", "unverified-ms"]
+      "tags": [
+        "service",
+        "privacy",
+        "unverified-ms"
+      ]
     },
     {
       "id": "performance.services.disable-mixed-reality",
@@ -559,13 +938,48 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "SharedRealitySvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
-        { "kind": "Service", "name": "MixedRealityOpenXRSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
-        { "kind": "Service", "name": "spectrum", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
-        { "kind": "Service", "name": "perceptionsimulation", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
-        { "kind": "Service", "name": "VacSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "SharedRealitySvc",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        },
+        {
+          "kind": "Service",
+          "name": "MixedRealityOpenXRSvc",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        },
+        {
+          "kind": "Service",
+          "name": "spectrum",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        },
+        {
+          "kind": "Service",
+          "name": "perceptionsimulation",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        },
+        {
+          "kind": "Service",
+          "name": "VacSvc",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -579,7 +993,10 @@
         "https://learn.microsoft.com/en-us/windows/whats-new/removed-features"
       ],
       "verifiedOn": [],
-      "tags": ["service", "debloat"]
+      "tags": [
+        "service",
+        "debloat"
+      ]
     },
     {
       "id": "performance.services.disable-peer-networking-pnrp",
@@ -591,12 +1008,41 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "p2pimsvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
-        { "kind": "Service", "name": "p2psvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
-        { "kind": "Service", "name": "PNRPsvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
-        { "kind": "Service", "name": "PNRPAutoReg", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "p2pimsvc",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        },
+        {
+          "kind": "Service",
+          "name": "p2psvc",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        },
+        {
+          "kind": "Service",
+          "name": "PNRPsvc",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        },
+        {
+          "kind": "Service",
+          "name": "PNRPAutoReg",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -610,7 +1056,10 @@
         "https://learn.microsoft.com/en-us/windows/whats-new/removed-features"
       ],
       "verifiedOn": [],
-      "tags": ["service", "debloat"]
+      "tags": [
+        "service",
+        "debloat"
+      ]
     },
     {
       "id": "performance.services.disable-sensor-services",
@@ -622,11 +1071,34 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "SensorService", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
-        { "kind": "Service", "name": "SensorDataService", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
-        { "kind": "Service", "name": "SensrSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "SensorService",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        },
+        {
+          "kind": "Service",
+          "name": "SensorDataService",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        },
+        {
+          "kind": "Service",
+          "name": "SensrSvc",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -640,7 +1112,10 @@
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
       "verifiedOn": [],
-      "tags": ["service", "privacy"]
+      "tags": [
+        "service",
+        "privacy"
+      ]
     },
     {
       "id": "performance.services.disable-ssdp-upnp",
@@ -652,10 +1127,27 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "SSDPSRV", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
-        { "kind": "Service", "name": "upnphost", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "SSDPSRV",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        },
+        {
+          "kind": "Service",
+          "name": "upnphost",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -668,7 +1160,10 @@
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
       "verifiedOn": [],
-      "tags": ["service", "network"]
+      "tags": [
+        "service",
+        "network"
+      ]
     },
     {
       "id": "performance.services.disable-xbox-services",
@@ -680,12 +1175,41 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Service", "name": "XblAuthManager", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
-        { "kind": "Service", "name": "XblGameSave", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
-        { "kind": "Service", "name": "XboxNetApiSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
-        { "kind": "Service", "name": "XboxGipSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+        {
+          "kind": "Service",
+          "name": "XblAuthManager",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        },
+        {
+          "kind": "Service",
+          "name": "XblGameSave",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        },
+        {
+          "kind": "Service",
+          "name": "XboxNetApiSvc",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        },
+        {
+          "kind": "Service",
+          "name": "XboxGipSvc",
+          "startType": "Disabled",
+          "default": "Manual",
+          "stopIfRunning": true
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -698,7 +1222,10 @@
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
       "verifiedOn": [],
-      "tags": ["service", "gaming"]
+      "tags": [
+        "service",
+        "gaming"
+      ]
     },
     {
       "id": "performance.services.disable-messaging",
@@ -709,10 +1236,24 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\MessagingService", "name": "Start", "type": "Dword", "value": 4, "default": 3, "valueKind": "Preference" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SYSTEM\\CurrentControlSet\\Services\\MessagingService",
+          "name": "Start",
+          "type": "Dword",
+          "value": 4,
+          "default": 3,
+          "valueKind": "Preference"
+        }
       ],
       "requires": "SignOut",
       "dependsOn": [],
@@ -725,8 +1266,18 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
-      "verifiedOn": [],
-      "tags": ["service", "debloat"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "service",
+        "debloat"
+      ]
     },
     {
       "id": "performance.services.disable-contact-data-indexing",
@@ -737,10 +1288,24 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\PimIndexMaintenanceSvc", "name": "Start", "type": "Dword", "value": 4, "default": 3, "valueKind": "Preference" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SYSTEM\\CurrentControlSet\\Services\\PimIndexMaintenanceSvc",
+          "name": "Start",
+          "type": "Dword",
+          "value": 4,
+          "default": 3,
+          "valueKind": "Preference"
+        }
       ],
       "requires": "SignOut",
       "dependsOn": [],
@@ -753,8 +1318,18 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
-      "verifiedOn": [],
-      "tags": ["service", "debloat"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "service",
+        "debloat"
+      ]
     },
     {
       "id": "performance.services.disable-user-data-storage",
@@ -765,11 +1340,34 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\UnistoreSvc", "name": "Start", "type": "Dword", "value": 4, "default": 3, "valueKind": "Preference" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\UserDataSvc", "name": "Start", "type": "Dword", "value": 4, "default": 3, "valueKind": "Preference" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SYSTEM\\CurrentControlSet\\Services\\UnistoreSvc",
+          "name": "Start",
+          "type": "Dword",
+          "value": 4,
+          "default": 3,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SYSTEM\\CurrentControlSet\\Services\\UserDataSvc",
+          "name": "Start",
+          "type": "Dword",
+          "value": 4,
+          "default": 3,
+          "valueKind": "Preference"
+        }
       ],
       "requires": "SignOut",
       "dependsOn": [],
@@ -782,8 +1380,18 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
       ],
-      "verifiedOn": [],
-      "tags": ["service", "debloat"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "service",
+        "debloat"
+      ]
     }
   ]
 }

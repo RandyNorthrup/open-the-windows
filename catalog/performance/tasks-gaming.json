@@ -10,8 +10,13 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "ScheduledTask",
@@ -30,8 +35,19 @@
       "sources": [
         "https://github.com/ChrisTitusTech/winutil"
       ],
-      "verifiedOn": [],
-      "tags": ["task", "startup", "unverified-ms"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "task",
+        "startup",
+        "unverified-ms"
+      ]
     },
     {
       "id": "performance.tasks.disable-maps-tasks",
@@ -42,8 +58,13 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "ScheduledTask",
@@ -70,8 +91,19 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://github.com/ChrisTitusTech/winutil"
       ],
-      "verifiedOn": [],
-      "tags": ["task", "maps", "unverified-ms"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "task",
+        "maps",
+        "unverified-ms"
+      ]
     },
     {
       "id": "performance.tasks.disable-xbox-game-save-sync",
@@ -83,7 +115,12 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "ScheduledTask",
@@ -105,7 +142,12 @@
         "https://github.com/ChrisTitusTech/winutil"
       ],
       "verifiedOn": [],
-      "tags": ["task", "gaming", "gamer", "unverified-ms"]
+      "tags": [
+        "task",
+        "gaming",
+        "gamer",
+        "unverified-ms"
+      ]
     },
     {
       "id": "performance.tasks.disable-speech-model-download",
@@ -117,7 +159,12 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "ScheduledTask",
@@ -138,7 +185,11 @@
         "https://github.com/ChrisTitusTech/winutil"
       ],
       "verifiedOn": [],
-      "tags": ["task", "speech", "unverified-ms"]
+      "tags": [
+        "task",
+        "speech",
+        "unverified-ms"
+      ]
     },
     {
       "id": "performance.tasks.disable-recommended-troubleshooting",
@@ -149,8 +200,13 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "ScheduledTask",
@@ -176,8 +232,19 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://github.com/farag2/Sophia-Script-for-Windows"
       ],
-      "verifiedOn": [],
-      "tags": ["task", "diagnostics", "unverified-ms"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "task",
+        "diagnostics",
+        "unverified-ms"
+      ]
     },
     {
       "id": "performance.tasks.disable-mare-backup",
@@ -188,8 +255,13 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "ScheduledTask",
@@ -209,8 +281,19 @@
         "https://github.com/ChrisTitusTech/winutil",
         "https://github.com/Raphire/Win11Debloat"
       ],
-      "verifiedOn": [],
-      "tags": ["task", "backup", "unverified-ms"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "task",
+        "backup",
+        "unverified-ms"
+      ]
     },
     {
       "id": "performance.tasks.disable-pca-patch-db",
@@ -221,8 +304,13 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "ScheduledTask",
@@ -242,8 +330,19 @@
         "https://github.com/ChrisTitusTech/winutil",
         "https://github.com/farag2/Sophia-Script-for-Windows"
       ],
-      "verifiedOn": [],
-      "tags": ["task", "compatibility", "unverified-ms"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "task",
+        "compatibility",
+        "unverified-ms"
+      ]
     },
     {
       "id": "performance.tasks.disable-family-safety",
@@ -255,7 +354,12 @@
       "risk": "Advanced",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "ScheduledTask",
@@ -283,7 +387,11 @@
         "https://github.com/Raphire/Win11Debloat"
       ],
       "verifiedOn": [],
-      "tags": ["task", "family-safety", "unverified-ms"]
+      "tags": [
+        "task",
+        "family-safety",
+        "unverified-ms"
+      ]
     },
     {
       "id": "performance.gaming.enable-hardware-gpu-scheduling",
@@ -295,7 +403,12 @@
       "risk": "Advanced",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -322,7 +435,12 @@
         "https://support.microsoft.com/en-us/windows/options-to-optimize-gaming-performance-in-windows-11-a255f612-2949-4373-a566-ff6f3f474613"
       ],
       "verifiedOn": [],
-      "tags": ["gaming", "gamer", "gpu", "unverified-ms"]
+      "tags": [
+        "gaming",
+        "gamer",
+        "gpu",
+        "unverified-ms"
+      ]
     },
     {
       "id": "performance.gaming.disable-game-bar-controller-popup",
@@ -334,7 +452,12 @@
       "risk": "Safe",
       "scope": "User",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -359,7 +482,12 @@
         "https://github.com/ChrisTitusTech/winutil"
       ],
       "verifiedOn": [],
-      "tags": ["gaming", "gamer", "game-bar", "unverified-ms"]
+      "tags": [
+        "gaming",
+        "gamer",
+        "game-bar",
+        "unverified-ms"
+      ]
     },
     {
       "id": "performance.gaming.disable-game-dvr-policy",
@@ -370,8 +498,13 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -398,8 +531,19 @@
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-applicationmanagement",
         "https://github.com/ChrisTitusTech/winutil"
       ],
-      "verifiedOn": [],
-      "tags": ["gaming", "gamedvr", "policy"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "gaming",
+        "gamedvr",
+        "policy"
+      ]
     }
   ]
 }

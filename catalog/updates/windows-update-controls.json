@@ -10,7 +10,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -60,7 +60,14 @@
         "https://learn.microsoft.com/windows/deployment/update/waas-configure-wufb",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "windows-update",
         "feature-updates",
@@ -76,7 +83,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -126,7 +133,14 @@
         "https://learn.microsoft.com/windows/deployment/update/waas-configure-wufb",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "windows-update",
         "feature-updates",
@@ -341,7 +355,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -403,7 +417,14 @@
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update",
         "https://learn.microsoft.com/windows/release-health/windows11-release-information"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "windows-update",
         "feature-updates",
@@ -419,7 +440,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -454,7 +475,14 @@
         "https://learn.microsoft.com/windows/deployment/update/waas-configure-wufb",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "windows-update",
         "features",
@@ -470,7 +498,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -519,7 +547,14 @@
         "https://learn.microsoft.com/windows/deployment/update/waas-wu-settings",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "windows-update",
         "automatic-updates",
@@ -535,7 +570,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -573,7 +608,14 @@
         "https://learn.microsoft.com/windows/deployment/do/waas-delivery-optimization-reference",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-deliveryoptimization"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "windows-update",
         "delivery-optimization",
@@ -646,7 +688,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -673,7 +715,14 @@
       "sources": [
         "https://support.microsoft.com/en-us/topic/remove-specific-prevalent-malware-with-windows-malicious-software-removal-tool-kb890830-ba51b71f-39cd-cdec-73eb-61979b0661e0"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "windows-update",
         "msrt",
@@ -741,7 +790,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -768,7 +817,14 @@
       "sources": [
         "https://learn.microsoft.com/windows/deployment/update/waas-wu-settings"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "windows-update",
         "notifications"
@@ -854,7 +910,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -921,7 +977,14 @@
         "https://learn.microsoft.com/windows/deployment/update/wufb-compliancedeadlines",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "windows-update",
         "restart",
@@ -937,7 +1000,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -1004,7 +1067,14 @@
         "https://learn.microsoft.com/windows/deployment/update/wufb-compliancedeadlines",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "windows-update",
         "restart",
@@ -1020,7 +1090,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -1065,7 +1135,14 @@
         "https://learn.microsoft.com/windows/deployment/update/waas-restart",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "windows-update",
         "notifications"
@@ -1080,7 +1157,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -1125,7 +1202,14 @@
         "https://learn.microsoft.com/windows/deployment/update/waas-configure-wufb",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "windows-update",
         "optional-content"
@@ -1140,7 +1224,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -1177,7 +1261,14 @@
         "https://learn.microsoft.com/windows/deployment/update/waas-configure-wufb",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "windows-update",
         "microsoft-update",
@@ -1193,7 +1284,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -1240,7 +1331,14 @@
         "https://learn.microsoft.com/windows/deployment/update/waas-restart",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
       "tags": [
         "windows-update",
         "restart",

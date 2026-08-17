@@ -11,7 +11,12 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -31,13 +36,18 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
       },
-      "sideEffects": ["Microsoft does not recommend fully disabling Edge diagnostic data; crash and usage reporting to Microsoft stops."],
+      "sideEffects": [
+        "Microsoft does not recommend fully disabling Edge diagnostic data; crash and usage reporting to Microsoft stops."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-browser-policies/diagnosticdata",
         "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies"
       ],
       "verifiedOn": [],
-      "tags": ["edge", "telemetry"]
+      "tags": [
+        "edge",
+        "telemetry"
+      ]
     },
     {
       "id": "privacy.edge.personalization-reporting",
@@ -48,8 +58,13 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -74,8 +89,18 @@
         "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-browser-policies/personalizationreportingenabled",
         "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies"
       ],
-      "verifiedOn": [],
-      "tags": ["edge", "personalization"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "edge",
+        "personalization"
+      ]
     },
     {
       "id": "privacy.edge.user-feedback",
@@ -86,8 +111,13 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -107,13 +137,25 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
       },
-      "sideEffects": ["The Send feedback UI and feedback prompts are removed from Edge."],
+      "sideEffects": [
+        "The Send feedback UI and feedback prompts are removed from Edge."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies",
         "https://github.com/Raphire/Win11Debloat"
       ],
-      "verifiedOn": [],
-      "tags": ["edge", "feedback"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "edge",
+        "feedback"
+      ]
     },
     {
       "id": "privacy.edge.shopping-assistant",
@@ -124,8 +166,13 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -145,13 +192,25 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
       },
-      "sideEffects": ["Coupon and price-tracking features are removed from Edge."],
+      "sideEffects": [
+        "Coupon and price-tracking features are removed from Edge."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies",
         "https://github.com/Raphire/Win11Debloat"
       ],
-      "verifiedOn": [],
-      "tags": ["edge", "shopping"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "edge",
+        "shopping"
+      ]
     },
     {
       "id": "privacy.edge.experimentation-config",
@@ -163,7 +222,12 @@
       "risk": "Advanced",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -183,13 +247,19 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
       },
-      "sideEffects": ["Edge stops receiving Microsoft-delivered site-compatibility configuration payloads, which can cause rendering issues on sites that rely on them."],
+      "sideEffects": [
+        "Edge stops receiving Microsoft-delivered site-compatibility configuration payloads, which can cause rendering issues on sites that rely on them."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-browser-policies/experimentationandconfigurationservicecontrol",
         "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies"
       ],
       "verifiedOn": [],
-      "tags": ["edge", "telemetry", "experimentation"]
+      "tags": [
+        "edge",
+        "telemetry",
+        "experimentation"
+      ]
     },
     {
       "id": "privacy.edge.hide-first-run",
@@ -200,8 +270,13 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -221,12 +296,24 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
       },
-      "sideEffects": ["The first-run onboarding, personalisation and import prompts are skipped."],
+      "sideEffects": [
+        "The first-run onboarding, personalisation and import prompts are skipped."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies"
       ],
-      "verifiedOn": [],
-      "tags": ["edge", "nag"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "edge",
+        "nag"
+      ]
     },
     {
       "id": "privacy.edge.spotlight",
@@ -237,8 +324,13 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -258,13 +350,25 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
       },
-      "sideEffects": ["Bing background images and suggestions are removed from the new-tab page."],
+      "sideEffects": [
+        "Bing background images and suggestions are removed from the new-tab page."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies",
         "https://github.com/Raphire/Win11Debloat"
       ],
-      "verifiedOn": [],
-      "tags": ["edge", "nag"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "edge",
+        "nag"
+      ]
     },
     {
       "id": "privacy.edge.recommendations",
@@ -275,8 +379,13 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -326,13 +435,25 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
       },
-      "sideEffects": ["Feature recommendations, Insider promotions, default-browser campaigns and the Acrobat subscription button no longer appear in Edge."],
+      "sideEffects": [
+        "Feature recommendations, Insider promotions, default-browser campaigns and the Acrobat subscription button no longer appear in Edge."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies",
         "https://github.com/Raphire/Win11Debloat"
       ],
-      "verifiedOn": [],
-      "tags": ["edge", "nag"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "edge",
+        "nag"
+      ]
     },
     {
       "id": "privacy.edge.collections",
@@ -344,7 +465,12 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -364,12 +490,17 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
       },
-      "sideEffects": ["The Collections feature is removed from Edge."],
+      "sideEffects": [
+        "The Collections feature is removed from Edge."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies"
       ],
       "verifiedOn": [],
-      "tags": ["edge", "cloud"]
+      "tags": [
+        "edge",
+        "cloud"
+      ]
     },
     {
       "id": "privacy.edge.web-widget",
@@ -380,8 +511,13 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "Registry",
@@ -401,12 +537,24 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
       },
-      "sideEffects": ["The Microsoft Edge web widget is disabled."],
+      "sideEffects": [
+        "The Microsoft Edge web widget is disabled."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies"
       ],
-      "verifiedOn": [],
-      "tags": ["edge", "widget"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "edge",
+        "widget"
+      ]
     },
     {
       "id": "privacy.task.program-data-updater",
@@ -418,7 +566,12 @@
       "risk": "Safe",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "ScheduledTask",
@@ -431,13 +584,19 @@
       "dependsOn": [],
       "conflictsWith": [],
       "managedBy": null,
-      "sideEffects": ["No effect while CEIP is disabled; feature updates may re-enable the task."],
+      "sideEffects": [
+        "No effect while CEIP is disabled; feature updates may re-enable the task."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://github.com/undergroundwires/privacy.sexy"
       ],
       "verifiedOn": [],
-      "tags": ["task", "telemetry", "ceip"]
+      "tags": [
+        "task",
+        "telemetry",
+        "ceip"
+      ]
     },
     {
       "id": "privacy.task.ceip",
@@ -448,8 +607,13 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "ScheduledTask",
@@ -468,13 +632,26 @@
       "dependsOn": [],
       "conflictsWith": [],
       "managedBy": null,
-      "sideEffects": ["These tasks are already dormant when CEIP is off; feature updates may re-enable them."],
+      "sideEffects": [
+        "These tasks are already dormant when CEIP is off; feature updates may re-enable them."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://github.com/undergroundwires/privacy.sexy"
       ],
-      "verifiedOn": [],
-      "tags": ["task", "telemetry", "ceip"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "task",
+        "telemetry",
+        "ceip"
+      ]
     },
     {
       "id": "privacy.task.autochk-proxy",
@@ -485,8 +662,13 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "ScheduledTask",
@@ -499,13 +681,26 @@
       "dependsOn": [],
       "conflictsWith": [],
       "managedBy": null,
-      "sideEffects": ["No effect while CEIP is disabled; feature updates may re-enable the task."],
+      "sideEffects": [
+        "No effect while CEIP is disabled; feature updates may re-enable the task."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://github.com/undergroundwires/privacy.sexy"
       ],
-      "verifiedOn": [],
-      "tags": ["task", "telemetry", "ceip"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "task",
+        "telemetry",
+        "ceip"
+      ]
     },
     {
       "id": "privacy.task.feedback-siuf",
@@ -516,8 +711,13 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "ScheduledTask",
@@ -536,13 +736,25 @@
       "dependsOn": [],
       "conflictsWith": [],
       "managedBy": null,
-      "sideEffects": ["Feedback Hub scenario downloads stop; re-enable if you want to submit feedback. Feature updates may re-enable the tasks."],
+      "sideEffects": [
+        "Feedback Hub scenario downloads stop; re-enable if you want to submit feedback. Feature updates may re-enable the tasks."
+      ],
       "sources": [
         "https://github.com/undergroundwires/privacy.sexy",
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
       ],
-      "verifiedOn": [],
-      "tags": ["task", "feedback"]
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-08-17",
+          "evidence": "docs/certification/M4/machine-scope-verification.md"
+        }
+      ],
+      "tags": [
+        "task",
+        "feedback"
+      ]
     },
     {
       "id": "privacy.task.wer-queue-reporting",
@@ -554,7 +766,12 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "ScheduledTask",
@@ -567,13 +784,19 @@
       "dependsOn": [],
       "conflictsWith": [],
       "managedBy": null,
-      "sideEffects": ["Queued Windows Error Reporting reports are no longer uploaded; pair with turning WER off. Feature updates may re-enable the task."],
+      "sideEffects": [
+        "Queued Windows Error Reporting reports are no longer uploaded; pair with turning WER off. Feature updates may re-enable the task."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://github.com/undergroundwires/privacy.sexy"
       ],
       "verifiedOn": [],
-      "tags": ["task", "telemetry", "wer"]
+      "tags": [
+        "task",
+        "telemetry",
+        "wer"
+      ]
     },
     {
       "id": "privacy.task.device-census",
@@ -585,7 +808,12 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
         {
           "kind": "ScheduledTask",
@@ -604,13 +832,19 @@
       "dependsOn": [],
       "conflictsWith": [],
       "managedBy": null,
-      "sideEffects": ["Windows Update for Business update reporting relies on DeviceCensus; leave these enabled on managed devices. Feature updates may re-enable the tasks."],
+      "sideEffects": [
+        "Windows Update for Business update reporting relies on DeviceCensus; leave these enabled on managed devices. Feature updates may re-enable the tasks."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/windows/deployment/update/wufb-reports-prerequisites",
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
       ],
       "verifiedOn": [],
-      "tags": ["task", "telemetry", "census"]
+      "tags": [
+        "task",
+        "telemetry",
+        "census"
+      ]
     }
   ]
 }
