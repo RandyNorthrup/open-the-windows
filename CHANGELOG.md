@@ -36,11 +36,12 @@ what was planned (plans live in `PLAN.md`).
 
 ### Fixed
 
-- Flaky `powershell` quality gate: `Invoke-ScriptAnalyzer` (PSScriptAnalyzer
-  1.25) intermittently threw a `NullReferenceException` from a compatibility
-  rule, failing the gate at random. The gate now retries the analysis on a
-  thrown exception (a tool crash, not a finding); real findings are still
-  reported and never retried.
+- Flaky PSScriptAnalyzer check: `Invoke-ScriptAnalyzer` (PSScriptAnalyzer 1.25)
+  intermittently threw a `NullReferenceException` from a compatibility rule,
+  failing at random (this reddened an otherwise green `main`). Both the
+  `powershell` quality gate (`build/quality.ps1`) and the CI PSScriptAnalyzer
+  step now retry the analysis on a thrown exception (a tool crash, not a
+  finding); real findings are still reported and never retried.
 - Intermittent Release build failures (RT0002 on the generated WPF
   `*_wpftmp.csproj`, cascading to BG1002 "DesktopApp.baml cannot be found").
   ReferenceTrimmer analysed the transient markup-compilation project — which
