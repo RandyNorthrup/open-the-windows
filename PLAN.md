@@ -427,6 +427,11 @@ Landed so far (branch `feature/m4-catalogue-population`, committed locally):
   `usoclient.exe` added to the command allow-list with a validator test.
 - **Refusal / not-included docs**: `docs/refusals.md` and
   `docs/not-included.md`, linked from the README.
+- **Catalogue authoring started (WP 4.2 updates)**: 18 new Windows Update control
+  entries in `catalog/updates/windows-update-controls.json` (deferral presets,
+  release pin, Delivery Optimization modes, restart deadlines, AU behaviour, MSRT
+  and Store update opt-outs, notifications), transcribed from research 03 §5.2–5.12
+  / §6; catalogue now 47 entries, all Draft, `otw catalog validate` clean.
 
 Still to do (the bulk of M4): populate the catalogue to ≥ 300 research-backed
 entries across the six categories, extend the catalogue tests to the per-category

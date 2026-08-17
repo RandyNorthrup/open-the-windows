@@ -38,6 +38,16 @@ what was planned (plans live in `PLAN.md`).
   network, and what it does instead) and
   [docs/not-included.md](docs/not-included.md) (the placebo / low-value
   "optimisation" tweaks it deliberately leaves out), both linked from the README.
+- Windows Update catalogue entries (`catalog/updates/windows-update-controls.json`,
+  research 03): feature-update deferral presets (30 / 90 / 180 / 365 days), a
+  quality-update 7-day deferral, a 25H2 feature-release pin, Temporary Enterprise
+  Feature Control, Automatic Updates "notify before install", Delivery
+  Optimization HTTP-only and Simple modes, the MSRT infection-report opt-out,
+  Microsoft Store app auto-update off, active hours, quality/feature restart
+  deadlines, notification-level control, optional-content user choice and hiding
+  the organisation name in notifications. Deferral presets and the release pin
+  conflict-guard each other; all are Draft pending VM verification. The catalogue
+  now ships 47 entries.
 - M3 (apply/verify/revert): the transactional change engine. `OpenTheWindows.Core.Engine.ApplyEngine`
   plans a run (dependency-ordered, flagging conflicts, managed settings, risk
   gating and not-applicable entries), then applies it journal-first — every prior
