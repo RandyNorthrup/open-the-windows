@@ -1,0 +1,405 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "performance.tasks.disable-startup-app-task",
+      "title": "Disable the startup-apps notification task",
+      "description": "Disables the Application Experience StartupAppTask, which scans your startup entries and raises the 'you have too many startup apps' notification.",
+      "rationale": "The task exists only to surface a startup-app toast. Disabling it removes a small logon-time scan and the notification; the startup apps themselves are unaffected.",
+      "category": "Performance",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Application Experience\\StartupAppTask",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "You no longer receive the 'you have too many startup apps' notification."
+      ],
+      "sources": [
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": ["task", "startup", "unverified-ms"]
+    },
+    {
+      "id": "performance.tasks.disable-maps-tasks",
+      "title": "Disable Windows Maps background tasks",
+      "description": "Disables the Windows Maps toast task (MapsToastTask) and the offline-map update task (MapsUpdateTask).",
+      "rationale": "Windows Maps is deprecated; these tasks only show Maps toasts and download offline-map updates in the background. Disabling them stops that periodic download and notification work.",
+      "category": "Performance",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Maps\\MapsToastTask",
+          "enabled": false,
+          "default": true
+        },
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Maps\\MapsUpdateTask",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Offline maps in the Windows Maps app no longer update automatically.",
+        "Windows Maps is a deprecated app."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": ["task", "maps", "unverified-ms"]
+    },
+    {
+      "id": "performance.tasks.disable-xbox-game-save-sync",
+      "title": "Disable the Xbox cloud game-save sync task",
+      "description": "Disables XblGameSaveTask, which syncs Xbox Live cloud saves for supported titles in the background.",
+      "rationale": "On PCs that do not play Xbox Live titles this task is idle background work. Gamers who rely on cloud saves should leave it enabled, so this is a Strict, opt-in change.",
+      "category": "Performance",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\XblGameSave\\XblGameSaveTask",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Xbox Live cloud saves for supported titles stop syncing from this device.",
+        "Gamers who use Xbox cloud saves should keep this task enabled."
+      ],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows",
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": ["task", "gaming", "gamer", "unverified-ms"]
+    },
+    {
+      "id": "performance.tasks.disable-speech-model-download",
+      "title": "Disable the speech-model download task",
+      "description": "Disables SpeechModelDownload, which downloads and updates voice-typing and Narrator speech models in the background.",
+      "rationale": "If you do not use voice typing or Narrator, this task is background download work you can stop. Existing speech models keep working; only automatic updates stop.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Speech\\SpeechModelDownload",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Voice typing and Narrator speech models no longer update automatically."
+      ],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows",
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": ["task", "speech", "unverified-ms"]
+    },
+    {
+      "id": "performance.tasks.disable-recommended-troubleshooting",
+      "title": "Disable the recommended-troubleshooting tasks",
+      "description": "Disables the Diagnosis Scheduled and RecommendedTroubleshootingScanner tasks that scan for and suggest automatic troubleshooters.",
+      "rationale": "These tasks periodically check for recommended troubleshooters. Disabling them stops that background scan; you can still run troubleshooters manually from Settings.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Diagnosis\\Scheduled",
+          "enabled": false,
+          "default": true
+        },
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Diagnosis\\RecommendedTroubleshootingScanner",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Windows no longer scans for or offers automatic 'recommended' troubleshooters. Manual troubleshooters in Settings still work."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": ["task", "diagnostics", "unverified-ms"]
+    },
+    {
+      "id": "performance.tasks.disable-mare-backup",
+      "title": "Disable the Windows Backup app-inventory task",
+      "description": "Disables MareBackup, the Application Experience task that inventories installed Win32 apps for the Windows Backup app-list restore feature.",
+      "rationale": "The task periodically catalogues installed desktop apps so Windows Backup can restore the list on a new PC. If you do not use Windows Backup app restore, this is background disk work you can stop.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Application Experience\\MareBackup",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Windows Backup can no longer restore your list of installed Win32 apps to a new PC."
+      ],
+      "sources": [
+        "https://github.com/ChrisTitusTech/winutil",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": ["task", "backup", "unverified-ms"]
+    },
+    {
+      "id": "performance.tasks.disable-pca-patch-db",
+      "title": "Disable the Program Compatibility Assistant patch-DB task",
+      "description": "Disables PcaPatchDbTask, which updates the Program Compatibility Assistant patch database.",
+      "rationale": "The task only refreshes the compatibility patch database used to apply shims to older apps. Existing shims still apply; disabling it stops the periodic database update.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Application Experience\\PcaPatchDbTask",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The Program Compatibility Assistant patch database stops receiving updates; compatibility fixes already applied continue to work."
+      ],
+      "sources": [
+        "https://github.com/ChrisTitusTech/winutil",
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": ["task", "compatibility", "unverified-ms"]
+    },
+    {
+      "id": "performance.tasks.disable-family-safety",
+      "title": "Disable the Family Safety enforcement tasks",
+      "description": "Disables the Shell FamilySafetyMonitor and FamilySafetyRefreshTask tasks that enforce Microsoft Family (parental control) limits.",
+      "rationale": "On a PC with no child accounts these tasks enforce controls that never apply, so they are safe to disable. If any Microsoft Family child account is configured, leave them enabled: disabling them stops screen-time and content limits.",
+      "category": "Performance",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Shell\\FamilySafetyMonitor",
+          "enabled": false,
+          "default": true
+        },
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Shell\\FamilySafetyRefreshTask",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "If any Microsoft Family (child) accounts are configured on this PC, their screen-time and content limits stop being enforced.",
+        "Only disable when there are no child accounts on this device."
+      ],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": ["task", "family-safety", "unverified-ms"]
+    },
+    {
+      "id": "performance.gaming.enable-hardware-gpu-scheduling",
+      "title": "Enable Hardware-accelerated GPU Scheduling (HAGS)",
+      "description": "Sets HwSchMode to 2 to enable Hardware-accelerated GPU scheduling, letting the GPU manage its own video-memory scheduling.",
+      "rationale": "HAGS can slightly reduce scheduling latency and is required by some features such as DLSS 3 frame generation. Windows already enables it by default on supported GPUs (WDDM 2.7+), so the effect is driver-dependent and marginal; it is exposed as an opt-in Gamer tweak. A reboot is required for the change to take effect.",
+      "category": "Performance",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers",
+          "name": "HwSchMode",
+          "type": "Dword",
+          "value": 2,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The effect depends on your GPU and driver; on unsupported GPUs the setting has no effect.",
+        "Some features such as DLSS 3 frame generation require HAGS to be on.",
+        "The registry mechanism is community-documented and not confirmed against a Microsoft doc."
+      ],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows",
+        "https://support.microsoft.com/en-us/windows/options-to-optimize-gaming-performance-in-windows-11-a255f612-2949-4373-a566-ff6f3f474613"
+      ],
+      "verifiedOn": [],
+      "tags": ["gaming", "gamer", "gpu", "unverified-ms"]
+    },
+    {
+      "id": "performance.gaming.disable-game-bar-controller-popup",
+      "title": "Stop Game Bar opening when a controller connects",
+      "description": "Sets UseNexusForGameBarEnabled to 0 so pressing the Xbox/Nexus button on a controller no longer opens the Xbox Game Bar.",
+      "rationale": "Stops the Game Bar popup that appears when a controller's Xbox button is pressed. The Game Bar can still be opened manually with Win+G.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\GameBar",
+          "name": "UseNexusForGameBarEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The controller's Xbox/Nexus button no longer opens the Game Bar; use Win+G instead."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": ["gaming", "gamer", "game-bar", "unverified-ms"]
+    },
+    {
+      "id": "performance.gaming.disable-game-dvr-policy",
+      "title": "Disable Game DVR for all users (policy)",
+      "description": "Sets the machine-wide AllowGameDVR policy to 0, turning off Windows game recording and broadcasting for every user on the PC.",
+      "rationale": "This is the machine-wide policy counterpart to the per-user Game DVR toggle: it enforces Game DVR off for all accounts, removing the background capture pipeline. Game Bar capture (screenshots and clips) is disabled while the policy is set.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR",
+          "name": "AllowGameDVR",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "ApplicationManagement/AllowGameDVR",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Game Recording and Broadcasting\\Enables or disables Windows Game Recording and Broadcasting"
+      },
+      "sideEffects": [
+        "Game recording and broadcasting is disabled for all users; the Game Bar's capture features are unavailable while the policy is set."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-applicationmanagement",
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": ["gaming", "gamedvr", "policy"]
+    }
+  ]
+}

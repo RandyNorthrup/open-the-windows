@@ -1,0 +1,892 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "performance.visual.transparency-off",
+      "title": "Turn off transparency effects",
+      "description": "Disables Acrylic/Mica window transparency for the interactive user.",
+      "rationale": "Compositing the blurred backdrops costs GPU time; turning it off is a small but real win on integrated graphics, virtual machines and remote sessions. Default is on; the flat surfaces still respect the accent colour.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+          "name": "EnableTransparency",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Acrylic and Mica transparency in the Start menu, taskbar and window backdrops is replaced by solid colour."
+      ],
+      "sources": [
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "visual-effects",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "performance.visual.animations-off",
+      "title": "Turn off window and taskbar animations",
+      "description": "Disables minimise/maximise window animations and taskbar animations for the interactive user.",
+      "rationale": "The animation timelines add latency to every window and taskbar interaction; removing them makes the shell feel instant and saves a little GPU work, most noticeable on low-end hardware, VMs and RDP. Defaults are on.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Control Panel\\Desktop\\WindowMetrics",
+          "name": "MinAnimate",
+          "type": "Sz",
+          "value": "0",
+          "default": "1",
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "TaskbarAnimations",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "SignOut",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Windows and taskbar items snap open/closed with no motion; this mirrors the Settings > Accessibility > Visual effects > Animation effects toggle."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "visual-effects",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "performance.visual.menu-show-delay",
+      "title": "Reduce menu show delay",
+      "description": "Lowers the hover delay before submenus and hover menus appear, for the interactive user.",
+      "rationale": "The stock 400 ms delay makes menus feel sluggish. 200 ms is a responsive compromise that still avoids the twitchy feel some users get at 0. Purely a perceived-responsiveness change.",
+      "category": "Performance",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Control Panel\\Desktop",
+          "name": "MenuShowDelay",
+          "type": "Sz",
+          "value": "200",
+          "default": "400",
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "SignOut",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "visual-effects",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "performance.visual.aero-shake-off",
+      "title": "Turn off Aero Shake (title-bar window shake)",
+      "description": "Disables the gesture that minimises other windows when you shake a title bar, for the interactive user.",
+      "rationale": "Removes an easily triggered accidental gesture. Windows 11 already hides the feature behind a Settings toggle; this makes the off state explicit. No performance cost either way.",
+      "category": "Performance",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "DisallowShaking",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "visual-effects",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "performance.visual.snap-assist-off",
+      "title": "Turn off Snap Assist suggestions and flyouts",
+      "description": "Disables the Snap Assist window suggestions, the snap-layouts flyout and the top-of-screen snap bar, while leaving keyboard/drag snapping working.",
+      "rationale": "Removes the pop-ups that appear when you snap or hover the maximise button. Windows still snaps via drag and Win+arrow. This is a preference/annoyance change; the perceived benefit is real on lower-end hardware.",
+      "category": "Performance",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "SnapAssist",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "EnableSnapAssistFlyout",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "EnableSnapBar",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The 'snap another window' suggestion grid, the maximise-button layout flyout and the drag-to-top snap bar no longer appear."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "visual-effects",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "performance.visual.lock-screen-blur-off",
+      "title": "Turn off the acrylic blur on the sign-in screen",
+      "description": "Applies the policy that shows a clear (unblurred) background on the logon screen.",
+      "rationale": "Skips rendering the acrylic blur when the lock/sign-in screen is drawn, so the background image shows sharply and the screen paints a touch faster. Machine-wide policy value.",
+      "category": "Performance",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "DisableAcrylicBackgroundOnLogon",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Logon\\Show clear logon background"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "visual-effects",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "performance.visual.windows-ink-workspace-off",
+      "title": "Turn off Windows Ink Workspace",
+      "description": "Applies the policy that disables the Windows Ink Workspace / pen menu machine-wide.",
+      "rationale": "On devices without a pen this removes an unused surface and its background wiring. This is an opt-in change for users who never use the pen menu.",
+      "category": "Performance",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\WindowsInkWorkspace",
+          "name": "AllowWindowsInkWorkspace",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "SignOut",
+      "dependsOn": [],
+      "conflictsWith": [
+        "security.logon.restrict-ink-and-voice-above-lock"
+      ],
+      "managedBy": {
+        "policyCsp": "WindowsInkWorkspace/AllowWindowsInkWorkspace",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Ink Workspace\\Allow Windows Ink Workspace"
+      },
+      "sideEffects": [
+        "The pen menu / Windows Ink Workspace is no longer available, including on pen-capable devices."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsinkworkspace"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "visual-effects"
+      ]
+    },
+    {
+      "id": "performance.power.high-performance-plan",
+      "title": "Activate the High performance power plan",
+      "description": "Sets the active power scheme to the built-in High performance plan.",
+      "rationale": "Keeps the processor at a high minimum state and disables core parking and USB selective suspend, trading power for lower latency. The gain on modern desktop CPUs is marginal (they ramp in milliseconds); it is desktop-only because it drains laptop batteries and adds heat.",
+      "category": "Performance",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Command",
+          "executable": "powercfg.exe",
+          "arguments": [
+            "/setactive",
+            "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c"
+          ],
+          "revertArguments": [
+            "/setactive",
+            "381b4222-f694-41f0-9685-ff5bb260df2e"
+          ]
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [
+        "performance.power.ultimate-performance"
+      ],
+      "managedBy": null,
+      "sideEffects": [
+        "Minimum processor state stays at 100%, core parking and USB selective suspend are off, so idle power, heat and fan noise rise.",
+        "On laptops this sharply reduces battery life; on Modern Standby laptops only the Balanced plan exists, so activation may have no effect.",
+        "Revert restores the Balanced plan (381b4222-f694-41f0-9685-ff5bb260df2e)."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/powercfg-command-line-options",
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "power",
+        "gamer"
+      ]
+    },
+    {
+      "id": "performance.power.ultimate-performance",
+      "title": "Add and activate the Ultimate Performance power plan",
+      "description": "Duplicates the built-in Ultimate Performance scheme and sets it active.",
+      "rationale": "Microsoft's Ultimate Performance plan removes fine-grained power-management micro-latencies on top of High performance. The measurable benefit is limited to latency-sensitive workstation workloads; Windows hides this plan on battery-powered systems by design, so it is desktop-only.",
+      "category": "Performance",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Command",
+          "executable": "powercfg.exe",
+          "arguments": [
+            "-duplicatescheme",
+            "e9a42b02-d5df-448d-aa00-03f14749eb61"
+          ],
+          "revertArguments": [
+            "-delete",
+            "e9a42b02-d5df-448d-aa00-03f14749eb61"
+          ]
+        },
+        {
+          "kind": "Command",
+          "executable": "powercfg.exe",
+          "arguments": [
+            "/setactive",
+            "e9a42b02-d5df-448d-aa00-03f14749eb61"
+          ],
+          "revertArguments": [
+            "/setactive",
+            "381b4222-f694-41f0-9685-ff5bb260df2e"
+          ]
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [
+        "performance.power.high-performance-plan"
+      ],
+      "managedBy": null,
+      "sideEffects": [
+        "Same idle-power, heat and fan-noise cost as High performance, plus higher steady-state idle power.",
+        "Microsoft hides this plan on laptops and battery devices; do not use it on portable hardware.",
+        "Revert deletes the added scheme and returns to the Balanced plan (381b4222-f694-41f0-9685-ff5bb260df2e)."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/powercfg-command-line-options",
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "power",
+        "gamer"
+      ]
+    },
+    {
+      "id": "performance.power.fast-startup-off",
+      "title": "Turn off Fast Startup (hiberboot)",
+      "description": "Sets HiberbootEnabled to 0 so shutdown performs a full kernel shutdown instead of a hybrid hibernate.",
+      "rationale": "Fast Startup keeps a hibernated kernel session across shutdowns, which causes NTFS volume-locking in dual-boot setups and leaves some drivers, network adapters and Wake-on-LAN in odd states. Disabling it makes every shutdown fully reset the kernel at the cost of a few extra seconds on a cold boot.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power",
+          "name": "HiberbootEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Cold boot is a few seconds slower on SSD; hibernate and hybrid sleep are unaffected."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "power",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "performance.power.hibernate-reduced",
+      "title": "Shrink the hibernation file (reduced type)",
+      "description": "Switches the hibernation file to the reduced type, roughly 40% of RAM instead of about 75%.",
+      "rationale": "The reduced hiberfile keeps Fast Startup working while reclaiming several gigabytes of disk. It removes the separate Hibernate menu option (which reduced mode cannot support). Intended for desktops; laptops should keep full hibernation for critical-battery protection.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Command",
+          "executable": "powercfg.exe",
+          "arguments": [
+            "/hibernate",
+            "/type",
+            "reduced"
+          ],
+          "revertArguments": [
+            "/hibernate",
+            "/type",
+            "full"
+          ]
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [
+        "performance.power.hibernate-off"
+      ],
+      "managedBy": null,
+      "sideEffects": [
+        "The Hibernate entry is removed from the power menu; Fast Startup still works.",
+        "On laptops this disables the ability to hibernate on critical battery."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/powercfg-command-line-options"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "power"
+      ]
+    },
+    {
+      "id": "performance.power.hibernate-off",
+      "title": "Turn hibernation off and reclaim hiberfil.sys",
+      "description": "Disables hibernation entirely, freeing the hiberfil.sys file (roughly 40-75% of RAM in disk).",
+      "rationale": "Turning hibernation off reclaims the largest single system file on many machines. It also disables Fast Startup and removes hibernate/hybrid sleep, so it is desktop-only; never use it on laptops, which rely on critical-battery hibernate.",
+      "category": "Performance",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Command",
+          "executable": "powercfg.exe",
+          "arguments": [
+            "/hibernate",
+            "off"
+          ],
+          "revertArguments": [
+            "/hibernate",
+            "on"
+          ]
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [
+        "performance.power.hibernate-reduced"
+      ],
+      "managedBy": null,
+      "sideEffects": [
+        "Hibernate, hybrid sleep and Fast Startup all stop working.",
+        "On laptops the 'critical battery -> hibernate' safeguard is lost, so do not apply on portable hardware."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/powercfg-command-line-options"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "power"
+      ]
+    },
+    {
+      "id": "performance.power.usb-selective-suspend-off",
+      "title": "Disable USB selective suspend on AC",
+      "description": "Sets the USB selective suspend power setting to disabled while plugged in, and leaves it enabled on battery.",
+      "rationale": "USB selective suspend can cause flaky USB audio interfaces, mice and hubs to drop out or fail to wake. Disabling it on AC fixes those issues at the cost of slightly higher idle power; battery keeps the power-saving behaviour.",
+      "category": "Performance",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "PowerSetting",
+          "subgroupGuid": "2a737441-1930-4402-8d77-b2bebba308a3",
+          "settingGuid": "48e6b7a6-50f5-4782-a5d4-53bb50f7e73c",
+          "acValue": 0,
+          "dcValue": 1
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Idle power draw rises slightly while plugged in; battery behaviour is unchanged (selective suspend stays on)."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/powercfg-command-line-options"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "power",
+        "usb"
+      ]
+    },
+    {
+      "id": "performance.power.pcie-lspm-off",
+      "title": "Disable PCI Express link-state power management on AC",
+      "description": "Sets PCI Express Link State Power Management to Off while plugged in, keeping maximum power savings on battery.",
+      "rationale": "ASPM can introduce stutter on some NVMe drives and GPUs. Turning it off on AC can smooth that out at the cost of higher idle power; battery keeps maximum power savings so laptops are not penalised.",
+      "category": "Performance",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "PowerSetting",
+          "subgroupGuid": "501a4d13-42af-4429-9fd1-a8218c268e20",
+          "settingGuid": "ee12f906-d277-404b-b6da-e5fa1a576df5",
+          "acValue": 0,
+          "dcValue": 2
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Idle power draw rises while plugged in; battery keeps maximum PCIe power savings."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/powercfg-command-line-options"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "power"
+      ]
+    },
+    {
+      "id": "performance.power.modern-standby-network-off",
+      "title": "Disable network connectivity during Modern Standby",
+      "description": "Applies the power policy that turns off network connectivity in connected standby, on both AC and battery, for S0ix (Modern Standby) laptops.",
+      "rationale": "Modern Standby keeps the radio and background sync alive during sleep, warming the device in a bag and draining battery. Setting connectivity off gives a measurably cooler, longer standby at the cost of no background mail/sync/notifications while asleep.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Power\\PowerSettings\\f15576e8-98b7-4186-b944-eafa664402d9",
+          "name": "ACSettingIndex",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Power\\PowerSettings\\f15576e8-98b7-4186-b944-eafa664402d9",
+          "name": "DCSettingIndex",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Power Management\\Sleep Settings\\Allow network connectivity during connected-standby"
+      },
+      "sideEffects": [
+        "No background sync, mail or notifications arrive while the device is in Modern Standby; they resume on wake. Only affects S0ix-capable hardware."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "power",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "performance.storage.enable-long-paths",
+      "title": "Enable Win32 long paths",
+      "description": "Sets LongPathsEnabled to 1 so applications that opt in can use paths longer than 260 characters.",
+      "rationale": "Removes the legacy MAX_PATH limit for manifest-aware apps (git, build tools, developer utilities), avoiding 'path too long' failures on deep trees. Only apps that opt in benefit and File Explorer stays limited, so this is a developer-oriented capability toggle with no downside.",
+      "category": "Performance",
+      "level": "Strict",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SYSTEM\\CurrentControlSet\\Control\\FileSystem",
+          "name": "LongPathsEnabled",
+          "type": "Dword",
+          "value": 1,
+          "default": 0,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "SignOut",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Filesystem\\Enable Win32 long paths"
+      },
+      "sideEffects": [
+        "Only applications whose manifest opts in gain long-path support; File Explorer and non-opted apps remain limited. Already-running processes pick it up after a restart."
+      ],
+      "sources": [
+        "https://github.com/ChrisTitusTech/winutil",
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "storage",
+        "developer",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "performance.storage.classic-search-indexing",
+      "title": "Use Classic Windows Search indexing scope",
+      "description": "Sets EnableFindMyFiles to 0 so Windows Search uses the default Classic scope instead of Enhanced whole-drive indexing.",
+      "rationale": "Enhanced ('Find my files') mode indexes entire drives, generating extra background CPU and disk IO. Classic mode indexes only the default locations and is the shipping default; enforcing it removes that indexing load on machines where Enhanced was turned on. The search service itself is left running.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows Search\\Gather\\Windows\\SystemIndex",
+          "name": "EnableFindMyFiles",
+          "type": "Dword",
+          "value": 0,
+          "default": 0,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Search/AllowFindMyFiles",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Whole-drive content search (Enhanced mode) is off; searching still covers the Start menu and indexed library locations."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-search"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "storage",
+        "search"
+      ]
+    },
+    {
+      "id": "performance.storage.disable-8dot3-creation",
+      "title": "Disable 8.3 short-name creation",
+      "description": "Runs fsutil to stop creating 8.3 (short) file names on new files and folders.",
+      "rationale": "Skipping short-name generation slightly speeds up creating files in very large directories. Existing short names are left intact. This is a developer-oriented change because a few legacy or 16-bit installers and scripts still depend on 8.3 paths.",
+      "category": "Performance",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Command",
+          "executable": "fsutil.exe",
+          "arguments": [
+            "behavior",
+            "set",
+            "disable8dot3",
+            "1"
+          ],
+          "revertArguments": [
+            "behavior",
+            "set",
+            "disable8dot3",
+            "2"
+          ]
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Some legacy or 16-bit installers and scripts that rely on 8.3 short paths (certain MSIs) can fail.",
+        "Existing 8.3 names are not removed; revert restores the default per-volume policy (value 2)."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/fsutil-behavior"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "storage",
+        "developer",
+        "filesystem"
+      ]
+    }
+  ]
+}

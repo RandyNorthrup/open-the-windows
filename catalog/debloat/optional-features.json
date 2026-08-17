@@ -1,0 +1,662 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "debloat.features.disable-recall",
+      "title": "Disable Windows Recall",
+      "description": "Disables the Recall optional feature so Windows stops taking and indexing periodic snapshots of the screen.",
+      "rationale": "Recall continuously captures and indexes on-screen snapshots. Disabling the optional feature removes those bits and stops snapshotting. Present on Copilot+ PCs on 24H2+, and off by default on managed devices.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 26100,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "OptionalFeature",
+          "name": "Recall",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Only applies to Copilot+ PCs on 24H2 or later, where Recall is present.",
+        "Disabling the feature removes Recall; for a policy-level block (Paranoid) also set AllowRecallEnablement=0 via the privacy catalogue."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai",
+        "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "debloat",
+        "optional-feature",
+        "recall",
+        "ai",
+        "privacy"
+      ]
+    },
+    {
+      "id": "debloat.features.remove-powershell-v2",
+      "title": "Remove the Windows PowerShell 2.0 engine",
+      "description": "Disables the Windows PowerShell 2.0 engine optional feature (root feature and engine sub-feature).",
+      "rationale": "The PowerShell 2.0 engine is a well-known downgrade-attack surface: it bypasses modern logging and AMSI. Disabling it is a hardening win. Removed from 24H2 and disabled by default on recent clean installs.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "OptionalFeature",
+          "name": "MicrosoftWindowsPowerShellV2Root",
+          "enabled": false,
+          "default": false
+        },
+        {
+          "kind": "OptionalFeature",
+          "name": "MicrosoftWindowsPowerShellV2",
+          "enabled": false,
+          "default": false
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Scripts or tools that explicitly request the PowerShell 2.0 engine (-Version 2) stop working; almost nothing modern uses it.",
+        "Already removed on 24H2 and disabled by default on recent clean installs."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/whats-new/removed-features",
+        "https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "debloat",
+        "optional-feature",
+        "powershell",
+        "security",
+        "hardening"
+      ]
+    },
+    {
+      "id": "debloat.features.remove-wmic",
+      "title": "Remove the WMIC command-line tool",
+      "description": "Removes the WMIC (Windows Management Instrumentation command-line) capability.",
+      "rationale": "WMIC is a deprecated, frequently abused living-off-the-land binary. Removing the capability shrinks attack surface. Not preinstalled on 24H2; present on 22H2/23H2.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "OptionalFeature",
+          "name": "WMIC~~~~",
+          "enabled": false,
+          "default": false
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Old scripts, installers or management tools that shell out to wmic.exe stop working; use PowerShell CIM cmdlets instead.",
+        "Not preinstalled on 24H2; present on 22H2/23H2."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod",
+        "https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "debloat",
+        "optional-feature",
+        "wmic",
+        "security",
+        "hardening"
+      ]
+    },
+    {
+      "id": "debloat.features.remove-vbscript",
+      "title": "Remove the VBScript engine",
+      "description": "Removes the VBScript scripting engine capability.",
+      "rationale": "The VBScript engine is a common malware and legacy-macro vector that Microsoft is deprecating. Removing it hardens the system but breaks legacy .vbs workflows. Preinstalled and on by default on 24H2.",
+      "category": "Debloat",
+      "level": "Paranoid",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 26100,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "OptionalFeature",
+          "name": "VBSCRIPT~~~~",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Removing breaks legacy .vbs scripts, some installers, older Office bridges and some OEM tools.",
+        "Preinstalled and on by default on 24H2; Microsoft has scheduled it to become disabled by default."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features",
+        "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "debloat",
+        "optional-feature",
+        "vbscript",
+        "security",
+        "hardening"
+      ]
+    },
+    {
+      "id": "debloat.features.remove-wordpad",
+      "title": "Remove WordPad",
+      "description": "Removes the WordPad rich-text editor capability.",
+      "rationale": "WordPad is a rarely used, now-removed rich-text editor. Present as a Feature on Demand on 22H2/23H2; removed entirely in 24H2.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "OptionalFeature",
+          "name": "Microsoft.Windows.WordPad~~~~",
+          "enabled": false,
+          "default": false
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Rich-text (.rtf) editing via WordPad is no longer available; use another editor.",
+        "Already removed from Windows 11 24H2, so on that build this is a no-op."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/whats-new/removed-features"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "debloat",
+        "optional-feature",
+        "wordpad"
+      ]
+    },
+    {
+      "id": "debloat.features.remove-steps-recorder",
+      "title": "Remove Steps Recorder",
+      "description": "Removes the Steps Recorder capability.",
+      "rationale": "Steps Recorder is a deprecated support tool most users never open. Safe to remove; may still be present on current builds.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "OptionalFeature",
+          "name": "App.StepsRecorder~~~~0.0.1.0",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Steps Recorder (psr.exe) is unavailable for capturing repro steps; it is deprecated by Microsoft."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features",
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "debloat",
+        "optional-feature",
+        "steps-recorder"
+      ]
+    },
+    {
+      "id": "debloat.features.remove-internet-explorer",
+      "title": "Remove Internet Explorer 11",
+      "description": "Removes the Internet Explorer 11 capability (the legacy IE engine used by Edge IE mode).",
+      "rationale": "The Internet Explorer 11 capability provides the legacy IE engine used by Edge IE mode. Removing it hardens and declutters the system but breaks IE mode and some legacy apps, so it is opt-in at Strict.",
+      "category": "Debloat",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "OptionalFeature",
+          "name": "Browser.InternetExplorer~~~~0.0.11.0",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Removing the Internet Explorer 11 capability breaks Edge's IE mode and some legacy line-of-business apps that depend on the IE engine.",
+        "Microsoft lists IE11 under preinstalled capabilities that should normally be kept."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod",
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "debloat",
+        "optional-feature",
+        "internet-explorer"
+      ]
+    },
+    {
+      "id": "debloat.features.remove-media-player-legacy",
+      "title": "Remove legacy Windows Media Player",
+      "description": "Removes the legacy Windows Media Player capability and its optional-feature counterpart.",
+      "rationale": "The legacy Windows Media Player is superseded by the modern Media Player app. Removing it declutters the system; preinstalled by default.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "OptionalFeature",
+          "name": "Media.WindowsMediaPlayer~~~~0.0.12.0",
+          "enabled": false,
+          "default": true
+        },
+        {
+          "kind": "OptionalFeature",
+          "name": "WindowsMediaPlayer",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Removing the legacy Windows Media Player also removes the Multimedia settings from advanced Power Options.",
+        "The modern Media Player app is unaffected."
+      ],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows",
+        "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "debloat",
+        "optional-feature",
+        "media-player",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "debloat.features.remove-math-recognizer",
+      "title": "Remove the Math Recognizer",
+      "description": "Removes the Math Recognizer (pen math input) capability.",
+      "rationale": "The math input recognizer is only used for pen-based math entry. Removing it saves a small amount of space with no impact for most users. Preinstalled by default.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "OptionalFeature",
+          "name": "MathRecognizer~~~~0.0.1.0",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The pen-based Math Input Panel / math recognition stops working; nothing else is affected."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "debloat",
+        "optional-feature",
+        "math-recognizer"
+      ]
+    },
+    {
+      "id": "debloat.features.remove-fax-scan",
+      "title": "Remove Windows Fax and Scan",
+      "description": "Removes the Windows Fax and Scan capability.",
+      "rationale": "Windows Fax and Scan is a legacy tool most users never use. Not preinstalled after 22H2, so on current builds this simply ensures it is absent.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "OptionalFeature",
+          "name": "Print.Fax.Scan~~~~0.0.1.0",
+          "enabled": false,
+          "default": false
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Windows Fax and Scan is unavailable; scanning apps that rely on it stop working.",
+        "Not preinstalled after 22H2, so on current builds this is usually a no-op."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "debloat",
+        "optional-feature",
+        "fax",
+        "scan"
+      ]
+    },
+    {
+      "id": "debloat.features.remove-xps-viewer",
+      "title": "Remove the XPS Viewer",
+      "description": "Removes the XPS Viewer capability.",
+      "rationale": "The XPS Viewer opens the little-used .xps document format. Not preinstalled on current builds; this ensures it is absent.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "OptionalFeature",
+          "name": "XPS.Viewer~~~~0.0.1.0",
+          "enabled": false,
+          "default": false
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The XPS Viewer application is unavailable for opening .xps/.oxps files.",
+        "Not preinstalled on current builds, so this is usually a no-op."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "debloat",
+        "optional-feature",
+        "xps"
+      ]
+    },
+    {
+      "id": "debloat.features.remove-xps-services",
+      "title": "Remove Microsoft XPS Document Writer (XPS Services)",
+      "description": "Disables the Microsoft XPS Document Writer / XPS Services optional feature.",
+      "rationale": "The XPS Document Writer prints to the little-used .xps format. Disabling the feature removes that virtual printer. Enabled by default.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "OptionalFeature",
+          "name": "Printing-XPSServices-Features",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The Microsoft XPS Document Writer virtual printer is removed; apps that print to .xps/.oxps lose that target."
+      ],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows",
+        "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "debloat",
+        "optional-feature",
+        "xps",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "debloat.features.remove-powershell-ise",
+      "title": "Remove PowerShell ISE",
+      "description": "Removes the Windows PowerShell ISE capability.",
+      "rationale": "PowerShell ISE is a deprecated script editor superseded by VS Code. Removing it declutters the system; it is opt-in at Strict because some developers still use it. Preinstalled by default.",
+      "category": "Debloat",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "OptionalFeature",
+          "name": "Microsoft.Windows.PowerShell.ISE~~~~0.0.1.0",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Removes the PowerShell ISE script editor; developers who use it should skip this and use VS Code or the PowerShell extension instead.",
+        "ISE is deprecated by Microsoft but still preinstalled."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features",
+        "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "debloat",
+        "optional-feature",
+        "powershell",
+        "ise"
+      ]
+    },
+    {
+      "id": "debloat.features.remove-work-folders-client",
+      "title": "Remove the Work Folders client",
+      "description": "Disables the Work Folders client optional feature, used to sync files from an on-premises corporate file server.",
+      "rationale": "Work Folders is an enterprise file-sync client that most home and small-business users never use; disabling it removes the capability and its background components. Reversible by re-enabling the feature.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "OptionalFeature",
+          "name": "WorkFolders-Client",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Machines that sync files from a corporate Work Folders server lose that sync until the feature is re-enabled."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "debloat",
+        "optional-feature"
+      ]
+    },
+    {
+      "id": "debloat.features.disable-internet-printing-client",
+      "title": "Disable the Internet Printing (IPP) client",
+      "description": "Disables the Internet Printing Client optional feature, which prints to printers over HTTP/IPP.",
+      "rationale": "Internet Printing over HTTP is rarely used on home networks and adds attack surface; disabling it removes the capability. Reversible by re-enabling the feature.",
+      "category": "Debloat",
+      "level": "Paranoid",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "OptionalFeature",
+          "name": "Printing-Foundation-InternetPrinting-Client",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Printing to IPP / Internet printers (including some network printers that only speak IPP) stops working until the feature is re-enabled."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "debloat",
+        "optional-feature",
+        "printing"
+      ]
+    }
+  ]
+}

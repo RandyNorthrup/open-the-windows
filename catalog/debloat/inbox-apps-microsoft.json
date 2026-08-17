@@ -1,0 +1,1407 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "debloat.apps.remove-cortana",
+      "title": "Remove Cortana",
+      "description": "Removes the deprecated Cortana app for all users and deprovisions it.",
+      "rationale": "Cortana was deprecated in June 2023 and is no longer provisioned on Windows 11 24H2+; it only lingers on upgraded 22H2/23H2 images and has no remaining system role.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.549981C3F5F10_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Cortana is deprecated and no longer distributed; there is no supported reinstall path (it exists only on older upgraded images)."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "No functional loss - Cortana's search integration was already removed from Windows.",
+        "Not re-provisioned after removal (absent on clean 24H2+ images)."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "cortana", "deprecated"]
+    },
+    {
+      "id": "debloat.apps.remove-bing-news",
+      "title": "Remove Microsoft News (MSN)",
+      "description": "Removes the Microsoft News / MSN Start news app for all users and deprovisions it.",
+      "rationale": "The MSN news app is an ad-supported content app with no system dependency; the Widgets feed uses a different component and is unaffected.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.BingNews_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Microsoft News\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The Widgets news feed uses the Web Experience pack, not this app, and keeps working.",
+        "May be re-provisioned by a feature update, and the Store may re-offer it."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "news"]
+    },
+    {
+      "id": "debloat.apps.remove-bing-weather",
+      "title": "Remove MSN Weather",
+      "description": "Removes the MSN Weather app for all users and deprovisions it.",
+      "rationale": "MSN Weather is a standalone content app with no system dependency; the Widgets weather tile is independent.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.BingWeather_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"MSN Weather\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The Widgets weather tile is independent and keeps working.",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "weather"]
+    },
+    {
+      "id": "debloat.apps.remove-bing-search",
+      "title": "Remove Bing web-search app",
+      "description": "Removes the Bing web-results app that backs web answers in Windows Search (24H2+).",
+      "rationale": "This app only adds Bing web results to Start/Windows Search; removing it does not remove Windows Search itself. Remove only if you do not want web results in Start.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": 26100, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.BingSearch_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store; a feature update also restores it."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Removes Bing web results from Start / Windows Search; Windows Search itself is unaffected.",
+        "Many users want web results in Start search - remove only if you do not.",
+        "In the EEA this is the officially uninstallable \"Web Search from Microsoft Bing\".",
+        "May be re-provisioned by a feature update or re-offered by the Store."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "search"]
+    },
+    {
+      "id": "debloat.apps.remove-copilot",
+      "title": "Remove Microsoft Copilot app",
+      "description": "Removes the consumer Microsoft Copilot Store app for all users and deprovisions it.",
+      "rationale": "The consumer Copilot app is an optional assistant; after removal the Copilot hardware key falls back to Search (or whatever SetCopilotHardwareKey specifies).",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.Copilot_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Microsoft Store: ms-windows-store://pdp/?productid=9NHT9RB2F4HD"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The Copilot hardware key falls back to Search (or whatever SetCopilotHardwareKey specifies).",
+        "Re-offered by Windows Update/Store and re-pinned after feature updates; the consumer Copilot app is not permanently removable without a policy or AppLocker rule."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "copilot", "ai"]
+    },
+    {
+      "id": "debloat.apps.remove-microsoft-365-copilot",
+      "title": "Remove Microsoft 365 Copilot (Office Hub)",
+      "description": "Removes the Microsoft 365 Copilot app (formerly the Microsoft 365 / Office hub) for all users and deprovisions it.",
+      "rationale": "This is a launcher/hub for Microsoft 365; removing it does not affect installed Office desktop apps.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Microsoft Store: ms-windows-store://pdp/?productid=9WZDNCRD29V9"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "On Entra/work accounts this is the Copilot-key default target; removing it makes the key fall back.",
+        "Re-offered by Windows Update/Store and auto-installed for Microsoft 365 desktop users."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "office", "copilot"]
+    },
+    {
+      "id": "debloat.apps.remove-outlook-new",
+      "title": "Remove new Outlook for Windows",
+      "description": "Removes the new Outlook for Windows app for all users and deprovisions it.",
+      "rationale": "The new Outlook is an optional mail client. Note that legacy Mail and Calendar reached end of life on 31 Dec 2024, so removing new Outlook can leave no built-in mail client.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.OutlookForWindows_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Outlook for Windows\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Legacy Mail and Calendar reached end of life on 31 Dec 2024, so removing new Outlook can leave no built-in mail client.",
+        "On 24H2+ the deprovisioning sticks; on 23H2 (pre-March 2024) and Windows 10 it can be re-offered via the UScheduler_Oobe updater."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/microsoft-365-apps/outlook/get-started/control-install",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "outlook", "mail"]
+    },
+    {
+      "id": "debloat.apps.remove-mail-calendar-people",
+      "title": "Remove legacy Mail and Calendar",
+      "description": "Removes the legacy Mail, Calendar and People (windowscommunicationsapps) bundle for all users and deprovisions it.",
+      "rationale": "The legacy Mail/Calendar apps reached end of life and only remain on upgraded machines; the new Outlook replaces them.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.windowscommunicationsapps_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Legacy Mail and Calendar are end of life and no longer distributed; use the new Outlook for Windows instead."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Legacy Mail, Calendar and People are end of life and only present on upgraded machines.",
+        "Removed from the Windows image in late 2024 and not re-provisioned."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/microsoft-365-apps/outlook/get-started/control-install",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "mail", "calendar"]
+    },
+    {
+      "id": "debloat.apps.remove-people",
+      "title": "Remove People app",
+      "description": "Removes the standalone People app for all users and deprovisions it.",
+      "rationale": "The People app was only a dependency of the legacy Mail/Calendar apps and has no remaining role.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.People_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store if still listed; the People app is legacy."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Was only a dependency of the legacy Mail/Calendar apps.",
+        "Not re-provisioned after removal."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "people"]
+    },
+    {
+      "id": "debloat.apps.remove-teams",
+      "title": "Remove Microsoft Teams (new)",
+      "description": "Removes the new Microsoft Teams app (free/work) for all users and deprovisions it.",
+      "rationale": "The bundled Teams app is optional; removing it clears the taskbar Chat/Teams entry and nothing else depends on it.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "MSTeams_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Microsoft Teams\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Removes the taskbar Chat/Teams entry; nothing else depends on it.",
+        "Re-provisioned by feature updates on consumer SKUs and re-offered by Windows Update."
+      ],
+      "sources": [
+        "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "teams"]
+    },
+    {
+      "id": "debloat.apps.remove-teams-personal",
+      "title": "Remove Teams personal (legacy Chat)",
+      "description": "Removes the legacy personal Teams / Chat app (22H2/23H2) for all users and deprovisions it.",
+      "rationale": "The old personal Teams/Chat app is superseded by the new Teams and has no dependencies.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "MicrosoftTeams_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall the current Teams from the Microsoft Store; the legacy personal Teams is no longer distributed."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Legacy personal Teams/Chat (22H2/23H2); nothing depends on it.",
+        "Not re-provisioned after removal."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "teams"]
+    },
+    {
+      "id": "debloat.apps.remove-sticky-notes",
+      "title": "Remove Sticky Notes",
+      "description": "Removes the Microsoft Sticky Notes app for all users and deprovisions it.",
+      "rationale": "Sticky Notes is an optional notes app; notes synced to your Microsoft account remain available online.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Microsoft Sticky Notes\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Local, unsynced notes are lost; notes synced to your Microsoft account remain.",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "notes"]
+    },
+    {
+      "id": "debloat.apps.remove-to-do",
+      "title": "Remove Microsoft To Do",
+      "description": "Removes the Microsoft To Do app for all users and deprovisions it.",
+      "rationale": "To Do is an optional task app with no system dependency; task data stays in your Microsoft account.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.Todos_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Microsoft To Do\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "No dependencies; To Do data stays in your Microsoft account.",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "todo"]
+    },
+    {
+      "id": "debloat.apps.remove-get-help",
+      "title": "Remove Get Help",
+      "description": "Removes the Get Help app for all users and deprovisions it.",
+      "rationale": "Get Help is used by Windows troubleshooters and support links; remove it only if you do not use them.",
+      "category": "Debloat",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.GetHelp_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Get Help\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Settings > System > Troubleshoot troubleshooters launch Get Help; Windows Update and Activation \"Get help\" links stop working.",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "help"]
+    },
+    {
+      "id": "debloat.apps.remove-tips",
+      "title": "Remove Tips",
+      "description": "Removes the deprecated Tips (Get Started) app for all users and deprovisions it.",
+      "rationale": "Tips was deprecated in November 2023 and cannot be uninstalled from Settings, but PowerShell/Appx removal works; only some \"learn more\" links use it.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.Getstarted_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store if still listed; the Tips app is deprecated."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Some \"learn more\" / tips links stop working.",
+        "Deprecated Nov 2023; may be re-provisioned by a feature update until removed from the image."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "tips", "deprecated"]
+    },
+    {
+      "id": "debloat.apps.remove-power-automate",
+      "title": "Remove Power Automate",
+      "description": "Removes the Power Automate desktop app for all users and deprovisions it.",
+      "rationale": "Power Automate is an optional automation app preinstalled on many images; it has no system dependency.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.PowerAutomateDesktop_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Power Automate\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "No dependencies.",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "automation"]
+    },
+    {
+      "id": "debloat.apps.remove-maps",
+      "title": "Remove Windows Maps",
+      "description": "Removes the Windows Maps app for all users and deprovisions it.",
+      "rationale": "Maps was deprecated in April 2025 and removed from the Store in July 2025; only rare offline-maps consumers depend on it.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.WindowsMaps_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Windows Maps was removed from the Microsoft Store in July 2025; there is no supported reinstall path."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Rarely, other apps' offline-maps features rely on it.",
+        "Deprecated Apr 2025 and removed from the Store Jul 2025; not re-provisioned."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "maps", "deprecated"]
+    },
+    {
+      "id": "debloat.apps.remove-clock",
+      "title": "Remove Windows Clock",
+      "description": "Removes the Windows Clock app (alarms, timers, focus sessions) for all users and deprovisions it.",
+      "rationale": "The Clock app is optional; the only integration is the Focus sessions entry in Settings/notification centre.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.WindowsAlarms_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Windows Clock\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The Focus sessions entry in Settings / notification centre uses this app.",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "clock"]
+    },
+    {
+      "id": "debloat.apps.remove-camera",
+      "title": "Remove Windows Camera",
+      "description": "Removes the Windows Camera app for all users and deprovisions it.",
+      "rationale": "Windows Hello enrolment does not need the Camera app, but several webcam features and OOBE checks do; remove only if you do not use them.",
+      "category": "Debloat",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.WindowsCamera_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Windows Camera\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Windows Hello enrolment does not need it, but Snipping Tool webcam/recording, Teams \"test camera\" links and the OOBE camera check use it; some Copilot+ Studio Effects entry points too.",
+        "In the EEA this is the officially uninstallable Camera app.",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "camera"]
+    },
+    {
+      "id": "debloat.apps.remove-calculator",
+      "title": "Remove Windows Calculator",
+      "description": "Removes the Windows Calculator app for all users and deprovisions it.",
+      "rationale": "Calculator has no functional dependencies, but most users expect it to be present - hence a cautious, opt-in removal.",
+      "category": "Debloat",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.WindowsCalculator_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Windows Calculator\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "No functional dependencies, but most users expect Calculator to be present.",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "calculator"]
+    },
+    {
+      "id": "debloat.apps.remove-notepad",
+      "title": "Remove Notepad (Store)",
+      "description": "Removes the Store version of Notepad for all users and deprovisions it.",
+      "rationale": "Notepad is the default .txt handler and the notepad.exe alias points to it; remove only if you use another editor. To keep Notepad but drop its AI features, use the DisableAIFeatures policy instead.",
+      "category": "Debloat",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.WindowsNotepad_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Windows Notepad\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Default .txt handler; the notepad.exe alias points to it (the classic Notepad is a separate Feature-on-Demand, Microsoft.Windows.Notepad.System).",
+        "To keep Notepad but disable its AI features, set HKLM\\SOFTWARE\\Policies\\WindowsNotepad\\DisableAIFeatures=1 instead of removing it.",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "notepad"]
+    },
+    {
+      "id": "debloat.apps.remove-paint",
+      "title": "Remove Paint",
+      "description": "Removes the Paint app for all users and deprovisions it.",
+      "rationale": "Paint is the default image editor and the mspaint.exe alias points to it; remove only if you use another editor. To keep Paint but drop its AI features, use the Paint policy keys instead.",
+      "category": "Debloat",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.Paint_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Paint\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Default image editor; the mspaint.exe alias points to it.",
+        "To keep Paint but disable its AI (Cocreator/Generative Fill/Image Creator/Generative Erase/Remove Background), set those Disable* values under HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Paint instead.",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "paint"]
+    },
+    {
+      "id": "debloat.apps.remove-snipping-tool",
+      "title": "Remove Snipping Tool",
+      "description": "Removes the Snipping Tool app for all users and deprovisions it.",
+      "rationale": "Snipping Tool backs the screenshot and screen-recording shortcuts; remove only if you use another tool.",
+      "category": "Debloat",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.ScreenSketch_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Snipping Tool\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Breaks PrtScn-to-Snipping-Tool, Win+Shift+S screenshots and built-in screen recording.",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "snipping-tool"]
+    },
+    {
+      "id": "debloat.apps.remove-sound-recorder",
+      "title": "Remove Sound Recorder",
+      "description": "Removes the Windows Sound Recorder app for all users and deprovisions it.",
+      "rationale": "Sound Recorder is an optional recording app with no system dependency.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.WindowsSoundRecorder_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Windows Sound Recorder\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "No dependencies.",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "sound-recorder"]
+    },
+    {
+      "id": "debloat.apps.remove-photos",
+      "title": "Remove Microsoft Photos",
+      "description": "Removes the Microsoft Photos app for all users and deprovisions it.",
+      "rationale": "Photos is the default image viewer for JPG/PNG/HEIC and more; Microsoft explicitly recommends against removing it. Install an alternative viewer first.",
+      "category": "Debloat",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.Windows.Photos_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Microsoft Photos\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Default image viewer for JPG/PNG/HEIC and more; Microsoft explicitly recommends against removing it - install an alternative viewer first (legacy Windows Photo Viewer is not registered on Windows 11).",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "photos"]
+    },
+    {
+      "id": "debloat.apps.remove-media-player",
+      "title": "Remove Windows Media Player",
+      "description": "Removes the Windows Media Player (Zune Music) app for all users and deprovisions it.",
+      "rationale": "Media Player is the default music and video handler, especially after Films & TV is removed; remove only if you use another player.",
+      "category": "Debloat",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.ZuneMusic_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Windows Media Player\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Default music and video handler (especially after Films & TV is removed).",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "media-player"]
+    },
+    {
+      "id": "debloat.apps.remove-movies-tv",
+      "title": "Remove Films & TV",
+      "description": "Removes the Films & TV (Movies & TV / Zune Video) app for all users and deprovisions it.",
+      "rationale": "Films & TV has been dropped from new images and superseded by Media Player; video playback falls back to Media Player.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.ZuneVideo_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store (Media Player supersedes Films & TV)."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Video playback default falls back to Media Player.",
+        "Dropped from new images (2024/25) and not re-provisioned; Media Player supersedes it."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "media-player"]
+    },
+    {
+      "id": "debloat.apps.remove-xbox-tcui",
+      "title": "Remove Xbox Title Callable UI",
+      "description": "Removes the Xbox Title Callable UI (TCUI) app for all users and deprovisions it.",
+      "rationale": "TCUI provides Xbox Live sign-in flows and Store game-purchase dialogs and is reported to be needed by the Store, Photos and some games; remove only as part of a full Xbox opt-out.",
+      "category": "Debloat",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.Xbox.TCUI_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store; a feature update also restores it."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Reported to be needed by the Microsoft Store, Photos and some games; provides Xbox Live sign-in flows and Store game-purchase dialogs.",
+        "Best removed together with the other Xbox components, and only if you do not use any Xbox/Game Pass features.",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "xbox", "gaming"]
+    },
+    {
+      "id": "debloat.apps.remove-game-bar",
+      "title": "Remove Xbox Game Bar",
+      "description": "Removes the Xbox Game Bar (Xbox Gaming Overlay) app for all users and deprovisions it.",
+      "rationale": "Game Bar backs Win+G, Game DVR capture and the controller bar; prefer disabling Game DVR over removal because removing it without neutralising the ms-gamebar: protocol produces popups.",
+      "category": "Debloat",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.XboxGamingOverlay_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Xbox Game Bar\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Removes Win+G Game Bar, Game DVR capture and the controller bar; some games call the overlay.",
+        "Removing it without neutralising the ms-gamebar: protocol produces \"ms-gamebar\" popups - prefer disabling Game DVR over removal.",
+        "May be re-provisioned by a feature update or the Store."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "xbox", "gaming", "game-bar"]
+    },
+    {
+      "id": "debloat.apps.remove-game-bar-plugin",
+      "title": "Remove Xbox Game Bar plugin (legacy)",
+      "description": "Removes the legacy Xbox Game Bar plugin (Xbox Game Overlay) for all users and deprovisions it.",
+      "rationale": "The legacy Game Bar plugin is superseded by the Game Bar app and shares the same overlay/DVR dependencies.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.XboxGameOverlay_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store; a feature update also restores it."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Legacy Game Bar plugin; same overlay/DVR dependencies as the Game Bar app.",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "xbox", "gaming", "game-bar"]
+    },
+    {
+      "id": "debloat.apps.remove-xbox-identity-provider",
+      "title": "Remove Xbox Identity Provider",
+      "description": "Removes the Xbox Identity Provider app for all users and deprovisions it.",
+      "rationale": "The Xbox Identity Provider handles Xbox Live sign-in; removing it breaks a wide range of games and Store game purchases, so it is an opt-out only for non-gamers.",
+      "category": "Debloat",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.XboxIdentityProvider_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store; a feature update also restores it."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Breaks Game Pass, the Xbox app, Minecraft, Forza, any Xbox Live-enabled game and Store game purchases.",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "xbox", "gaming"]
+    },
+    {
+      "id": "debloat.apps.remove-xbox-app",
+      "title": "Remove Xbox app",
+      "description": "Removes the Xbox app (Game Pass client) for all users and deprovisions it.",
+      "rationale": "The Xbox app is the Game Pass PC client; removing it stops Game Pass installs but is otherwise optional.",
+      "category": "Debloat",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.GamingApp_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Xbox\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Game Pass PC game installs go through the Xbox app and Gaming Services.",
+        "May be re-provisioned by a feature update or reinstalled from the Store."
+      ],
+      "sources": [
+        "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "xbox", "gaming"]
+    },
+    {
+      "id": "debloat.apps.remove-gaming-services",
+      "title": "Remove Gaming Services",
+      "description": "Removes the Gaming Services package for all users and deprovisions it.",
+      "rationale": "Gaming Services underpins Game Pass installs and the Xbox app; the Store reinstalls it on demand when an Xbox feature next needs it.",
+      "category": "Debloat",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.GamingServices_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "The Store reinstalls Gaming Services on demand the next time an Xbox feature needs it."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Required for Game Pass installs and the Xbox app.",
+        "The Store reinstalls it on demand the next time an Xbox feature needs it."
+      ],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "xbox", "gaming"]
+    },
+    {
+      "id": "debloat.apps.remove-phone-link",
+      "title": "Remove Phone Link",
+      "description": "Removes the Phone Link (Your Phone) app for all users and deprovisions it.",
+      "rationale": "Phone Link provides cross-device features (phone photos, mobile-device panel); it is safe to remove but opt-in because it loses those integrations.",
+      "category": "Debloat",
+      "level": "Strict",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.YourPhone_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Phone Link\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Removes cross-device features: phone photos in Snipping Tool/File Explorer and the Start \"mobile device\" panel (the Cross Device Experience Host also participates).",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "phone-link"]
+    },
+    {
+      "id": "debloat.apps.remove-mixed-reality-portal",
+      "title": "Remove Mixed Reality Portal",
+      "description": "Removes the Mixed Reality Portal app for all users and deprovisions it.",
+      "rationale": "Windows Mixed Reality has been removed from Windows, so the portal is dead weight on current builds.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.MixedReality.Portal_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Windows Mixed Reality was removed in 24H2; there is no supported reinstall path."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Only used by Windows Mixed Reality headsets, a feature that has itself been removed.",
+        "Removed in 24H2 and not re-provisioned."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/whats-new/removed-features",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "mixed-reality", "deprecated"]
+    },
+    {
+      "id": "debloat.apps.remove-quick-assist",
+      "title": "Remove Quick Assist",
+      "description": "Removes the Quick Assist remote-help app for all users and deprovisions it.",
+      "rationale": "Quick Assist is used for remote help with family and helpdesk; many admins remove it for tech-support-scam prevention. Reinstall is via the Store (the old Feature-on-Demand no longer exists on Windows 11).",
+      "category": "Debloat",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "MicrosoftCorporationII.QuickAssist_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Quick Assist\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Removes Quick Assist remote help (used with family and helpdesk); the older App.Support.QuickAssist Feature-on-Demand no longer exists on Windows 11, so reinstall is via the Store.",
+        "Some admins remove it deliberately for tech-support-scam prevention.",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/",
+        "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "quick-assist"]
+    },
+    {
+      "id": "debloat.apps.remove-remote-desktop",
+      "title": "Remove Remote Desktop (Store)",
+      "description": "Removes the Store Remote Desktop client for all users and deprovisions it.",
+      "rationale": "The Store Remote Desktop client only matters if you use AVD/Windows 365/RDS; it is being replaced by the new Windows App.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.RemoteDesktop_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Remote Desktop\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Only matters if you use Azure Virtual Desktop, Windows 365 or RDS; it is being replaced by the new \"Windows App\".",
+        "Reinstallable from the Store."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "remote-desktop"]
+    },
+    {
+      "id": "debloat.apps.remove-family-safety",
+      "title": "Remove Microsoft Family Safety",
+      "description": "Removes the Microsoft Family Safety app for all users and deprovisions it.",
+      "rationale": "Family Safety manages child-account controls; keep it on devices with child accounts, otherwise it is optional.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "MicrosoftCorporationII.MicrosoftFamily_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Microsoft Family Safety\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Removes Microsoft Family Safety features - keep on devices with child accounts.",
+        "May be re-provisioned by a feature update."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "family-safety"]
+    },
+    {
+      "id": "debloat.apps.remove-journal",
+      "title": "Remove Microsoft Journal",
+      "description": "Removes the Microsoft Journal (pen) app for all users and deprovisions it.",
+      "rationale": "Journal is an optional pen/note app with no system dependency.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.MicrosoftJournal_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Microsoft Journal\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "No dependencies.",
+        "Reinstallable from the Store (ships via OEM/Store)."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "journal"]
+    },
+    {
+      "id": "debloat.apps.remove-whiteboard",
+      "title": "Remove Microsoft Whiteboard",
+      "description": "Removes the Microsoft Whiteboard app for all users and deprovisions it.",
+      "rationale": "Whiteboard is an optional collaboration app with no system dependency.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.Whiteboard_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Reinstall from the Microsoft Store, or `winget install --source msstore \"Microsoft Whiteboard\"`."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "No dependencies.",
+        "Reinstallable from the Store (ships via OEM/Store)."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "whiteboard"]
+    },
+    {
+      "id": "debloat.apps.remove-dev-home",
+      "title": "Remove Dev Home",
+      "description": "Removes the Dev Home app for all users and deprovisions it.",
+      "rationale": "Dev Home's retirement was announced and it was removed from the Store in 2025; its Dev Drive/WSL settings pages moved into Settings.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.Windows.DevHome_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Dev Home was removed from the Microsoft Store in 2025; there is no supported reinstall path."
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Dev Drive and WSL settings pages have moved into Settings, so little is lost.",
+        "Retirement announced and removed from the Store in 2025; not re-provisioned."
+      ],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows",
+        "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "debloat", "dev-home", "deprecated"]
+    }
+  ]
+}

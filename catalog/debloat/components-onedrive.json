@@ -1,0 +1,97 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "debloat.apps.prevent-device-metadata-reinstall",
+      "title": "Block silent re-install of OEM companion apps via device metadata",
+      "description": "Applies the Prevent Device Metadata From Network policy so Windows stops fetching device metadata that can silently re-install OEM companion apps (for example an LG monitor, Alienware, or Razer utility) after a hardware scan or update.",
+      "rationale": "Removing an OEM stub is pointless if Windows re-installs it from device metadata on the next hardware scan. Device metadata retrieval is deprecated as of May 2025, so blocking it has little functional downside.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Device Metadata",
+          "name": "PreventDeviceMetadataFromNetwork",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Some devices may show a generic name or icon in Devices and Printers because rich device metadata is no longer downloaded."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://github.com/ChrisTitusTech/winutil",
+        "https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "debloat",
+        "oem"
+      ]
+    },
+    {
+      "id": "debloat.components.disable-teams-chat-autoinstall",
+      "title": "Stop auto-install of consumer Teams (Chat)",
+      "description": "Sets ConfigureChatAutoInstall to 0 so Windows does not automatically install the consumer Teams/Chat app.",
+      "rationale": "Prevents the Chat app from returning after it is removed. The value name is used widely by community debloat tools but is not documented by Microsoft, so it is marked unverified.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Communications",
+          "name": "ConfigureChatAutoInstall",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The value name is documented by community debloat tools (winutil, Raphire) and is not part of official Microsoft documentation."
+      ],
+      "sources": [
+        "https://github.com/ChrisTitusTech/winutil",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "debloat",
+        "teams",
+        "unverified-ms"
+      ]
+    }
+  ]
+}

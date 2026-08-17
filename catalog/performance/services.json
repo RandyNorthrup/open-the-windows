@@ -1,0 +1,789 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "performance.services.disable-alljoyn-router",
+      "title": "Disable the AllJoyn Router service",
+      "description": "Sets the AllJoyn Router (AJRouter) service to Disabled and stops it. AllJoyn was an IoT device-interoperability transport.",
+      "rationale": "AllJoyn was retired and the service was removed in Windows 11 24H2; on earlier builds nothing on a normal desktop uses it. It is trigger-started, so this only ensures it can never start.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "AJRouter", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "AllJoyn IoT device discovery and control (rare) stops working.",
+        "The service is removed entirely on Windows 11 24H2, where this is a harmless no-op."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/whats-new/removed-features"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "debloat"]
+    },
+    {
+      "id": "performance.services.disable-activex-installer",
+      "title": "Disable the ActiveX Installer service",
+      "description": "Sets the ActiveX Installer (AxInstSV) service to Disabled and stops it. It handles installation of ActiveX controls for legacy Internet Explorer.",
+      "rationale": "ActiveX is an Internet Explorer feature that modern browsers do not use; Microsoft lists this service as safe to disable.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "AxInstSV", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Legacy sites that install ActiveX controls through Internet Explorer or IE mode can no longer do so."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "debloat"]
+    },
+    {
+      "id": "performance.services.disable-fax",
+      "title": "Disable the Fax service",
+      "description": "Sets the Fax service to Disabled and stops it.",
+      "rationale": "The Fax service is only used by the Windows Fax and Scan app and is not present on recent clean installs; disabling it reclaims a background service on machines with no fax modem.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "Fax", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Sending and receiving faxes through Windows Fax and Scan stops working."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "debloat"]
+    },
+    {
+      "id": "performance.services.disable-mobile-hotspot",
+      "title": "Disable the Windows Mobile Hotspot service",
+      "description": "Sets the Windows Mobile Hotspot (icssvc) service to Disabled and stops it.",
+      "rationale": "The service backs the Mobile Hotspot feature and is trigger-started; disabling it prevents sharing this PC's connection over Wi-Fi for users who never use that feature.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "icssvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The Mobile Hotspot feature (sharing this PC's internet connection over Wi-Fi) can no longer be turned on."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "network"]
+    },
+    {
+      "id": "performance.services.disable-geolocation",
+      "title": "Disable the Geolocation service",
+      "description": "Sets the Geolocation service (lfsvc) to Disabled and stops it, so Windows and apps can no longer determine this device's location.",
+      "rationale": "Removes the system-wide location provider (GPS, Wi-Fi and IP based). This is a privacy control; because it also breaks several convenience features it is a Strict-tier opt-in. The per-app location consent toggle is a lighter alternative.",
+      "category": "Performance",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "lfsvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Location stops working for all apps, Maps, weather-widget location and Find My Device.",
+        "Automatic time-zone (Set time zone automatically) can no longer update, because it depends on this service.",
+        "Wi-Fi-based location is unavailable."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server",
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "privacy"]
+    },
+    {
+      "id": "performance.services.disable-downloaded-maps-manager",
+      "title": "Disable the Downloaded Maps Manager service",
+      "description": "Sets the Downloaded Maps Manager (MapsBroker) service to Disabled and stops it.",
+      "rationale": "The service only maintains offline maps for the deprecated Maps app; Microsoft lists it as safe to disable. It starts automatically (delayed), so disabling it removes one delayed-autostart service.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "MapsBroker", "startType": "Disabled", "default": "AutomaticDelayed", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Offline maps in the (deprecated) Windows Maps app no longer download or update."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server",
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "debloat"]
+    },
+    {
+      "id": "performance.services.disable-network-device-auto-setup",
+      "title": "Disable Network Connected Devices Auto-Setup",
+      "description": "Sets the Network Connected Devices Auto-Setup (NcdAutoSetup) service to Disabled and stops it.",
+      "rationale": "The service automatically discovers and sets up networked devices such as printers and smart TVs it finds on the LAN; disabling it stops that automatic reach-out, a small privacy win. Devices can still be added manually.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "NcdAutoSetup", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Network devices (printers, media receivers, TVs) are no longer set up automatically when discovered; add them manually instead."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "privacy"]
+    },
+    {
+      "id": "performance.services.disable-program-compatibility-assistant",
+      "title": "Disable the Program Compatibility Assistant service",
+      "description": "Sets the Program Compatibility Assistant (PcaSvc) service to Disabled and stops it.",
+      "rationale": "PCA shows 'this app might not have installed correctly' prompts, auto-applies compatibility modes and reports application-install data to Windows telemetry; Microsoft lists it as safe to disable. It starts automatically (delayed).",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "PcaSvc", "startType": "Disabled", "default": "AutomaticDelayed", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Compatibility-assistant prompts and automatic compatibility-mode application no longer appear.",
+        "Application-install signals are no longer sent to Windows telemetry."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "telemetry"]
+    },
+    {
+      "id": "performance.services.disable-phone-service",
+      "title": "Disable the Phone Service",
+      "description": "Sets the Phone Service (PhoneSvc) to Disabled and stops it.",
+      "rationale": "The service backs telephony state for Phone Link calling and some VoIP dialer integration. Disabling it is a Strict-tier opt-in for users who do not use PC calling.",
+      "category": "Performance",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "PhoneSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Phone Link calling and VoIP apps that rely on the dialer integration (for example Teams calling) may stop working."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "debloat"]
+    },
+    {
+      "id": "performance.services.disable-push-to-install",
+      "title": "Disable the Windows PushToInstall service",
+      "description": "Sets the Windows PushToInstall (PushToInstall) service to Disabled and stops it.",
+      "rationale": "The service lets the Microsoft Store push a remote install to this device from a web page ('install to my devices'); disabling it removes that remote-install channel.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "PushToInstall", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Installing a Store app remotely from microsoft.com to this device no longer works; install from the Store on the device instead."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "privacy"]
+    },
+    {
+      "id": "performance.services.disable-remote-registry",
+      "title": "Keep the Remote Registry service disabled",
+      "description": "Ensures the Remote Registry (RemoteRegistry) service is set to Disabled and stopped, so the registry cannot be edited from another computer over the network.",
+      "rationale": "Remote Registry lets remote users modify this machine's registry and is a well-known attack surface. It ships Disabled; this control re-asserts that state if something enabled it.",
+      "category": "Performance",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "RemoteRegistry", "startType": "Disabled", "default": "Disabled", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Remote registry administration of this PC from another computer is not possible (it is not by default)."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "security"]
+    },
+    {
+      "id": "performance.services.disable-retail-demo",
+      "title": "Disable the Retail Demo service",
+      "description": "Sets the Retail Demo (RetailDemo) service to Disabled and stops it.",
+      "rationale": "Retail Demo mode is only used on store display units; it is never needed on a personal machine.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "RetailDemo", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Retail demo mode cannot be activated (it is a store-display feature)."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "debloat"]
+    },
+    {
+      "id": "performance.services.disable-nfc-payments",
+      "title": "Disable the Payments and NFC/SE Manager service",
+      "description": "Sets the Payments and NFC/SE Manager (SEMgrSvc) service to Disabled and stops it.",
+      "rationale": "The service manages NFC tap-to-pay and secure-element payments; on desktops and laptops without NFC hardware it never does anything.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "SEMgrSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "NFC tap-to-pay and secure-element payment features stop working on devices that have NFC hardware."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "debloat"]
+    },
+    {
+      "id": "performance.services.disable-recommended-troubleshooting",
+      "title": "Disable the Recommended Troubleshooting service",
+      "description": "Sets the Recommended Troubleshooting (TroubleshootingSvc) service to Disabled and stops it.",
+      "rationale": "The service runs the automatic ('recommended') troubleshooters that Microsoft pushes to the device; disabling it stops Windows from downloading and applying those automatically.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "TroubleshootingSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Windows no longer automatically downloads and applies recommended troubleshooters."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "privacy"]
+    },
+    {
+      "id": "performance.services.disable-wallet-service",
+      "title": "Disable the Wallet service",
+      "description": "Sets the WalletService to Disabled and stops it.",
+      "rationale": "The Wallet feature is defunct on Windows 11; Microsoft lists the service as safe to disable.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "WalletService", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The (defunct) Wallet feature is unavailable."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "debloat"]
+    },
+    {
+      "id": "performance.services.disable-webclient-webdav",
+      "title": "Disable the WebClient (WebDAV) service",
+      "description": "Sets the WebClient (WebDAV) service to Disabled and stops it, removing the Windows WebDAV redirector.",
+      "rationale": "WebDAV was deprecated in November 2023 and the redirector is a known credential-leak vector (NTLM leak to remote WebDAV shares). Disabling it is a recommended hardening step for machines that do not open WebDAV or SharePoint UNC paths.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "WebClient", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The \\\\server@SSL\\ WebDAV UNC path form and SharePoint 'Open with Explorer' no longer work."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "security"]
+    },
+    {
+      "id": "performance.services.disable-windows-insider",
+      "title": "Disable the Windows Insider service",
+      "description": "Sets the Windows Insider (wisvc) service to Disabled and stops it.",
+      "rationale": "The service only supports the Windows Insider Program (preview-build flighting); it is unused on production machines.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "wisvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Enrolling this device in the Windows Insider Program and receiving Insider preview flights no longer works until re-enabled."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "debloat"]
+    },
+    {
+      "id": "performance.services.disable-wmp-network-sharing",
+      "title": "Disable Windows Media Player Network Sharing",
+      "description": "Sets the Windows Media Player Network Sharing (WMPNetworkSvc) service to Disabled and stops it.",
+      "rationale": "The service only streams a Windows Media Player library to other DLNA devices; it is present only when Windows Media Player is installed and is unused on most machines.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "WMPNetworkSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Streaming a Windows Media Player library to other devices over the network (DLNA) stops working."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "debloat"]
+    },
+    {
+      "id": "performance.services.disable-parental-controls",
+      "title": "Disable the Parental Controls service",
+      "description": "Sets the Parental Controls (WpcMonSvc) service to Disabled and stops it.",
+      "rationale": "The service backs Microsoft Family Safety monitoring; on machines with no child accounts it never does anything.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "WpcMonSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Microsoft Family Safety parental-control monitoring and enforcement stop working for child accounts on this PC."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "debloat"]
+    },
+    {
+      "id": "performance.services.disable-ai-fabric",
+      "title": "Disable the Windows AI Fabric service",
+      "description": "Sets the Windows AI Fabric (WSAIFabricSvc) service to Disabled and stops it. The service hosts the on-device AI models used by Copilot+ features.",
+      "rationale": "On Copilot+ PCs this service runs on-device inference for Recall, Click to Do and related AI features. Disabling it (Strict) removes that on-device AI processing; on hardware without Copilot+ the service is absent and this is a no-op.",
+      "category": "Performance",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": 26100, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "WSAIFabricSvc", "startType": "Disabled", "default": "Automatic", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Recall, Click to Do and other on-device Copilot+ AI features stop working.",
+        "Only present on Copilot+ PCs running 24H2 or later; a no-op elsewhere."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "privacy", "unverified-ms"]
+    },
+    {
+      "id": "performance.services.disable-mixed-reality",
+      "title": "Disable the Windows Mixed Reality services",
+      "description": "Sets the Windows Mixed Reality services (SharedRealitySvc, MixedRealityOpenXRSvc, spectrum, perceptionsimulation) and the VacSvc volumetric audio compositor to Disabled and stops them.",
+      "rationale": "Windows Mixed Reality was removed in Windows 11 24H2; on earlier builds these services only run with a WMR headset. Disabling them reclaims several background services on machines that never use WMR.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "SharedRealitySvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
+        { "kind": "Service", "name": "MixedRealityOpenXRSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
+        { "kind": "Service", "name": "spectrum", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
+        { "kind": "Service", "name": "perceptionsimulation", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
+        { "kind": "Service", "name": "VacSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Windows Mixed Reality headsets and the OpenXR-via-WMR runtime stop working.",
+        "These services are removed in Windows 11 24H2, where the change is a harmless no-op."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/whats-new/removed-features"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "debloat"]
+    },
+    {
+      "id": "performance.services.disable-peer-networking-pnrp",
+      "title": "Disable the Peer Networking (PNRP) services",
+      "description": "Sets the Peer Name Resolution Protocol and peer-networking services (p2pimsvc, p2psvc, PNRPsvc, PNRPAutoReg) to Disabled and stops them.",
+      "rationale": "The PNRP peer-networking APIs were removed in Windows 11 24H2 and were only ever used by HomeGroup and a few legacy peer applications.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "p2pimsvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
+        { "kind": "Service", "name": "p2psvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
+        { "kind": "Service", "name": "PNRPsvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
+        { "kind": "Service", "name": "PNRPAutoReg", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Legacy peer-to-peer applications and PNRP name resolution stop working.",
+        "PNRP is removed in Windows 11 24H2, where the change is a harmless no-op."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/whats-new/removed-features"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "debloat"]
+    },
+    {
+      "id": "performance.services.disable-sensor-services",
+      "title": "Disable the sensor services",
+      "description": "Sets the sensor services (SensorService, SensorDataService, SensrSvc) to Disabled and stops them.",
+      "rationale": "On a desktop with no orientation, ambient-light or location sensors these services do nothing useful; disabling them is a Strict-tier option. On laptops, tablets and 2-in-1s they drive real features and this should not be applied there.",
+      "category": "Performance",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "SensorService", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
+        { "kind": "Service", "name": "SensorDataService", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
+        { "kind": "Service", "name": "SensrSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Automatic screen rotation, adaptive (ambient-light) brightness, sensor-based location and some Windows Hello sensor paths stop working.",
+        "Recommended only for desktops without sensors."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "privacy"]
+    },
+    {
+      "id": "performance.services.disable-ssdp-upnp",
+      "title": "Disable SSDP Discovery and UPnP Device Host",
+      "description": "Sets the SSDP Discovery (SSDPSRV) and UPnP Device Host (upnphost) services to Disabled and stops them.",
+      "rationale": "SSDP/UPnP discovery is used to find and cast to networked media devices; Microsoft lists it as safe to disable. It is a Strict-tier option because it removes device-casting discovery.",
+      "category": "Performance",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "SSDPSRV", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
+        { "kind": "Service", "name": "upnphost", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "DLNA and cast-to-device discovery, some smart-TV and networked-printer discovery, and Xbox console streaming stop working."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "network"]
+    },
+    {
+      "id": "performance.services.disable-xbox-services",
+      "title": "Disable the Xbox Live services",
+      "description": "Sets the Xbox Live services (XblAuthManager, XblGameSave, XboxNetApiSvc, XboxGipSvc) to Disabled and stops them.",
+      "rationale": "These services back Xbox app sign-in, cloud game saves, Xbox networking and controller/accessory management. Disabling them (Strict) suits users who do not use Xbox or Game Pass; gamers should keep them.",
+      "category": "Performance",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Service", "name": "XblAuthManager", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
+        { "kind": "Service", "name": "XblGameSave", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
+        { "kind": "Service", "name": "XboxNetApiSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true },
+        { "kind": "Service", "name": "XboxGipSvc", "startType": "Disabled", "default": "Manual", "stopIfRunning": true }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The Xbox app, Game Pass, cloud saves for Xbox Live titles and Xbox controller firmware / accessory management stop working."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "gaming"]
+    },
+    {
+      "id": "performance.services.disable-messaging",
+      "title": "Disable the Messaging (SMS) user service",
+      "description": "Sets the per-user Messaging service (MessagingService) start type to Disabled via its service template key, so it does not start for any user after sign-in.",
+      "rationale": "The service only provides SMS text messaging through Phone Link; on machines that do not use Phone Link SMS it is unused. Because it is a per-user (template) service, this is written to the template key and takes effect at next sign-in.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\MessagingService", "name": "Start", "type": "Dword", "value": 4, "default": 3, "valueKind": "Preference" }
+      ],
+      "requires": "SignOut",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "SMS text messaging through Phone Link stops working.",
+        "Takes effect at next sign-in because it is a per-user service."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "debloat"]
+    },
+    {
+      "id": "performance.services.disable-contact-data-indexing",
+      "title": "Disable the Contact Data indexing user service",
+      "description": "Sets the per-user Contact Data service (PimIndexMaintenanceSvc) start type to Disabled via its service template key.",
+      "rationale": "The service indexes contact data for the People and Mail experiences, which are removed on current Windows 11; it is unused on those builds. As a per-user (template) service it is written to the template key and applies at next sign-in.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\PimIndexMaintenanceSvc", "name": "Start", "type": "Dword", "value": 4, "default": 3, "valueKind": "Preference" }
+      ],
+      "requires": "SignOut",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Contact indexing for People and Mail-style experiences stops.",
+        "Takes effect at next sign-in because it is a per-user service."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "debloat"]
+    },
+    {
+      "id": "performance.services.disable-user-data-storage",
+      "title": "Disable the User Data Storage and Access user services",
+      "description": "Sets the per-user User Data Storage (UnistoreSvc) and User Data Access (UserDataSvc) services to Disabled via their service template keys.",
+      "rationale": "These services store and broker Mail, People and Calendar data for the built-in apps that have been removed from current Windows 11; Microsoft lists them as safe to disable. As per-user (template) services they are written to the template keys and apply at next sign-in.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\UnistoreSvc", "name": "Start", "type": "Dword", "value": 4, "default": 3, "valueKind": "Preference" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\UserDataSvc", "name": "Start", "type": "Dword", "value": 4, "default": 3, "valueKind": "Preference" }
+      ],
+      "requires": "SignOut",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Apps that read Mail, People or Calendar data through these services lose access to it.",
+        "Takes effect at next sign-in because these are per-user services."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+      ],
+      "verifiedOn": [],
+      "tags": ["service", "debloat"]
+    }
+  ]
+}

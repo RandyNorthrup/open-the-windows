@@ -1,0 +1,1227 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "shell.taskbar.left-alignment",
+      "title": "Align the taskbar to the left",
+      "description": "Moves the Start button and taskbar icons to the left edge instead of the centre.",
+      "rationale": "Restores the pre-Windows 11 muscle memory of a fixed bottom-left Start button; purely cosmetic and instantly reversible.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "TaskbarAl",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "taskbar",
+        "layout"
+      ]
+    },
+    {
+      "id": "shell.taskbar.disable-chat-button",
+      "title": "Hide the Chat (Microsoft Teams) taskbar button",
+      "description": "Removes the consumer Teams Chat button from the taskbar on Windows 11 22H2.",
+      "rationale": "Frees taskbar space for users who do not use consumer Teams; the toggle only applies to 22H2, as the button was removed outright in 23H2 (KB5031455+).",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "TaskbarMn",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Has no effect on 23H2 and later, where the Chat button was already removed from the taskbar."
+      ],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "taskbar",
+        "teams",
+        "chat"
+      ]
+    },
+    {
+      "id": "shell.taskbar.search-box-mode",
+      "title": "Shrink the taskbar search box to an icon",
+      "description": "Replaces the wide taskbar search box with a single search icon (mode 1). The value also supports 0 hidden, 2 box and 3 icon with label.",
+      "rationale": "Reclaims a large amount of taskbar width while keeping search one click away; a per-user preference with no functional loss.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Search",
+          "name": "SearchboxTaskbarMode",
+          "type": "Dword",
+          "value": 1,
+          "default": 2,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Search/ConfigureSearchOnTaskbarMode",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-search",
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "taskbar",
+        "search"
+      ]
+    },
+    {
+      "id": "shell.taskbar.disable-task-view-button",
+      "title": "Hide the Task View taskbar button",
+      "description": "Removes the Task View (virtual desktops / timeline) button from the taskbar.",
+      "rationale": "Task View is still reachable with Win+Tab; hiding the button declutters the taskbar for users who never click it.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "ShowTaskViewButton",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Start/HideTaskViewButton",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-start"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "taskbar",
+        "task-view"
+      ]
+    },
+    {
+      "id": "shell.taskbar.never-combine-buttons",
+      "title": "Never combine taskbar buttons (show labels)",
+      "description": "Sets the primary taskbar to never combine buttons of the same app and to show window labels.",
+      "rationale": "Labelled, uncombined buttons make it faster to pick a specific window; the 'never combine' option returned to the taskbar in 23H2.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22631,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "TaskbarGlomLevel",
+          "type": "Dword",
+          "value": 2,
+          "default": 0,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "taskbar",
+        "buttons"
+      ]
+    },
+    {
+      "id": "shell.taskbar.never-combine-buttons-secondary",
+      "title": "Never combine taskbar buttons on other monitors",
+      "description": "Sets the taskbars on secondary monitors to never combine buttons and to show window labels.",
+      "rationale": "Applies the same uncombined, labelled layout to additional monitors, which have an independent setting from the primary taskbar.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22631,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "MMTaskbarGlomLevel",
+          "type": "Dword",
+          "value": 2,
+          "default": 0,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Only relevant on multi-monitor setups."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "taskbar",
+        "buttons",
+        "multi-monitor"
+      ]
+    },
+    {
+      "id": "shell.taskbar.enable-end-task",
+      "title": "Add End task to the taskbar right-click menu",
+      "description": "Enables the developer option that adds an 'End task' command to a running app's taskbar context menu.",
+      "rationale": "Lets you force-kill a hung app straight from the taskbar without opening Task Manager; off by default under developer settings.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22631,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\\TaskbarDeveloperSettings",
+          "name": "TaskbarEndTask",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "taskbar",
+        "end-task",
+        "developer"
+      ]
+    },
+    {
+      "id": "shell.taskbar.last-active-click",
+      "title": "Taskbar click shows the last active window",
+      "description": "Makes a click on a combined taskbar button switch straight to the last active window of that app instead of showing thumbnails.",
+      "rationale": "Restores the classic single-click behaviour that many long-time users prefer; absent by default.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "LastActiveClick",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "taskbar",
+        "buttons"
+      ]
+    },
+    {
+      "id": "shell.taskbar.show-seconds-in-clock",
+      "title": "Show seconds in the taskbar clock",
+      "description": "Adds seconds to the system-tray clock.",
+      "rationale": "Useful when timing things at a glance; off by default because Microsoft notes it costs a little extra CPU and battery. A personal preference, not applied unless chosen.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "ShowSecondsInSystemClock",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Slightly higher CPU and battery use, as Windows warns in Settings."
+      ],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "taskbar",
+        "clock"
+      ]
+    },
+    {
+      "id": "shell.start.more-pins-layout",
+      "title": "Start menu 'More pins' layout",
+      "description": "Switches the Start menu to the layout that shows an extra row of pins and a smaller recommended area.",
+      "rationale": "Gives more room to pinned apps for people who pin heavily; a per-user layout preference, absent (default layout) by default.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "Start_Layout",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "start",
+        "layout"
+      ]
+    },
+    {
+      "id": "shell.start.disable-phone-link-panel",
+      "title": "Hide the Phone Link panel in Start",
+      "description": "Turns off the mobile-device companion panel that Phone Link adds to the Start menu.",
+      "rationale": "Removes an unused side panel for people who do not link a phone; leaves the Phone Link app itself installed.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22631,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Start\\Companions\\Microsoft.YourPhone_8wekyb3d8bbwe",
+          "name": "IsEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "start",
+        "phone-link"
+      ]
+    },
+    {
+      "id": "shell.start.disable-recently-added",
+      "title": "Hide recently added apps in Start",
+      "description": "Removes newly installed apps from the Start menu's recommendations.",
+      "rationale": "Keeps freshly installed apps from being highlighted in Start; a per-user preference.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Start",
+          "name": "ShowRecentList",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "start",
+        "recommendations"
+      ]
+    },
+    {
+      "id": "shell.start.disable-most-used",
+      "title": "Hide the most-used apps list in Start",
+      "description": "Removes the frequently used apps entries from the Start menu's recommendations.",
+      "rationale": "Prevents the Start menu from surfacing your most-used apps; a per-user preference.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Start",
+          "name": "ShowFrequentList",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "start",
+        "recommendations"
+      ]
+    },
+    {
+      "id": "shell.explorer.show-hidden-files",
+      "title": "Show hidden files and folders",
+      "description": "Makes File Explorer display items marked hidden. Protected operating-system files stay hidden.",
+      "rationale": "Lets you see dot-folders and app data that are hidden by default; does not reveal protected OS files, so it stays comparatively safe.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "Hidden",
+          "type": "Dword",
+          "value": 1,
+          "default": 2,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "explorer",
+        "hidden-files"
+      ]
+    },
+    {
+      "id": "shell.explorer.launch-to-this-pc",
+      "title": "Open File Explorer to This PC",
+      "description": "Makes new File Explorer windows open on This PC instead of the Home / Quick Access page.",
+      "rationale": "Lands you on your drives and folders rather than a recommendations page; a long-standing user preference.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "LaunchTo",
+          "type": "Dword",
+          "value": 1,
+          "default": 2,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "explorer",
+        "navigation"
+      ]
+    },
+    {
+      "id": "shell.explorer.enable-compact-mode",
+      "title": "Use compact spacing in File Explorer",
+      "description": "Enables compact view so list rows sit closer together, as in Windows 10.",
+      "rationale": "Fits more items on screen for users who dislike the roomier Windows 11 spacing; off by default and purely a preference.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "UseCompactMode",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "explorer",
+        "compact"
+      ]
+    },
+    {
+      "id": "shell.explorer.disable-item-checkboxes",
+      "title": "Turn off item check boxes in File Explorer",
+      "description": "Disables the hover check boxes File Explorer can show for selecting items.",
+      "rationale": "Restores plain click selection for users who find the check boxes distracting; they are not shown by default.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "AutoCheckSelect",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "explorer",
+        "selection"
+      ]
+    },
+    {
+      "id": "shell.explorer.disable-recent-files",
+      "title": "Hide recent files in Quick Access and Home",
+      "description": "Stops File Explorer's Home and Quick Access from listing recently used files.",
+      "rationale": "Keeps a history of your recent documents off screen on shared or presented machines.",
+      "category": "Shell",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer",
+          "name": "ShowRecent",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The Explorer Home page becomes sparser."
+      ],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "explorer",
+        "quick-access",
+        "privacy"
+      ]
+    },
+    {
+      "id": "shell.explorer.disable-frequent-folders",
+      "title": "Hide frequent folders in Quick Access and Home",
+      "description": "Stops File Explorer's Home and Quick Access from listing frequently used folders.",
+      "rationale": "Prevents your commonly used folders from being advertised in Explorer, a small privacy and clutter improvement.",
+      "category": "Shell",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer",
+          "name": "ShowFrequent",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The Explorer Home page becomes sparser."
+      ],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "explorer",
+        "quick-access",
+        "privacy"
+      ]
+    },
+    {
+      "id": "shell.explorer.disable-cloud-files-quick-access",
+      "title": "Hide Office and OneDrive files in Explorer Home",
+      "description": "Stops File Explorer's Home from showing recommended Office and OneDrive cloud files.",
+      "rationale": "Removes cloud-file recommendations that pull from your Microsoft account, a privacy and clutter win.",
+      "category": "Shell",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer",
+          "name": "ShowCloudFilesInQuickAccess",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "explorer",
+        "quick-access",
+        "onedrive",
+        "privacy"
+      ]
+    },
+    {
+      "id": "shell.explorer.hide-gallery-nav-pane",
+      "title": "Hide Gallery from the Explorer navigation pane",
+      "description": "Removes the Gallery entry from the left-hand navigation pane in File Explorer.",
+      "rationale": "Declutters the navigation pane for users who do not use the photo Gallery view. Editing a shell CLSID pin can be undone by feature updates, hence a small caution.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Classes\\CLSID\\{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}",
+          "name": "System.IsPinnedToNameSpaceTree",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "A feature update may restore the entry."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "explorer",
+        "nav-pane",
+        "gallery"
+      ]
+    },
+    {
+      "id": "shell.explorer.hide-onedrive-nav-pane",
+      "title": "Hide OneDrive from the Explorer navigation pane",
+      "description": "Removes the personal OneDrive entry from the left-hand navigation pane in File Explorer.",
+      "rationale": "Declutters the navigation pane without uninstalling OneDrive. Editing a shell CLSID pin can be undone by feature updates, hence a small caution.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Classes\\CLSID\\{018D5C66-4533-4307-9B53-224DE2ED1FE6}",
+          "name": "System.IsPinnedToNameSpaceTree",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Only hides the navigation-pane entry; OneDrive stays installed and syncing.",
+        "A feature update may restore the entry."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "explorer",
+        "nav-pane",
+        "onedrive"
+      ]
+    },
+    {
+      "id": "shell.explorer.hide-3d-objects-nav-pane",
+      "title": "Hide 3D Objects from the Explorer navigation pane",
+      "description": "Removes the legacy 3D Objects folder from the File Explorer navigation pane.",
+      "rationale": "Removes an obsolete folder that most users never open. Editing a shell CLSID pin can be undone by feature updates, hence a small caution.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Classes\\CLSID\\{0DB7E03F-FC29-4DC6-9020-FF41B59E513A}",
+          "name": "System.IsPinnedToNameSpaceTree",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "A feature update may restore the entry."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "explorer",
+        "nav-pane",
+        "3d-objects"
+      ]
+    },
+    {
+      "id": "shell.explorer.classic-context-menu",
+      "title": "Restore the Windows 10 classic context menu",
+      "description": "Registers an empty in-process handler under the shell CLSID so right-click shows the full classic context menu instead of the 'Show more options' shortcut.",
+      "rationale": "Brings back the single, complete right-click menu that many users prefer. This is an undocumented shell hack: it removes the new menu and is reverted by deleting the key.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32",
+          "name": "",
+          "type": "Sz",
+          "value": "",
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The new context menu is hidden, including its top-level 'Open in Terminal', Share and Copilot entries.",
+        "Undocumented registry hack; behaviour on future Windows builds is not guaranteed."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "explorer",
+        "context-menu",
+        "hack"
+      ]
+    },
+    {
+      "id": "shell.explorer.verbose-status-messages",
+      "title": "Show highly detailed startup and shutdown messages",
+      "description": "Enables verbose status messages during sign-in, sign-out, startup and shutdown.",
+      "rationale": "Surfaces exactly which step Windows is on when boot or sign-in is slow, which helps diagnose profile and Group Policy delays. Aimed at developers and administrators.",
+      "category": "Shell",
+      "level": "Strict",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "VerboseStatus",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "SignOut",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Display highly detailed status messages"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "diagnostics",
+        "developer",
+        "logon"
+      ]
+    },
+    {
+      "id": "shell.explorer.detailed-bsod",
+      "title": "Show technical details on the stop (BSoD) screen",
+      "description": "Adds the technical bug-check parameters to the blue-screen crash display.",
+      "rationale": "Puts the stop code parameters on screen so a crash can be read without a memory dump; a diagnostics aid for developers and administrators. Applies on the next stop error.",
+      "category": "Shell",
+      "level": "Strict",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SYSTEM\\CurrentControlSet\\Control\\CrashControl",
+          "name": "DisplayParameters",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/ChrisTitusTech/winutil",
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "diagnostics",
+        "developer",
+        "crash"
+      ]
+    },
+    {
+      "id": "shell.explorer.hide-home-from-nav-pane",
+      "title": "Hide Home from the File Explorer navigation pane",
+      "description": "Removes the Home node from the File Explorer left navigation pane.",
+      "rationale": "Home aggregates recent, favourite and cloud files; hiding it gives a cleaner, more predictable folder tree. Reversible by deleting the value.",
+      "category": "Shell",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Classes\\CLSID\\{f874310e-b6b7-47dc-bc84-b9e6b38f5903}",
+          "name": "System.IsPinnedToNameSpaceTree",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "explorer",
+        "navigation-pane",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "shell.taskbar.multimonitor-buttons-active-only",
+      "title": "Show taskbar buttons only where the window is open (multi-monitor)",
+      "description": "Sets the multi-monitor taskbar so each application's button appears only on the taskbar of the monitor showing that window.",
+      "rationale": "On multi-monitor setups this keeps each monitor's taskbar limited to its own windows, cutting clutter. Reversible.",
+      "category": "Shell",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22000,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "MMTaskbarMode",
+          "type": "Dword",
+          "value": 2,
+          "default": 0,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "taskbar",
+        "multi-monitor"
+      ]
+    }
+  ]
+}

@@ -96,7 +96,33 @@ what was planned (plans live in `PLAN.md`).
   perf / debloat / shell / updates / privacy controls (e.g. DiagTrack, Start
   suggestions, News-and-Interests, Recall, removable-drive BitLocker), and each
   file was adversarially re-verified against its research section. All Draft; the
-  catalogue now ships 289 entries (107 Privacy, 150 Security, 22 Updates). `OpenTheWindows.Core.Engine.ApplyEngine`
+  catalogue now ships 289 entries (107 Privacy, 150 Security, 22 Updates).
+- Performance, debloat and shell catalogues (WP 4.4 / 4.5 / 4.6, research 05):
+  143 new entries transcribed from the performance/debloat research tables.
+  Debloat (`catalog/debloat/`): Microsoft inbox-app removals (`Appx`,
+  `AllUsersAndDeprovision`, every `packageFamilyName` a verified
+  `_8wekyb3d8bbwe` — no guessed publisher ids), Copilot / Teams / Dev Home /
+  Cortana component removals and the device-metadata-reinstall block, and
+  optional-feature / capability removals (Recall, PowerShell 2.0, WMIC, VBScript,
+  WordPad, Internet Explorer, WMP legacy, XPS, Work Folders, Internet Printing).
+  Performance (`catalog/performance/`): disable-able services (only
+  DISABLE-OK / DISABLE-RECOMMENDED non-protected services, per-user services
+  written via their template `Start` key), telemetry-adjacent scheduled tasks,
+  real gaming tweaks (HAGS, Game DVR policy), and measurable visual / power /
+  storage tweaks (`powercfg` and `fsutil` command actions, `PowerSetting` AC/DC
+  toggles). Shell (`catalog/shell/`): taskbar, Start and Explorer UX toggles.
+  The snake-oil / harmful set (research 05 §7 — timer-resolution hacks, Nagle /
+  network-throttling knobs, `LargeSystemCache`, MSI-mode, registry cleaners) and
+  every `NEVER` / `KEEP` / `SignatureKind = System` / protected-service row were
+  excluded; third-party OEM stubs whose publisher id the research does not state
+  were skipped rather than guessed. A full-catalogue collision scan removed nine
+  cross-category duplicates (Cortana / Copilot / Dev Home / Teams authored twice,
+  Delivery-Optimization and Start-tracking keys owned by other categories) and
+  paired the two Windows-Ink-Workspace entries with `conflictsWith`; each file
+  was adversarially re-verified (zero discrepancies). All Draft; the catalogue
+  now ships **432 entries** — Security 150, Privacy 107, Performance 61, Debloat
+  61, Shell 31, Updates 22 — with a `BuiltInCatalogTests` theory asserting every
+  category's M4 minimum. `OpenTheWindows.Core.Engine.ApplyEngine`
   plans a run (dependency-ordered, flagging conflicts, managed settings, risk
   gating and not-applicable entries), then applies it journal-first — every prior
   state is written to the journal before the first machine change, each action is

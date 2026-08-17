@@ -29,24 +29,19 @@ public sealed class BuiltInCatalogTests
         Assert.True(Load().Count >= 20, "The built-in catalogue should ship at least 20 entries.");
     }
 
-    [Fact]
-    public void Security_category_meets_its_M4_target()
+    [Theory]
+    [InlineData(Category.Security, 120)]
+    [InlineData(Category.Privacy, 90)]
+    [InlineData(Category.Debloat, 60)]
+    [InlineData(Category.Performance, 40)]
+    [InlineData(Category.Shell, 30)]
+    public void Category_meets_its_M4_minimum(Category category, int minimum)
     {
-        int security = Load().InCategory(Category.Security).Count();
+        int actual = Load().InCategory(category).Count();
 
-        Assert.True(security >= 120,
+        Assert.True(actual >= minimum,
             string.Create(System.Globalization.CultureInfo.InvariantCulture,
-                $"M4 requires at least 120 Security entries; found {security}."));
-    }
-
-    [Fact]
-    public void Privacy_category_meets_its_M4_target()
-    {
-        int privacy = Load().InCategory(Category.Privacy).Count();
-
-        Assert.True(privacy >= 90,
-            string.Create(System.Globalization.CultureInfo.InvariantCulture,
-                $"M4 requires at least 90 Privacy entries; found {privacy}."));
+                $"M4 requires at least {minimum} {category} entries; found {actual}."));
     }
 
     [Fact]

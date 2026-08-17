@@ -463,13 +463,25 @@ Landed so far (branch `feature/m4-catalogue-population`, committed locally):
   now returns 0 for a clean preview even when the plan contains reboot-required
   entries (the restart requirement is still reported in output).
 
-Still to do: the security (WP 4.3, 150), privacy (WP 4.1, 107) and updates (WP 4.2,
-22) categories are populated (289 total). The remaining categories bring the total
-to ≥ 300 — performance (≥ 40, research 05 §3/§6), debloat (≥ 60, research 05 §1/§2,
-`reinstallHint` mandatory) and shell (≥ 30, research 05 §6 / 01); updates also
-needs three more entries to reach its ≥ 25 target. Then extend the catalogue tests
-to the remaining per-category targets and the M4 tag/managedBy/reinstallHint rules,
-and run the per-entry VM verification. Note
+- **Performance / debloat / shell catalogues (WP 4.4 / 4.5 / 4.6)**: 143 new
+  entries from research 05 — debloat inbox-app / component / optional-feature
+  removals (verified `_8wekyb3d8bbwe` family names, no guessed publisher ids),
+  performance disable-able services (non-protected only; per-user services via
+  their template `Start` key), telemetry-adjacent tasks, gaming and measurable
+  visual / power (`powercfg`) / storage (`fsutil`) tweaks, and shell taskbar /
+  Start / Explorer UX toggles. Research 05 §7 snake-oil and every
+  `NEVER` / `KEEP` / system-app / protected-service row excluded; OEM stubs with
+  unknown publisher ids skipped rather than guessed. A collision scan removed nine
+  cross-category duplicates and paired the Windows-Ink entries; each file was
+  adversarially re-verified (zero discrepancies). Catalogue now **432 entries**
+  (Security 150, Privacy 107, Performance 61, Debloat 61, Shell 31, Updates 22),
+  `otw catalog validate` clean, 0 warnings; a `BuiltInCatalogTests` theory asserts
+  every category's M4 minimum.
+
+All six categories now meet their per-category minimums except **Updates**, which
+sits at 22 and needs three more entries to reach ≥ 25 (the remaining catalogue
+gap). Then: the M4 tag / managedBy / reinstallHint validation rules, the per-entry
+VM verification, and the M4 certification record. Note
 the M3-discovered limitation: over headless SSH the
 interactive-user resolver returns null, so per-user (`User`-hive) entries cannot
 be VM-verified from the lab session and stay `Draft` pending the M5

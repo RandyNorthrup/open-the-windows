@@ -1082,7 +1082,9 @@
       ],
       "requires": "None",
       "dependsOn": [],
-      "conflictsWith": [],
+      "conflictsWith": [
+        "performance.visual.windows-ink-workspace-off"
+      ],
       "managedBy": {
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Ink Workspace\\Allow Windows Ink Workspace"
