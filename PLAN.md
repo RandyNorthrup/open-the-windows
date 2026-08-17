@@ -541,6 +541,9 @@ committed locally):
   profiles ship embedded; none allows or resolves to a Breaking entry. The JSON
   Schema evaluation shared with the catalogue loader was factored into
   `Core/Catalog/SchemaEvaluation`. `Profile` suppresses `CA1724` (PLAN §7.3).
+- **Profile CLI** (`otw profile list|show|validate`): read-only inspection of the
+  built-in profiles or an operator profile file (built-in id or path), with
+  `--json` on each and schema + catalogue-aware validation on `validate`.
 
 ### M6 — GUI (not started)
 

@@ -94,6 +94,16 @@ does not change the exit code.
 raw entry), and `validate` (schema + structural rules; `--catalog-dir` adds an
 operator override directory). Exit 0 when valid, 4 on invalid input.
 
+`otw profile` inspects and validates profiles (read-only): `list` shows the
+seven built-in profiles (`--json` for the array), `show <id|path>` prints one
+profile's level dial, include/exclude, scope, options and applicability (a
+built-in id such as `home`, or a path to a profile `.json` file; `--json` for
+the raw object), and `validate <id|path>` checks a profile against
+`catalog/schema/profile.schema.json` and against the catalogue (include/exclude
+ids must exist, built-ins never apply a Breaking entry; `--catalog-dir` adds an
+override directory, `--json` emits the issue array). Exit 0 when valid, 4 on
+invalid input.
+
 `otw scan --profile <basic|balanced|strict|paranoid>` runs a read-only drift
 scan of that built-in level profile against the machine — it never changes
 anything. `--include-draft` also scans Draft entries; `--catalog-dir` adds an

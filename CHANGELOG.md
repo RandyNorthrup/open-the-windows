@@ -26,6 +26,11 @@ what was planned (plans live in `PLAN.md`).
   Seven built-in profiles ship embedded (`home`, `power-user`,
   `enterprise-workstation`, `developer`, `gamer`, `kiosk-shared`, `privacy-max`),
   none of which allows or resolves to a Breaking entry.
+- M5 (profiles, part 2 — the `otw profile` CLI): `otw profile list` shows the
+  built-in profiles, `otw profile show <id|path>` prints one profile (a built-in
+  id or a profile file), and `otw profile validate <id|path>` validates it
+  against the schema and the catalogue. All read-only; `--json` on each; exit 0
+  when valid, 4 on invalid input.
 - M4 (Windows Update guardrails): the safe, reversible update controls
   (`OpenTheWindows.Core.Updates`). `PauseCalculator` computes the six Settings-app
   pause values (`PauseUpdatesStartTime`/`ExpiryTime`,
