@@ -77,6 +77,19 @@ what was planned (plans live in `PLAN.md`).
   can express severity. Golden/validation tests cover all four (CSV exact-string
   golden, JSON/SARIF parse-and-assert, HTML self-containment).
 
+- M2: read-only machine health probe (`WindowsMachineHealthProbe`,
+  `IMachineHealthProbe`). The 28 checks from research 04 §5 — Secure Boot, TPM,
+  Defender real-time/tamper, BitLocker, VBS/HVCI/Credential Guard, LSA PPL,
+  kernel DMA, build support, local admins, join state, firewall, RDP, SMB,
+  remote-management services, sudo/Developer Mode, Smart App Control,
+  vulnerable-driver blocklist, core isolation, edition, Windows RE, host/
+  port-proxy exposure, event-log size, Defender exclusions, local security
+  policy, third-party AV and MDM enrolment — each reading only (registry,
+  WMI, services). A check whose source needs elevation reports `Unknown` with an
+  explanation rather than failing or inventing a value; every check is wrapped so
+  the probe never throws. Tested against the real machine unelevated (28 unique
+  checks, all with detail; the registry-backed checks return a real verdict).
+
 - M1: catalogue model (`OpenTheWindows.Core.Catalog`), JSON Schema
   `catalog/schema/tweak.schema.json`, embedded loader with directory overrides
   and a structural validator (stable rule ids), 29 Draft entries across six
