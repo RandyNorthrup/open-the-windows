@@ -121,6 +121,19 @@ what was planned (plans live in `PLAN.md`).
   detects that condition and reports DEFERRED rather than a spurious failure —
   any other Stryker error still fails it. Recorded in PLAN §7.1.
 
+- M2: VM integration tests (`VmIntegrationTests`, gated by `OTW_INTEGRATION=1`
+  via `Assert.SkipUnless`, skipped in normal runs): registry `CurrentBuild`
+  matches the OS, the Print Spooler service and the built-in ScheduledDefrag task
+  read back, interactive-user resolution returns the session user's SID, managed
+  detection is NotManaged on an unmanaged machine, and the health probe returns
+  all 28 checks. Verified end-to-end on the lab VM (Windows 11 Pro 25H2,
+  build 26200.9168, elevated): `otw scan --profile balanced --include-draft`
+  exits 1 and lists the drifting ids; setting a tweak's two policy values flips
+  that entry to Compliant; `otw health` prints 28 checks with real elevated
+  values (e.g. TPM and BitLocker return verdicts, not Unknown); and all four
+  report formats write to file. The VM was reverted to its prior state
+  afterwards.
+
 - M1: catalogue model (`OpenTheWindows.Core.Catalog`), JSON Schema
   `catalog/schema/tweak.schema.json`, embedded loader with directory overrides
   and a structural validator (stable rule ids), 29 Draft entries across six
