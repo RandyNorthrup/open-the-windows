@@ -230,6 +230,16 @@ detection and the reader is testable on an unelevated developer box. The
 InstallState mapping (1 enabled, 2 disabled, 3/4/absent ⇒ not present) is
 documented in `WindowsOptionalFeatureReader`.
 
+M2 native interop: the P/Invoke readers (power via `powrprof.dll`,
+interactive user via `wtsapi32.dll`) use the `[LibraryImport]` source generator
+rather than the CsWin32 the spec suggested — no build-time code generator
+dependency, AOT/trim-safe stubs, and only a handful of functions are needed.
+`[LibraryImport]` marshalling stubs pin blittable arguments with unsafe
+pointers, so `AllowUnsafeBlocks` is enabled in the Windows project only (no
+hand-written unsafe code exists outside the generated stubs); every P/Invoke
+carries `[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]` to prevent
+DLL search-order hijacking (CA5392).
+
 ### 7.2 Gate verification log (each gate seen to FAIL on a broken input, then reverted)
 
 | Gate | Command | Broken input used | Observed |

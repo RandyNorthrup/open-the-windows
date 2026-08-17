@@ -16,6 +16,10 @@
     <!-- Trim-analyzed so the single-file CLI can be published with TrimMode=partial;
          also keeps Microsoft.NET.ILLink.Tasks in the lock file for locked publish restores. -->
     <IsTrimmable>true</IsTrimmable>
+    <!-- Required by the [LibraryImport] source generator: its marshalling stubs
+         pin blittable arguments with unsafe pointers. This is the OS-interop
+         layer; no hand-written unsafe code exists outside the generated stubs. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

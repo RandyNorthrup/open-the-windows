@@ -38,10 +38,17 @@ what was planned (plans live in `PLAN.md`).
   property read from WMI and materialised to JSON with `Utf8JsonWriter`;
   Defender absent or property unknown ⇒ `null`). The trim-safe JSON
   materialisation helper is now shared (`JsonMaterialization`) between the
-  registry and Defender readers. All six readers have tests that read the real
-  registry / SCM / task store / package store / WMI unelevated. Remaining
-  Windows readers (power, interactive user, managed detection), report writers,
-  `otw scan` / `otw health` and VM integration are still to come (see
+  registry and Defender readers. `WindowsPowerSettingReader` reads a setting's
+  AC/DC value indices for the active scheme via `powrprof.dll`
+  (`PowerGetActiveScheme` / `PowerRead{AC,DC}ValueIndex`), declared with the
+  `[LibraryImport]` source generator (chosen over the spec's CsWin32 — no
+  build-time generator dependency; deviation recorded in PLAN §7.1); every
+  P/Invoke pins `DllImportSearchPath.System32` (CA5392) and `AllowUnsafeBlocks`
+  is enabled for the Windows project only, for the generated marshalling stubs.
+  All seven readers have tests that read the real registry / SCM / task store /
+  package store / WMI / power scheme unelevated. Remaining Windows readers
+  (interactive user, managed detection), report writers, `otw scan` /
+  `otw health` and VM integration are still to come (see
   docs/milestones/M2-scan.md).
 
 - M1: catalogue model (`OpenTheWindows.Core.Catalog`), JSON Schema
