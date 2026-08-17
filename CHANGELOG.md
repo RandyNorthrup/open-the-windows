@@ -31,6 +31,13 @@ what was planned (plans live in `PLAN.md`).
   id or a profile file), and `otw profile validate <id|path>` validates it
   against the schema and the catalogue. All read-only; `--json` on each; exit 0
   when valid, 4 on invalid input.
+- M5 (profiles, part 3 — profile signing): `ProfileSignature` signs and verifies
+  profiles with detached **ES256** (ECDSA P-256 / SHA-256) signatures (decision
+  D11) over a canonical form of the JSON, so a signature survives re-formatting;
+  the signer is identified by a `keyId` (hex SHA-256 of its SubjectPublicKeyInfo).
+  `otw profile sign <file> --key <pem>` writes `<file>.sig`; `otw profile verify
+  <file> [--key <pem>]` checks it against a given public key or the machine trust
+  store (`%ProgramData%\OpenTheWindows\trusted-keys\*.pem`).
 - M4 (Windows Update guardrails): the safe, reversible update controls
   (`OpenTheWindows.Core.Updates`). `PauseCalculator` computes the six Settings-app
   pause values (`PauseUpdatesStartTime`/`ExpiryTime`,

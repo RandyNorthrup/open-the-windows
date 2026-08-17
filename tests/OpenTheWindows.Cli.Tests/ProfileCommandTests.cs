@@ -1,4 +1,5 @@
 using System.CommandLine;
+using System.Security.Cryptography;
 using System.Text.Json;
 using OpenTheWindows.Core;
 using OpenTheWindows.Core.Catalog;
@@ -57,6 +58,24 @@ public sealed class ProfileCommandTests
         string path = Path.Combine(Path.GetTempPath(), "otw-profile-" + Guid.NewGuid().ToString("N") + ".json");
         File.WriteAllText(path, json);
         return path;
+    }
+
+    private static (int Exit, string Out, string Err) RunProfile(params string[] args)
+    {
+        (RootCommand root, StringWriter stdout, StringWriter stderr) = Build();
+        int exit = Invoke(root, stdout, stderr, ["profile", .. args]);
+        return (exit, stdout.ToString(), stderr.ToString());
+    }
+
+    private static (string Profile, string PrivateKey, string PublicKey) WriteSigningFixture(DirectoryInfo dir, ECDsa signer)
+    {
+        string profile = Path.Combine(dir.FullName, "profile.json");
+        string privateKey = Path.Combine(dir.FullName, "key.pem");
+        string publicKey = Path.Combine(dir.FullName, "key.pub.pem");
+        File.WriteAllText(profile, ValidFileProfile);
+        File.WriteAllText(privateKey, signer.ExportECPrivateKeyPem());
+        File.WriteAllText(publicKey, signer.ExportSubjectPublicKeyInfoPem());
+        return (profile, privateKey, publicKey);
     }
 
     [Fact]
@@ -188,6 +207,152 @@ public sealed class ProfileCommandTests
         finally
         {
             File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void Sign_then_verify_round_trips_with_the_public_key()
+    {
+        var dir = Directory.CreateTempSubdirectory("otw-sign-");
+        try
+        {
+            using var signer = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+            (string profile, string privateKey, string publicKey) = WriteSigningFixture(dir, signer);
+
+            Assert.Equal(ExitCodes.Success, RunProfile("sign", profile, "--key", privateKey).Exit);
+            Assert.True(File.Exists(profile + ".sig"));
+
+            (int exit, string output, _) = RunProfile("verify", profile, "--key", publicKey);
+            Assert.Equal(ExitCodes.Success, exit);
+            Assert.Contains("valid", output, StringComparison.Ordinal);
+        }
+        finally
+        {
+            dir.Delete(recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Verify_fails_when_the_profile_is_tampered_after_signing()
+    {
+        var dir = Directory.CreateTempSubdirectory("otw-sign-");
+        try
+        {
+            using var signer = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+            (string profile, string privateKey, string publicKey) = WriteSigningFixture(dir, signer);
+            RunProfile("sign", profile, "--key", privateKey);
+
+            // Change the content (still schema-valid) so the signature no longer matches.
+            File.WriteAllText(profile, ValidFileProfile.Replace("\"Privacy\": \"Basic\"", "\"Privacy\": \"Strict\"", StringComparison.Ordinal));
+
+            Assert.Equal(ExitCodes.InvalidInput, RunProfile("verify", profile, "--key", publicKey).Exit);
+        }
+        finally
+        {
+            dir.Delete(recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Verify_fails_with_a_wrong_public_key()
+    {
+        var dir = Directory.CreateTempSubdirectory("otw-sign-");
+        try
+        {
+            using var signer = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+            using var stranger = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+            (string profile, string privateKey, _) = WriteSigningFixture(dir, signer);
+            string strangerPem = Path.Combine(dir.FullName, "stranger.pub.pem");
+            File.WriteAllText(strangerPem, stranger.ExportSubjectPublicKeyInfoPem());
+            RunProfile("sign", profile, "--key", privateKey);
+
+            Assert.Equal(ExitCodes.InvalidInput, RunProfile("verify", profile, "--key", strangerPem).Exit);
+        }
+        finally
+        {
+            dir.Delete(recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Verify_reports_a_missing_signature_file()
+    {
+        string path = WriteTempProfile(ValidFileProfile);
+        try
+        {
+            (int exit, _, string error) = RunProfile("verify", path);
+
+            Assert.Equal(ExitCodes.InvalidInput, exit);
+            Assert.Contains("No signature file", error, StringComparison.Ordinal);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void Verify_reports_a_missing_key_file()
+    {
+        var dir = Directory.CreateTempSubdirectory("otw-sign-");
+        try
+        {
+            using var signer = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+            (string profile, string privateKey, _) = WriteSigningFixture(dir, signer);
+            RunProfile("sign", profile, "--key", privateKey);
+
+            (int exit, _, string error) = RunProfile("verify", profile, "--key", Path.Combine(dir.FullName, "absent.pem"));
+
+            Assert.Equal(ExitCodes.InvalidInput, exit);
+            Assert.Contains("does not exist", error, StringComparison.Ordinal);
+        }
+        finally
+        {
+            dir.Delete(recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Verify_reports_a_malformed_signature_file()
+    {
+        var dir = Directory.CreateTempSubdirectory("otw-sign-");
+        try
+        {
+            string profile = Path.Combine(dir.FullName, "profile.json");
+            File.WriteAllText(profile, ValidFileProfile);
+            File.WriteAllText(profile + ".sig", "{ not json ");
+
+            (int exit, _, string error) = RunProfile("verify", profile, "--key", Path.Combine(dir.FullName, "any.pem"));
+
+            Assert.Equal(ExitCodes.InvalidInput, exit);
+            Assert.Contains("not valid JSON", error, StringComparison.Ordinal);
+        }
+        finally
+        {
+            dir.Delete(recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Sign_rejects_a_public_only_key()
+    {
+        var dir = Directory.CreateTempSubdirectory("otw-sign-");
+        try
+        {
+            using var signer = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+            string profile = Path.Combine(dir.FullName, "profile.json");
+            string publicPem = Path.Combine(dir.FullName, "key.pub.pem");
+            File.WriteAllText(profile, ValidFileProfile);
+            File.WriteAllText(publicPem, signer.ExportSubjectPublicKeyInfoPem());
+
+            (int exit, _, _) = RunProfile("sign", profile, "--key", publicPem);
+
+            Assert.Equal(ExitCodes.InvalidInput, exit);
+            Assert.False(File.Exists(profile + ".sig"));
+        }
+        finally
+        {
+            dir.Delete(recursive: true);
         }
     }
 }

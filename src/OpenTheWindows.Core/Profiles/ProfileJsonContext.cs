@@ -20,4 +20,5 @@ namespace OpenTheWindows.Core.Profiles;
     WriteIndented = true)]
 [JsonSerializable(typeof(Profile))]
 [JsonSerializable(typeof(IReadOnlyList<Profile>))]
+[JsonSerializable(typeof(ProfileSignatureDocument))]
 public sealed partial class ProfileJsonContext : JsonSerializerContext;

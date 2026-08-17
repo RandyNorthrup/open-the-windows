@@ -1,5 +1,6 @@
 using System.CommandLine;
 using System.Globalization;
+using System.Security.Cryptography;
 using System.Text.Json;
 using OpenTheWindows.Core;
 using OpenTheWindows.Core.Catalog;
@@ -9,13 +10,16 @@ using OpenTheWindows.Core.Profiles;
 namespace OpenTheWindows.Cli.Commands;
 
 /// <summary>
-/// <c>otw profile list|show|validate</c>: inspect and validate profiles (the
-/// built-in ones or an operator file). Read-only; never touches the machine.
-/// Exit codes: 0 ok; 4 invalid input (unknown profile, unreadable file, a
-/// profile that fails schema or structural validation).
+/// <c>otw profile list|show|validate|sign|verify</c>: inspect, validate and sign
+/// profiles (the built-in ones or an operator file). All read-only with respect
+/// to the machine; <c>sign</c>/<c>verify</c> only touch the given files and the
+/// trust store. Exit codes: 0 ok; 4 invalid input (unknown profile, unreadable
+/// file, a profile that fails validation, or a signature that does not verify).
 /// </summary>
 internal static class ProfileCommand
 {
+    private const string SignatureSuffix = ".sig";
+
     public static Command Create(Func<string?, CatalogLoadResult> loadCatalog)
     {
         ArgumentNullException.ThrowIfNull(loadCatalog);
@@ -26,11 +30,13 @@ internal static class ProfileCommand
             Recursive = true,
         };
 
-        var command = new Command("profile", "Inspect and validate profiles (read-only).");
+        var command = new Command("profile", "Inspect, validate and sign profiles.");
         command.Options.Add(jsonOption);
         command.Subcommands.Add(CreateList(jsonOption));
         command.Subcommands.Add(CreateShow(jsonOption));
         command.Subcommands.Add(CreateValidate(loadCatalog, jsonOption));
+        command.Subcommands.Add(CreateSign());
+        command.Subcommands.Add(CreateVerify());
         return command;
     }
 
@@ -152,6 +158,231 @@ internal static class ProfileCommand
             return valid ? ExitCodes.Success : ExitCodes.InvalidInput;
         });
         return command;
+    }
+
+    private static Command CreateSign()
+    {
+        var profileArgument = new Argument<string>("profile") { Description = "Path to a profile .json file to sign." };
+        var keyOption = new Option<string>("--key") { Description = "PEM file holding the ES256 (P-256) private key.", Required = true };
+        var outOption = new Option<string?>("--out") { Description = "Where to write the detached signature (default: <profile>.sig)." };
+        var command = new Command("sign", "Sign a profile file with an ES256 private key (writes a detached <profile>.sig).");
+        command.Arguments.Add(profileArgument);
+        command.Options.Add(keyOption);
+        command.Options.Add(outOption);
+        command.SetAction(parseResult => ExecuteSign(parseResult, profileArgument, keyOption, outOption));
+        return command;
+    }
+
+    /// <summary>Sets up stdout/stderr and the profile path, checking the file exists; false (with a message) when it does not.</summary>
+    private static bool TryBeginFileCommand(
+        ParseResult parseResult, Argument<string> profileArgument, out TextWriter stdout, out TextWriter stderr, out string profilePath)
+    {
+        stdout = parseResult.InvocationConfiguration.Output;
+        stderr = parseResult.InvocationConfiguration.Error;
+        profilePath = parseResult.GetValue(profileArgument) ?? string.Empty;
+
+        if (File.Exists(profilePath))
+        {
+            return true;
+        }
+
+        stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Profile file '{profilePath}' does not exist."));
+        return false;
+    }
+
+    private static int ExecuteSign(ParseResult parseResult, Argument<string> profileArgument, Option<string> keyOption, Option<string?> outOption)
+    {
+        if (!TryBeginFileCommand(parseResult, profileArgument, out TextWriter stdout, out TextWriter stderr, out string profilePath))
+        {
+            return ExitCodes.InvalidInput;
+        }
+
+        ProfileLoadResult load = ProfileLoader.LoadFile(profilePath);
+        if (load.Profile is null)
+        {
+            WriteIssues(stderr, load.Errors);
+            stderr.WriteLine("Refusing to sign a profile that fails validation.");
+            return ExitCodes.InvalidInput;
+        }
+
+        using ECDsa? key = LoadKey(parseResult.GetValue(keyOption) ?? string.Empty, stderr);
+        if (key is null)
+        {
+            return ExitCodes.InvalidInput;
+        }
+
+        ProfileSignatureDocument signature;
+        try
+        {
+            signature = ProfileSignature.Sign(File.ReadAllText(profilePath), key);
+        }
+        catch (CryptographicException ex)
+        {
+            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture,
+                $"Could not sign with this key (does the PEM hold the private key?): {ex.Message}"));
+            return ExitCodes.InvalidInput;
+        }
+
+        string sigPath = parseResult.GetValue(outOption) ?? (profilePath + SignatureSuffix);
+        File.WriteAllText(sigPath, JsonSerializer.Serialize(signature, ProfileJsonContext.Default.ProfileSignatureDocument));
+        stdout.WriteLine(string.Create(CultureInfo.InvariantCulture,
+            $"Signed '{profilePath}' -> '{sigPath}' (keyId {signature.KeyId})."));
+        return ExitCodes.Success;
+    }
+
+    private static Command CreateVerify()
+    {
+        var profileArgument = new Argument<string>("profile") { Description = "Path to a signed profile .json file." };
+        var keyOption = new Option<string?>("--key") { Description = "PEM public key to verify against (default: the machine trust store)." };
+        var sigOption = new Option<string?>("--sig") { Description = "Path to the detached signature (default: <profile>.sig)." };
+        var command = new Command("verify", "Verify a profile's ES256 signature against a public key or the machine trust store.");
+        command.Arguments.Add(profileArgument);
+        command.Options.Add(keyOption);
+        command.Options.Add(sigOption);
+        command.SetAction(parseResult => ExecuteVerify(parseResult, profileArgument, keyOption, sigOption));
+        return command;
+    }
+
+    private static int ExecuteVerify(ParseResult parseResult, Argument<string> profileArgument, Option<string?> keyOption, Option<string?> sigOption)
+    {
+        if (!TryBeginFileCommand(parseResult, profileArgument, out TextWriter stdout, out TextWriter stderr, out string profilePath))
+        {
+            return ExitCodes.InvalidInput;
+        }
+
+        string sigPath = parseResult.GetValue(sigOption) ?? (profilePath + SignatureSuffix);
+        if (!File.Exists(sigPath))
+        {
+            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture,
+                $"No signature file '{sigPath}'. Sign the profile first or pass --sig."));
+            return ExitCodes.InvalidInput;
+        }
+
+        if (!TryReadSignature(sigPath, stderr, out ProfileSignatureDocument signature))
+        {
+            return ExitCodes.InvalidInput;
+        }
+
+        string profileJson = File.ReadAllText(profilePath);
+        if (!TryVerify(profileJson, signature, parseResult.GetValue(keyOption), stderr, out bool verified))
+        {
+            return ExitCodes.InvalidInput;
+        }
+
+        if (verified)
+        {
+            stdout.WriteLine(string.Create(CultureInfo.InvariantCulture,
+                $"Signature valid (alg {signature.Algorithm}, keyId {signature.KeyId})."));
+            return ExitCodes.Success;
+        }
+
+        stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Signature INVALID for '{profilePath}'."));
+        return ExitCodes.InvalidInput;
+    }
+
+    /// <summary>
+    /// Evaluates the signature against either an explicit public key or the machine
+    /// trust store. Returns <see langword="false"/> (having written a message) only
+    /// when the verification could not be attempted (bad key file, empty trust
+    /// store); otherwise returns <see langword="true"/> and sets
+    /// <paramref name="verified"/> to the cryptographic result.
+    /// </summary>
+    private static bool TryVerify(string profileJson, ProfileSignatureDocument signature, string? keyPath, TextWriter stderr, out bool verified)
+    {
+        verified = false;
+        if (keyPath is not null)
+        {
+            using ECDsa? key = LoadKey(keyPath, stderr);
+            if (key is null)
+            {
+                return false;
+            }
+
+            verified = ProfileSignature.Verify(profileJson, signature, key);
+            return true;
+        }
+
+        string directory = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "OpenTheWindows", "trusted-keys");
+        List<string> pems = Directory.Exists(directory) ? [.. Directory.EnumerateFiles(directory, "*.pem")] : [];
+        if (pems.Count == 0)
+        {
+            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture,
+                $"No public key given (--key) and no trusted keys in '{directory}'."));
+            return false;
+        }
+
+        verified = VerifyWithAnyKey(profileJson, signature, pems);
+        return true;
+    }
+
+    private static bool VerifyWithAnyKey(string profileJson, ProfileSignatureDocument signature, IEnumerable<string> pemPaths)
+    {
+        foreach (string pem in pemPaths)
+        {
+            using var key = ECDsa.Create();
+            try
+            {
+                key.ImportFromPem(File.ReadAllText(pem));
+            }
+            catch (Exception ex) when (ex is ArgumentException or CryptographicException)
+            {
+                continue;
+            }
+
+            if (ProfileSignature.Verify(profileJson, signature, key))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool TryReadSignature(string path, TextWriter stderr, out ProfileSignatureDocument signature)
+    {
+        signature = null!;
+        try
+        {
+            ProfileSignatureDocument? parsed = JsonSerializer.Deserialize(File.ReadAllText(path), ProfileJsonContext.Default.ProfileSignatureDocument);
+            if (parsed is null)
+            {
+                stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Signature file '{path}' is empty."));
+                return false;
+            }
+
+            signature = parsed;
+            return true;
+        }
+        catch (JsonException ex)
+        {
+            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Signature file '{path}' is not valid JSON: {ex.Message}"));
+            return false;
+        }
+    }
+
+    /// <summary>Loads an EC key (public or private) from a PEM file, or reports why it could not and returns null.</summary>
+    private static ECDsa? LoadKey(string pemPath, TextWriter stderr)
+    {
+        if (!File.Exists(pemPath))
+        {
+            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Key file '{pemPath}' does not exist."));
+            return null;
+        }
+
+        var created = ECDsa.Create();
+        try
+        {
+            created.ImportFromPem(File.ReadAllText(pemPath));
+        }
+        catch (Exception ex) when (ex is ArgumentException or CryptographicException)
+        {
+            created.Dispose();
+            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Could not read an EC key from '{pemPath}': {ex.Message}"));
+            return null;
+        }
+
+        return created;
     }
 
     /// <summary>
