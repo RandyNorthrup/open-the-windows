@@ -3,6 +3,7 @@ using System.Runtime.Versioning;
 using System.ServiceProcess;
 using Microsoft.Win32;
 using OpenTheWindows.Core.Abstractions;
+using OpenTheWindows.Windows.Interop;
 using CatalogStartType = OpenTheWindows.Core.Catalog.ServiceStartType;
 
 namespace OpenTheWindows.Windows.Readers;
@@ -14,10 +15,10 @@ namespace OpenTheWindows.Windows.Readers;
 /// <remarks>
 /// <see cref="ServiceControllerStatus"/> reports Automatic without distinguishing
 /// delayed auto-start, so the <c>DelayedAutostart</c> flag is read from the
-/// service's registry key. Protected-process (PPL) detection needs
-/// <c>QueryServiceConfig2(SERVICE_CONFIG_LAUNCH_PROTECTED)</c>; it is not part of
-/// scan compliance and is added in M3, where it guards apply. Until then the
-/// conservative value <see langword="false"/> is reported.
+/// service's registry key. Protected-process (PPL) status comes from
+/// <c>QueryServiceConfig2(SERVICE_CONFIG_LAUNCH_PROTECTED)</c> via
+/// <see cref="Interop.ServiceConfig.IsLaunchProtected"/>; it guards apply so a
+/// protected service is never reconfigured.
 /// </remarks>
 [SupportedOSPlatform("windows")]
 public sealed class WindowsServiceReader : IServiceReader
@@ -34,7 +35,7 @@ public sealed class WindowsServiceReader : IServiceReader
             using var controller = new ServiceController(name);
             CatalogStartType startType = MapStartType(controller.StartType, name);
             bool running = controller.Status == ServiceControllerStatus.Running;
-            return new ServiceSnapshot(name, startType, running, IsProtectedProcess: false);
+            return new ServiceSnapshot(name, startType, running, ServiceConfig.IsLaunchProtected(name));
         }
         catch (InvalidOperationException)
         {

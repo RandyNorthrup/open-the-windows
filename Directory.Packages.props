@@ -52,6 +52,8 @@
     <PackageVersion Include="TaskScheduler" Version="2.12.2" />
     <!-- WMI (System.Management) for read-only Win32_OptionalFeature and Defender MSFT_MpPreference reads; Windows only. -->
     <PackageVersion Include="System.Management" Version="10.0.11" />
+    <!-- Windows Event Log source (OpenTheWindows/OTW) for the audit trail; Windows only. -->
+    <PackageVersion Include="System.Diagnostics.EventLog" Version="10.0.11" />
   </ItemGroup>
 
   <!-- ─── Test packages ─────────────────────────────────────────────────── -->

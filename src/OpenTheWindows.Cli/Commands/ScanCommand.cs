@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Text;
 using OpenTheWindows.Core;
 using OpenTheWindows.Core.Catalog;
-using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Model;
 using OpenTheWindows.Core.Reports;
@@ -34,33 +33,11 @@ internal static class ScanCommand
         TextWriter stdout = parseResult.InvocationConfiguration.Output;
         TextWriter stderr = parseResult.InvocationConfiguration.Error;
 
-        SystemReport support = services.Doctor.Run();
-        if (support.Status != SupportStatus.Supported)
+        if (!CommandSupport.TryResolveProfileCatalog(
+            services, parseResult, options.Profile, options.CatalogDir, ExitCodes.Error, stderr,
+            out Level level, out TweakCatalog catalog, out int exitCode))
         {
-            stderr.WriteLine(string.Create(
-                CultureInfo.InvariantCulture, $"Unsupported platform ({support.Status}); see 'otw doctor'."));
-            return ExitCodes.UnsupportedPlatform;
-        }
-
-        string profileName = parseResult.GetValue(options.Profile) ?? string.Empty;
-        if (!NamedProfile.TryResolve(profileName, out Level level))
-        {
-            stderr.WriteLine(string.Create(
-                CultureInfo.InvariantCulture,
-                $"Unknown profile '{profileName}'. Use one of: {string.Join(", ", NamedProfile.Names)}."));
-            return ExitCodes.Error;
-        }
-
-        CatalogLoadResult loaded = services.LoadCatalog(parseResult.GetValue(options.CatalogDir));
-        if (loaded.Catalog is null)
-        {
-            foreach (CatalogIssue issue in loaded.Errors)
-            {
-                stderr.WriteLine(issue.ToString());
-            }
-
-            stderr.WriteLine("Catalogue failed validation; run 'otw catalog validate' for details.");
-            return ExitCodes.Error;
+            return exitCode;
         }
 
         IReportWriter? writer = options.ResolveWriter(parseResult, out int formatCount);
@@ -70,8 +47,8 @@ internal static class ScanCommand
             return ExitCodes.Error;
         }
 
-        IReadOnlyList<TweakDefinition> entries = NamedProfile.Select(
-            loaded.Catalog, level, parseResult.GetValue(options.IncludeDraft));
+        string profileName = parseResult.GetValue(options.Profile)!;
+        IReadOnlyList<TweakDefinition> entries = NamedProfile.Select(catalog, level, parseResult.GetValue(options.IncludeDraft));
         ScanReport report = services.CreateScanEngine().Scan(entries, profileName);
 
         string? outPath = parseResult.GetValue(options.Out);
@@ -127,21 +104,11 @@ internal static class ScanCommand
 
     private sealed class ScanOptions
     {
-        public Option<string> Profile { get; } = new("--profile")
-        {
-            Description = "Built-in level profile: " + string.Join(", ", NamedProfile.Names) + ".",
-            Required = true,
-        };
+        public Option<string> Profile { get; } = CommandSupport.ProfileOption();
 
-        public Option<string?> CatalogDir { get; } = new("--catalog-dir")
-        {
-            Description = "Directory of additional catalogue JSON files; entries override built-in ones by id.",
-        };
+        public Option<string?> CatalogDir { get; } = CommandSupport.CatalogDirOption();
 
-        public Option<bool> IncludeDraft { get; } = new("--include-draft")
-        {
-            Description = "Include Draft entries (verified-only by default).",
-        };
+        public Option<bool> IncludeDraft { get; } = CommandSupport.IncludeDraftOption();
 
         public Option<bool> Json { get; } = new("--json") { Description = "Write a JSON report." };
 

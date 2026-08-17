@@ -23,6 +23,9 @@ internal static class CommandLineBuilder
         root.Subcommands.Add(CatalogCommand.Create(services.LoadCatalog));
         root.Subcommands.Add(ScanCommand.Create(services));
         root.Subcommands.Add(HealthCommand.Create(services.Health));
+        root.Subcommands.Add(ApplyCommand.Create(services));
+        root.Subcommands.Add(RevertCommand.Create(services));
+        root.Subcommands.Add(HistoryCommand.Create(services));
         return root;
     }
 }

@@ -1,66 +1,88 @@
-using System.Reflection.Metadata;
-using System.Reflection.PortableExecutable;
-using OpenTheWindows.Windows.Readers;
-
 namespace OpenTheWindows.Windows.Tests;
 
 /// <summary>
-/// Architectural guard: the OS-touching Windows assembly must be read-only in
-/// M2. It inspects the assembly's member references and fails if any mutating
-/// registry, service, package, task or file API is referenced anywhere. This is
-/// precise (it matches the declaring type and member name, so <c>List.Add</c>
-/// and friends are not flagged) and catches an accidental write before it can
-/// ship.
+/// Architectural guards for the OS-touching layer in M3, where writers now
+/// exist: the readers must stay read-only, and the banned <c>Process</c> type
+/// may be hosted only by the guarded command runner. Both scan the real source
+/// tree so an accidental write or an out-of-bounds process host fails the build.
 /// </summary>
 public sealed class ReadOnlyArchitectureTests
 {
+    private static readonly string? RepoRoot = FindRepoRoot();
+
+    // Mutating members that must never appear in a reader source file.
+    private static readonly string[] ForbiddenInReaders =
+    [
+        ".SetValue(", ".DeleteValue(", ".DeleteSubKey", ".CreateSubKey", ".CreateSubKeyTree",
+        "ChangeServiceConfig", "RemovePackageAsync", "DeprovisionPackage", "ProvisionPackage",
+        ".WriteAllText", ".AppendAllText", "SetEnabled", "SetStartType", "SetPreference",
+    ];
+
     [Fact]
-    public void Windows_assembly_references_no_write_apis()
+    public void Reader_sources_reference_no_mutating_apis()
     {
-        string assemblyPath = typeof(WindowsRegistryReader).Assembly.Location;
-
-        using FileStream stream = File.OpenRead(assemblyPath);
-        using var peReader = new PEReader(stream);
-        MetadataReader metadata = peReader.GetMetadataReader();
-
-        var violations = new List<string>();
-        foreach (MemberReferenceHandle handle in metadata.MemberReferences)
+        string? root = RepoRoot;
+        if (root is null)
         {
-            MemberReference reference = metadata.GetMemberReference(handle);
-            string member = metadata.GetString(reference.Name);
-            string declaringType = DeclaringTypeName(metadata, reference.Parent);
-            if (IsMutatingApi(declaringType, member))
+            Assert.Skip("Runs only inside a source checkout (these tests scan the repository's source tree).");
+            return;
+        }
+
+        string readers = Path.Combine(root, "src", "OpenTheWindows.Windows", "Readers");
+        var violations = new List<string>();
+
+        foreach (string file in Directory.EnumerateFiles(readers, "*.cs"))
+        {
+            string text = File.ReadAllText(file);
+            foreach (string token in ForbiddenInReaders)
             {
-                violations.Add(declaringType + "." + member);
+                if (text.Contains(token, StringComparison.Ordinal))
+                {
+                    violations.Add(string.Concat(Path.GetFileName(file), ": ", token));
+                }
             }
         }
 
-        Assert.True(violations.Count == 0, "Write API(s) referenced: " + string.Join(", ", violations.Distinct(StringComparer.Ordinal)));
+        Assert.True(violations.Count == 0, "Reader references a mutating API: " + string.Join(", ", violations));
     }
 
-    private static string DeclaringTypeName(MetadataReader metadata, EntityHandle parent)
+    [Fact]
+    public void Only_the_command_runner_suppresses_the_process_ban()
     {
-        if (parent.Kind == HandleKind.TypeReference)
+        string? root = RepoRoot;
+        if (root is null)
         {
-            return metadata.GetString(metadata.GetTypeReference((TypeReferenceHandle)parent).Name);
+            Assert.Skip("Runs only inside a source checkout (these tests scan the repository's source tree).");
+            return;
         }
 
-        return string.Empty;
+        string source = Path.Combine(root, "src");
+        var offenders = new List<string>();
+
+        foreach (string file in Directory.EnumerateFiles(source, "*.cs", SearchOption.AllDirectories))
+        {
+            if (string.Equals(Path.GetFileName(file), "WindowsCommandRunner.cs", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            if (File.ReadAllText(file).Contains("RS0030", StringComparison.Ordinal))
+            {
+                offenders.Add(Path.GetFileName(file));
+            }
+        }
+
+        Assert.True(offenders.Count == 0, "The Process ban is suppressed outside the command runner in: " + string.Join(", ", offenders));
     }
 
-    private static bool IsMutatingApi(string declaringType, string member) => declaringType switch
+    private static string? FindRepoRoot()
     {
-        "RegistryKey" => member is "SetValue" or "DeleteValue" or "DeleteValueTree"
-            or "DeleteSubKey" or "DeleteSubKeyTree" or "CreateSubKey" or "CreateSubKeyTree",
-        "ServiceController" => member is "Start" or "Stop" or "Pause" or "Continue" or "ExecuteCommand",
-        "PackageManager" => StartsWithAny(member, "Add", "Remove", "Stage", "Register", "Provision", "Deprovision"),
-        "TaskService" or "TaskFolder" or "TaskDefinition" =>
-            member.Contains("Register", StringComparison.Ordinal) || member.Contains("Delete", StringComparison.Ordinal),
-        "File" or "Directory" => member is "Delete" or "Create" or "CreateDirectory" or "Move" or "Copy"
-            or "WriteAllText" or "WriteAllBytes" or "WriteAllLines" or "AppendAllText" or "AppendAllLines",
-        _ => false,
-    };
+        DirectoryInfo? directory = new(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "OpenTheWindows.slnx")))
+        {
+            directory = directory.Parent;
+        }
 
-    private static bool StartsWithAny(string value, params string[] prefixes)
-        => prefixes.Any(prefix => value.StartsWith(prefix, StringComparison.Ordinal));
+        return directory?.FullName;
+    }
 }

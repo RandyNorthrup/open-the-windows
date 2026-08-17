@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Diagnostics;
+using OpenTheWindows.Core.Journal;
 
 namespace OpenTheWindows.Cli;
 
@@ -16,4 +17,6 @@ namespace OpenTheWindows.Cli;
     DefaultIgnoreCondition = JsonIgnoreCondition.Never)]
 [JsonSerializable(typeof(SystemReport))]
 [JsonSerializable(typeof(IReadOnlyList<HealthCheckResult>))]
+[JsonSerializable(typeof(ApplyJsonReport))]
+[JsonSerializable(typeof(IReadOnlyList<JournalSummary>))]
 internal sealed partial class CliJsonContext : JsonSerializerContext;

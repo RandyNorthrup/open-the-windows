@@ -104,6 +104,25 @@ TPM, Defender, BitLocker, firewall, and more — research 04 §5). It only reads
 checks whose source needs elevation report `Unknown`. Exit 0 unless the command
 itself errors.
 
+`otw apply --profile <basic|balanced|strict|paranoid>` **applies** a profile
+transactionally (elevated). It journals every prior state before changing
+anything, verifies each change by re-reading it, and rolls the whole run back if
+any step fails. `--what-if` plans without changing anything; `--include-draft`
+also applies Draft entries; a System Restore point is created first unless
+`--no-restore-point`; `--allow-advanced` / `--allow-breaking` permit higher-risk
+entries (Breaking also needs typed confirmation unless `--yes`); `--break-glass`
+overrides MDM/Group-Policy-managed settings (audited); `--restart-explorer`
+restarts the shell for entries that need it; `--json` emits a stable result
+document. Exit 0 = applied, 3010 = applied but a reboot is required, 2 = error
+(rolled back), 3 = unsupported platform, 4 = invalid input / conflict, 5 =
+elevation required. Journals live in `%ProgramData%\OpenTheWindows\journal`
+([docs/journal-format.md](docs/journal-format.md)); the audit trail goes to the
+Windows Event Log and JSONL ([docs/event-log.md](docs/event-log.md)).
+
+`otw revert <runId|last> [--what-if] [--json]` restores the state captured before
+a prior run, journaling a new revert run. `otw history [--json]` lists prior
+apply and revert runs, newest first.
+
 Publish (single-file trimmed CLI + self-contained app + SBOM + hashes):
 
 ```powershell

@@ -30,6 +30,7 @@
     <PackageReference Include="System.ServiceProcess.ServiceController" />
     <PackageReference Include="TaskScheduler" />
     <PackageReference Include="System.Management" />
+    <PackageReference Include="System.Diagnostics.EventLog" />
   </ItemGroup>
 
   <ItemGroup>
