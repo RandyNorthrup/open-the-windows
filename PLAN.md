@@ -218,8 +218,20 @@ Planned (not yet referenced; add at the milestone that needs them, with the
 same verification): Microsoft.Windows.CsWin32 0.3.298, Vanara.PInvoke.WUApi
 5.0.7 (or hand-written WUA COM interfaces — `<COMReference>` does not build
 under `dotnet build`), Corvus.Json.Validator 5.3.2 or JsonSchema.Net 9.4.0,
-Serilog 4.4.0 + Serilog.Sinks.EventLog 4.0.0, FlaUI.UIA3 5.0.0, Stryker.NET
-4.16.0, WiX 7.0.0, Verify.XunitV3 31.28.0.
+Serilog 4.4.0 + Serilog.Sinks.EventLog 4.0.0, FlaUI.UIA3 5.0.0, WiX 7.0.0,
+Verify.XunitV3 31.28.0.
+
+Stryker.NET 4.16.0 is pinned in `.config/dotnet-tools.json` with a config
+(`stryker-config.json`) scoped to the M2-added Core logic (engine, reports,
+policy parser), wired as the opt-in `pwsh build/quality.ps1 -Only mutation`
+step (report-only in M2: `break=0`, threshold enforced from M3; never part of
+`all`). **Deferred gate:** Stryker.NET does not yet support
+Microsoft.Testing.Platform test projects (stryker-mutator/stryker-net#3094), and
+this repo mandates MTP (no VSTest packages), so mutation testing cannot run its
+tests today. The gate detects exactly this condition and reports DEFERRED rather
+than a spurious failure (any other Stryker error still fails it); it also sets
+`DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR` so Buildalyzer's VS MSBuild can resolve the
+.NET 10 SDK. The step activates unchanged once Stryker adds MTP support.
 
 M2 deviation from the M2-scan spec: optional-feature state is read via WMI
 `Win32_OptionalFeature` (through `System.Management`), not the DISM API the

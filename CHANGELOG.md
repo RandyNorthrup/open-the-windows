@@ -112,6 +112,15 @@ what was planned (plans live in `PLAN.md`).
   `List.Add` and friends are not flagged. Proven to fail on an injected
   `SetValue` and pass once reverted (PLAN §7.2).
 
+- M2: mutation-testing step wired (Stryker.NET 4.16.0, pinned in
+  `.config/dotnet-tools.json` with `stryker-config.json` scoped to the M2 Core
+  logic) as the opt-in `pwsh build/quality.ps1 -Only mutation` gate (report-only:
+  `break=0`; never part of `all`; real threshold from M3). It is currently a
+  **deferred gate**: Stryker does not yet support Microsoft.Testing.Platform test
+  projects (stryker-net#3094) and this repo mandates MTP (no VSTest), so the gate
+  detects that condition and reports DEFERRED rather than a spurious failure —
+  any other Stryker error still fails it. Recorded in PLAN §7.1.
+
 - M1: catalogue model (`OpenTheWindows.Core.Catalog`), JSON Schema
   `catalog/schema/tweak.schema.json`, embedded loader with directory overrides
   and a structural validator (stable rule ids), 29 Draft entries across six

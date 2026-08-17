@@ -1,0 +1,23 @@
+{
+  "stryker-config": {
+    "solution": "OpenTheWindows.slnx",
+    "project": "OpenTheWindows.Core.csproj",
+    "test-projects": [
+      "tests/OpenTheWindows.Core.Tests/OpenTheWindows.Core.Tests.csproj"
+    ],
+    "mutate": [
+      "Engine/**/*.cs",
+      "Reports/**/*.cs",
+      "Policy/**/*.cs"
+    ],
+    "reporters": [
+      "html",
+      "progress"
+    ],
+    "thresholds": {
+      "high": 85,
+      "low": 70,
+      "break": 0
+    }
+  }
+}
