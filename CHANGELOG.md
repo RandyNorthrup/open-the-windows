@@ -324,6 +324,14 @@ what was planned (plans live in `PLAN.md`).
 
 ### Fixed
 
+- `otw scan --only <id>` and `otw apply --only <id>` no longer require
+  `--profile`. `--only` is the per-entry verification selector (M4 acceptance #2)
+  and ignores the profile, but the parser still marked `--profile` required, so
+  the documented `apply --only <id>` command failed with "Option '--profile' is
+  required". `--profile` is now optional; it is required only in profile mode
+  (no `--only`), and a run selected by `--only` alone is labelled `only:<id>` in
+  the journal and scan report so history stays readable. Found while building the
+  M4 VM-verification harness.
 - `otw updates resume` now clears **every** active Open the Windows pause, not
   just the most recent one. When a user re-paused (for example `pause --days 7`
   then later `pause --days 60 --extended`) without resuming in between, the second

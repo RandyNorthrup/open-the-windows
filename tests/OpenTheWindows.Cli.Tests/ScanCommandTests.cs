@@ -75,6 +75,30 @@ public sealed class ScanCommandTests
     }
 
     [Fact]
+    public void Only_without_profile_scans_just_that_entry()
+    {
+        string id = CatalogLoader.LoadBuiltIn().Catalog!.Entries[0].Id.Value;
+        var (root, stdout, stderr) = Build();
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "scan", "--only", id, "--json");
+
+        Assert.True(code is ExitCodes.Success or ExitCodes.Drift, "a single-entry scan should succeed or report drift, not error");
+        using var document = JsonDocument.Parse(stdout.ToString());
+        Assert.Equal("only:" + id, document.RootElement.GetProperty("profile").GetString());
+    }
+
+    [Fact]
+    public void Neither_profile_nor_only_reports_profile_required()
+    {
+        var (root, stdout, stderr) = Build();
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "scan");
+
+        Assert.Equal(ExitCodes.Error, code);
+        Assert.Contains("--profile' is required", stderr.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Out_file_writes_csv_report()
     {
         var (root, stdout, stderr) = Build();

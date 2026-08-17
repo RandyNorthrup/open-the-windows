@@ -24,25 +24,28 @@ internal static class CommandSupport
         CliServices services,
         ParseResult parseResult,
         Option<string> profileOption,
+        Option<string?> onlyOption,
         Option<string?> catalogDirOption,
         int unknownProfileExit,
         TextWriter stderr,
         out Level level,
         out TweakCatalog catalog,
+        out string profileLabel,
         out int exitCode)
     {
         level = default;
         catalog = null!;
+        profileLabel = string.Empty;
 
         if (!IsSupported(services.Doctor, stderr, out exitCode))
         {
             return false;
         }
 
-        string profileName = parseResult.GetValue(profileOption) ?? string.Empty;
-        if (!TryResolveProfile(profileName, stderr, out level))
+        if (!TryResolveLevelAndLabel(
+                parseResult.GetValue(onlyOption), parseResult.GetValue(profileOption) ?? string.Empty,
+                unknownProfileExit, stderr, out level, out profileLabel, out exitCode))
         {
-            exitCode = unknownProfileExit;
             return false;
         }
 
@@ -61,6 +64,47 @@ internal static class CommandSupport
 
         catalog = loaded.Catalog;
         exitCode = ExitCodes.Success;
+        return true;
+    }
+
+    /// <summary>
+    /// Resolves the level and the run/report label for a scan or apply. In profile
+    /// mode (<paramref name="onlyId"/> empty) a named <paramref name="profileName"/>
+    /// is required and selects the level. With <c>--only</c> the profile is ignored:
+    /// an explicit profile still sets the level label, otherwise the level is a
+    /// placeholder (<see cref="TrySelectEntries"/> ignores it) and the run is
+    /// labelled <c>only:&lt;id&gt;</c> so history reads clearly.
+    /// </summary>
+    private static bool TryResolveLevelAndLabel(
+        string? onlyId, string profileName, int unknownProfileExit, TextWriter stderr,
+        out Level level, out string profileLabel, out int exitCode)
+    {
+        level = Level.Basic;
+        profileLabel = string.Empty;
+        exitCode = ExitCodes.Success;
+
+        if (string.IsNullOrEmpty(onlyId))
+        {
+            if (string.IsNullOrEmpty(profileName))
+            {
+                stderr.WriteLine("Option '--profile' is required unless '--only <id>' is given.");
+                exitCode = unknownProfileExit;
+                return false;
+            }
+        }
+        else if (string.IsNullOrEmpty(profileName))
+        {
+            profileLabel = string.Create(CultureInfo.InvariantCulture, $"only:{onlyId}");
+            return true;
+        }
+
+        if (!TryResolveProfile(profileName, stderr, out level))
+        {
+            exitCode = unknownProfileExit;
+            return false;
+        }
+
+        profileLabel = profileName;
         return true;
     }
 
@@ -92,11 +136,10 @@ internal static class CommandSupport
         return true;
     }
 
-    /// <summary>The shared <c>--profile</c> option (required).</summary>
+    /// <summary>The shared <c>--profile</c> option (required unless <c>--only</c> is given).</summary>
     public static Option<string> ProfileOption() => new("--profile")
     {
-        Description = "Built-in level profile: " + string.Join(", ", NamedProfile.Names) + ".",
-        Required = true,
+        Description = "Built-in level profile: " + string.Join(", ", NamedProfile.Names) + " (required unless --only is given).",
     };
 
     /// <summary>The shared <c>--catalog-dir</c> option.</summary>

@@ -34,8 +34,9 @@ internal static class ScanCommand
         TextWriter stderr = parseResult.InvocationConfiguration.Error;
 
         if (!CommandSupport.TryResolveProfileCatalog(
-            services, parseResult, options.Common.Profile, options.Common.CatalogDir, ExitCodes.Error, stderr,
-            out Level level, out TweakCatalog catalog, out int exitCode))
+            services, parseResult, options.Common.Profile, options.Common.Only, options.Common.CatalogDir,
+            ExitCodes.Error, stderr,
+            out Level level, out TweakCatalog catalog, out string profileName, out int exitCode))
         {
             return exitCode;
         }
@@ -47,7 +48,6 @@ internal static class ScanCommand
             return ExitCodes.Error;
         }
 
-        string profileName = parseResult.GetValue(options.Common.Profile)!;
         if (!CommandSupport.TrySelectEntries(
             catalog, level, parseResult.GetValue(options.Common.IncludeDraft), parseResult.GetValue(options.Common.Only), stderr,
             out IReadOnlyList<TweakDefinition> entries))

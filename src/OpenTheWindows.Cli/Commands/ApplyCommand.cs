@@ -37,13 +37,13 @@ internal static class ApplyCommand
         TextWriter stderr = parseResult.InvocationConfiguration.Error;
 
         if (!CommandSupport.TryResolveProfileCatalog(
-            services, parseResult, options.Common.Profile, options.Common.CatalogDir, ExitCodes.InvalidInput, stderr,
-            out Level level, out TweakCatalog catalog, out int exitCode))
+            services, parseResult, options.Common.Profile, options.Common.Only, options.Common.CatalogDir,
+            ExitCodes.InvalidInput, stderr,
+            out Level level, out TweakCatalog catalog, out string profileName, out int exitCode))
         {
             return exitCode;
         }
 
-        string profileName = parseResult.GetValue(options.Common.Profile)!;
         bool whatIf = parseResult.GetValue(options.WhatIf);
         if (!whatIf && !services.Elevation.IsElevated)
         {

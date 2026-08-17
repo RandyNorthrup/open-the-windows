@@ -70,6 +70,32 @@ public sealed class ApplyCommandTests
     }
 
     [Fact]
+    public void Only_without_profile_selects_just_that_entry()
+    {
+        string id = CatalogLoader.LoadBuiltIn().Catalog!.Entries[0].Id.Value;
+        var (root, stdout, stderr) = Build(engine: FakeApplyEngine.Create(new FakeMachine()).Engine);
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "apply", "--only", id, "--what-if", "--json");
+
+        Assert.Equal(ExitCodes.Success, code);
+        using var document = JsonDocument.Parse(stdout.ToString());
+        JsonElement entries = document.RootElement.GetProperty("entries");
+        Assert.Equal(1, entries.GetArrayLength());
+        Assert.Equal(id, entries[0].GetProperty("id").GetString());
+    }
+
+    [Fact]
+    public void Neither_profile_nor_only_reports_profile_required()
+    {
+        var (root, stdout, stderr) = Build();
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "apply", "--what-if");
+
+        Assert.Equal(ExitCodes.InvalidInput, code);
+        Assert.Contains("--profile' is required", stderr.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void What_if_json_parses()
     {
         var (root, stdout, stderr) = Build(engine: FakeApplyEngine.Create(new FakeMachine()).Engine);
