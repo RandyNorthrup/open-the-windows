@@ -120,9 +120,17 @@ what was planned (plans live in `PLAN.md`).
   Delivery-Optimization and Start-tracking keys owned by other categories) and
   paired the two Windows-Ink-Workspace entries with `conflictsWith`; each file
   was adversarially re-verified (zero discrepancies). All Draft; the catalogue
-  now ships **432 entries** — Security 150, Privacy 107, Performance 61, Debloat
+  now ships 432 entries — Security 150, Privacy 107, Performance 61, Debloat
   61, Shell 31, Updates 22 — with a `BuiltInCatalogTests` theory asserting every
-  category's M4 minimum. `OpenTheWindows.Core.Engine.ApplyEngine`
+  category's M4 minimum.
+- Three more Windows Update client-policy entries (research 03): get updates for
+  other Microsoft products (`AllowMUUpdateService`), an 18-hour active-hours range
+  (`SetActiveHoursMaxRange` / `ActiveHoursMaxRange`) and an auto-download /
+  scheduled-daily-install mode (`AUOptions` = 4), the last paired with
+  notify-before-install by `conflictsWith`. Updates reaches 25 and **all six
+  catalogue categories now meet their M4 per-category minimums** (435 entries
+  total: Security 150, Privacy 107, Performance 61, Debloat 61, Shell 31,
+  Updates 25). `OpenTheWindows.Core.Engine.ApplyEngine`
   plans a run (dependency-ordered, flagging conflicts, managed settings, risk
   gating and not-applicable entries), then applies it journal-first — every prior
   state is written to the journal before the first machine change, each action is

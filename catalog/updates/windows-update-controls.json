@@ -11,14 +11,46 @@
       "risk": "Safe",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "DeferFeatureUpdates", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "DeferFeatureUpdatesPeriodInDays", "type": "Dword", "value": 30, "default": null, "valueKind": "Policy" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "DeferFeatureUpdates",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "DeferFeatureUpdatesPeriodInDays",
+          "type": "Dword",
+          "value": 30,
+          "default": null,
+          "valueKind": "Policy"
+        }
       ],
       "requires": "None",
       "dependsOn": [],
-      "conflictsWith": ["updates.feature-updates.defer-90-days", "updates.feature-updates.defer-180-days", "updates.feature-updates.defer-365-days", "updates.feature-release.pin-to-25h2"],
+      "conflictsWith": [
+        "updates.feature-updates.defer-90-days",
+        "updates.feature-updates.defer-180-days",
+        "updates.feature-updates.defer-365-days",
+        "updates.feature-release.pin-to-25h2"
+      ],
       "managedBy": {
         "policyCsp": "Update/DeferFeatureUpdatesPeriodInDays",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Update\\Manage updates offered from Windows Update\\Select when Preview builds and Feature Updates are received"
@@ -29,7 +61,11 @@
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
       "verifiedOn": [],
-      "tags": ["windows-update", "feature-updates", "defer"]
+      "tags": [
+        "windows-update",
+        "feature-updates",
+        "defer"
+      ]
     },
     {
       "id": "updates.feature-updates.defer-90-days",
@@ -41,14 +77,46 @@
       "risk": "Safe",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "DeferFeatureUpdates", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "DeferFeatureUpdatesPeriodInDays", "type": "Dword", "value": 90, "default": null, "valueKind": "Policy" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "DeferFeatureUpdates",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "DeferFeatureUpdatesPeriodInDays",
+          "type": "Dword",
+          "value": 90,
+          "default": null,
+          "valueKind": "Policy"
+        }
       ],
       "requires": "None",
       "dependsOn": [],
-      "conflictsWith": ["updates.feature-updates.defer-30-days", "updates.feature-updates.defer-180-days", "updates.feature-updates.defer-365-days", "updates.feature-release.pin-to-25h2"],
+      "conflictsWith": [
+        "updates.feature-updates.defer-30-days",
+        "updates.feature-updates.defer-180-days",
+        "updates.feature-updates.defer-365-days",
+        "updates.feature-release.pin-to-25h2"
+      ],
       "managedBy": {
         "policyCsp": "Update/DeferFeatureUpdatesPeriodInDays",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Update\\Manage updates offered from Windows Update\\Select when Preview builds and Feature Updates are received"
@@ -59,7 +127,11 @@
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
       "verifiedOn": [],
-      "tags": ["windows-update", "feature-updates", "defer"]
+      "tags": [
+        "windows-update",
+        "feature-updates",
+        "defer"
+      ]
     },
     {
       "id": "updates.feature-updates.defer-180-days",
@@ -71,25 +143,63 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "DeferFeatureUpdates", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "DeferFeatureUpdatesPeriodInDays", "type": "Dword", "value": 180, "default": null, "valueKind": "Policy" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "DeferFeatureUpdates",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "DeferFeatureUpdatesPeriodInDays",
+          "type": "Dword",
+          "value": 180,
+          "default": null,
+          "valueKind": "Policy"
+        }
       ],
       "requires": "None",
       "dependsOn": [],
-      "conflictsWith": ["updates.feature-updates.defer-30-days", "updates.feature-updates.defer-90-days", "updates.feature-updates.defer-365-days", "updates.feature-release.pin-to-25h2"],
+      "conflictsWith": [
+        "updates.feature-updates.defer-30-days",
+        "updates.feature-updates.defer-90-days",
+        "updates.feature-updates.defer-365-days",
+        "updates.feature-release.pin-to-25h2"
+      ],
       "managedBy": {
         "policyCsp": "Update/DeferFeatureUpdatesPeriodInDays",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Update\\Manage updates offered from Windows Update\\Select when Preview builds and Feature Updates are received"
       },
-      "sideEffects": ["The device can stay a full Windows version behind the current release; ensure the running version does not reach end-of-servicing during the deferral window."],
+      "sideEffects": [
+        "The device can stay a full Windows version behind the current release; ensure the running version does not reach end-of-servicing during the deferral window."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows/deployment/update/waas-configure-wufb",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
       "verifiedOn": [],
-      "tags": ["windows-update", "feature-updates", "defer"]
+      "tags": [
+        "windows-update",
+        "feature-updates",
+        "defer"
+      ]
     },
     {
       "id": "updates.feature-updates.defer-365-days",
@@ -101,25 +211,63 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "DeferFeatureUpdates", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "DeferFeatureUpdatesPeriodInDays", "type": "Dword", "value": 365, "default": null, "valueKind": "Policy" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "DeferFeatureUpdates",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "DeferFeatureUpdatesPeriodInDays",
+          "type": "Dword",
+          "value": 365,
+          "default": null,
+          "valueKind": "Policy"
+        }
       ],
       "requires": "None",
       "dependsOn": [],
-      "conflictsWith": ["updates.feature-updates.defer-30-days", "updates.feature-updates.defer-90-days", "updates.feature-updates.defer-180-days", "updates.feature-release.pin-to-25h2"],
+      "conflictsWith": [
+        "updates.feature-updates.defer-30-days",
+        "updates.feature-updates.defer-90-days",
+        "updates.feature-updates.defer-180-days",
+        "updates.feature-release.pin-to-25h2"
+      ],
       "managedBy": {
         "policyCsp": "Update/DeferFeatureUpdatesPeriodInDays",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Update\\Manage updates offered from Windows Update\\Select when Preview builds and Feature Updates are received"
       },
-      "sideEffects": ["The device can stay a full Windows version behind; the end-of-servicing warning must be heeded before the running release lapses."],
+      "sideEffects": [
+        "The device can stay a full Windows version behind; the end-of-servicing warning must be heeded before the running release lapses."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows/deployment/update/waas-configure-wufb",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
       "verifiedOn": [],
-      "tags": ["windows-update", "feature-updates", "defer"]
+      "tags": [
+        "windows-update",
+        "feature-updates",
+        "defer"
+      ]
     },
     {
       "id": "updates.quality-updates.defer-7-days",
@@ -131,10 +279,37 @@
       "risk": "Advanced",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "DeferQualityUpdates", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "DeferQualityUpdatesPeriodInDays", "type": "Dword", "value": 7, "default": null, "valueKind": "Policy" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "DeferQualityUpdates",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "DeferQualityUpdatesPeriodInDays",
+          "type": "Dword",
+          "value": 7,
+          "default": null,
+          "valueKind": "Policy"
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -143,13 +318,19 @@
         "policyCsp": "Update/DeferQualityUpdatesPeriodInDays",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Update\\Manage updates offered from Windows Update\\Select when Quality Updates are received"
       },
-      "sideEffects": ["Security updates are withheld for 7 days after release, leaving already-fixed vulnerabilities exposed on this device during that window."],
+      "sideEffects": [
+        "Security updates are withheld for 7 days after release, leaving already-fixed vulnerabilities exposed on this device during that window."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows/deployment/update/waas-configure-wufb",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
       "verifiedOn": [],
-      "tags": ["windows-update", "quality-updates", "defer"]
+      "tags": [
+        "windows-update",
+        "quality-updates",
+        "defer"
+      ]
     },
     {
       "id": "updates.feature-release.pin-to-25h2",
@@ -161,26 +342,73 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "TargetReleaseVersion", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "TargetReleaseVersionInfo", "type": "Sz", "value": "25H2", "default": null, "valueKind": "Policy" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "ProductVersion", "type": "Sz", "value": "Windows 11", "default": null, "valueKind": "Policy" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "TargetReleaseVersion",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "TargetReleaseVersionInfo",
+          "type": "Sz",
+          "value": "25H2",
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "ProductVersion",
+          "type": "Sz",
+          "value": "Windows 11",
+          "default": null,
+          "valueKind": "Policy"
+        }
       ],
       "requires": "None",
       "dependsOn": [],
-      "conflictsWith": ["updates.feature-updates.defer-30-days", "updates.feature-updates.defer-90-days", "updates.feature-updates.defer-180-days", "updates.feature-updates.defer-365-days"],
+      "conflictsWith": [
+        "updates.feature-updates.defer-30-days",
+        "updates.feature-updates.defer-90-days",
+        "updates.feature-updates.defer-180-days",
+        "updates.feature-updates.defer-365-days"
+      ],
       "managedBy": {
         "policyCsp": "Update/TargetReleaseVersion",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Update\\Manage updates offered from Windows Update\\Select the target Feature Update version"
       },
-      "sideEffects": ["The device stays on 25H2 and is not offered a newer feature release until 25H2 reaches end of servicing; check 'otw updates status' for the days remaining."],
+      "sideEffects": [
+        "The device stays on 25H2 and is not offered a newer feature release until 25H2 reaches end of servicing; check 'otw updates status' for the days remaining."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update",
         "https://learn.microsoft.com/windows/release-health/windows11-release-information"
       ],
       "verifiedOn": [],
-      "tags": ["windows-update", "feature-updates", "pin"]
+      "tags": [
+        "windows-update",
+        "feature-updates",
+        "pin"
+      ]
     },
     {
       "id": "updates.features.keep-new-features-off",
@@ -192,9 +420,27 @@
       "risk": "Safe",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": 22621, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "AllowTemporaryEnterpriseFeatureControl", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "AllowTemporaryEnterpriseFeatureControl",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -209,7 +455,11 @@
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
       "verifiedOn": [],
-      "tags": ["windows-update", "features", "stability"]
+      "tags": [
+        "windows-update",
+        "features",
+        "stability"
+      ]
     },
     {
       "id": "updates.automatic-updates.notify-before-install",
@@ -221,25 +471,60 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", "name": "NoAutoUpdate", "type": "Dword", "value": 0, "default": null, "valueKind": "Policy" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", "name": "AUOptions", "type": "Dword", "value": 3, "default": null, "valueKind": "Policy" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
+          "name": "NoAutoUpdate",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
+          "name": "AUOptions",
+          "type": "Dword",
+          "value": 3,
+          "default": null,
+          "valueKind": "Policy"
+        }
       ],
       "requires": "None",
       "dependsOn": [],
-      "conflictsWith": [],
+      "conflictsWith": [
+        "updates.automatic-updates.scheduled-install"
+      ],
       "managedBy": {
         "policyCsp": "Update/AllowAutoUpdate",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Update\\Manage end user experience\\Configure Automatic Updates"
       },
-      "sideEffects": ["Installs wait for you to act, so a patch can sit un-installed if you keep dismissing the notification; add a compliance deadline if you need guaranteed patching."],
+      "sideEffects": [
+        "Installs wait for you to act, so a patch can sit un-installed if you keep dismissing the notification; add a compliance deadline if you need guaranteed patching."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows/deployment/update/waas-wu-settings",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
       "verifiedOn": [],
-      "tags": ["windows-update", "automatic-updates", "restart"]
+      "tags": [
+        "windows-update",
+        "automatic-updates",
+        "restart"
+      ]
     },
     {
       "id": "updates.delivery-optimization.http-only",
@@ -251,13 +536,34 @@
       "risk": "Safe",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization", "name": "DODownloadMode", "type": "Dword", "value": 0, "default": null, "valueKind": "Policy" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization",
+          "name": "DODownloadMode",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
       ],
       "requires": "None",
       "dependsOn": [],
-      "conflictsWith": ["updates.delivery-optimization.lan-only", "updates.delivery-optimization.simple-mode"],
+      "conflictsWith": [
+        "updates.delivery-optimization.lan-only",
+        "updates.delivery-optimization.simple-mode"
+      ],
       "managedBy": {
         "policyCsp": "DeliveryOptimization/DODownloadMode",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Delivery Optimization\\Download Mode"
@@ -268,7 +574,12 @@
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-deliveryoptimization"
       ],
       "verifiedOn": [],
-      "tags": ["windows-update", "delivery-optimization", "bandwidth", "privacy"]
+      "tags": [
+        "windows-update",
+        "delivery-optimization",
+        "bandwidth",
+        "privacy"
+      ]
     },
     {
       "id": "updates.delivery-optimization.simple-mode",
@@ -280,24 +591,51 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization", "name": "DODownloadMode", "type": "Dword", "value": 99, "default": null, "valueKind": "Policy" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization",
+          "name": "DODownloadMode",
+          "type": "Dword",
+          "value": 99,
+          "default": null,
+          "valueKind": "Policy"
+        }
       ],
       "requires": "None",
       "dependsOn": [],
-      "conflictsWith": ["updates.delivery-optimization.lan-only", "updates.delivery-optimization.http-only"],
+      "conflictsWith": [
+        "updates.delivery-optimization.lan-only",
+        "updates.delivery-optimization.http-only"
+      ],
       "managedBy": {
         "policyCsp": "DeliveryOptimization/DODownloadMode",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Delivery Optimization\\Download Mode"
       },
-      "sideEffects": ["Delivery Optimization's cloud service, peer sharing and Microsoft Connected Cache are all disabled, so large updates download directly and can be slower."],
+      "sideEffects": [
+        "Delivery Optimization's cloud service, peer sharing and Microsoft Connected Cache are all disabled, so large updates download directly and can be slower."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows/deployment/do/waas-delivery-optimization-reference",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-deliveryoptimization"
       ],
       "verifiedOn": [],
-      "tags": ["windows-update", "delivery-optimization", "privacy"]
+      "tags": [
+        "windows-update",
+        "delivery-optimization",
+        "privacy"
+      ]
     },
     {
       "id": "updates.msrt.do-not-report-infections",
@@ -309,9 +647,23 @@
       "risk": "Safe",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\MRT", "name": "DontReportInfectionInformation", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\MRT",
+          "name": "DontReportInfectionInformation",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -322,7 +674,11 @@
         "https://support.microsoft.com/en-us/topic/remove-specific-prevalent-malware-with-windows-malicious-software-removal-tool-kb890830-ba51b71f-39cd-cdec-73eb-61979b0661e0"
       ],
       "verifiedOn": [],
-      "tags": ["windows-update", "msrt", "telemetry"]
+      "tags": [
+        "windows-update",
+        "msrt",
+        "telemetry"
+      ]
     },
     {
       "id": "updates.store.disable-app-auto-update",
@@ -334,9 +690,27 @@
       "risk": "Advanced",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsStore", "name": "AutoDownload", "type": "Dword", "value": 2, "default": null, "valueKind": "Policy" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\WindowsStore",
+          "name": "AutoDownload",
+          "type": "Dword",
+          "value": 2,
+          "default": null,
+          "valueKind": "Policy"
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -345,12 +719,18 @@
         "policyCsp": "ApplicationManagement/AllowAppStoreAutoUpdate",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Store\\Turn off Automatic Download and Install of updates"
       },
-      "sideEffects": ["Microsoft Store apps — including WebView2-based and security-relevant apps such as the Windows Security helpers, Photos and Terminal — stop updating themselves and can go stale until you update them manually."],
+      "sideEffects": [
+        "Microsoft Store apps — including WebView2-based and security-relevant apps such as the Windows Security helpers, Photos and Terminal — stop updating themselves and can go stale until you update them manually."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-admx-windowsstore"
       ],
       "verifiedOn": [],
-      "tags": ["windows-update", "store", "app-updates"]
+      "tags": [
+        "windows-update",
+        "store",
+        "app-updates"
+      ]
     },
     {
       "id": "updates.notifications.hide-organization-name",
@@ -362,9 +742,23 @@
       "risk": "Safe",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Microsoft\\WindowsUpdate\\Orchestrator\\Configurations", "name": "UsoDisableAADJAttribution", "type": "Dword", "value": 1, "default": null, "valueKind": "Preference" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\WindowsUpdate\\Orchestrator\\Configurations",
+          "name": "UsoDisableAADJAttribution",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Preference"
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -375,7 +769,10 @@
         "https://learn.microsoft.com/windows/deployment/update/waas-wu-settings"
       ],
       "verifiedOn": [],
-      "tags": ["windows-update", "notifications"]
+      "tags": [
+        "windows-update",
+        "notifications"
+      ]
     },
     {
       "id": "updates.restart.active-hours-8-to-23",
@@ -387,11 +784,47 @@
       "risk": "Safe",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "SetActiveHours", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "ActiveHoursStart", "type": "Dword", "value": 8, "default": null, "valueKind": "Policy" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "ActiveHoursEnd", "type": "Dword", "value": 23, "default": null, "valueKind": "Policy" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "SetActiveHours",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "ActiveHoursStart",
+          "type": "Dword",
+          "value": 8,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "ActiveHoursEnd",
+          "type": "Dword",
+          "value": 23,
+          "default": null,
+          "valueKind": "Policy"
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -406,7 +839,11 @@
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
       "verifiedOn": [],
-      "tags": ["windows-update", "restart", "active-hours"]
+      "tags": [
+        "windows-update",
+        "restart",
+        "active-hours"
+      ]
     },
     {
       "id": "updates.restart.quality-deadline-7-grace-2",
@@ -418,12 +855,57 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": 22621, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "SetComplianceDeadline", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "ConfigureDeadlineForQualityUpdates", "type": "Dword", "value": 7, "default": null, "valueKind": "Policy" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "ConfigureDeadlineGracePeriod", "type": "Dword", "value": 2, "default": null, "valueKind": "Policy" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "ConfigureDeadlineNoAutoRebootForQualityUpdates", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "SetComplianceDeadline",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "ConfigureDeadlineForQualityUpdates",
+          "type": "Dword",
+          "value": 7,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "ConfigureDeadlineGracePeriod",
+          "type": "Dword",
+          "value": 2,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "ConfigureDeadlineNoAutoRebootForQualityUpdates",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -432,13 +914,19 @@
         "policyCsp": "Update/ConfigureDeadlineForQualityUpdates",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Update\\Manage end user experience\\Specify deadlines for automatic updates and restarts"
       },
-      "sideEffects": ["After the 7-day deadline plus the 2-day grace period, the device will restart to finish a quality update even outside active hours, with a 15-minute warning."],
+      "sideEffects": [
+        "After the 7-day deadline plus the 2-day grace period, the device will restart to finish a quality update even outside active hours, with a 15-minute warning."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows/deployment/update/wufb-compliancedeadlines",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
       "verifiedOn": [],
-      "tags": ["windows-update", "restart", "deadline"]
+      "tags": [
+        "windows-update",
+        "restart",
+        "deadline"
+      ]
     },
     {
       "id": "updates.restart.feature-deadline-7-grace-7",
@@ -450,12 +938,57 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": 22621, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "SetComplianceDeadlineForFeatureUpdates", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "ConfigureDeadlineForFeatureUpdates", "type": "Dword", "value": 7, "default": null, "valueKind": "Policy" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "ConfigureDeadlineGracePeriodForFeatureUpdates", "type": "Dword", "value": 7, "default": null, "valueKind": "Policy" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "ConfigureDeadlineNoAutoRebootForFeatureUpdates", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "SetComplianceDeadlineForFeatureUpdates",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "ConfigureDeadlineForFeatureUpdates",
+          "type": "Dword",
+          "value": 7,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "ConfigureDeadlineGracePeriodForFeatureUpdates",
+          "type": "Dword",
+          "value": 7,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "ConfigureDeadlineNoAutoRebootForFeatureUpdates",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -464,13 +997,19 @@
         "policyCsp": "Update/ConfigureDeadlineForFeatureUpdates",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Update\\Manage end user experience\\Specify deadlines for automatic updates and restarts"
       },
-      "sideEffects": ["After the 7-day deadline plus the 7-day grace period, the device will restart to finish a feature update even outside active hours, with a 15-minute warning."],
+      "sideEffects": [
+        "After the 7-day deadline plus the 7-day grace period, the device will restart to finish a feature update even outside active hours, with a 15-minute warning."
+      ],
       "sources": [
         "https://learn.microsoft.com/windows/deployment/update/wufb-compliancedeadlines",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
       "verifiedOn": [],
-      "tags": ["windows-update", "restart", "deadline"]
+      "tags": [
+        "windows-update",
+        "restart",
+        "deadline"
+      ]
     },
     {
       "id": "updates.notifications.hide-all-but-restart-warnings",
@@ -482,10 +1021,37 @@
       "risk": "Safe",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "SetUpdateNotificationLevel", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "UpdateNotificationLevel", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "SetUpdateNotificationLevel",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "UpdateNotificationLevel",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -500,7 +1066,10 @@
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
       "verifiedOn": [],
-      "tags": ["windows-update", "notifications"]
+      "tags": [
+        "windows-update",
+        "notifications"
+      ]
     },
     {
       "id": "updates.optional-content.let-user-choose",
@@ -512,10 +1081,37 @@
       "risk": "Safe",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "SetAllowOptionalContent", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
-        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "AllowOptionalContent", "type": "Dword", "value": 3, "default": null, "valueKind": "Policy" }
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "SetAllowOptionalContent",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "AllowOptionalContent",
+          "type": "Dword",
+          "value": 3,
+          "default": null,
+          "valueKind": "Policy"
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -530,7 +1126,211 @@
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
       "verifiedOn": [],
-      "tags": ["windows-update", "optional-content"]
+      "tags": [
+        "windows-update",
+        "optional-content"
+      ]
+    },
+    {
+      "id": "updates.microsoft-update.enable",
+      "title": "Get updates for other Microsoft products",
+      "description": "Registers the Microsoft Update service with Automatic Updates so security and quality updates for other Microsoft products (.NET, Office MSI, SQL Server, Visual Studio) arrive through Windows Update.",
+      "rationale": "Broadens patch coverage beyond the OS to the rest of the installed Microsoft stack, a security win; the same as the Settings toggle 'Receive updates for other Microsoft products'. Documented Pro/Enterprise/Education; the Settings toggle and the WUA API work on Home too.",
+      "category": "Updates",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
+          "name": "AllowMUUpdateService",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Update/AllowMUUpdateService",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Update\\Manage end user experience\\Configure Automatic Updates (Install updates for other Microsoft products)"
+      },
+      "sideEffects": [
+        "Turning this off later stops security updates for .NET, Office MSI and other Microsoft products from arriving through Windows Update."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/windows/deployment/update/waas-configure-wufb",
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "windows-update",
+        "microsoft-update",
+        "automatic-updates"
+      ]
+    },
+    {
+      "id": "updates.restart.active-hours-max-range-18",
+      "title": "Allow an 18-hour active-hours range",
+      "description": "Raises the maximum active-hours range to 18 hours so a wider working window can be protected from automatic update restarts.",
+      "rationale": "By default Windows caps the active-hours span; this policy allows the full 18-hour maximum, useful alongside an active-hours policy on machines used across a long day. Documented Pro/Enterprise/Education.",
+      "category": "Updates",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "SetActiveHoursMaxRange",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "ActiveHoursMaxRange",
+          "type": "Dword",
+          "value": 18,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Update/ActiveHoursMaxRange",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Update\\Manage end user experience\\Specify active hours range for auto-restarts"
+      },
+      "sideEffects": [
+        "Only takes effect alongside an active-hours policy, and has no effect if 'No auto-restart with logged on users' or 'Always automatically restart at the scheduled time' is set."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/windows/deployment/update/waas-restart",
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "windows-update",
+        "restart",
+        "active-hours"
+      ]
+    },
+    {
+      "id": "updates.automatic-updates.scheduled-install",
+      "title": "Auto-download and schedule daily install",
+      "description": "Configures Automatic Updates to download updates automatically and install them on a daily schedule (03:00), rather than waiting for you to trigger the install.",
+      "rationale": "Keeps the machine reliably patched without manual intervention while confining installs to a chosen time; the scheduled alternative to notify-before-install. Documented Pro/Enterprise/Education.",
+      "category": "Updates",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
+          "name": "NoAutoUpdate",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
+          "name": "AUOptions",
+          "type": "Dword",
+          "value": 4,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
+          "name": "ScheduledInstallDay",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
+          "name": "ScheduledInstallTime",
+          "type": "Dword",
+          "value": 3,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [
+        "updates.automatic-updates.notify-before-install"
+      ],
+      "managedBy": {
+        "policyCsp": "Update/AllowAutoUpdate",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Update\\Manage end user experience\\Configure Automatic Updates"
+      },
+      "sideEffects": [
+        "Updates install and can restart automatically on the schedule; pair with active hours or a compliance deadline to keep restarts out of the working day."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/windows/deployment/update/waas-wu-settings",
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "windows-update",
+        "automatic-updates",
+        "restart"
+      ]
     }
   ]
 }

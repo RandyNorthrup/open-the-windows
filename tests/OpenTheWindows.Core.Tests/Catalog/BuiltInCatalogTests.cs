@@ -35,6 +35,7 @@ public sealed class BuiltInCatalogTests
     [InlineData(Category.Debloat, 60)]
     [InlineData(Category.Performance, 40)]
     [InlineData(Category.Shell, 30)]
+    [InlineData(Category.Updates, 25)]
     public void Category_meets_its_M4_minimum(Category category, int minimum)
     {
         int actual = Load().InCategory(category).Count();

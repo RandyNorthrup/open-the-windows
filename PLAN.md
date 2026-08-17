@@ -478,10 +478,14 @@ Landed so far (branch `feature/m4-catalogue-population`, committed locally):
   `otw catalog validate` clean, 0 warnings; a `BuiltInCatalogTests` theory asserts
   every category's M4 minimum.
 
-All six categories now meet their per-category minimums except **Updates**, which
-sits at 22 and needs three more entries to reach ≥ 25 (the remaining catalogue
-gap). Then: the M4 tag / managedBy / reinstallHint validation rules, the per-entry
-VM verification, and the M4 certification record. Note
+Three more Windows Update client-policy entries (Microsoft-Update opt-in, an
+18-hour active-hours range, and an auto-download/scheduled-install mode paired
+with notify-before-install by `conflictsWith`) bring Updates to 25. **All six
+categories now meet their M4 per-category minimums** — Security 150, Privacy 107,
+Performance 61, Debloat 61, Shell 31, Updates 25 (**435 entries total**), enforced
+by the `BuiltInCatalogTests` theory. Remaining for M4: the tag / managedBy /
+reinstallHint validation rules, the per-entry VM verification, and the M4
+certification record. Note
 the M3-discovered limitation: over headless SSH the
 interactive-user resolver returns null, so per-user (`User`-hive) entries cannot
 be VM-verified from the lab session and stay `Draft` pending the M5
