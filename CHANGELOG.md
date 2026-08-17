@@ -51,9 +51,20 @@ what was planned (plans live in `PLAN.md`).
   the account to a SID with the managed `NTAccount` translation, reporting
   whether `HKEY_USERS\<sid>` is loaded. All eight readers have tests that read
   the real registry / SCM / task store / package store / WMI / power scheme /
-  session unelevated. Remaining Windows work (managed-setting detection, report
-  writers, `otw scan` / `otw health` and VM integration) is still to come (see
-  docs/milestones/M2-scan.md).
+  session unelevated. `WindowsManagedSettingDetector` reports whether a registry
+  value is owned by the Local Group Policy by reading the `Registry.pol` files
+  through a new read-only PReg parser (`OpenTheWindows.Core.Policy.
+  PolicyRegistryFile` + `PolicyRegistryEntry`) — chosen over an RSOP query
+  because the `.pol` files are world-readable (no elevation) and deterministic;
+  per-value MDM attribution and per-user MLGPO are deferred to the policy engine
+  (M5), and a value that cannot be positively tied to a policy is reported as
+  not-managed (the safe direction — it never hides real drift). The PReg parser
+  has golden-fixture tests and the detector has deterministic tests over a
+  temporary policy root (new shared `PRegFixture` test helper). This completes
+  every read-only state reader for the M2 detection engine. Remaining M2 work
+  (28-check machine health probe, JSON/CSV/HTML/SARIF report writers, `otw scan`
+  / `otw health`, the no-write architectural guard, Stryker.NET, and VM
+  integration) is still to come (see docs/milestones/M2-scan.md).
 
 - M1: catalogue model (`OpenTheWindows.Core.Catalog`), JSON Schema
   `catalog/schema/tweak.schema.json`, embedded loader with directory overrides

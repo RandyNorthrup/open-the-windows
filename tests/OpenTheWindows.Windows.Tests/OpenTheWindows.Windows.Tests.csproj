@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\OpenTheWindows.Windows\OpenTheWindows.Windows.csproj" />
+    <ProjectReference Include="..\OpenTheWindows.TestSupport\OpenTheWindows.TestSupport.csproj" />
   </ItemGroup>
 
   <ItemGroup>

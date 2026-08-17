@@ -233,6 +233,12 @@
           "JsonSchema.Net": "[9.4.0, )"
         }
       },
+      "openthewindows.testsupport": {
+        "type": "Project",
+        "dependencies": {
+          "OpenTheWindows.Core": "[0.1.0-local, )"
+        }
+      },
       "openthewindows.windows": {
         "type": "Project",
         "dependencies": {

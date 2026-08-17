@@ -240,6 +240,19 @@ hand-written unsafe code exists outside the generated stubs); every P/Invoke
 carries `[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]` to prevent
 DLL search-order hijacking (CA5392).
 
+M2 managed-setting detection: Group Policy ownership is detected by reading the
+Local GPO `Registry.pol` files (a new read-only PReg parser,
+`OpenTheWindows.Core.Policy.PolicyRegistryFile`) rather than the RSOP
+`RSOP_RegistryPolicySetting` query D2 lists. The `.pol` files are world-readable
+so the check needs no elevation and is deterministic and unit-testable with
+golden fixtures, whereas RSOP requires administrator rights and returns nothing
+on an unmanaged machine. Per-value MDM attribution (PolicyManager
+`current\device\<Area>\<Policy>` + `_WinningProvider`) and per-user MLGPO
+(`GroupPolicyUsers\<sid>`) need identifiers the M2 detector signature/catalogue
+do not carry and are deferred to the policy engine (M5); until then a value that
+cannot be positively tied to a policy is reported NotManaged, which never hides
+real drift. The read-only PReg parser is also the read half of M5's PolicyWriter.
+
 ### 7.2 Gate verification log (each gate seen to FAIL on a broken input, then reverted)
 
 | Gate | Command | Broken input used | Observed |
