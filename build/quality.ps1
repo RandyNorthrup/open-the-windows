@@ -24,6 +24,8 @@
       markdown     markdownlint-cli2
       powershell   PSScriptAnalyzer over build/ scripts (fails on any record)
       plan         build/check-plan.ps1: PLAN.md, milestone specs, certification records and agent files agree
+      mutation     Stryker.NET (opt-in only; NOT part of 'all'). Report-only in M2; currently DEFERRED
+                   because Stryker does not support Microsoft.Testing.Platform yet (see PLAN.md 7.1)
 
     Every gate has been observed to fail on a deliberately broken input before
     being trusted (see PLAN.md "Gate verification log").
@@ -31,7 +33,7 @@
 [CmdletBinding()]
 param(
     [switch] $Ci,
-    [ValidateSet('all', 'restore', 'format', 'build', 'test', 'coverage', 'catalog', 'secrets', 'sast', 'duplication', 'markdown', 'powershell', 'plan')]
+    [ValidateSet('all', 'restore', 'format', 'build', 'test', 'coverage', 'catalog', 'secrets', 'sast', 'duplication', 'markdown', 'powershell', 'plan', 'mutation')]
     [string] $Only = 'all'
 )
 
@@ -264,6 +266,41 @@ Invoke-Gate 'powershell' {
 
 Invoke-Gate 'plan' {
     & pwsh -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repoRoot 'build/check-plan.ps1')
+}
+
+# Mutation testing (Stryker.NET) is opt-in: it is slow and, in M2, report-only
+# (stryker-config.json sets break=0 so a low score never fails the build; a real
+# break threshold is enforced from M3). It is therefore never part of 'all'.
+#
+# Known upstream block: Stryker.NET does not yet support Microsoft.Testing.Platform
+# test projects (stryker-mutator/stryker-net#3094), and this repo mandates MTP
+# (no VSTest packages). Until Stryker adds MTP support the step cannot run its
+# tests; the gate detects exactly that condition and reports DEFERRED instead of a
+# spurious failure, while any OTHER Stryker error still fails the gate. See PLAN.md
+# section 7.1. The tool, config and gate are wired so this activates unchanged once
+# support lands. (See PLAN.md "Gate verification log" for the deferral record.)
+if ($runOnly -eq 'mutation') {
+    Invoke-Gate 'mutation' {
+        & $dotnetExe tool restore
+        if ($LASTEXITCODE -ne 0) { return }
+
+        # Buildalyzer finds Visual Studio's MSBuild, which cannot resolve the .NET 10
+        # SDK; point its SDK resolver at the standalone dotnet install.
+        $dotnetDir = Split-Path -Parent $dotnetExe
+        if ($dotnetDir) {
+            $env:DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR = $dotnetDir
+        }
+
+        $strykerLog = Join-Path $coverageDir '..' 'stryker.log'
+        $null = New-Item -ItemType Directory -Force -Path (Split-Path -Parent $strykerLog)
+        & $dotnetExe dotnet-stryker 2>&1 | Tee-Object -FilePath $strykerLog
+        $strykerExit = $LASTEXITCODE
+        if ($strykerExit -ne 0 -and (Select-String -Path $strykerLog -SimpleMatch 'Microsoft.Testing.Platform which is not yet supported' -Quiet)) {
+            Write-Host 'DEFERRED: Stryker.NET does not yet support Microsoft.Testing.Platform test projects (stryker-net#3094).' -ForegroundColor Yellow
+            Write-Host 'Mutation testing is report-only in M2 and activates when Stryker adds MTP support. See PLAN.md 7.1.' -ForegroundColor Yellow
+            $global:LASTEXITCODE = 0
+        }
+    }
 }
 
 Write-Host ''

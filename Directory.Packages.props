@@ -46,6 +46,12 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.11" />
     <!-- JSON Schema (draft 2020-12) validation of catalogue files; MIT, AOT-friendly. -->
     <PackageVersion Include="JsonSchema.Net" Version="9.4.0" />
+    <!-- Service control-manager reads (start type, run state) for OpenTheWindows.Windows only. -->
+    <PackageVersion Include="System.ServiceProcess.ServiceController" Version="10.0.11" />
+    <!-- Task Scheduler 2.0 wrapper (read-only enabled-state reads) for OpenTheWindows.Windows only; MIT. -->
+    <PackageVersion Include="TaskScheduler" Version="2.12.2" />
+    <!-- WMI (System.Management) for read-only Win32_OptionalFeature and Defender MSFT_MpPreference reads; Windows only. -->
+    <PackageVersion Include="System.Management" Version="10.0.11" />
   </ItemGroup>
 
   <!-- ─── Test packages ─────────────────────────────────────────────────── -->

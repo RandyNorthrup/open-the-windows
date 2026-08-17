@@ -91,6 +91,19 @@ does not change the exit code.
 raw entry), and `validate` (schema + structural rules; `--catalog-dir` adds an
 operator override directory). Exit 0 when valid, 4 on invalid input.
 
+`otw scan --profile <basic|balanced|strict|paranoid>` runs a read-only drift
+scan of that built-in level profile against the machine — it never changes
+anything. `--include-draft` also scans Draft entries; `--catalog-dir` adds an
+override directory; `--json`, `--csv`, `--html` or `--sarif` (with optional
+`--out <file>`) write a report instead of the text summary. Exit 0 = compliant,
+1 = drift, 2 = error, 3 = unsupported platform. Report formats are documented in
+[docs/reports.md](docs/reports.md).
+
+`otw health [--json]` runs the read-only machine health checks (Secure Boot,
+TPM, Defender, BitLocker, firewall, and more — research 04 §5). It only reads;
+checks whose source needs elevation report `Unknown`. Exit 0 unless the command
+itself errors.
+
 Publish (single-file trimmed CLI + self-contained app + SBOM + hashes):
 
 ```powershell

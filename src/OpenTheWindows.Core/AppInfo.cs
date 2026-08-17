@@ -14,6 +14,14 @@ public static class AppInfo
     /// <summary>Short executable name of the CLI.</summary>
     public const string CliName = "otw";
 
+    /// <summary>Canonical project home, used as the SARIF tool <c>informationUri</c>.</summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Major Code Smell",
+        "S1075:URIs should not be hardcoded",
+        Justification = "Immutable product-identity constant (the project homepage) used as the SARIF tool " +
+            "informationUri; it is not environment-specific configuration. Recorded in PLAN.md §7.3.")]
+    public const string HomepageUri = "https://github.com/RandyNorthrup/open-the-windows";
+
     /// <summary>
     /// Informational version of the running Core assembly (from
     /// <see cref="AssemblyInformationalVersionAttribute"/>), falling back to the

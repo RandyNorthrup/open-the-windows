@@ -1,5 +1,7 @@
 # M2 — Detection engine (`scan`), health checks, reports
 
+Status: **DONE** (2026-08-16). Certification: `docs/certification/M2.md`.
+
 ## Goal
 
 Read-only state readers for every action kind, a drift report against a set

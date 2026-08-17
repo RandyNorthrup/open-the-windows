@@ -192,6 +192,9 @@ before they leave `draft` state.
 | System.CommandLine | 2.0.11 | `Directory.Packages.props` |
 | CommunityToolkit.Mvvm | 8.4.2 | same |
 | Microsoft.Extensions.DependencyInjection / Logging.Abstractions | 10.0.11 | same |
+| System.ServiceProcess.ServiceController | 10.0.11 | same (Windows project; service reads) |
+| TaskScheduler | 2.12.2 | same (Windows project; scheduled-task reads) |
+| System.Management | 10.0.11 | same (Windows project; WMI optional-feature and Defender reads) |
 | xunit.v3 | 4.0.0 | same |
 | Microsoft.Testing.Extensions.CodeCoverage | 18.10.0 | same |
 | Roslynator.Analyzers | 4.16.1 | same (global) |
@@ -212,12 +215,55 @@ before they leave `draft` state.
 | GitHub Actions | checkout v7.0.1, setup-dotnet v6.0.0, setup-node v7.0.0, setup-python v7.0.0, upload-artifact v7.0.1, raven-actions/actionlint v2.2.0 — all pinned to commit SHAs (semgrep `p/github-actions` mutable-tag rule) | `.github/workflows/ci.yml` |
 
 Planned (not yet referenced; add at the milestone that needs them, with the
-same verification): TaskScheduler 2.12.2, Microsoft.Windows.CsWin32 0.3.298,
-System.Management 10.0.11, Vanara.PInvoke.WUApi 5.0.7 (or hand-written WUA COM
-interfaces — `<COMReference>` does not build under `dotnet build`),
-Corvus.Json.Validator 5.3.2 or JsonSchema.Net 9.4.0, Serilog 4.4.0 +
-Serilog.Sinks.EventLog 4.0.0, FlaUI.UIA3 5.0.0, Stryker.NET 4.16.0, WiX 7.0.0,
+same verification): Microsoft.Windows.CsWin32 0.3.298, Vanara.PInvoke.WUApi
+5.0.7 (or hand-written WUA COM interfaces — `<COMReference>` does not build
+under `dotnet build`), Corvus.Json.Validator 5.3.2 or JsonSchema.Net 9.4.0,
+Serilog 4.4.0 + Serilog.Sinks.EventLog 4.0.0, FlaUI.UIA3 5.0.0, WiX 7.0.0,
 Verify.XunitV3 31.28.0.
+
+Stryker.NET 4.16.0 is pinned in `.config/dotnet-tools.json` with a config
+(`stryker-config.json`) scoped to the M2-added Core logic (engine, reports,
+policy parser), wired as the opt-in `pwsh build/quality.ps1 -Only mutation`
+step (report-only in M2: `break=0`, threshold enforced from M3; never part of
+`all`). **Deferred gate:** Stryker.NET does not yet support
+Microsoft.Testing.Platform test projects (stryker-mutator/stryker-net#3094), and
+this repo mandates MTP (no VSTest packages), so mutation testing cannot run its
+tests today. The gate detects exactly this condition and reports DEFERRED rather
+than a spurious failure (any other Stryker error still fails it); it also sets
+`DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR` so Buildalyzer's VS MSBuild can resolve the
+.NET 10 SDK. The step activates unchanged once Stryker adds MTP support.
+
+M2 deviation from the M2-scan spec: optional-feature state is read via WMI
+`Win32_OptionalFeature` (through `System.Management`), not the DISM API the
+spec suggested. Opening a DISM online session requires administrator rights and
+the DISM API can also modify the image; `Win32_OptionalFeature` is strictly
+read-only and queryable unelevated, so the scan needs no elevation for feature
+detection and the reader is testable on an unelevated developer box. The
+InstallState mapping (1 enabled, 2 disabled, 3/4/absent ⇒ not present) is
+documented in `WindowsOptionalFeatureReader`.
+
+M2 native interop: the P/Invoke readers (power via `powrprof.dll`,
+interactive user via `wtsapi32.dll`) use the `[LibraryImport]` source generator
+rather than the CsWin32 the spec suggested — no build-time code generator
+dependency, AOT/trim-safe stubs, and only a handful of functions are needed.
+`[LibraryImport]` marshalling stubs pin blittable arguments with unsafe
+pointers, so `AllowUnsafeBlocks` is enabled in the Windows project only (no
+hand-written unsafe code exists outside the generated stubs); every P/Invoke
+carries `[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]` to prevent
+DLL search-order hijacking (CA5392).
+
+M2 managed-setting detection: Group Policy ownership is detected by reading the
+Local GPO `Registry.pol` files (a new read-only PReg parser,
+`OpenTheWindows.Core.Policy.PolicyRegistryFile`) rather than the RSOP
+`RSOP_RegistryPolicySetting` query D2 lists. The `.pol` files are world-readable
+so the check needs no elevation and is deterministic and unit-testable with
+golden fixtures, whereas RSOP requires administrator rights and returns nothing
+on an unmanaged machine. Per-value MDM attribution (PolicyManager
+`current\device\<Area>\<Policy>` + `_WinningProvider`) and per-user MLGPO
+(`GroupPolicyUsers\<sid>`) need identifiers the M2 detector signature/catalogue
+do not carry and are deferred to the policy engine (M5); until then a value that
+cannot be positively tied to a policy is reported NotManaged, which never hides
+real drift. The read-only PReg parser is also the read half of M5's PolicyWriter.
 
 ### 7.2 Gate verification log (each gate seen to FAIL on a broken input, then reverted)
 
@@ -236,6 +282,7 @@ Verify.XunitV3 31.28.0.
 | duplication | `jscpd --config .jscpd.json .` | duplicated `DoctorService.cs` | "Clone found (csharp)", exit 1 |
 | markdown | `markdownlint-cli2` | real MD060/MD034 issues in early docs | exit 1, then fixed |
 | powershell | `Invoke-ScriptAnalyzer … -Settings PSScriptAnalyzerSettings.psd1` (fail on any record) | `ls C:\` alias in a script | `PSAvoidUsingCmdletAliases`, gate FAIL |
+| read-only guard (M2) | `Windows_assembly_references_no_write_apis` test (metadata scan of the Windows assembly's member references) | temporary `RegistryKey.SetValue` call added to a reader | test FAIL: "Write API(s) referenced: RegistryKey.SetValue"; reverted, green again |
 
 Two decorative-gate traps found and fixed during M0: (1) `-EnableExit` inside
 the runner script set a host exit code that the runner overwrote (gate reported
@@ -262,6 +309,7 @@ shipped `core-6.1.0-windows` profile.
 | `.gitleaks.toml` | dir-scan allowlist for `.venv-tools/`, `node_modules/`, `artifacts/`, `temp/` | gitignored, third-party or local-only; history scan unaffected | never |
 | `BannedSymbols.txt` | applies to `src/` only | tests use HKCU sandbox keys and DateTime in assertions | never |
 | `Directory.Build.props` | `EnableReferenceTrimmer=false` when `MSBuildProjectName` ends with `_wpftmp` | the WPF markup-compile pass builds a generated `<Project>_<hash>_wpftmp.csproj` that omits the code-behind using Core/Windows; ReferenceTrimmer then falsely reports those refs as removable (RT0002), failing the temp build under warnings-as-errors and cascading to BG1002 in the real build. RT still runs on the real App project | when the WPF SDK stops leaking analyzers into the temp project |
+| `AppInfo.HomepageUri` (`SuppressMessage`) | Sonar `S1075` (URIs should not be hardcoded) | the project homepage is an immutable product-identity constant used as the SARIF tool `informationUri`, not environment-specific configuration that S1075 targets | never |
 
 ## 8. Milestones
 
@@ -278,8 +326,8 @@ or the agent instruction files disagree.
 | # | Spec | Status | Certification |
 | --- | ------ | -------- | --------------- |
 | M0 | Scaffold, gates, research (recorded inline below) | DONE 2026-08-16 | inline (§8.1) |
-| M1 | [docs/milestones/M1-catalogue.md](docs/milestones/M1-catalogue.md) — catalogue model, schema, loader, `otw catalog` | in progress (uncommitted WIP; see spec "Current WIP") | `docs/certification/M1.md` (pending) |
-| M2 | [docs/milestones/M2-scan.md](docs/milestones/M2-scan.md) — detection engine, health checks, reports | not started | pending |
+| M1 | [docs/milestones/M1-catalogue.md](docs/milestones/M1-catalogue.md) — catalogue model, schema, loader, `otw catalog` | DONE 2026-08-16 | `docs/certification/M1.md` |
+| M2 | [docs/milestones/M2-scan.md](docs/milestones/M2-scan.md) — detection engine, health checks, reports | DONE 2026-08-16 | `docs/certification/M2.md` |
 | M3 | [docs/milestones/M3-apply.md](docs/milestones/M3-apply.md) — apply/verify/revert, journal, restore points, Event Log | not started | pending |
 | M4 | [docs/milestones/M4-catalogue-population.md](docs/milestones/M4-catalogue-population.md) — ≥ 300 entries + VM verification + WU guardrails | not started | pending |
 | M5 | [docs/milestones/M5-profiles-enterprise.md](docs/milestones/M5-profiles-enterprise.md) — profiles, all-users, MDM/GPO awareness, drift task | not started | pending |
@@ -316,7 +364,7 @@ Catalogue model + JSON Schema + embedded loader (directory overrides) + structur
 validator (stable rule ids) + read-only `otw catalog list|show|validate`, 29 Draft
 entries, a `catalog` quality gate, and 141 tests (87.7% line / 78.5% branch).
 
-### M2 — Scan (not started)
+### M2 — Scan (DONE 2026-08-16)
 
 ### M3 — Apply (not started)
 
