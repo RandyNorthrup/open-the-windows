@@ -6,10 +6,10 @@ Free, open-source (MIT), enterprise-grade Windows 11 control panel for
 reversibility, drift detection and remediation, and an audit trail. GUI
 (WPF) and CLI (`otw.exe`) over one shared engine.
 
-> Status: **M0 (scaffold + research) complete.** The engine and catalogue are
-> being built milestone by milestone — see [PLAN.md](PLAN.md). Today the CLI
-> and GUI provide the pre-flight `doctor` check only. Nothing changes your
-> system yet.
+> Status: **M0 complete; M1 (catalogue) in progress.** The engine is being
+> built milestone by milestone — see [PLAN.md](PLAN.md). Today the CLI provides
+> the pre-flight `doctor` check and read-only `catalog` commands (list, show,
+> validate); nothing changes your system yet.
 
 ## What it will do (and what it will never do)
 
@@ -76,12 +76,20 @@ Run the CLI and the GUI from the build output:
 ```powershell
 artifacts\bin\OpenTheWindows.Cli\release\otw.exe doctor
 artifacts\bin\OpenTheWindows.Cli\release\otw.exe doctor --json
+artifacts\bin\OpenTheWindows.Cli\release\otw.exe catalog list --category Privacy --level Basic
+artifacts\bin\OpenTheWindows.Cli\release\otw.exe catalog show privacy.advertising-id.disable
+artifacts\bin\OpenTheWindows.Cli\release\otw.exe catalog validate
 artifacts\bin\OpenTheWindows.App\release\OpenTheWindows.exe   # elevates (UAC)
 ```
 
 `otw doctor` prints OS/edition/build, whether the process is elevated, and the
 support verdict; exit code 0 = supported, 3 = unsupported platform. Elevation
 does not change the exit code.
+
+`otw catalog` inspects the built-in tweak catalogue (read-only): `list`
+(optionally `--category`/`--level`, or `--json`), `show <id>` (`--json` for the
+raw entry), and `validate` (schema + structural rules; `--catalog-dir` adds an
+operator override directory). Exit 0 when valid, 4 on invalid input.
 
 Publish (single-file trimmed CLI + self-contained app + SBOM + hashes):
 
@@ -122,6 +130,7 @@ pwsh build/quality.ps1 -Only test # a single gate
 | build | `dotnet build OpenTheWindows.slnx -c Release` | `TreatWarningsAsErrors`, `AnalysisLevel latest-all`, `EnforceCodeStyleInBuild`, Roslynator + Sonar + Meziantou + IDisposable + VS-Threading analyzers, banned APIs (`BannedSymbols.txt`), unused references (ReferenceTrimmer), dead code (IDE0051/52/59/60/005) |
 | test | `dotnet test OpenTheWindows.slnx -c Release --coverage --coverage-output-format cobertura --results-directory artifacts/coverage` | xunit.v3 on Microsoft.Testing.Platform |
 | coverage | `dotnet reportgenerator … minimumCoverageThresholds:lineCoverage=85 minimumCoverageThresholds:branchCoverage=75` | exit 1 below threshold (bare token syntax; `-settings:` forms are silently ignored) |
+| catalog | built `otw.exe catalog validate` on the embedded catalogue | non-zero fails; proven to reject `tests/fixtures/catalog-bad` (exit 4) so it is not decorative |
 | secrets | `gitleaks git … && gitleaks dir …` with `.gitleaks.toml` | `--exit-code 1`; history + working tree; custom rules for VM-inventory passwords and OpenSSH keys |
 | sast | `semgrep scan --config p/csharp --config p/secrets --config p/github-actions --error` | exit 1 on findings |
 | duplication | `npx jscpd --config .jscpd.json .` | `threshold: 0`, `exitCode: 1` |

@@ -9,11 +9,15 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
-- M1 (in progress): catalogue model (`OpenTheWindows.Core.Catalog`), JSON
-  Schema `catalog/schema/tweak.schema.json`, embedded loader with directory
-  overrides and structural validator (stable rule ids), 29 Draft entries across
-  six categories, CLI `otw catalog list|show|validate`. Tests and the `catalog`
-  gate are still to be written (see docs/milestones/M1-catalogue.md).
+- M1: catalogue model (`OpenTheWindows.Core.Catalog`), JSON Schema
+  `catalog/schema/tweak.schema.json`, embedded loader with directory overrides
+  and a structural validator (stable rule ids), 29 Draft entries across six
+  categories, and read-only CLI `otw catalog list|show|validate`. Full test
+  suite (built-in catalogue, one negative per validator rule, loader/override,
+  applicability, edition mapping, serialization round-trip, a 1000-entry
+  performance guard, and CLI command tests) and a `catalog` quality gate that
+  validates the embedded catalogue and is proven to reject
+  `tests/fixtures/catalog-bad`.
 
 - Executable milestone specifications `docs/milestones/M1..M8` with a runbook
   and certification template (`docs/milestones/README.md`); catalogue
@@ -32,6 +36,18 @@ what was planned (plans live in `PLAN.md`).
 
 ### Fixed
 
+- Flaky `powershell` quality gate: `Invoke-ScriptAnalyzer` (PSScriptAnalyzer
+  1.25) intermittently threw a `NullReferenceException` from a compatibility
+  rule, failing the gate at random. The gate now retries the analysis on a
+  thrown exception (a tool crash, not a finding); real findings are still
+  reported and never retried.
+- Intermittent Release build failures (RT0002 on the generated WPF
+  `*_wpftmp.csproj`, cascading to BG1002 "DesktopApp.baml cannot be found").
+  ReferenceTrimmer analysed the transient markup-compilation project — which
+  omits the code-behind that uses Core/Windows — and reported those project
+  references as removable, which is an error under warnings-as-errors. The temp
+  project is now excluded from ReferenceTrimmer (Directory.Build.props); it
+  still runs on the real App project. Recorded in PLAN.md §7.3.
 - CI publish failed with NU1004 (locked restore vs RID/trim publish graph). Every
   project now declares `RuntimeIdentifiers` (Directory.Build.props) and the
   Windows/CLI projects are `IsTrimmable`, so `packages.lock.json` matches both

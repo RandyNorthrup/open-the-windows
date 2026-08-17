@@ -66,6 +66,25 @@
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
+  <!-- ─── WPF markup-compilation temp project ───────────────────────────────
+       Building a WPF project runs a markup-compilation pass that MSBuild
+       implements by generating and building a sibling project named
+       <Project>_<hash>_wpftmp.csproj next to the real .csproj. That temp
+       project inherits this Directory.Build.props (and therefore the
+       ReferenceTrimmer global package), but it compiles only the XAML pass —
+       not the code-behind (DesktopApp.xaml.cs) that consumes Core/Windows
+       types. ReferenceTrimmer consequently reports those ProjectReferences as
+       removable (RT0002); under TreatWarningsAsErrors that fails the temp
+       build, and the real App build then fails downstream with BG1002
+       ("DesktopApp.baml cannot be found"). Whether RT0002 fires depends on
+       build ordering, so a full-solution build is intermittently red. The
+       temp project is a transient build artifact, not an assembly whose
+       references we own, so ReferenceTrimmer must not analyse it. RT still
+       runs on the real App project, where it correctly catches unused refs. -->
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('_wpftmp'))">
+    <EnableReferenceTrimmer>false</EnableReferenceTrimmer>
+  </PropertyGroup>
+
   <!-- ─── Supply chain ──────────────────────────────────────────────────── -->
   <PropertyGroup>
     <NuGetAudit>true</NuGetAudit>

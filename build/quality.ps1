@@ -8,7 +8,7 @@
         pwsh build/quality.ps1            # everything
         pwsh build/quality.ps1 -Ci        # locked restore, no auto-fix, CI annotations
         pwsh build/quality.ps1 -Only test # a single gate (restore, format, build, test, coverage,
-                                          #   secrets, sast, duplication, markdown, powershell)
+                                          #   catalog, secrets, sast, duplication, markdown, powershell)
 
     Gates (see README.md "Quality gates" for the exact command each runs):
       restore      dotnet restore (locked mode in CI) + NuGetAudit (vulnerable/deprecated packages fail restore)
@@ -17,6 +17,7 @@
                    dead code, banned APIs, unused references)
       test         dotnet test (Microsoft.Testing.Platform) with Cobertura coverage
       coverage     ReportGenerator merge + minimum thresholds (line/branch)
+      catalog      built otw.exe validates the embedded catalogue; proven to fail on tests/fixtures/catalog-bad
       secrets      gitleaks over git history and the working tree
       sast         semgrep (p/csharp, p/secrets, p/github-actions)
       duplication  jscpd
@@ -30,7 +31,7 @@
 [CmdletBinding()]
 param(
     [switch] $Ci,
-    [ValidateSet('all', 'restore', 'format', 'build', 'test', 'coverage', 'secrets', 'sast', 'duplication', 'markdown', 'powershell', 'plan')]
+    [ValidateSet('all', 'restore', 'format', 'build', 'test', 'coverage', 'catalog', 'secrets', 'sast', 'duplication', 'markdown', 'powershell', 'plan')]
     [string] $Only = 'all'
 )
 
@@ -175,6 +176,38 @@ Invoke-Gate 'coverage' {
     }
 }
 
+Invoke-Gate 'catalog' {
+    # The embedded catalogue must validate with the built CLI, and the gate must
+    # reject a deliberately broken catalogue directory so it cannot be decorative
+    # (proven against tests/fixtures/catalog-bad; recorded in PLAN.md 7.2).
+    $cli = Join-Path $repoRoot 'artifacts/bin/OpenTheWindows.Cli/release/otw.dll'
+    if (-not (Test-Path $cli)) {
+        & $dotnetExe build (Join-Path $repoRoot 'src/OpenTheWindows.Cli/OpenTheWindows.Cli.csproj') -c Release
+        if ($LASTEXITCODE -ne 0) { throw 'Building the CLI for the catalog gate failed.' }
+    }
+
+    # 1) The shipped catalogue must be valid. A non-zero exit (or a terminating
+    #    error from it) legitimately fails this gate.
+    & $dotnetExe $cli catalog validate
+    if ($LASTEXITCODE -ne 0) { throw 'The built-in catalogue failed validation.' }
+
+    # 2) The gate must reject a broken catalogue. Depending on pwsh configuration
+    #    a non-zero native exit may surface as a terminating error; either way a
+    #    rejection is what we require, so treat a throw as a (non-zero) rejection.
+    $bad = Join-Path $repoRoot 'tests/fixtures/catalog-bad'
+    $rejection = 0
+    try {
+        & $dotnetExe $cli catalog validate --catalog-dir $bad *> $null
+        $rejection = $LASTEXITCODE
+    }
+    catch {
+        $rejection = if ($LASTEXITCODE -ne 0) { $LASTEXITCODE } else { 1 }
+    }
+    if ($rejection -eq 0) { throw "The catalog gate did not reject the broken fixture at $bad." }
+    Write-Host "Catalogue valid; broken fixture rejected (otw catalog validate exit $rejection)."
+    $global:LASTEXITCODE = 0
+}
+
 Invoke-Gate 'secrets' {
     $gitleaks = Get-GitleaksPath
     if (Test-Path (Join-Path $repoRoot '.git')) {
@@ -206,8 +239,23 @@ Invoke-Gate 'powershell' {
     Import-Module PSScriptAnalyzer
     # Do NOT rely on -EnableExit here: it sets the host exit code, which this
     # runner would overwrite; a decorative pass is exactly what we must avoid.
-    $records = @(Invoke-ScriptAnalyzer -Path (Join-Path $repoRoot 'build') -Recurse `
-            -Settings (Join-Path $repoRoot 'PSScriptAnalyzerSettings.psd1'))
+    #
+    # Invoke-ScriptAnalyzer 1.25 intermittently throws a NullReferenceException
+    # from inside a compatibility rule (a tool crash, not a finding). Retry a
+    # couple of times on a *thrown* exception; a real finding is a non-empty
+    # result set, handled below and never retried.
+    $records = $null
+    for ($attempt = 1; ; $attempt++) {
+        try {
+            $records = @(Invoke-ScriptAnalyzer -Path (Join-Path $repoRoot 'build') -Recurse `
+                    -Settings (Join-Path $repoRoot 'PSScriptAnalyzerSettings.psd1'))
+            break
+        }
+        catch {
+            if ($attempt -ge 3) { throw }
+            Write-Host "PSScriptAnalyzer crashed ($($_.Exception.GetType().Name)); retry $attempt/2." -ForegroundColor DarkYellow
+        }
+    }
     if ($records.Count -gt 0) {
         $records | Format-Table -AutoSize | Out-String | Write-Host
         throw "PSScriptAnalyzer reported $($records.Count) finding(s)."

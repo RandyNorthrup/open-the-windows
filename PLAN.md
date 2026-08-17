@@ -230,6 +230,7 @@ Verify.XunitV3 31.28.0.
 | restore / NuGetAudit | `dotnet restore` | `Newtonsoft.Json 12.0.1` | `NU1903` "Warning As Error … high severity vulnerability" |
 | test | `dotnet test` | `Assert.Equal(1, 2)` | exit 2, `failed: 1` |
 | coverage | `dotnet reportgenerator … minimumCoverageThresholds:lineCoverage=99` | threshold above actual | exit 1 "line coverage of 88% is below the minimum threshold of 99%" (note: `-settings:` and `settings:` variants exit 0 silently) |
+| catalog | `otw catalog validate --catalog-dir tests/fixtures/catalog-bad` | entry missing every required field | exit 4, 5 `schema` errors incl. JSON pointers; gate also proven to FAIL when the fixture is replaced with a valid document ("did not reject the broken fixture") |
 | secrets | `gitleaks dir --exit-code 1` | real ed25519 private key under `temp/ssh` (before the dir allowlist for gitignored dirs) | 26 leaks found incl. the custom `otw-openssh-private-key` rule |
 | sast | `semgrep scan -e 'Process.Start(...)' -l csharp --error` | file calling `Process.Start` | 1 finding, exit 1 (registry rulesets `p/csharp`, `p/secrets`, `p/github-actions` load and run; their individual rules were not exercised) |
 | duplication | `jscpd --config .jscpd.json .` | duplicated `DoctorService.cs` | "Clone found (csharp)", exit 1 |
@@ -257,8 +258,10 @@ shipped `core-6.1.0-windows` profile.
 | `.editorconfig` `[tests/**]` | CA1707, CA2007, CA1515, CA1861, CA1062, CA1812, CA1822 none | test conventions | never |
 | `PSScriptAnalyzerSettings.psd1` | `PSUseShouldProcessForStateChangingFunctions`, `PSAvoidUsingWriteHost`, `PSAvoidUsingPositionalParameters` excluded | imperative build scripts calling native tools | never |
 | `.markdownlint-cli2.jsonc` | `docs/research/**` ignored | generated reference reports with wide tables/raw URLs | never |
+| `.jscpd.json` | markdown excluded from `format`; `catalog/**` ignored | the Linux tokenizer reports ```` ```text ```` code fences as clones across unrelated docs; catalogue entries are declarative data with intentionally uniform action blocks (not copy-pasted logic) | never |
 | `.gitleaks.toml` | dir-scan allowlist for `.venv-tools/`, `node_modules/`, `artifacts/`, `temp/` | gitignored, third-party or local-only; history scan unaffected | never |
 | `BannedSymbols.txt` | applies to `src/` only | tests use HKCU sandbox keys and DateTime in assertions | never |
+| `Directory.Build.props` | `EnableReferenceTrimmer=false` when `MSBuildProjectName` ends with `_wpftmp` | the WPF markup-compile pass builds a generated `<Project>_<hash>_wpftmp.csproj` that omits the code-behind using Core/Windows; ReferenceTrimmer then falsely reports those refs as removable (RT0002), failing the temp build under warnings-as-errors and cascading to BG1002 in the real build. RT still runs on the real App project | when the WPF SDK stops leaking analyzers into the temp project |
 
 ## 8. Milestones
 
@@ -303,9 +306,12 @@ exist yet; every later milestone uses `docs/certification/Mx.md`.
 - [x] SBOM + SHA256SUMS produced
 - [x] CI: repository pushed 2026-08-16; first run status is recorded in `docs/certification/M1.md` when M1 closes (see §11)
 
-### M1 — Catalogue (in progress)
+### M1 — Catalogue (DONE 2026-08-16)
 
-See `docs/milestones/M1-catalogue.md`.
+See `docs/milestones/M1-catalogue.md`; certification in `docs/certification/M1.md`.
+Catalogue model + JSON Schema + embedded loader (directory overrides) + structural
+validator (stable rule ids) + read-only `otw catalog list|show|validate`, 29 Draft
+entries, a `catalog` quality gate, and 141 tests (87.7% line / 78.5% branch).
 
 ### M2 — Scan (not started)
 

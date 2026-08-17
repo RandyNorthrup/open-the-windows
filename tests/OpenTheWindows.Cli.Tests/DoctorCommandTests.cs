@@ -14,17 +14,11 @@ public sealed class DoctorCommandTests
         var doctor = new DoctorService(
             new FakeOperatingSystemInfo(win11 ? FakeOperatingSystemInfo.Windows11Pro24H2() : FakeOperatingSystemInfo.Windows10Pro22H2()),
             new FakeElevationContext(elevated));
-        RootCommand root = CommandLineBuilder.Build(new CliServices(doctor, _ => CatalogLoader.LoadBuiltIn()));
-        return (root, new StringWriter(), new StringWriter());
+        return CliTestHost.Host(new CliServices(doctor, _ => CatalogLoader.LoadBuiltIn()));
     }
 
     private static int Invoke(RootCommand root, StringWriter stdout, StringWriter stderr, params string[] args)
-    {
-        var parse = root.Parse(args);
-        parse.InvocationConfiguration.Output = stdout;
-        parse.InvocationConfiguration.Error = stderr;
-        return parse.Invoke();
-    }
+        => CliTestHost.Invoke(root, stdout, stderr, args);
 
     [Fact]
     public void Doctor_supported_platform_exits_zero_and_prints_summary()
