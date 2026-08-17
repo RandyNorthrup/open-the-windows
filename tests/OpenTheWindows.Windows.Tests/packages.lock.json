@@ -232,7 +232,8 @@
         "type": "Project",
         "dependencies": {
           "OpenTheWindows.Core": "[0.1.0-local, )",
-          "System.ServiceProcess.ServiceController": "[10.0.11, )"
+          "System.ServiceProcess.ServiceController": "[10.0.11, )",
+          "TaskScheduler": "[2.12.2, )"
         }
       },
       "JsonSchema.Net": {
@@ -251,6 +252,15 @@
         "contentHash": "khROyIQ3GAZy5MbCabfmlbvxf9nuvdveFP2XbRCteZ9Lq8OFEvImmrjV6acl1LegRu/9T6VMxi9Lr+KZu29VHg==",
         "dependencies": {
           "System.Diagnostics.EventLog": "10.0.11"
+        }
+      },
+      "TaskScheduler": {
+        "type": "CentralTransitive",
+        "requested": "[2.12.2, )",
+        "resolved": "2.12.2",
+        "contentHash": "glpAb3VrwfdAofp6PIyAzL0ZeTV7XUJ8muu0oZoTeyU5jtk2sMJ6QAMRRuFbovcaj+SBJiEUGklxIWOqQoxshA==",
+        "dependencies": {
+          "System.Diagnostics.EventLog": "9.0.2"
         }
       }
     },

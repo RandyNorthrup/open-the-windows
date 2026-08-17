@@ -22,8 +22,11 @@ what was planned (plans live in `PLAN.md`).
   via `Utf8JsonWriter` so the trimmable project stays reflection-free), and
   `WindowsServiceReader` (start type incl. delayed auto-start from the registry,
   and run state, via `ServiceController`; new package
-  `System.ServiceProcess.ServiceController` 10.0.11). Both readers have tests that
-  read the real registry / SCM unelevated. Remaining Windows readers (task, Appx,
+  `System.ServiceProcess.ServiceController` 10.0.11), and
+  `WindowsScheduledTaskReader` (enabled state via the Task Scheduler 2.0 API;
+  new package `TaskScheduler` 2.12.2; a missing task reads as `null`, which the
+  engine treats as not-applicable). All three readers have tests that read the
+  real registry / SCM / task store unelevated. Remaining Windows readers (Appx,
   optional feature, Defender, power, interactive user, managed detection), report
   writers, `otw scan` / `otw health` and VM integration are still to come (see
   docs/milestones/M2-scan.md).
