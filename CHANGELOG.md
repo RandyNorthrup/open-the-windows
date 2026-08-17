@@ -73,7 +73,30 @@ what was planned (plans live in `PLAN.md`).
   `acsc`); chk-only health checks, domain-only settings and no-fallback refusals
   were excluded, and each entry was adversarially re-verified against its research
   section for value, hex-conversion, hive, type and ASR-GUID fidelity. All Draft;
-  the catalogue now ships 194 entries (153 Security). `OpenTheWindows.Core.Engine.ApplyEngine`
+  the catalogue now ships 194 entries (153 Security).
+- Telemetry / privacy catalogue (WP 4.1, research 01 §1–§16): 98 new Privacy
+  entries across six domain files under `catalog/privacy/` — diagnostic-data core
+  / CEIP / Windows Error Reporting (`telemetry-core.json`), advertising ID and
+  app-launch tracking, account and notification nags, cloud content, Windows
+  Spotlight and widgets (`content-suggestions.json`), search / Bing / Cortana,
+  Copilot / Click to Do / generative-AI features and activity history
+  (`search-ai-activity.json`), input personalization and app-permission consent
+  (`input-permissions.json`, per-user `ConsentStore` and machine `AppPrivacy`
+  policies), settings-sync / clipboard / Find My Device / Store / consumer
+  features (`sync-store-defender.json`), and Microsoft Edge telemetry plus the
+  telemetry-relevant scheduled tasks (`edge-tasks.json`). Each row follows the
+  research policy-vs-preference distinction (`POL:` → `valueKind: Policy`,
+  `PREF:` → `Preference`), applies per-user settings at scope `User` (HKCU) and
+  machine settings at scope `Machine`, and skips every row the research rates
+  **Never** (security regressions such as disabling SmartScreen or a Defender
+  protection) or **n/a** / informational. Community-verified consumer toggles
+  whose exact key Microsoft does not document are tagged `unverified-ms` with a
+  provenance note. A full-catalogue action-target collision scan then removed 12
+  privacy entries and 3 security entries that duplicated existing
+  perf / debloat / shell / updates / privacy controls (e.g. DiagTrack, Start
+  suggestions, News-and-Interests, Recall, removable-drive BitLocker), and each
+  file was adversarially re-verified against its research section. All Draft; the
+  catalogue now ships 289 entries (107 Privacy, 150 Security, 22 Updates). `OpenTheWindows.Core.Engine.ApplyEngine`
   plans a run (dependency-ordered, flagging conflicts, managed settings, risk
   gating and not-applicable entries), then applies it journal-first — every prior
   state is written to the journal before the first machine change, each action is

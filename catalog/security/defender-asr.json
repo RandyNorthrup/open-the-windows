@@ -11,12 +11,37 @@
       "risk": "Safe",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "DisableRealtimeMonitoring", "value": 0, "default": 0 },
-        { "kind": "DefenderPreference", "property": "DisableBehaviorMonitoring", "value": 0, "default": 0 },
-        { "kind": "DefenderPreference", "property": "DisableIOAVProtection", "value": 0, "default": 0 },
-        { "kind": "DefenderPreference", "property": "DisableScriptScanning", "value": 0, "default": 0 }
+        {
+          "kind": "DefenderPreference",
+          "property": "DisableRealtimeMonitoring",
+          "value": 0,
+          "default": 0
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "DisableBehaviorMonitoring",
+          "value": 0,
+          "default": 0
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "DisableIOAVProtection",
+          "value": 0,
+          "default": 0
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "DisableScriptScanning",
+          "value": 0,
+          "default": 0
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -25,13 +50,20 @@
         "policyCsp": "Defender/AllowRealtimeMonitoring",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Real-time Protection\\Turn off real-time protection"
       },
-      "sideEffects": ["No effect when a third-party antivirus is registered as active; Defender then runs in passive mode."],
+      "sideEffects": [
+        "No effect when a third-party antivirus is registered as active; Defender then runs in passive mode."
+      ],
       "sources": [
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
         "https://stigaview.com/products/win11/v2r8/WN11-00-000045/"
       ],
       "verifiedOn": [],
-      "tags": ["defender", "baseline", "stig", "stig-wn11-00-000045"]
+      "tags": [
+        "defender",
+        "baseline",
+        "stig",
+        "stig-wn11-00-000045"
+      ]
     },
     {
       "id": "security.defender.cloud-protection",
@@ -43,11 +75,31 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "MAPSReporting", "value": 2, "default": null },
-        { "kind": "DefenderPreference", "property": "DisableBlockAtFirstSeen", "value": 0, "default": 0 },
-        { "kind": "DefenderPreference", "property": "CloudExtendedTimeout", "value": 50, "default": 0 }
+        {
+          "kind": "DefenderPreference",
+          "property": "MAPSReporting",
+          "value": 2,
+          "default": null
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "DisableBlockAtFirstSeen",
+          "value": 0,
+          "default": 0
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "CloudExtendedTimeout",
+          "value": 50,
+          "default": 0
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -66,7 +118,12 @@
         "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
       ],
       "verifiedOn": [],
-      "tags": ["defender", "cloud", "baseline", "acsc"]
+      "tags": [
+        "defender",
+        "cloud",
+        "baseline",
+        "acsc"
+      ]
     },
     {
       "id": "security.defender.cloud-block-level-high",
@@ -78,9 +135,19 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "CloudBlockLevel", "value": 2, "default": 0 }
+        {
+          "kind": "DefenderPreference",
+          "property": "CloudBlockLevel",
+          "value": 2,
+          "default": 0
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -89,14 +156,21 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\MpEngine\\Select cloud protection level"
       },
-      "sideEffects": ["More false positives on rare, new or unsigned software; developer and line-of-business machines may need exclusions."],
+      "sideEffects": [
+        "More false positives on rare, new or unsigned software; developer and line-of-business machines may need exclusions."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/specify-cloud-protection-level-microsoft-defender-antivirus",
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
       ],
       "verifiedOn": [],
-      "tags": ["defender", "cloud", "baseline", "cis"]
+      "tags": [
+        "defender",
+        "cloud",
+        "baseline",
+        "cis"
+      ]
     },
     {
       "id": "security.defender.submit-samples-safe",
@@ -108,9 +182,19 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "SubmitSamplesConsent", "value": 1, "default": 1 }
+        {
+          "kind": "DefenderPreference",
+          "property": "SubmitSamplesConsent",
+          "value": 1,
+          "default": 1
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -119,14 +203,22 @@
         "policyCsp": "Defender/SubmitSamplesConsent",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\MAPS\\Send file samples when further analysis is required"
       },
-      "sideEffects": ["Uploads binaries considered safe samples to Microsoft; documents are excluded from automatic submission at this level."],
+      "sideEffects": [
+        "Uploads binaries considered safe samples to Microsoft; documents are excluded from automatic submission at this level."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/specify-cloud-protection-level-microsoft-defender-antivirus",
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
       ],
       "verifiedOn": [],
-      "tags": ["defender", "cloud", "privacy", "baseline", "cis"]
+      "tags": [
+        "defender",
+        "cloud",
+        "privacy",
+        "baseline",
+        "cis"
+      ]
     },
     {
       "id": "security.defender.pua-protection",
@@ -138,18 +230,18 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "PUAProtection", "value": 1, "default": 0 },
         {
-          "kind": "Registry",
-          "hive": "LocalMachine",
-          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
-          "name": "SmartScreenPuaEnabled",
-          "type": "Dword",
+          "kind": "DefenderPreference",
+          "property": "PUAProtection",
           "value": 1,
-          "default": null,
-          "valueKind": "Policy"
+          "default": 0
         }
       ],
       "requires": "None",
@@ -159,14 +251,22 @@
         "policyCsp": "Defender/PUAProtection",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Configure detection for potentially unwanted applications"
       },
-      "sideEffects": ["May flag bundleware, adware, crypto-miners, some remote-admin tools and cracks as unwanted; the user can allow individual detections."],
+      "sideEffects": [
+        "May flag bundleware, adware, crypto-miners, some remote-admin tools and cracks as unwanted; the user can allow individual detections."
+      ],
       "sources": [
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
         "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations",
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
       ],
       "verifiedOn": [],
-      "tags": ["defender", "pua", "baseline", "acsc", "cis"]
+      "tags": [
+        "defender",
+        "pua",
+        "baseline",
+        "acsc",
+        "cis"
+      ]
     },
     {
       "id": "security.defender.network-protection-audit",
@@ -178,25 +278,44 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "EnableNetworkProtection", "value": 2, "default": 0 }
+        {
+          "kind": "DefenderPreference",
+          "property": "EnableNetworkProtection",
+          "value": 2,
+          "default": 0
+        }
       ],
       "requires": "None",
       "dependsOn": [],
-      "conflictsWith": ["security.defender.network-protection-block"],
+      "conflictsWith": [
+        "security.defender.network-protection-block"
+      ],
       "managedBy": {
         "policyCsp": "Defender/EnableNetworkProtection",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Network Protection\\Prevent users and apps from accessing dangerous websites"
       },
-      "sideEffects": ["Audit mode only logs (event 1125); nothing is blocked. Used to measure impact before enabling block."],
+      "sideEffects": [
+        "Audit mode only logs (event 1125); nothing is blocked. Used to measure impact before enabling block."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
         "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
       ],
       "verifiedOn": [],
-      "tags": ["defender", "network", "baseline", "acsc"]
+      "tags": [
+        "defender",
+        "network",
+        "baseline",
+        "acsc"
+      ]
     },
     {
       "id": "security.defender.network-protection-block",
@@ -208,25 +327,44 @@
       "risk": "Advanced",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "EnableNetworkProtection", "value": 1, "default": 0 }
+        {
+          "kind": "DefenderPreference",
+          "property": "EnableNetworkProtection",
+          "value": 1,
+          "default": 0
+        }
       ],
       "requires": "None",
       "dependsOn": [],
-      "conflictsWith": ["security.defender.network-protection-audit"],
+      "conflictsWith": [
+        "security.defender.network-protection-audit"
+      ],
       "managedBy": {
         "policyCsp": "Defender/EnableNetworkProtection",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Network Protection\\Prevent users and apps from accessing dangerous websites"
       },
-      "sideEffects": ["Blocks low-reputation domains and IPs for all applications; can block legitimate sites, APIs and captive portals, and conflicts with some VPN filter drivers."],
+      "sideEffects": [
+        "Blocks low-reputation domains and IPs for all applications; can block legitimate sites, APIs and captive portals, and conflicts with some VPN filter drivers."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
         "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
       ],
       "verifiedOn": [],
-      "tags": ["defender", "network", "baseline", "acsc"]
+      "tags": [
+        "defender",
+        "network",
+        "baseline",
+        "acsc"
+      ]
     },
     {
       "id": "security.defender.controlled-folder-access-audit",
@@ -238,25 +376,44 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "EnableControlledFolderAccess", "value": 2, "default": 0 }
+        {
+          "kind": "DefenderPreference",
+          "property": "EnableControlledFolderAccess",
+          "value": 2,
+          "default": 0
+        }
       ],
       "requires": "None",
       "dependsOn": [],
-      "conflictsWith": ["security.defender.controlled-folder-access-block"],
+      "conflictsWith": [
+        "security.defender.controlled-folder-access-block"
+      ],
       "managedBy": {
         "policyCsp": "Defender/EnableControlledFolderAccess",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Controlled folder access\\Configure Controlled folder access"
       },
-      "sideEffects": ["Audit mode only logs (event 1124); no writes are blocked."],
+      "sideEffects": [
+        "Audit mode only logs (event 1124); no writes are blocked."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
         "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
       ],
       "verifiedOn": [],
-      "tags": ["defender", "ransomware", "cis", "acsc"]
+      "tags": [
+        "defender",
+        "ransomware",
+        "cis",
+        "acsc"
+      ]
     },
     {
       "id": "security.defender.controlled-folder-access-block",
@@ -268,25 +425,44 @@
       "risk": "Advanced",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "EnableControlledFolderAccess", "value": 1, "default": 0 }
+        {
+          "kind": "DefenderPreference",
+          "property": "EnableControlledFolderAccess",
+          "value": 1,
+          "default": 0
+        }
       ],
       "requires": "None",
       "dependsOn": [],
-      "conflictsWith": ["security.defender.controlled-folder-access-audit"],
+      "conflictsWith": [
+        "security.defender.controlled-folder-access-audit"
+      ],
       "managedBy": {
         "policyCsp": "Defender/EnableControlledFolderAccess",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Controlled folder access\\Configure Controlled folder access"
       },
-      "sideEffects": ["High friction: any application not on Microsoft's trusted list is blocked from writing to Documents, Pictures, Desktop, Videos, Music and Favorites (game saves, backup/sync agents, developer tools, scanners). Needs an allow-list."],
+      "sideEffects": [
+        "High friction: any application not on Microsoft's trusted list is blocked from writing to Documents, Pictures, Desktop, Videos, Music and Favorites (game saves, backup/sync agents, developer tools, scanners). Needs an allow-list."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
         "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
       ],
       "verifiedOn": [],
-      "tags": ["defender", "ransomware", "cis", "acsc"]
+      "tags": [
+        "defender",
+        "ransomware",
+        "cis",
+        "acsc"
+      ]
     },
     {
       "id": "security.defender.scan-options",
@@ -298,12 +474,37 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "DisableRemovableDriveScanning", "value": 0, "default": 1 },
-        { "kind": "DefenderPreference", "property": "DisableArchiveScanning", "value": 0, "default": 0 },
-        { "kind": "DefenderPreference", "property": "DisableEmailScanning", "value": 0, "default": 1 },
-        { "kind": "DefenderPreference", "property": "CheckForSignaturesBeforeRunningScan", "value": 1, "default": 0 }
+        {
+          "kind": "DefenderPreference",
+          "property": "DisableRemovableDriveScanning",
+          "value": 0,
+          "default": 1
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "DisableArchiveScanning",
+          "value": 0,
+          "default": 0
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "DisableEmailScanning",
+          "value": 0,
+          "default": 1
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "CheckForSignaturesBeforeRunningScan",
+          "value": 1,
+          "default": 0
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -312,13 +513,20 @@
         "policyCsp": null,
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Scan"
       },
-      "sideEffects": ["Scanning removable drives slows USB copies; email scanning adds overhead."],
+      "sideEffects": [
+        "Scanning removable drives slows USB copies; email scanning adds overhead."
+      ],
       "sources": [
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
       ],
       "verifiedOn": [],
-      "tags": ["defender", "scan", "baseline", "cis"]
+      "tags": [
+        "defender",
+        "scan",
+        "baseline",
+        "cis"
+      ]
     },
     {
       "id": "security.asr.vulnerable-drivers",
@@ -330,10 +538,29 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Ids", "value": ["56a863a9-875e-4185-98a7-b882c64b5ce5"], "default": [] },
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Actions", "value": [1], "default": [] }
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Ids",
+          "value": [
+            "56a863a9-875e-4185-98a7-b882c64b5ce5"
+          ],
+          "default": []
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Actions",
+          "value": [
+            1
+          ],
+          "default": []
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -342,13 +569,19 @@
         "policyCsp": "Defender/AttackSurfaceReductionRules",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules"
       },
-      "sideEffects": ["Blocks writing known-vulnerable signed drivers to disk; already-loaded drivers are unaffected. Complements the vulnerable-driver blocklist and WDAC."],
+      "sideEffects": [
+        "Blocks writing known-vulnerable signed drivers to disk; already-loaded drivers are unaffected. Complements the vulnerable-driver blocklist and WDAC."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231"
       ],
       "verifiedOn": [],
-      "tags": ["asr", "vulnerable-drivers", "baseline"]
+      "tags": [
+        "asr",
+        "vulnerable-drivers",
+        "baseline"
+      ]
     },
     {
       "id": "security.asr.lsass",
@@ -360,10 +593,29 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Ids", "value": ["9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2"], "default": [] },
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Actions", "value": [1], "default": [] }
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Ids",
+          "value": [
+            "9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2"
+          ],
+          "default": []
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Actions",
+          "value": [
+            1
+          ],
+          "default": []
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -372,13 +624,20 @@
         "policyCsp": "Defender/AttackSurfaceReductionRules",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules"
       },
-      "sideEffects": ["Noisy in audit mode (many benign LSASS handle opens); blocks memory reads, not process launch. Incompatible with Quest DirSync password sync. Largely redundant when LSA protection (RunAsPPL) is already enabled."],
+      "sideEffects": [
+        "Noisy in audit mode (many benign LSASS handle opens); blocks memory reads, not process launch. Incompatible with Quest DirSync password sync. Largely redundant when LSA protection (RunAsPPL) is already enabled."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231"
       ],
       "verifiedOn": [],
-      "tags": ["asr", "lsass", "credentials", "baseline"]
+      "tags": [
+        "asr",
+        "lsass",
+        "credentials",
+        "baseline"
+      ]
     },
     {
       "id": "security.asr.wmi-persistence",
@@ -390,10 +649,29 @@
       "risk": "Advanced",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Ids", "value": ["e6db77e5-3df2-4cf1-b95a-636979351e5b"], "default": [] },
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Actions", "value": [2], "default": [] }
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Ids",
+          "value": [
+            "e6db77e5-3df2-4cf1-b95a-636979351e5b"
+          ],
+          "default": []
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Actions",
+          "value": [
+            2
+          ],
+          "default": []
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -402,13 +680,19 @@
         "policyCsp": "Defender/AttackSurfaceReductionRules",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules"
       },
-      "sideEffects": ["Audited first because Configuration Manager (ConfigMgr/SCCM) relies heavily on WMI; monitoring, backup and OEM agents using permanent WMI event subscriptions can break in block mode."],
+      "sideEffects": [
+        "Audited first because Configuration Manager (ConfigMgr/SCCM) relies heavily on WMI; monitoring, backup and OEM agents using permanent WMI event subscriptions can break in block mode."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231"
       ],
       "verifiedOn": [],
-      "tags": ["asr", "wmi-persistence", "baseline"]
+      "tags": [
+        "asr",
+        "wmi-persistence",
+        "baseline"
+      ]
     },
     {
       "id": "security.asr.adobe-reader-child",
@@ -420,10 +704,29 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Ids", "value": ["7674ba52-37eb-4a4f-a9a1-f0f9a1619a2c"], "default": [] },
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Actions", "value": [1], "default": [] }
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Ids",
+          "value": [
+            "7674ba52-37eb-4a4f-a9a1-f0f9a1619a2c"
+          ],
+          "default": []
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Actions",
+          "value": [
+            1
+          ],
+          "default": []
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -432,13 +735,19 @@
         "policyCsp": "Defender/AttackSurfaceReductionRules",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules"
       },
-      "sideEffects": ["Breaks Adobe Reader plug-ins or updates that spawn child processes (rare)."],
+      "sideEffects": [
+        "Breaks Adobe Reader plug-ins or updates that spawn child processes (rare)."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231"
       ],
       "verifiedOn": [],
-      "tags": ["asr", "adobe-reader", "baseline"]
+      "tags": [
+        "asr",
+        "adobe-reader",
+        "baseline"
+      ]
     },
     {
       "id": "security.asr.office-child-process",
@@ -450,10 +759,29 @@
       "risk": "Advanced",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Ids", "value": ["d4f940ab-401b-4efc-aadc-ad5f3c50688a"], "default": [] },
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Actions", "value": [1], "default": [] }
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Ids",
+          "value": [
+            "d4f940ab-401b-4efc-aadc-ad5f3c50688a"
+          ],
+          "default": []
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Actions",
+          "value": [
+            1
+          ],
+          "default": []
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -462,13 +790,19 @@
         "policyCsp": "Defender/AttackSurfaceReductionRules",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules"
       },
-      "sideEffects": ["Blocks Office macros and add-ins that launch cmd, PowerShell or other applications; the most common rule needing per-app exclusions. Enforced only when Office is installed under Program Files."],
+      "sideEffects": [
+        "Blocks Office macros and add-ins that launch cmd, PowerShell or other applications; the most common rule needing per-app exclusions. Enforced only when Office is installed under Program Files."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231"
       ],
       "verifiedOn": [],
-      "tags": ["asr", "office-child-process", "baseline"]
+      "tags": [
+        "asr",
+        "office-child-process",
+        "baseline"
+      ]
     },
     {
       "id": "security.asr.email-executable",
@@ -480,10 +814,29 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Ids", "value": ["be9ba2d9-53ea-4cdc-84e5-9b1eeee46550"], "default": [] },
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Actions", "value": [1], "default": [] }
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Ids",
+          "value": [
+            "be9ba2d9-53ea-4cdc-84e5-9b1eeee46550"
+          ],
+          "default": []
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Actions",
+          "value": [
+            1
+          ],
+          "default": []
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -492,13 +845,19 @@
         "policyCsp": "Defender/AttackSurfaceReductionRules",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules"
       },
-      "sideEffects": ["Blocks running executable content directly from Outlook or webmail; users can still save to disk and run with SmartScreen."],
+      "sideEffects": [
+        "Blocks running executable content directly from Outlook or webmail; users can still save to disk and run with SmartScreen."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231"
       ],
       "verifiedOn": [],
-      "tags": ["asr", "email", "baseline"]
+      "tags": [
+        "asr",
+        "email",
+        "baseline"
+      ]
     },
     {
       "id": "security.asr.executable-prevalence",
@@ -510,10 +869,29 @@
       "risk": "Advanced",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Ids", "value": ["01443614-cd74-433a-b99e-2ecdc07bfc25"], "default": [] },
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Actions", "value": [2], "default": [] }
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Ids",
+          "value": [
+            "01443614-cd74-433a-b99e-2ecdc07bfc25"
+          ],
+          "default": []
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Actions",
+          "value": [
+            2
+          ],
+          "default": []
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -522,13 +900,19 @@
         "policyCsp": "Defender/AttackSurfaceReductionRules",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules"
       },
-      "sideEffects": ["High breakage for developers and line-of-business software: new, unsigned or low-prevalence executables are blocked. Audited first; requires cloud protection."],
+      "sideEffects": [
+        "High breakage for developers and line-of-business software: new, unsigned or low-prevalence executables are blocked. Audited first; requires cloud protection."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://learn.microsoft.com/en-us/defender-endpoint/specify-cloud-protection-level-microsoft-defender-antivirus"
       ],
       "verifiedOn": [],
-      "tags": ["asr", "executable-prevalence", "cloud"]
+      "tags": [
+        "asr",
+        "executable-prevalence",
+        "cloud"
+      ]
     },
     {
       "id": "security.asr.obfuscated-scripts",
@@ -540,10 +924,29 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Ids", "value": ["5beb7efe-fd9a-4556-801d-275e5ffc04cc"], "default": [] },
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Actions", "value": [1], "default": [] }
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Ids",
+          "value": [
+            "5beb7efe-fd9a-4556-801d-275e5ffc04cc"
+          ],
+          "default": []
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Actions",
+          "value": [
+            1
+          ],
+          "default": []
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -552,14 +955,21 @@
         "policyCsp": "Defender/AttackSurfaceReductionRules",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules"
       },
-      "sideEffects": ["False positives on minified or packed legitimate scripts (some installers, PowerShell modules, build scripts). Requires AMSI and cloud protection."],
+      "sideEffects": [
+        "False positives on minified or packed legitimate scripts (some installers, PowerShell modules, build scripts). Requires AMSI and cloud protection."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
         "https://learn.microsoft.com/en-us/defender-endpoint/specify-cloud-protection-level-microsoft-defender-antivirus"
       ],
       "verifiedOn": [],
-      "tags": ["asr", "obfuscated-scripts", "baseline", "cloud"]
+      "tags": [
+        "asr",
+        "obfuscated-scripts",
+        "baseline",
+        "cloud"
+      ]
     },
     {
       "id": "security.asr.script-launch-executable",
@@ -571,10 +981,29 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Ids", "value": ["d3e037e1-3eb8-44c8-a917-57927947596d"], "default": [] },
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Actions", "value": [1], "default": [] }
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Ids",
+          "value": [
+            "d3e037e1-3eb8-44c8-a917-57927947596d"
+          ],
+          "default": []
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Actions",
+          "value": [
+            1
+          ],
+          "default": []
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -583,13 +1012,19 @@
         "policyCsp": "Defender/AttackSurfaceReductionRules",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules"
       },
-      "sideEffects": ["Blocks JavaScript/VBScript that downloads and launches executables; rare line-of-business installers can break."],
+      "sideEffects": [
+        "Blocks JavaScript/VBScript that downloads and launches executables; rare line-of-business installers can break."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231"
       ],
       "verifiedOn": [],
-      "tags": ["asr", "script-launch-executable", "baseline"]
+      "tags": [
+        "asr",
+        "script-launch-executable",
+        "baseline"
+      ]
     },
     {
       "id": "security.asr.office-executable-content",
@@ -601,10 +1036,29 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Ids", "value": ["3b576869-a4ec-4529-8536-b80a7769e899"], "default": [] },
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Actions", "value": [1], "default": [] }
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Ids",
+          "value": [
+            "3b576869-a4ec-4529-8536-b80a7769e899"
+          ],
+          "default": []
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Actions",
+          "value": [
+            1
+          ],
+          "default": []
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -613,13 +1067,19 @@
         "policyCsp": "Defender/AttackSurfaceReductionRules",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules"
       },
-      "sideEffects": ["Blocks Office macros/add-ins writing executables or scripts to disk."],
+      "sideEffects": [
+        "Blocks Office macros/add-ins writing executables or scripts to disk."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231"
       ],
       "verifiedOn": [],
-      "tags": ["asr", "office-executable-content", "baseline"]
+      "tags": [
+        "asr",
+        "office-executable-content",
+        "baseline"
+      ]
     },
     {
       "id": "security.asr.office-injection",
@@ -631,10 +1091,29 @@
       "risk": "Advanced",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Ids", "value": ["75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84"], "default": [] },
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Actions", "value": [1], "default": [] }
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Ids",
+          "value": [
+            "75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84"
+          ],
+          "default": []
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Actions",
+          "value": [
+            1
+          ],
+          "default": []
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -643,13 +1122,19 @@
         "policyCsp": "Defender/AttackSurfaceReductionRules",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules"
       },
-      "sideEffects": ["Incompatible with BeyondTrust Privilege Guard (pre-September 2024 platform) and Heimdal; requires an Office restart. Skip if those products are present."],
+      "sideEffects": [
+        "Incompatible with BeyondTrust Privilege Guard (pre-September 2024 platform) and Heimdal; requires an Office restart. Skip if those products are present."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231"
       ],
       "verifiedOn": [],
-      "tags": ["asr", "office-injection", "baseline"]
+      "tags": [
+        "asr",
+        "office-injection",
+        "baseline"
+      ]
     },
     {
       "id": "security.asr.office-comm-child",
@@ -661,10 +1146,29 @@
       "risk": "Advanced",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Ids", "value": ["26190899-1602-49e8-8b27-eb1d0a1ce869"], "default": [] },
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Actions", "value": [1], "default": [] }
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Ids",
+          "value": [
+            "26190899-1602-49e8-8b27-eb1d0a1ce869"
+          ],
+          "default": []
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Actions",
+          "value": [
+            1
+          ],
+          "default": []
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -673,13 +1177,19 @@
         "policyCsp": "Defender/AttackSurfaceReductionRules",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules"
       },
-      "sideEffects": ["Breaks Outlook add-ins that launch helper processes (document-management, CRM, PDF and print plug-ins). Enforced only for Program Files installs."],
+      "sideEffects": [
+        "Breaks Outlook add-ins that launch helper processes (document-management, CRM, PDF and print plug-ins). Enforced only for Program Files installs."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231"
       ],
       "verifiedOn": [],
-      "tags": ["asr", "office-comm-child", "baseline"]
+      "tags": [
+        "asr",
+        "office-comm-child",
+        "baseline"
+      ]
     },
     {
       "id": "security.asr.psexec-wmi",
@@ -691,10 +1201,29 @@
       "risk": "Advanced",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Ids", "value": ["d1e49aac-8f56-4280-b9ba-993a6d77406c"], "default": [] },
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Actions", "value": [2], "default": [] }
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Ids",
+          "value": [
+            "d1e49aac-8f56-4280-b9ba-993a6d77406c"
+          ],
+          "default": []
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Actions",
+          "value": [
+            2
+          ],
+          "default": []
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -703,13 +1232,19 @@
         "policyCsp": "Defender/AttackSurfaceReductionRules",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules"
       },
-      "sideEffects": ["Audited first: do not enable in block on ConfigMgr-managed devices (the client uses WMI). Breaks PsExec-based deployment, many RMM tools and remote WMI process creation."],
+      "sideEffects": [
+        "Audited first: do not enable in block on ConfigMgr-managed devices (the client uses WMI). Breaks PsExec-based deployment, many RMM tools and remote WMI process creation."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231"
       ],
       "verifiedOn": [],
-      "tags": ["asr", "psexec-wmi", "baseline"]
+      "tags": [
+        "asr",
+        "psexec-wmi",
+        "baseline"
+      ]
     },
     {
       "id": "security.asr.safe-mode-reboot",
@@ -721,10 +1256,29 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Ids", "value": ["33ddedf1-c6e0-47cb-833e-de6133960387"], "default": [] },
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Actions", "value": [1], "default": [] }
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Ids",
+          "value": [
+            "33ddedf1-c6e0-47cb-833e-de6133960387"
+          ],
+          "default": []
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Actions",
+          "value": [
+            1
+          ],
+          "default": []
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -733,12 +1287,17 @@
         "policyCsp": "Defender/AttackSurfaceReductionRules",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules"
       },
-      "sideEffects": ["Blocks bcdedit/bootcfg from scheduling a Safe Mode boot; Safe Mode remains reachable via WinRE or Shift-restart. Some AV-removal and imaging tools fail. No user notification."],
+      "sideEffects": [
+        "Blocks bcdedit/bootcfg from scheduling a Safe Mode boot; Safe Mode remains reachable via WinRE or Shift-restart. Some AV-removal and imaging tools fail. No user notification."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference"
       ],
       "verifiedOn": [],
-      "tags": ["asr", "safe-mode-reboot"]
+      "tags": [
+        "asr",
+        "safe-mode-reboot"
+      ]
     },
     {
       "id": "security.asr.usb-untrusted",
@@ -750,10 +1309,29 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Ids", "value": ["b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4"], "default": [] },
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Actions", "value": [1], "default": [] }
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Ids",
+          "value": [
+            "b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4"
+          ],
+          "default": []
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Actions",
+          "value": [
+            1
+          ],
+          "default": []
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -762,13 +1340,19 @@
         "policyCsp": "Defender/AttackSurfaceReductionRules",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules"
       },
-      "sideEffects": ["Blocks untrusted, unsigned processes running directly from USB/SD media (portable apps); copying to a local disk and running is still allowed."],
+      "sideEffects": [
+        "Blocks untrusted, unsigned processes running directly from USB/SD media (portable apps); copying to a local disk and running is still allowed."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231"
       ],
       "verifiedOn": [],
-      "tags": ["asr", "usb-untrusted", "baseline"]
+      "tags": [
+        "asr",
+        "usb-untrusted",
+        "baseline"
+      ]
     },
     {
       "id": "security.asr.copied-system-tools",
@@ -780,10 +1364,29 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Ids", "value": ["c0033c00-d16d-4114-a5a0-dc9b3a7d2ceb"], "default": [] },
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Actions", "value": [1], "default": [] }
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Ids",
+          "value": [
+            "c0033c00-d16d-4114-a5a0-dc9b3a7d2ceb"
+          ],
+          "default": []
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Actions",
+          "value": [
+            1
+          ],
+          "default": []
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -792,12 +1395,17 @@
         "policyCsp": "Defender/AttackSurfaceReductionRules",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules"
       },
-      "sideEffects": ["Blocks renamed or copied Windows binaries (e.g. a copy of cmd.exe or powershell.exe); some IT toolkits ship such copies."],
+      "sideEffects": [
+        "Blocks renamed or copied Windows binaries (e.g. a copy of cmd.exe or powershell.exe); some IT toolkits ship such copies."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference"
       ],
       "verifiedOn": [],
-      "tags": ["asr", "copied-system-tools"]
+      "tags": [
+        "asr",
+        "copied-system-tools"
+      ]
     },
     {
       "id": "security.asr.office-macro-win32",
@@ -809,10 +1417,29 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Ids", "value": ["92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b"], "default": [] },
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Actions", "value": [1], "default": [] }
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Ids",
+          "value": [
+            "92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b"
+          ],
+          "default": []
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Actions",
+          "value": [
+            1
+          ],
+          "default": []
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -821,13 +1448,19 @@
         "policyCsp": "Defender/AttackSurfaceReductionRules",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules"
       },
-      "sideEffects": ["Legacy VBA macros that declare Win32 APIs (Declare statements) fail; rare."],
+      "sideEffects": [
+        "Legacy VBA macros that declare Win32 APIs (Declare statements) fail; rare."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231"
       ],
       "verifiedOn": [],
-      "tags": ["asr", "office-macro-win32", "baseline"]
+      "tags": [
+        "asr",
+        "office-macro-win32",
+        "baseline"
+      ]
     },
     {
       "id": "security.asr.ransomware",
@@ -839,10 +1472,29 @@
       "risk": "Caution",
       "scope": "Machine",
       "status": "Draft",
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
       "actions": [
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Ids", "value": ["c1db55ab-c21a-4637-bb3f-a12568109d35"], "default": [] },
-        { "kind": "DefenderPreference", "property": "AttackSurfaceReductionRules_Actions", "value": [1], "default": [] }
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Ids",
+          "value": [
+            "c1db55ab-c21a-4637-bb3f-a12568109d35"
+          ],
+          "default": []
+        },
+        {
+          "kind": "DefenderPreference",
+          "property": "AttackSurfaceReductionRules_Actions",
+          "value": [
+            1
+          ],
+          "default": []
+        }
       ],
       "requires": "None",
       "dependsOn": [],
@@ -851,13 +1503,19 @@
         "policyCsp": "Defender/AttackSurfaceReductionRules",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\Microsoft Defender Exploit Guard\\Attack Surface Reduction\\Configure Attack Surface Reduction rules"
       },
-      "sideEffects": ["Blocks unknown or low-reputation files resembling ransomware; may block internal builds until their reputation grows. Requires cloud protection."],
+      "sideEffects": [
+        "Blocks unknown or low-reputation files resembling ransomware; may block internal builds until their reputation grows. Requires cloud protection."
+      ],
       "sources": [
         "https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-rules-reference",
         "https://learn.microsoft.com/en-us/defender-endpoint/specify-cloud-protection-level-microsoft-defender-antivirus"
       ],
       "verifiedOn": [],
-      "tags": ["asr", "ransomware", "cloud"]
+      "tags": [
+        "asr",
+        "ransomware",
+        "cloud"
+      ]
     }
   ]
 }

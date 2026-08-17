@@ -40,6 +40,16 @@ public sealed class BuiltInCatalogTests
     }
 
     [Fact]
+    public void Privacy_category_meets_its_M4_target()
+    {
+        int privacy = Load().InCategory(Category.Privacy).Count();
+
+        Assert.True(privacy >= 90,
+            string.Create(System.Globalization.CultureInfo.InvariantCulture,
+                $"M4 requires at least 90 Privacy entries; found {privacy}."));
+    }
+
+    [Fact]
     public void Every_category_is_represented()
     {
         TweakCatalog catalog = Load();

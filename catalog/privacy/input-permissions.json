@@ -1,0 +1,1267 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "privacy.input.improve-inking-typing-off",
+      "title": "Turn off Improve inking and typing",
+      "description": "Disables the Diagnostics & feedback setting that sends samples of typed and handwritten text to Microsoft to improve recognition.",
+      "rationale": "Keystroke and ink samples are among the most sensitive telemetry; local typing and handwriting are unaffected. Microsoft documents the toggle but not this exact key.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Input\\TIPC",
+          "name": "Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Microsoft documents the behaviour but not this exact registry value; community-verified (privacy.sexy / Win11Debloat / winutil)."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://github.com/undergroundwires/privacy.sexy",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "input",
+        "typing",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "privacy.input.disable-linguistic-data-collection",
+      "title": "Disable inking and typing recognition data collection (policy)",
+      "description": "Applies the machine policy that stops Windows from collecting inking and typing samples to improve handwriting and typing recognition.",
+      "rationale": "Group Policy equivalent of the 'Improve inking and typing' toggle, enforced for all users. Local recognition still works.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\TextInput",
+          "name": "AllowLinguisticDataCollection",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "TextInput/AllowLinguisticDataCollection",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Text Input\\Improve inking and typing recognition"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-textinput"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "input",
+        "typing"
+      ]
+    },
+    {
+      "id": "privacy.input.disable-automatic-learning-policy",
+      "title": "Turn off automatic learning of inking and typing (policy)",
+      "description": "Applies the machine policy that turns off automatic learning of handwriting and text patterns for all users (custom dictionary / implicit collection).",
+      "rationale": "Enforces the personal-dictionary opt-out through Group Policy so it cannot be re-enabled per user.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\InputPersonalization",
+          "name": "RestrictImplicitInkCollection",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\InputPersonalization",
+          "name": "RestrictImplicitTextCollection",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "ADMX_Globalization/ImplicitDataCollectionOff_1",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Control Panel\\Regional and Language Options\\Handwriting personalization\\Turn off automatic learning"
+      },
+      "sideEffects": [
+        "Personal dictionary and text-prediction learning stop for all users."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-globalization"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "input",
+        "typing"
+      ]
+    },
+    {
+      "id": "privacy.input.disable-online-speech-recognition",
+      "title": "Turn off online speech recognition",
+      "description": "Sets the per-user preference so voice typing and dictation no longer send audio to Microsoft's cloud speech services.",
+      "rationale": "Online speech is off by default unless the user accepted it; on-device speech recognition is unaffected.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Speech_OneCore\\Settings\\OnlineSpeechPrivacy",
+          "name": "HasAccepted",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Voice typing (Win+H) and online dictation stop working until re-enabled."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-speech"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "speech",
+        "voice"
+      ]
+    },
+    {
+      "id": "privacy.input.disable-online-speech-recognition-policy",
+      "title": "Disallow online speech recognition (policy)",
+      "description": "Applies the machine policy that prevents users from enabling online (cloud) speech recognition.",
+      "rationale": "Group Policy enforcement of the online-speech opt-out; users cannot turn voice typing back on.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\InputPersonalization",
+          "name": "AllowInputPersonalization",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Privacy/AllowInputPersonalization",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Control Panel\\Regional and Language Options\\Allow users to enable online speech recognition services"
+      },
+      "sideEffects": [
+        "Users can no longer enable voice typing or online dictation."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "speech",
+        "voice"
+      ]
+    },
+    {
+      "id": "privacy.input.disable-speech-model-updates",
+      "title": "Turn off speech model updates",
+      "description": "Applies the machine policy that stops background download of updated speech recognition and text-to-speech models.",
+      "rationale": "Prevents periodic speech-data downloads; existing models keep working but are never refreshed.",
+      "category": "Privacy",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Speech",
+          "name": "AllowSpeechModelUpdate",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Speech/AllowSpeechModelUpdate",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Control Panel\\Regional and Language Options\\Allow automatic update of Speech Data"
+      },
+      "sideEffects": [
+        "Speech recognition and text-to-speech models are never refreshed with newer versions."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-speech"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "speech"
+      ]
+    },
+    {
+      "id": "privacy.input.disable-handwriting-data-sharing",
+      "title": "Turn off handwriting personalization data sharing",
+      "description": "Applies the policy that stops Windows from sharing handwriting personalization data used to improve recognition.",
+      "rationale": "Prevents upload of handwriting samples with no loss of local functionality. Microsoft documents the ADMX setting but not this exact key.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\TabletPC",
+          "name": "PreventHandwritingDataSharing",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Internet Communication Management\\Internet Communication settings\\Turn off handwriting personalization data sharing"
+      },
+      "sideEffects": [
+        "Microsoft documents the behaviour but not this exact registry value; community-verified (privacy.sexy)."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-icm",
+        "https://github.com/undergroundwires/privacy.sexy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "handwriting",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "privacy.input.disable-handwriting-error-reports",
+      "title": "Turn off handwriting recognition error reporting",
+      "description": "Applies the policy that stops Windows from reporting handwriting recognition errors to Microsoft.",
+      "rationale": "Prevents upload of ink error reports with no loss of local functionality. Microsoft documents the ADMX setting but not this exact key.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\HandwritingErrorReports",
+          "name": "PreventHandwritingErrorReports",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Internet Communication Management\\Internet Communication settings\\Turn off handwriting recognition error reporting"
+      },
+      "sideEffects": [
+        "Microsoft documents the behaviour but not this exact registry value; community-verified (privacy.sexy)."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-errorreporting",
+        "https://github.com/undergroundwires/privacy.sexy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "handwriting",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "privacy.input.disable-voice-activation",
+      "title": "Turn off voice activation for apps",
+      "description": "Applies the machine policy that force-denies apps the ability to listen for wake words (such as 'Hey Cortana' or 'Hey Copilot'), including above the lock screen.",
+      "rationale": "Stops always-listening wake-word detection for all apps; apps can still be opened manually.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+          "name": "LetAppsActivateWithVoice",
+          "type": "Dword",
+          "value": 2,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Privacy/LetAppsActivateWithVoice",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\App Privacy\\Let Windows apps activate with voice"
+      },
+      "sideEffects": [
+        "Wake-word activation (Hey Cortana / Hey Copilot) stops for all apps, on-screen and above the lock screen."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "speech",
+        "voice",
+        "permissions"
+      ]
+    },
+    {
+      "id": "privacy.input.disable-ime-cloud-candidates",
+      "title": "Turn off Microsoft IME cloud candidates",
+      "description": "Disables cloud candidate suggestions and proactive key detection for the Microsoft Japanese IME so keystrokes are not sent to Microsoft's suggestion service.",
+      "rationale": "Stops East-Asian IME text from reaching Microsoft's cloud; local candidates keep working with fewer suggestions. Community tools set these keys; Microsoft documents the CSP but not the registry values.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\IME\\15.0\\IMEJP\\MSIME",
+          "name": "EnableCloudCandidate",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\IME\\15.0\\IMEJP\\MSIME",
+          "name": "EnableProactiveKeyDetection",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "TextInput/AllowIMENetworkAccess",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Fewer candidate suggestions in the Japanese IME (region-specific).",
+        "Microsoft documents the behaviour but not these exact registry values; community-verified (privacy.sexy)."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-textinput",
+        "https://github.com/undergroundwires/privacy.sexy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "input",
+        "ime",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "privacy.permissions.disable-location-device",
+      "title": "Turn off location for this device",
+      "description": "Applies the machine policy that turns off the Windows location service and the Windows location provider for the whole device.",
+      "rationale": "Master location kill switch; the single largest privacy control for location. Reversible by removing the policy.",
+      "category": "Privacy",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\LocationAndSensors",
+          "name": "DisableLocation",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\LocationAndSensors",
+          "name": "DisableWindowsLocationProvider",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "System/AllowLocation",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Location and Sensors\\Turn off location"
+      },
+      "sideEffects": [
+        "Automatic time-zone, Find My Device, Maps, weather and any app that needs location stop working.",
+        "Wi-Fi/IP-based location for apps is disabled device-wide."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-system",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-locationprovideradm"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "location",
+        "sensors",
+        "permissions"
+      ]
+    },
+    {
+      "id": "privacy.permissions.deny-apps-camera",
+      "title": "Deny Store apps access to the camera",
+      "description": "Force-denies packaged (Store) apps access to the camera through the App Privacy policy.",
+      "rationale": "Blocks UWP apps from the camera regardless of per-app settings. Classic desktop apps are unaffected.",
+      "category": "Privacy",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+          "name": "LetAppsAccessCamera",
+          "type": "Dword",
+          "value": 2,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Privacy/LetAppsAccessCamera",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\App Privacy\\Let Windows apps access the camera"
+      },
+      "sideEffects": [
+        "Store versions of Teams, Zoom, Camera and similar apps cannot use the webcam."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "camera",
+        "permissions"
+      ]
+    },
+    {
+      "id": "privacy.permissions.deny-apps-microphone",
+      "title": "Deny Store apps access to the microphone",
+      "description": "Force-denies packaged (Store) apps access to the microphone through the App Privacy policy.",
+      "rationale": "Blocks UWP apps from the microphone regardless of per-app settings. Classic desktop apps are unaffected.",
+      "category": "Privacy",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+          "name": "LetAppsAccessMicrophone",
+          "type": "Dword",
+          "value": 2,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Privacy/LetAppsAccessMicrophone",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\App Privacy\\Let Windows apps access the microphone"
+      },
+      "sideEffects": [
+        "Voice typing, calls and dictation in Store apps are blocked."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "microphone",
+        "permissions"
+      ]
+    },
+    {
+      "id": "privacy.permissions.deny-apps-contacts",
+      "title": "Deny Store apps access to contacts",
+      "description": "Force-denies packaged (Store) apps access to the contacts list through the App Privacy policy.",
+      "rationale": "Blocks UWP apps from reading contacts regardless of per-app settings. Classic desktop apps are unaffected.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+          "name": "LetAppsAccessContacts",
+          "type": "Dword",
+          "value": 2,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Privacy/LetAppsAccessContacts",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\App Privacy\\Let Windows apps access contacts"
+      },
+      "sideEffects": [
+        "Mail, People and other Store apps cannot read the contacts list."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "contacts",
+        "permissions"
+      ]
+    },
+    {
+      "id": "privacy.permissions.deny-apps-calendar",
+      "title": "Deny Store apps access to the calendar",
+      "description": "Force-denies packaged (Store) apps access to calendar appointments through the App Privacy policy.",
+      "rationale": "Blocks UWP apps from reading the calendar regardless of per-app settings. Classic desktop apps are unaffected.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+          "name": "LetAppsAccessCalendar",
+          "type": "Dword",
+          "value": 2,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Privacy/LetAppsAccessCalendar",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\App Privacy\\Let Windows apps access the calendar"
+      },
+      "sideEffects": [
+        "Mail and Calendar apps cannot read or write appointments."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "calendar",
+        "permissions"
+      ]
+    },
+    {
+      "id": "privacy.permissions.deny-apps-account-info",
+      "title": "Deny Store apps access to account information",
+      "description": "Force-denies packaged (Store) apps access to your name, picture and other account information through the App Privacy policy.",
+      "rationale": "Blocks UWP apps from reading account information regardless of per-app settings. Classic desktop apps are unaffected.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+          "name": "LetAppsAccessAccountInfo",
+          "type": "Dword",
+          "value": 2,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Privacy/LetAppsAccessAccountInfo",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\App Privacy\\Let Windows apps access account information"
+      },
+      "sideEffects": [
+        "Apps cannot read your name, picture or other account information."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "account",
+        "permissions"
+      ]
+    },
+    {
+      "id": "privacy.permissions.deny-apps-call-history",
+      "title": "Deny Store apps access to call history",
+      "description": "Force-denies packaged (Store) apps access to call history through the App Privacy policy.",
+      "rationale": "Blocks UWP apps from reading call history regardless of per-app settings. Classic desktop apps are unaffected.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+          "name": "LetAppsAccessCallHistory",
+          "type": "Dword",
+          "value": 2,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Privacy/LetAppsAccessCallHistory",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\App Privacy\\Let Windows apps access call history"
+      },
+      "sideEffects": [
+        "Phone Link and similar Store apps cannot read call history."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "phone",
+        "permissions"
+      ]
+    },
+    {
+      "id": "privacy.permissions.deny-apps-notifications",
+      "title": "Deny Store apps access to notifications",
+      "description": "Force-denies packaged (Store) apps the ability to read your notifications through the App Privacy policy.",
+      "rationale": "Blocks UWP apps from reading notifications regardless of per-app settings. Classic desktop apps are unaffected.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+          "name": "LetAppsAccessNotifications",
+          "type": "Dword",
+          "value": 2,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Privacy/LetAppsAccessNotifications",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\App Privacy\\Let Windows apps access notifications"
+      },
+      "sideEffects": [
+        "Notification-mirroring features such as Phone Link cannot read notifications."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "notifications",
+        "permissions"
+      ]
+    },
+    {
+      "id": "privacy.permissions.deny-apps-app-diagnostics",
+      "title": "Deny Store apps access to app diagnostics",
+      "description": "Force-denies packaged (Store) apps the ability to read diagnostic information about other running apps through the App Privacy policy.",
+      "rationale": "Blocks UWP apps from inspecting other apps regardless of per-app settings. Classic desktop apps are unaffected.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+          "name": "LetAppsGetDiagnosticInfo",
+          "type": "Dword",
+          "value": 2,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Privacy/LetAppsGetDiagnosticInfo",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\App Privacy\\Let Windows apps access diagnostic information about other apps"
+      },
+      "sideEffects": [
+        "Some Store system utilities that inspect other running apps stop working."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "diagnostics",
+        "permissions"
+      ]
+    },
+    {
+      "id": "privacy.permissions.deny-apps-radios",
+      "title": "Deny Store apps control of radios",
+      "description": "Force-denies packaged (Store) apps the ability to turn Bluetooth and Wi-Fi radios on or off through the App Privacy policy.",
+      "rationale": "Blocks UWP apps from controlling radios regardless of per-app settings. Classic desktop apps are unaffected.",
+      "category": "Privacy",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+          "name": "LetAppsAccessRadios",
+          "type": "Dword",
+          "value": 2,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Privacy/LetAppsAccessRadios",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\App Privacy\\Let Windows apps control radios"
+      },
+      "sideEffects": [
+        "Store apps cannot turn Bluetooth or Wi-Fi radios on or off."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "radios",
+        "bluetooth",
+        "permissions"
+      ]
+    },
+    {
+      "id": "privacy.permissions.location-consent-deny",
+      "title": "Deny apps location access (per-user consent)",
+      "description": "Sets the per-user consent store so apps are denied location access, matching the Settings > Privacy & security > Location global toggle.",
+      "rationale": "Per-user equivalent of the location toggle; the device location service itself is unaffected. Microsoft documents the location consent key.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\location",
+          "name": "Value",
+          "type": "Sz",
+          "value": "Deny",
+          "default": "Allow",
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Apps requesting location are denied; the device location service is unaffected."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/troubleshoot/windows-client/shell-experience/cannot-set-timezone-automatically",
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "location",
+        "permissions"
+      ]
+    },
+    {
+      "id": "privacy.permissions.camera-consent-deny",
+      "title": "Deny apps camera access (per-user consent)",
+      "description": "Sets the per-user consent store so apps are denied camera access, matching the Settings > Privacy & security > Camera global toggle.",
+      "rationale": "Per-user equivalent of the camera toggle. Community tools set this key; Microsoft documents the location consent schema but not the camera key.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\webcam",
+          "name": "Value",
+          "type": "Sz",
+          "value": "Deny",
+          "default": "Allow",
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Store apps requesting the camera are denied via the per-user toggle.",
+        "Microsoft documents the behaviour but not this exact registry value; community-verified (privacy.sexy)."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://github.com/undergroundwires/privacy.sexy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "camera",
+        "permissions",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "privacy.permissions.microphone-consent-deny",
+      "title": "Deny apps microphone access (per-user consent)",
+      "description": "Sets the per-user consent store so apps are denied microphone access, matching the Settings > Privacy & security > Microphone global toggle.",
+      "rationale": "Per-user equivalent of the microphone toggle. Community tools set this key; Microsoft documents the location consent schema but not the microphone key.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\microphone",
+          "name": "Value",
+          "type": "Sz",
+          "value": "Deny",
+          "default": "Allow",
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Store apps requesting the microphone are denied via the per-user toggle.",
+        "Microsoft documents the behaviour but not this exact registry value; community-verified (privacy.sexy)."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://github.com/undergroundwires/privacy.sexy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "microphone",
+        "permissions",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "privacy.permissions.disable-background-apps",
+      "title": "Turn off background apps (per-user global)",
+      "description": "Sets the per-user global toggle that stops packaged apps from running in the background.",
+      "rationale": "Reduces background activity and data use. This is the reversible Settings-equivalent toggle, not the machine force-deny policy (which Microsoft warns breaks core notifications). Community tools set this key.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\BackgroundAccessApplications",
+          "name": "GlobalUserDisabled",
+          "type": "Dword",
+          "value": 1,
+          "default": 0,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Privacy/LetAppsRunInBackground",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Mail, messaging, Phone Link, Widgets and Store updates may not update or notify in the background.",
+        "Microsoft documents the behaviour but not this exact registry value; community-verified (privacy.sexy / winutil)."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy",
+        "https://github.com/undergroundwires/privacy.sexy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "background",
+        "permissions",
+        "unverified-ms"
+      ]
+    }
+  ]
+}

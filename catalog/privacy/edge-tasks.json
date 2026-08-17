@@ -1,0 +1,616 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "privacy.edge.diagnostic-data",
+      "title": "Turn off Microsoft Edge diagnostic data",
+      "description": "Sets the Microsoft Edge DiagnosticData policy to Off (0) so Edge sends no crash or usage diagnostic data to Microsoft.",
+      "rationale": "0 = Off, 1 = Required, 2 = Optional. Edge honours this policy natively from Edge 122 on Windows; earlier versions followed the Windows diagnostic-data level. Microsoft recommends Required (1), so full Off is offered only at the Strict level.",
+      "category": "Privacy",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "DiagnosticData",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
+      },
+      "sideEffects": ["Microsoft does not recommend fully disabling Edge diagnostic data; crash and usage reporting to Microsoft stops."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-browser-policies/diagnosticdata",
+        "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies"
+      ],
+      "verifiedOn": [],
+      "tags": ["edge", "telemetry"]
+    },
+    {
+      "id": "privacy.edge.personalization-reporting",
+      "title": "Stop Edge personalisation reporting",
+      "description": "Sets PersonalizationReportingEnabled to 0 so Microsoft Edge stops sending browsing history, favourites, collections and usage data used for ad and content personalisation.",
+      "rationale": "Disables the personalisation data feed with no functional side effects; browsing is unaffected. Available since Edge 80.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "PersonalizationReportingEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-browser-policies/personalizationreportingenabled",
+        "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies"
+      ],
+      "verifiedOn": [],
+      "tags": ["edge", "personalization"]
+    },
+    {
+      "id": "privacy.edge.user-feedback",
+      "title": "Disable Edge feedback collection",
+      "description": "Sets UserFeedbackAllowed to 0 so the 'Send feedback' UI and feedback prompts in Microsoft Edge are removed.",
+      "rationale": "Feedback submissions upload usage context and screenshots on demand; disabling the surface removes an interruption with no functional loss.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "UserFeedbackAllowed",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
+      },
+      "sideEffects": ["The Send feedback UI and feedback prompts are removed from Edge."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": ["edge", "feedback"]
+    },
+    {
+      "id": "privacy.edge.shopping-assistant",
+      "title": "Turn off the Edge shopping assistant",
+      "description": "Sets EdgeShoppingAssistantEnabled to 0 so Microsoft Edge stops coupon, price-tracking and shopping-comparison features.",
+      "rationale": "The shopping assistant inspects the pages you visit to surface offers; disabling it removes that page inspection with no impact on normal browsing.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "EdgeShoppingAssistantEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
+      },
+      "sideEffects": ["Coupon and price-tracking features are removed from Edge."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": ["edge", "shopping"]
+    },
+    {
+      "id": "privacy.edge.experimentation-config",
+      "title": "Restrict the Edge experimentation and configuration service",
+      "description": "Sets ExperimentationAndConfigurationServiceControl to RestrictedMode (0) so Microsoft Edge does not download experiment or configuration payloads from Microsoft.",
+      "rationale": "0 = RestrictedMode, 1 = ConfigurationsOnly (default for managed devices), 2 = Full. Microsoft does not recommend RestrictedMode because it also stops site-compatibility fixes, so it is offered only at the Paranoid level. Available since Edge 77.",
+      "category": "Privacy",
+      "level": "Paranoid",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "ExperimentationAndConfigurationServiceControl",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
+      },
+      "sideEffects": ["Edge stops receiving Microsoft-delivered site-compatibility configuration payloads, which can cause rendering issues on sites that rely on them."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-browser-policies/experimentationandconfigurationservicecontrol",
+        "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies"
+      ],
+      "verifiedOn": [],
+      "tags": ["edge", "telemetry", "experimentation"]
+    },
+    {
+      "id": "privacy.edge.hide-first-run",
+      "title": "Hide the Edge first-run experience",
+      "description": "Sets HideFirstRunExperience to 1 so Microsoft Edge skips the first-run onboarding flow, its data-collection prompts and default import offers.",
+      "rationale": "The first-run experience prompts for personalisation, sign-in and data import; hiding it avoids those prompts. It does not change how Edge browses.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "HideFirstRunExperience",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
+      },
+      "sideEffects": ["The first-run onboarding, personalisation and import prompts are skipped."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies"
+      ],
+      "verifiedOn": [],
+      "tags": ["edge", "nag"]
+    },
+    {
+      "id": "privacy.edge.spotlight",
+      "title": "Turn off Edge Spotlight recommendations",
+      "description": "Sets SpotlightExperiencesAndRecommendationsEnabled to 0 so Microsoft Edge stops Bing background images, text and suggestions on the new-tab page.",
+      "rationale": "Spotlight content is fetched and personalised from Microsoft services; disabling it produces a quieter new-tab page with no functional loss.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "SpotlightExperiencesAndRecommendationsEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
+      },
+      "sideEffects": ["Bing background images and suggestions are removed from the new-tab page."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": ["edge", "nag"]
+    },
+    {
+      "id": "privacy.edge.recommendations",
+      "title": "Turn off Edge feature nags and promotions",
+      "description": "Disables Microsoft Edge feature recommendations, Edge Insider promotions, default-browser campaigns and the Acrobat subscription button.",
+      "rationale": "These surfaces nag the user to enable Edge features or Microsoft subscriptions and can call promotion services; turning them off removes the prompts without affecting browsing. The deprecated PromotionalTabsEnabled value is intentionally not written.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "ShowRecommendationsEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "MicrosoftEdgeInsiderPromotionEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "DefaultBrowserSettingsCampaignEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "ShowAcrobatSubscriptionButton",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
+      },
+      "sideEffects": ["Feature recommendations, Insider promotions, default-browser campaigns and the Acrobat subscription button no longer appear in Edge."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": ["edge", "nag"]
+    },
+    {
+      "id": "privacy.edge.collections",
+      "title": "Disable Edge Collections",
+      "description": "Sets EdgeCollectionsEnabled to 0 so the Microsoft Edge Collections feature is unavailable.",
+      "rationale": "Collections can sync saved content through Microsoft services. Disabling it removes that cloud surface; this is offered at the Strict level because it removes a feature some users rely on.",
+      "category": "Privacy",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "EdgeCollectionsEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
+      },
+      "sideEffects": ["The Collections feature is removed from Edge."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies"
+      ],
+      "verifiedOn": [],
+      "tags": ["edge", "cloud"]
+    },
+    {
+      "id": "privacy.edge.web-widget",
+      "title": "Disable the Microsoft Edge web widget",
+      "description": "Sets WebWidgetAllowed to 0 so the Microsoft Edge web widget (the Edge-powered desktop widget) is disabled.",
+      "rationale": "The web widget surfaces a personalised Edge-powered feed on the desktop; disabling it removes that content feed with no impact on the browser itself.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "WebWidgetAllowed",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
+      },
+      "sideEffects": ["The Microsoft Edge web widget is disabled."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies"
+      ],
+      "verifiedOn": [],
+      "tags": ["edge", "widget"]
+    },
+    {
+      "id": "privacy.task.program-data-updater",
+      "title": "Disable the ProgramDataUpdater scheduled task",
+      "description": "Disables the Application Experience task that collects program telemetry for the Customer Experience Improvement Program (CEIP).",
+      "rationale": "The task only gathers program inventory when CEIP is enabled and has no effect otherwise; disabling it stops that collection at the Balanced level.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Application Experience\\ProgramDataUpdater",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": ["No effect while CEIP is disabled; feature updates may re-enable the task."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://github.com/undergroundwires/privacy.sexy"
+      ],
+      "verifiedOn": [],
+      "tags": ["task", "telemetry", "ceip"]
+    },
+    {
+      "id": "privacy.task.ceip",
+      "title": "Disable Customer Experience Improvement Program tasks",
+      "description": "Disables the CEIP Consolidator and UsbCeip scheduled tasks that collect and upload Customer Experience Improvement Program data.",
+      "rationale": "These tasks are dormant when CEIP is disabled (CEIPEnable=0); disabling them provides a belt-and-braces stop with no functional loss.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Customer Experience Improvement Program\\Consolidator",
+          "enabled": false,
+          "default": true
+        },
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Customer Experience Improvement Program\\UsbCeip",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": ["These tasks are already dormant when CEIP is off; feature updates may re-enable them."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://github.com/undergroundwires/privacy.sexy"
+      ],
+      "verifiedOn": [],
+      "tags": ["task", "telemetry", "ceip"]
+    },
+    {
+      "id": "privacy.task.autochk-proxy",
+      "title": "Disable the Autochk Proxy scheduled task",
+      "description": "Disables the Autochk\\Proxy task that uploads autochk SQM data for Customer Experience Improvement Program participants.",
+      "rationale": "The task only uploads SQM data for CEIP participants and is a no-op when CEIP is off; disabling it removes the upload path at the Basic level.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Autochk\\Proxy",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": ["No effect while CEIP is disabled; feature updates may re-enable the task."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://github.com/undergroundwires/privacy.sexy"
+      ],
+      "verifiedOn": [],
+      "tags": ["task", "telemetry", "ceip"]
+    },
+    {
+      "id": "privacy.task.feedback-siuf",
+      "title": "Disable Feedback Hub SIUF scheduled tasks",
+      "description": "Disables the Feedback\\Siuf DmClient and DmClientOnScenarioDownload tasks that drive Feedback Hub telemetry and diagnostic-scenario downloads.",
+      "rationale": "These tasks upload feedback scenario data and fetch diagnostic-scenario definitions; disabling them stops that traffic. Re-enable them if you want to file feedback through the Feedback Hub.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Feedback\\Siuf\\DmClient",
+          "enabled": false,
+          "default": true
+        },
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Feedback\\Siuf\\DmClientOnScenarioDownload",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": ["Feedback Hub scenario downloads stop; re-enable if you want to submit feedback. Feature updates may re-enable the tasks."],
+      "sources": [
+        "https://github.com/undergroundwires/privacy.sexy",
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
+      ],
+      "verifiedOn": [],
+      "tags": ["task", "feedback"]
+    },
+    {
+      "id": "privacy.task.wer-queue-reporting",
+      "title": "Disable the Windows Error Reporting upload task",
+      "description": "Disables the Windows Error Reporting\\QueueReporting task that uploads queued Windows Error Reporting reports to Microsoft.",
+      "rationale": "Queued WER reports can contain file paths and memory contents. Disabling the upload task pairs with turning Windows Error Reporting off and is offered at the Strict level.",
+      "category": "Privacy",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Windows Error Reporting\\QueueReporting",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": ["Queued Windows Error Reporting reports are no longer uploaded; pair with turning WER off. Feature updates may re-enable the task."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://github.com/undergroundwires/privacy.sexy"
+      ],
+      "verifiedOn": [],
+      "tags": ["task", "telemetry", "wer"]
+    },
+    {
+      "id": "privacy.task.device-census",
+      "title": "Disable the Device Census scheduled tasks",
+      "description": "Disables the Device Information\\Device and Device User tasks that run DeviceCensus.exe to build the device census sent to Microsoft.",
+      "rationale": "DeviceCensus collects hardware and configuration inventory for diagnostics. Offered only at the Strict level for unmanaged devices, because Windows Update for Business reporting depends on it.",
+      "category": "Privacy",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Device Information\\Device",
+          "enabled": false,
+          "default": true
+        },
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Device Information\\Device User",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": ["Windows Update for Business update reporting relies on DeviceCensus; leave these enabled on managed devices. Feature updates may re-enable the tasks."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/deployment/update/wufb-reports-prerequisites",
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
+      ],
+      "verifiedOn": [],
+      "tags": ["task", "telemetry", "census"]
+    }
+  ]
+}

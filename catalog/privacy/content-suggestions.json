@@ -1,0 +1,1272 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "privacy.ads.disable-language-list",
+      "title": "Stop websites from reading your language list",
+      "description": "Sets the Accept-Language opt-out so Windows no longer offers your full language-preference list to websites.",
+      "rationale": "The language list is a browser-fingerprinting signal; a single preferred language is still sent, so sites keep working.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Control Panel\\International\\User Profile",
+          "name": "HttpAcceptLanguageOptOut",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Some sites may initially guess the wrong language until you select one."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "ads",
+        "tracking"
+      ]
+    },
+    {
+      "id": "privacy.ads.disable-app-launch-tracking",
+      "title": "Turn off app-launch tracking for Start and search",
+      "description": "Stops Windows from tracking which apps you launch to rank Start menu and search results.",
+      "rationale": "The data stays local, but the ranking signal is pure convenience; disabling it removes an on-device activity log with no functional loss.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "Start_TrackProgs",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Start's 'Most used' apps list stops updating."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "ads",
+        "tracking",
+        "start"
+      ]
+    },
+    {
+      "id": "privacy.ads.disable-recent-items-tracking",
+      "title": "Turn off recent items and jump-list tracking",
+      "description": "Stops Windows from recording recently opened documents that feed jump lists and Start's Recommended area.",
+      "rationale": "Recency tracking is a local usage log; turning it off trades the recent-files convenience for less on-device history.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "Start_TrackDocs",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Jump lists and recently opened files disappear from Start and the taskbar."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-start"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "ads",
+        "tracking",
+        "start"
+      ]
+    },
+    {
+      "id": "privacy.nags.disable-account-notifications",
+      "title": "Turn off Microsoft account notifications in Start",
+      "description": "Disables the account-related reminders (sign-in, backup and subscription prompts) shown above the Start menu user tile.",
+      "rationale": "These prompts advertise Microsoft account and subscription features; disabling them does not change how the account works.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "Start_AccountNotifications",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\SystemSettings\\AccountNotifications",
+          "name": "EnableAccountNotifications",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Notifications/DisableAccountNotifications",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Microsoft documents the behaviour but not this exact registry value; community-verified (privacy.sexy / Sophia / winutil)."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "nags",
+        "account",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "privacy.nags.disable-suggested-notifications",
+      "title": "Turn off 'Suggested' promotional notifications",
+      "description": "Disables the 'Suggested' toast notifications and Windows Backup reminders that promote Microsoft services.",
+      "rationale": "These toasts are advertisements for Microsoft features rather than system alerts; other notifications are unaffected.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Notifications\\Settings\\Windows.SystemToast.Suggested",
+          "name": "Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Notifications\\Settings\\Windows.SystemToast.BackupReminder",
+          "name": "Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Microsoft documents the behaviour but not this exact registry value; community-verified (privacy.sexy / Sophia / winutil)."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "nags",
+        "notifications",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "privacy.nags.disable-file-explorer-ads",
+      "title": "Hide sync-provider ads in File Explorer",
+      "description": "Turns off the 'sync provider notifications' that show OneDrive and Microsoft 365 promotions inside File Explorer.",
+      "rationale": "These banners advertise OneDrive; hiding them does not affect OneDrive itself.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "ShowSyncProviderNotifications",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Microsoft documents the behaviour but not this exact registry value; community-verified (privacy.sexy / Sophia / winutil)."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "nags",
+        "explorer",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "privacy.nags.disable-phone-link-suggestions",
+      "title": "Turn off mobile-device (Phone Link) suggestions",
+      "description": "Disables the 'Show me suggestions for using my mobile device with Windows' prompts.",
+      "rationale": "A purely promotional nudge toward Phone Link; Phone Link itself still works if you open it.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Mobility",
+          "name": "OptedIn",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Microsoft documents the behaviour but not this exact registry value; community-verified (privacy.sexy / Sophia / winutil)."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "nags",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "privacy.nags.disable-finish-setup-suggestions",
+      "title": "Turn off 'finish setting up this device' suggestions",
+      "description": "Disables the post-update 'get even more out of Windows' and 'finish setting up this device' (SCOOBE) prompts.",
+      "rationale": "These full-screen prompts push Microsoft account, OneDrive and Edge; skipping them changes nothing you have already set up.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\UserProfileEngagement",
+          "name": "ScoobeSystemSettingEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Microsoft documents the behaviour but not this exact registry value; community-verified (privacy.sexy / Sophia / winutil)."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "nags",
+        "scoobe",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "privacy.nags.disable-settings-online-tips",
+      "title": "Stop the Settings app from fetching online tips",
+      "description": "Applies the policy that stops the Settings app from downloading online help tips from Microsoft.",
+      "rationale": "Removes a connection to Microsoft content services from the Settings app; local settings are unaffected.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+          "name": "AllowOnlineTips",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Settings/AllowOnlineTips",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Control Panel\\Allow Online Tips"
+      },
+      "sideEffects": [
+        "The Settings app no longer shows inline online help content."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-settings"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "nags",
+        "suggestions"
+      ]
+    },
+    {
+      "id": "privacy.nags.disable-welcome-experience",
+      "title": "Turn off the Windows welcome experience after updates",
+      "description": "Disables the 'Windows welcome experience' screens shown after updates and occasionally at sign-in to highlight new features.",
+      "rationale": "These screens are feature marketing highlights; disabling them does not affect updates themselves.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SubscribedContent-310093Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://github.com/Raphire/Win11Debloat",
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "nags",
+        "suggestions"
+      ]
+    },
+    {
+      "id": "privacy.nags.disable-account-state-content",
+      "title": "Turn off account-state upsell content",
+      "description": "Applies the Cloud Content policy that removes Microsoft account and Microsoft 365 upsell content from Settings and other surfaces.",
+      "rationale": "Removes subscription upsell prompts; the content-delivery manager honours this policy only on Enterprise and Education editions.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent",
+          "name": "DisableConsumerAccountStateContent",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Experience/DisableConsumerAccountStateContent",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Documented for Enterprise and Education editions; ignored by the content-delivery manager on Home and Pro."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "nags",
+        "account",
+        "cloudcontent"
+      ]
+    },
+    {
+      "id": "privacy.nags.disable-lock-screen-toasts",
+      "title": "Hide notification content on the lock screen",
+      "description": "Applies the policy that stops app toast notifications from appearing on the lock screen.",
+      "rationale": "Notification text on the lock screen is visible to anyone near the device; hiding it is a shoulder-surfing safeguard. Notifications still appear once you sign in.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Policies\\Microsoft\\Windows\\CurrentVersion\\PushNotifications",
+          "name": "NoToastApplicationNotificationOnLockScreen",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "User Configuration\\Administrative Templates\\Start Menu and Taskbar\\Notifications\\Turn off toast notifications on the lock screen"
+      },
+      "sideEffects": [
+        "Notifications are hidden on the lock screen and appear only after you sign in."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-wpn"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "nags",
+        "notifications",
+        "lockscreen"
+      ]
+    },
+    {
+      "id": "privacy.content.disable-consumer-features",
+      "title": "Turn off Microsoft consumer experiences",
+      "description": "Applies the Cloud Content policy that stops Start suggestions, promoted app installs (such as Candy Crush) and membership notifications.",
+      "rationale": "Prevents automatic installation and promotion of consumer apps; the policy takes effect only on Enterprise and Education editions.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent",
+          "name": "DisableWindowsConsumerFeatures",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Experience/AllowWindowsConsumerFeatures",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Documented for Enterprise and Education editions; ignored by the content-delivery manager on Home and Pro."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "content",
+        "suggestions",
+        "cloudcontent"
+      ]
+    },
+    {
+      "id": "privacy.content.disable-cloud-optimized-content",
+      "title": "Turn off cloud-optimised content",
+      "description": "Applies the policy that stops Windows from fetching server-driven 'cloud optimised' content and falls back to local content.",
+      "rationale": "Removes another server-driven suggestion channel; effective on Enterprise and Education editions.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent",
+          "name": "DisableCloudOptimizedContent",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Experience/DisableCloudOptimizedContent",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Documented for Enterprise and Education editions; Microsoft notes it is most effective when applied within 15 minutes of installation or in the image."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "content",
+        "suggestions",
+        "cloudcontent"
+      ]
+    },
+    {
+      "id": "privacy.content.disable-tips",
+      "title": "Turn off Windows tips and suggestions",
+      "description": "Disables the 'Get tips and suggestions when using Windows' notifications and the soft-landing tip pages.",
+      "rationale": "These tips are promotional and interruptive; nothing depends on them.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SubscribedContent-338389Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SoftLandingEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Experience/AllowWindowsTips",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://github.com/Raphire/Win11Debloat",
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "content",
+        "tips",
+        "suggestions"
+      ]
+    },
+    {
+      "id": "privacy.content.disable-settings-suggestions",
+      "title": "Turn off suggested content in the Settings app",
+      "description": "Disables the promoted 'suggested content' banners shown across the Settings app.",
+      "rationale": "These banners advertise Microsoft features inside Settings; hiding them does not change any setting.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SubscribedContent-338393Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SubscribedContent-353694Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SubscribedContent-353696Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://github.com/undergroundwires/privacy.sexy",
+        "https://github.com/Raphire/Win11Debloat",
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "content",
+        "suggestions",
+        "settings"
+      ]
+    },
+    {
+      "id": "privacy.content.hide-start-recommended-section",
+      "title": "Remove the Recommended section from Start",
+      "description": "Applies the policy that hides the entire 'Recommended' area of the Start menu, including personalised website suggestions.",
+      "rationale": "The Recommended area surfaces suggested and recent content; removing it is a bigger change because it also hides your recent files.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Explorer",
+          "name": "HideRecommendedSection",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Explorer",
+          "name": "HideRecommendedPersonalizedSites",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Start/HideRecommendedSection",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Recently opened files and recently added apps also disappear from Start."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-start",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "content",
+        "suggestions",
+        "start"
+      ]
+    },
+    {
+      "id": "privacy.spotlight.disable-all-features",
+      "title": "Turn off all Windows Spotlight features",
+      "description": "Applies the user policy that turns off every Windows Spotlight feature, including lock-screen images, tips and suggestions.",
+      "rationale": "A single master switch for Spotlight; effective on Enterprise and Education editions, where the lock screen falls back to a static picture.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Policies\\Microsoft\\Windows\\CloudContent",
+          "name": "DisableWindowsSpotlightFeatures",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Experience/AllowWindowsSpotlight",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "The lock screen shows a static picture and Spotlight tips stop.",
+        "Documented for Enterprise and Education editions."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "spotlight",
+        "suggestions",
+        "cloudcontent"
+      ]
+    },
+    {
+      "id": "privacy.spotlight.disable-lock-screen-policy",
+      "title": "Turn off Windows Spotlight on the lock screen (policy)",
+      "description": "Applies the Cloud Content policy that disables Windows Spotlight specifically on the lock screen.",
+      "rationale": "Targets the lock-screen Spotlight images and overlay; effective on Enterprise and Education editions.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Policies\\Microsoft\\Windows\\CloudContent",
+          "name": "ConfigureWindowsSpotlight",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Experience/ConfigureWindowsSpotlightOnLockScreen",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "The lock screen shows a static picture instead of rotating Spotlight images.",
+        "Documented for Enterprise and Education editions."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "spotlight",
+        "lockscreen",
+        "cloudcontent"
+      ]
+    },
+    {
+      "id": "privacy.spotlight.disable-desktop-collection",
+      "title": "Turn off the Spotlight desktop background collection",
+      "description": "Applies the policy that removes the 'Windows spotlight' desktop-background option (daily Bing images and 'Learn about this picture').",
+      "rationale": "Stops daily server-supplied desktop wallpapers and the associated desktop icon.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": 22621,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Policies\\Microsoft\\Windows\\CloudContent",
+          "name": "DisableSpotlightCollectionOnDesktop",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Experience/AllowSpotlightCollection",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "The 'Windows spotlight' desktop-background option is removed.",
+        "Documented for Enterprise and Education editions; community tools also apply it on Home and Pro, where the effect is not Microsoft-verified."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "spotlight",
+        "desktop",
+        "cloudcontent"
+      ]
+    },
+    {
+      "id": "privacy.spotlight.disable-third-party-suggestions",
+      "title": "Block third-party content in Windows Spotlight",
+      "description": "Applies the policy that stops Windows Spotlight from suggesting third-party (non-Microsoft) content.",
+      "rationale": "Removes promoted third-party suggestions from Spotlight; effective on Pro and above.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Policies\\Microsoft\\Windows\\CloudContent",
+          "name": "DisableThirdPartySuggestions",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Experience/AllowThirdPartySuggestionsInWindowsSpotlight",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Lock screen and Spotlight stop showing Microsoft partner/third-party promotional suggestions; Windows Spotlight images from Microsoft still rotate unless the master Spotlight toggle is also applied."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "spotlight",
+        "suggestions",
+        "cloudcontent"
+      ]
+    },
+    {
+      "id": "privacy.spotlight.disable-lock-screen-tips",
+      "title": "Turn off lock-screen fun facts and tips",
+      "description": "Turns off the 'fun facts, tips and tricks' overlay text shown on the Windows Spotlight lock screen.",
+      "rationale": "Removes the promotional overlay text while leaving the rotating images available; this is the all-edition preference.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "RotatingLockScreenOverlayEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SubscribedContent-338387Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "spotlight",
+        "lockscreen"
+      ]
+    },
+    {
+      "id": "privacy.spotlight.disable-lock-screen-spotlight",
+      "title": "Turn off rotating Spotlight images on the lock screen",
+      "description": "Turns off the rotating Windows Spotlight images on the lock screen so it shows a single static picture.",
+      "rationale": "Spotlight images are downloaded from Microsoft; a static picture avoids that. This is the all-edition preference.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "RotatingLockScreenEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "The lock screen shows a single static picture instead of rotating Spotlight images."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "spotlight",
+        "lockscreen"
+      ]
+    },
+    {
+      "id": "privacy.widgets.hide-taskbar-button",
+      "title": "Hide the Widgets taskbar button",
+      "description": "Turns off just the Widgets button on the taskbar without removing the Widgets platform.",
+      "rationale": "A lightweight, per-user way to hide the Widgets entry point while leaving the platform installed.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "TaskbarDa",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "On Windows 11 24H2 this value is protected by the UCPD driver and a standard write may be reverted by Windows.",
+        "Microsoft documents the behaviour but not this exact registry value; community-verified (privacy.sexy / Sophia / winutil)."
+      ],
+      "sources": [
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "widgets",
+        "unverified-ms"
+      ]
+    }
+  ]
+}

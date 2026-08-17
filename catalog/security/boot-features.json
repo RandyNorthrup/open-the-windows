@@ -147,63 +147,6 @@
       ]
     },
     {
-      "id": "security.boot.bitlocker-require-removable-encryption",
-      "title": "Deny write access to unencrypted removable drives",
-      "description": "Sets the BitLocker policy that makes removable drives read-only unless they are protected by BitLocker To Go. Paranoid because it can lock users out of writing to any USB stick that is not encrypted.",
-      "rationale": "Forces data written to removable media to be encrypted, preventing casual data exfiltration or loss of an unencrypted stick. High friction: unencrypted removable drives become read-only.",
-      "category": "Security",
-      "level": "Paranoid",
-      "risk": "Breaking",
-      "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": {
-        "editions": [
-          "Pro",
-          "Enterprise",
-          "Education"
-        ],
-        "minBuild": null,
-        "maxBuild": null,
-        "architectures": []
-      },
-      "actions": [
-        {
-          "kind": "Registry",
-          "hive": "LocalMachine",
-          "path": "SOFTWARE\\Policies\\Microsoft\\FVE",
-          "name": "RDVDenyWriteAccess",
-          "type": "Dword",
-          "value": 1,
-          "default": null,
-          "valueKind": "Policy"
-        }
-      ],
-      "requires": "None",
-      "dependsOn": [],
-      "conflictsWith": [],
-      "managedBy": {
-        "policyCsp": "BitLocker/RemovableDrivesRequireEncryption",
-        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\BitLocker Drive Encryption\\Removable Data Drives\\Deny write access to removable drives not protected by BitLocker"
-      },
-      "sideEffects": [
-        "Every removable drive that is not BitLocker-encrypted becomes read-only, so ordinary USB sticks cannot be written to until they are encrypted.",
-        "You must enable BitLocker To Go on the removable drives you need to write to."
-      ],
-      "sources": [
-        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-24h2-security-baseline/4252801",
-        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
-      ],
-      "verifiedOn": [],
-      "tags": [
-        "boot",
-        "bitlocker",
-        "crypto",
-        "removable-media",
-        "baseline",
-        "cis"
-      ]
-    },
-    {
       "id": "security.boot.early-launch-antimalware",
       "title": "Let the boot-start driver policy block bad drivers (ELAM)",
       "description": "Sets the Early Launch Antimalware boot-start driver initialization policy to allow good, unknown and bad-but-boot-critical drivers, so known-bad boot drivers are blocked at startup.",
@@ -366,67 +309,6 @@
         "sudo",
         "privilege",
         "baseline",
-        "cis"
-      ]
-    },
-    {
-      "id": "security.feature.disable-recall",
-      "title": "Turn off Windows Recall snapshot saving",
-      "description": "Sets the Windows AI policies that stop Recall from saving screen snapshots and remove the ability to enable Recall, on Copilot+ PCs running 24H2 or later.",
-      "rationale": "Recall periodically screenshots the desktop; even with local encryption those snapshots are a target for local malware or a coerced user who has Windows Hello access. These policies keep the feature from capturing data.",
-      "category": "Security",
-      "level": "Balanced",
-      "risk": "Caution",
-      "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": {
-        "editions": [],
-        "minBuild": 26100,
-        "maxBuild": null,
-        "architectures": []
-      },
-      "actions": [
-        {
-          "kind": "Registry",
-          "hive": "LocalMachine",
-          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
-          "name": "DisableAIDataAnalysis",
-          "type": "Dword",
-          "value": 1,
-          "default": null,
-          "valueKind": "Policy"
-        },
-        {
-          "kind": "Registry",
-          "hive": "LocalMachine",
-          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
-          "name": "AllowRecallEnablement",
-          "type": "Dword",
-          "value": 0,
-          "default": null,
-          "valueKind": "Policy"
-        }
-      ],
-      "requires": "None",
-      "dependsOn": [],
-      "conflictsWith": [],
-      "managedBy": {
-        "policyCsp": "WindowsAI/DisableAIDataAnalysis",
-        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows AI\\Turn off saving snapshots for Windows"
-      },
-      "sideEffects": [
-        "Recall and its Click-to-Do-in-Recall timeline are disabled; the user loses the ability to search their activity history."
-      ],
-      "sources": [
-        "https://learn.microsoft.com/en-us/windows/client-management/manage-recall",
-        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
-      ],
-      "verifiedOn": [],
-      "tags": [
-        "feature",
-        "recall",
-        "ai",
-        "privacy",
         "cis"
       ]
     },
@@ -600,77 +482,6 @@
         "baseline",
         "stig",
         "stig-wn11-cc-000391"
-      ]
-    },
-    {
-      "id": "security.misc.attachment-manager-motw",
-      "title": "Preserve Mark-of-the-Web on downloaded attachments",
-      "description": "Configures the interactive user's Attachment Manager so zone (Mark-of-the-Web) information is preserved on saved attachments, the unblock control stays visible, and antivirus is always notified when an attachment is opened.",
-      "rationale": "Mark-of-the-Web is what triggers SmartScreen and Office Protected View on downloaded files; preserving it and forcing an antivirus scan keeps those defences working. Applies to the interactive user's hive.",
-      "category": "Security",
-      "level": "Basic",
-      "risk": "Safe",
-      "scope": "User",
-      "status": "Draft",
-      "appliesTo": {
-        "editions": [],
-        "minBuild": null,
-        "maxBuild": null,
-        "architectures": []
-      },
-      "actions": [
-        {
-          "kind": "Registry",
-          "hive": "User",
-          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Attachments",
-          "name": "SaveZoneInformation",
-          "type": "Dword",
-          "value": 2,
-          "default": null,
-          "valueKind": "Policy"
-        },
-        {
-          "kind": "Registry",
-          "hive": "User",
-          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Attachments",
-          "name": "HideZoneInfoOnProperties",
-          "type": "Dword",
-          "value": 0,
-          "default": null,
-          "valueKind": "Policy"
-        },
-        {
-          "kind": "Registry",
-          "hive": "User",
-          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Attachments",
-          "name": "ScanWithAntiVirus",
-          "type": "Dword",
-          "value": 3,
-          "default": null,
-          "valueKind": "Policy"
-        }
-      ],
-      "requires": "None",
-      "dependsOn": [],
-      "conflictsWith": [],
-      "managedBy": {
-        "policyCsp": null,
-        "groupPolicyPath": "User Configuration\\Administrative Templates\\Windows Components\\Attachment Manager\\Do not preserve zone information in file attachments"
-      },
-      "sideEffects": [],
-      "sources": [
-        "https://stigaview.com/products/win11/v2r8/WN11-UC-000020/",
-        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
-        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
-      ],
-      "verifiedOn": [],
-      "tags": [
-        "motw",
-        "browser",
-        "baseline",
-        "stig",
-        "stig-wn11-uc-000020",
-        "cis"
       ]
     }
   ]

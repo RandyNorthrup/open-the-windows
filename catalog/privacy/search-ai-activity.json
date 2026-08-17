@@ -1,0 +1,508 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "privacy.search.disable-web-results",
+      "title": "Don't use Bing or web results in Windows Search",
+      "description": "Applies the Windows Search policies that stop Windows from sending typed queries to Bing and from showing web results in the search box.",
+      "rationale": "Windows Search otherwise sends what you type to Bing and mixes web results with local files; local file, app and settings search is unaffected. Both policy values are absent by default.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search",
+          "name": "DisableWebSearch",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search",
+          "name": "ConnectedSearchUseWeb",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Search/DoNotUseWebResults",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Search\\Don't search the web or display web results in Search"
+      },
+      "sideEffects": [
+        "The 'Search the web' rows and Bing web results disappear from Windows Search; only local apps, files and settings are shown.",
+        "ConnectedSearchUseWeb is officially documented for Enterprise/Education; on Home and Pro the web-results removal relies on the legacy DisableWebSearch policy."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-search"
+      ],
+      "verifiedOn": [],
+      "tags": ["search", "bing"]
+    },
+    {
+      "id": "privacy.search.disable-search-highlights",
+      "title": "Turn off search highlights",
+      "description": "Turns off the Bing-driven 'highlights' content (trending topics and events) shown in the search box and search home.",
+      "rationale": "Search highlights fetch dynamic content from Microsoft/Bing; turning them off keeps the search box static. Purely cosmetic and nothing depends on it. This is the per-user Settings toggle, so it also works on Home; the equivalent machine policy (EnableDynamicContentInWSB) is Pro and above.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": 22000, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\SearchSettings",
+          "name": "IsDynamicSearchBoxEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Search/AllowSearchHighlights",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Search\\Allow search highlights"
+      },
+      "sideEffects": [
+        "The search box and search home no longer show trending or highlight content."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-search",
+        "https://github.com/farag2/Sophia-Script-for-Windows"
+      ],
+      "verifiedOn": [],
+      "tags": ["search", "bing"]
+    },
+    {
+      "id": "privacy.search.disable-cortana",
+      "title": "Disable Cortana (policy)",
+      "description": "Applies the AllowCortana=0 policy so the legacy Cortana assistant cannot run and cannot drive search behaviours.",
+      "rationale": "Cortana was removed as an inbox app in Windows 11 23H2, but the policy remains and still gates a few older search behaviours. No functional loss on modern builds. The policy value is absent by default.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search",
+          "name": "AllowCortana",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Experience/AllowCortana",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Search\\Allow Cortana"
+      },
+      "sideEffects": [
+        "On 23H2 and later Cortana is already gone, so this policy is largely a no-op and harmless."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience"
+      ],
+      "verifiedOn": [],
+      "tags": ["search", "cortana"]
+    },
+    {
+      "id": "privacy.search.disable-device-history",
+      "title": "Turn off search history on this device",
+      "description": "Stops Windows Search from storing your recent searches on this device.",
+      "rationale": "Recent-search history is kept locally and suggested in the search box; disabling it removes that on-device record. Search itself keeps working.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\SearchSettings",
+          "name": "IsDeviceSearchHistoryEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": { "policyCsp": null, "groupPolicyPath": null },
+      "sideEffects": [
+        "Recent searches are no longer suggested in the search box."
+      ],
+      "sources": [
+        "https://github.com/undergroundwires/privacy.sexy",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": ["search", "history"]
+    },
+    {
+      "id": "privacy.search.disable-cloud-search",
+      "title": "Turn off cloud content search",
+      "description": "Applies AllowCloudSearch=0 so Windows Search does not query Microsoft-account or work-account cloud content (OneDrive, SharePoint, Outlook).",
+      "rationale": "Cloud content search sends queries to Microsoft/365 services to surface cloud files in Start; disabling it keeps search local. The policy value is absent by default.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search",
+          "name": "AllowCloudSearch",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Search/AllowCloudSearch",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Search\\Allow Cloud Search"
+      },
+      "sideEffects": [
+        "OneDrive, SharePoint and Outlook cloud results no longer appear in Windows Search."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-search",
+        "https://github.com/undergroundwires/privacy.sexy"
+      ],
+      "verifiedOn": [],
+      "tags": ["search", "cloud"]
+    },
+    {
+      "id": "privacy.ai.disable-copilot",
+      "title": "Turn off Windows Copilot (legacy policy)",
+      "description": "Applies the per-user TurnOffWindowsCopilot policy that disabled the 2023 Copilot sidebar.",
+      "rationale": "Stops the legacy Copilot pane from appearing. Microsoft has deprecated this policy: the new Microsoft Copilot app is a separate package, so on 24H2 and later it is largely a no-op but remains harmless. The policy value is absent by default.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": 22621, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Policies\\Microsoft\\Windows\\WindowsCopilot",
+          "name": "TurnOffWindowsCopilot",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "WindowsAI/TurnOffWindowsCopilot",
+        "groupPolicyPath": "User Configuration\\Administrative Templates\\Windows Components\\Windows Copilot\\Turn off Windows Copilot"
+      },
+      "sideEffects": [
+        "Deprecated control for the 2023 Copilot sidebar; on Windows 11 24H2 and later, where Copilot is a separate app, it has little or no effect."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai",
+        "https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot"
+      ],
+      "verifiedOn": [],
+      "tags": ["ai", "copilot"]
+    },
+    {
+      "id": "privacy.ai.hide-copilot-button",
+      "title": "Hide the Copilot taskbar button",
+      "description": "Hides the Copilot button on the taskbar (Windows 11 22H2/23H2).",
+      "rationale": "Removes the taskbar entry point for Copilot. Cosmetic; on newer builds the button was already removed, so the setting is a harmless no-op there.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": 22621, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "ShowCopilotButton",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": { "policyCsp": null, "groupPolicyPath": null },
+      "sideEffects": [
+        "Applies to the 22H2/23H2 taskbar Copilot button; on newer builds, where the button was removed, it has no effect."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot"
+      ],
+      "verifiedOn": [],
+      "tags": ["ai", "copilot"]
+    },
+    {
+      "id": "privacy.ai.disable-click-to-do",
+      "title": "Disable Click to Do",
+      "description": "Applies the DisableClickToDo policy that turns off Click to Do screen OCR and entity extraction (Win+Q / Win+click).",
+      "rationale": "Click to Do runs on-device AI over whatever is on screen to extract text and entities; disabling it removes those entry points. Only meaningful on Copilot+ PCs. The policy value is absent by default.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": 26100, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+          "name": "DisableClickToDo",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "WindowsAI/DisableClickToDo",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Click to Do entry points in the Snipping Tool and Start are removed. Does not affect Click to Do surfaced inside Recall."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai",
+        "https://learn.microsoft.com/en-us/windows/client-management/manage-click-to-do"
+      ],
+      "verifiedOn": [],
+      "tags": ["ai", "click-to-do"]
+    },
+    {
+      "id": "privacy.ai.disable-paint-ai",
+      "title": "Disable Paint AI features",
+      "description": "Applies the Paint policies that hide Cocreator, Generative fill and Image Creator.",
+      "rationale": "These Paint features send prompts and images to Microsoft's generative-AI service; the policies hide the buttons. Ordinary Paint editing is unaffected. The policy values are absent by default.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": 22621, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Paint",
+          "name": "DisableCocreator",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Paint",
+          "name": "DisableGenerativeFill",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Paint",
+          "name": "DisableImageCreator",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "WindowsAI/DisableCocreator",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Paint"
+      },
+      "sideEffects": [
+        "The Cocreator, Generative fill and Image Creator buttons are hidden in Paint."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai",
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": ["ai", "paint"]
+    },
+    {
+      "id": "privacy.ai.disable-notepad-ai",
+      "title": "Disable Notepad AI features",
+      "description": "Applies the Notepad DisableAIFeatures policy that hides the Rewrite and Summarize features (which call Copilot).",
+      "rationale": "Notepad's Rewrite/Summarize send text to Copilot; the policy removes the AI menu. Plain text editing is unaffected. The policy value is absent by default.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": 22000, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\WindowsNotepad",
+          "name": "DisableAIFeatures",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": { "policyCsp": null, "groupPolicyPath": null },
+      "sideEffects": [
+        "Notepad's AI (Rewrite/Summarize) menu is hidden.",
+        "This registry value is not documented by Microsoft; it ships with the Notepad Store app's ADMX and is community-verified (Win11Debloat)."
+      ],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat"
+      ],
+      "verifiedOn": [],
+      "tags": ["ai", "notepad", "unverified-ms"]
+    },
+    {
+      "id": "privacy.ai.remap-copilot-key",
+      "title": "Remap the Copilot key away from Copilot",
+      "description": "Sets the Copilot hardware key (or Win+C) to launch a chosen app instead of Copilot; the example value targets Microsoft 365 (Office).",
+      "rationale": "Pressing the Copilot key otherwise opens Copilot and can send context to the cloud; remapping points it at a local or chosen app. Change the AUMID to your preferred app. The policy value is absent by default.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": 22621, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Policies\\Microsoft\\Windows\\CopilotKey",
+          "name": "SetCopilotHardwareKey",
+          "type": "Sz",
+          "value": "Microsoft.MicrosoftOfficeHub_8wekyb3d8bbwe!Microsoft.MicrosoftOfficeHub",
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "WindowsAI/SetCopilotHardwareKey",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "The Copilot key (or Win+C) opens the specified app instead of Copilot. The example value targets Microsoft 365 (Office); if that app is not installed the key does nothing until you set an installed app's AUMID."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai",
+        "https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot"
+      ],
+      "verifiedOn": [],
+      "tags": ["ai", "copilot"]
+    },
+    {
+      "id": "privacy.activity.disable-activity-feed-policy",
+      "title": "Turn off the activity feed (policy)",
+      "description": "Applies EnableActivityFeed=0 to stop Windows from building the local activity feed (the Timeline store).",
+      "rationale": "The activity feed is the local store behind Timeline and cross-device resume; disabling it stops that collection. Complements the activity-history publish and upload policies. The policy value is absent by default.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "EnableActivityFeed",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Privacy/EnableActivityFeed",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\OS Policies\\Enables activity feed"
+      },
+      "sideEffects": [
+        "Some 'recent activity' surfaces (for example Phone Link 'continue' or activity-based providers) may lose data. The Timeline UI is already removed in Windows 11."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy",
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": ["activity", "timeline"]
+    }
+  ]
+}

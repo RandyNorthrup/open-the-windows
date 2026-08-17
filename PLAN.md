@@ -442,7 +442,20 @@ Landed so far (branch `feature/m4-catalogue-population`, committed locally):
   was adversarially re-verified against its research section (value, hex, hive,
   type, ASR-GUID fidelity). Catalogue now **194 entries** (153 Security), all
   Draft, `otw catalog validate` clean, 0 warnings. A `BuiltInCatalogTests` guard
-  asserts the ≥120 Security target. **Deferred:** local account / password /
+  asserts the ≥120 Security target.
+- **Telemetry / privacy catalogue (WP 4.1)**: 98 new Privacy entries across six
+  domain files under `catalog/privacy/` (diagnostic-data / CEIP / WER, advertising
+  ID and nags, cloud content / Spotlight / widgets, search / Copilot / AI /
+  activity history, input personalization and app-permission consent, sync / Store
+  / consumer features, Edge telemetry and scheduled tasks), transcribed from
+  research 01 §1–§16 with the policy-vs-preference distinction, per-user (`User`)
+  vs machine scope, and every **Never** (security-regression) / **n/a** row
+  skipped. A full-catalogue action-target collision scan removed 12 privacy and 3
+  security duplicates of existing controls; each file was adversarially
+  re-verified. Catalogue now **289 entries** (107 Privacy, 150 Security, 22
+  Updates), all Draft, `otw catalog validate` clean, 0 warnings; a
+  `BuiltInCatalogTests` guard asserts the ≥90 Privacy target. **Deferred:** local
+  account / password /
   lockout policy (research §4.B) is not authorable in the closed action set — a
   bare `secedit.exe` Command cannot stage its `.inf` — and waits on a dedicated
   security-policy action kind (candidate for a later milestone) rather than
@@ -450,12 +463,13 @@ Landed so far (branch `feature/m4-catalogue-population`, committed locally):
   now returns 0 for a clean preview even when the plan contains reboot-required
   entries (the restart requirement is still reported in output).
 
-Still to do: the updates (WP 4.2, 22 entries) and security (WP 4.3, 153 entries)
-categories are populated; the remaining categories bring the total to ≥ 300 —
-privacy (≥ 90, research 01), performance (≥ 40, research 05 §3/§6), debloat (≥ 60,
-research 05 §1/§2, `reinstallHint` mandatory) and shell (≥ 30, research 05 §6 /
-01). Then extend the catalogue tests to the remaining per-category targets and the
-M4 tag/managedBy/reinstallHint rules, and run the per-entry VM verification. Note
+Still to do: the security (WP 4.3, 150), privacy (WP 4.1, 107) and updates (WP 4.2,
+22) categories are populated (289 total). The remaining categories bring the total
+to ≥ 300 — performance (≥ 40, research 05 §3/§6), debloat (≥ 60, research 05 §1/§2,
+`reinstallHint` mandatory) and shell (≥ 30, research 05 §6 / 01); updates also
+needs three more entries to reach its ≥ 25 target. Then extend the catalogue tests
+to the remaining per-category targets and the M4 tag/managedBy/reinstallHint rules,
+and run the per-entry VM verification. Note
 the M3-discovered limitation: over headless SSH the
 interactive-user resolver returns null, so per-user (`User`-hive) entries cannot
 be VM-verified from the lab session and stay `Draft` pending the M5

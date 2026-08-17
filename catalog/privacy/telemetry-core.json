@@ -1,0 +1,777 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "privacy.diagnostics.disable-autologgers",
+      "title": "Disable the DiagTrack ETW autologgers",
+      "description": "Sets the Start value of the AutoLogger-Diagtrack-Listener and SQMLogger ETW autologger sessions to 0 so the DiagTrack and CEIP kernel trace sessions do not start at boot.",
+      "rationale": "Removes the low-level trace sessions that feed diagnostic and CEIP telemetry. Redundant once diagnostic data is Required and CEIP is off; the writes are unsupported and may be reset by cumulative updates.",
+      "category": "Privacy",
+      "level": "Paranoid",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SYSTEM\\CurrentControlSet\\Control\\WMI\\Autologger\\AutoLogger-Diagtrack-Listener",
+          "name": "Start",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SYSTEM\\CurrentControlSet\\Control\\WMI\\Autologger\\SQMLogger",
+          "name": "Start",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Redundant once diagnostic data is Required and CEIP is off.",
+        "Unsupported; cumulative updates may reset the autologger start values.",
+        "Microsoft documents the behaviour but not this exact registry value; community-verified (privacy.sexy / Sophia / winutil)."
+      ],
+      "sources": [
+        "https://github.com/undergroundwires/privacy.sexy",
+        "https://github.com/ChrisTitusTech/winutil"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "telemetry",
+        "diagtrack",
+        "etw",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "privacy.diagnostics.optin-change-notification",
+      "title": "Suppress diagnostic data setting change notifications",
+      "description": "Sets the policy that stops Windows from showing notifications when the diagnostic data setting changes.",
+      "rationale": "Removes an interruption notification. It does not change what diagnostic data is collected.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+          "name": "DisableTelemetryOptInChangeNotification",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "System/ConfigureTelemetryOptInChangeNotification",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-system"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "telemetry",
+        "notifications"
+      ]
+    },
+    {
+      "id": "privacy.diagnostics.device-name",
+      "title": "Do not send device name in diagnostic data",
+      "description": "Sets the policy that keeps the device name out of diagnostic data (the private default), so a tool cannot turn it on unnoticed.",
+      "rationale": "Sending the device name is off by default; this entry ensures it stays off. Windows Update for Business reports show device names only when it is enabled.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+          "name": "AllowDeviceNameInDiagnosticData",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "System/AllowDeviceNameInDiagnosticData",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-system",
+        "https://learn.microsoft.com/en-us/windows/deployment/update/wufb-reports-prerequisites"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "telemetry",
+        "device-name"
+      ]
+    },
+    {
+      "id": "privacy.diagnostics.disable-onesettings",
+      "title": "Disable OneSettings downloads",
+      "description": "Sets the policy that stops Windows from downloading configuration from the OneSettings remote configuration service.",
+      "rationale": "OneSettings periodically fetches remote configuration. Disabling it is a paranoid, last-resort measure: Microsoft warns that apps using the service may stop working and Windows Update for Business reports may be incorrect. It does not stop diagnostic uploads.",
+      "category": "Privacy",
+      "level": "Paranoid",
+      "risk": "Breaking",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+          "name": "DisableOneSettingsDownloads",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "System/DisableOneSettingsDownloads",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Microsoft warns that apps using the OneSettings service may stop working.",
+        "Windows Update for Business reports data may be incorrect or missing.",
+        "Does not stop diagnostic data uploads."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-system",
+        "https://learn.microsoft.com/en-us/windows/deployment/update/wufb-reports-prerequisites"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "telemetry",
+        "onesettings"
+      ]
+    },
+    {
+      "id": "privacy.diagnostics.onesettings-auditing",
+      "title": "Audit OneSettings connection attempts",
+      "description": "Enables the policy that logs OneSettings connection attempts to the Microsoft-Windows-Privacy-Auditing/Operational event log.",
+      "rationale": "A transparency feature that records when Windows contacts the OneSettings service; useful for auditing what phones home. It does not block any connection.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+          "name": "EnableOneSettingsAuditing",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "System/EnableOneSettingsAuditing",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-system"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "telemetry",
+        "onesettings",
+        "audit"
+      ]
+    },
+    {
+      "id": "privacy.diagnostics.privacy-experience",
+      "title": "Skip the first-logon privacy settings experience (OOBE)",
+      "description": "Sets the policy that skips the out-of-box / first-logon privacy settings page so users are not prompted to configure privacy options.",
+      "rationale": "Intended for managed or automated deployments where the privacy toggles are configured centrally. Because users are not asked, the individual privacy settings must be applied separately.",
+      "category": "Privacy",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\OOBE",
+          "name": "DisablePrivacyExperience",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Privacy/DisablePrivacyExperience",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Users are not shown the first-logon privacy settings page, so the individual privacy toggles must be configured separately."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "oobe",
+        "privacy-experience"
+      ]
+    },
+    {
+      "id": "privacy.diagnostics.feedback-frequency",
+      "title": "Set Windows feedback frequency to Never",
+      "description": "Sets the SIUF feedback frequency values (NumberOfSIUFInPeriod and PeriodInNanoSeconds) to 0 so Windows never asks the current user for feedback.",
+      "rationale": "Stops Feedback Hub prompts for the current user. Deleting both values restores the automatic frequency.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Siuf\\Rules",
+          "name": "NumberOfSIUFInPeriod",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Siuf\\Rules",
+          "name": "PeriodInNanoSeconds",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "feedback",
+        "siuf"
+      ]
+    },
+    {
+      "id": "privacy.diagnostics.tailored-experiences-policy",
+      "title": "Turn off tailored experiences with diagnostic data (policy)",
+      "description": "Sets the Cloud Content policy that stops Windows from using diagnostic data to personalise tips, ads and recommendations for the current user.",
+      "rationale": "The enforced policy version of the tailored experiences setting. Complements the per-user preference toggle by locking the behaviour via policy.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Policies\\Microsoft\\Windows\\CloudContent",
+          "name": "DisableTailoredExperiencesWithDiagnosticData",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Experience/AllowTailoredExperiencesWithDiagnosticData",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "telemetry",
+        "tailored-experiences"
+      ]
+    },
+    {
+      "id": "privacy.ceip.disable-sqm",
+      "title": "Turn off the Windows Customer Experience Improvement Program",
+      "description": "Sets the policy that disables the Windows Customer Experience Improvement Program (SQM), making the Consolidator, UsbCeip, KernelCeipTask and related tasks no-ops.",
+      "rationale": "CEIP is legacy telemetry superseded by DiagTrack; turning it off has no functional side effects.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\SQMClient\\Windows",
+          "name": "CEIPEnable",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "ADMX_ICM/CEIPEnable",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Internet Communication Management\\Internet Communication settings\\Turn off Windows Customer Experience Improvement Program"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-icm"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "telemetry",
+        "ceip"
+      ]
+    },
+    {
+      "id": "privacy.ceip.disable-application-telemetry",
+      "title": "Turn off Application Telemetry (AIT)",
+      "description": "Sets the Application Compatibility policy that turns off Application Telemetry (the aitagent application-impact telemetry).",
+      "rationale": "Stops the application-impact telemetry agent from reporting to Microsoft; no functional side effects.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppCompat",
+          "name": "AITEnable",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "ADMX_AppCompat/AppCompatTurnOffApplicationImpactTelemetry",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Application Compatibility\\Turn off Application Telemetry"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-appcompat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "telemetry",
+        "appcompat"
+      ]
+    },
+    {
+      "id": "privacy.ceip.disable-inventory-collector",
+      "title": "Turn off the Inventory Collector",
+      "description": "Sets the Application Compatibility policy that turns off the Inventory Collector, which sends application, device and driver inventory to Microsoft as part of Appraiser.",
+      "rationale": "Stops inventory data being sent to Microsoft. Microsoft notes inventory feeds app-compatibility decisions, so this can reduce feature-update compatibility evaluation quality.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppCompat",
+          "name": "DisableInventory",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "ADMX_AppCompat/AppCompatTurnOffProgramInventory",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Can reduce the quality of feature-update compatibility evaluation (safeguard holds); impact on Windows 11 is not fully verified."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-appcompat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "telemetry",
+        "appcompat",
+        "inventory"
+      ]
+    },
+    {
+      "id": "privacy.ceip.disable-steps-recorder",
+      "title": "Turn off Steps Recorder",
+      "description": "Sets the Application Compatibility policy that turns off Steps Recorder (psr.exe) user-action recording.",
+      "rationale": "Steps Recorder records user actions for feedback and is deprecated; turning it off has no functional impact on supported builds.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppCompat",
+          "name": "DisableUAR",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "ADMX_AppCompat/AppCompatTurnOffUserActionRecord",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Steps Recorder is deprecated and removed from newer builds."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-appcompat"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "appcompat",
+        "steps-recorder"
+      ]
+    },
+    {
+      "id": "privacy.wer.disable",
+      "title": "Disable Windows Error Reporting",
+      "description": "Sets the policy that disables Windows Error Reporting so crash reports and dumps are not sent to Microsoft's Watson endpoints.",
+      "rationale": "Stops crash reports and 'check for solutions'. Local Windows Reliability history is unaffected, but Windows Update for Business reports lose feature-update failure detail.",
+      "category": "Privacy",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Error Reporting",
+          "name": "Disabled",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "ErrorReporting/DisableWindowsErrorReporting",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Error Reporting\\Disable Windows Error Reporting"
+      },
+      "sideEffects": [
+        "No 'check for solutions' after crashes.",
+        "Windows Update for Business reports lose feature-update failure detail.",
+        "Local Windows Reliability history is unaffected."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-errorreporting",
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-windows-11-endpoints"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "wer",
+        "crash-reporting"
+      ]
+    },
+    {
+      "id": "privacy.wer.no-additional-data",
+      "title": "Do not send additional data in error reports",
+      "description": "Sets the policy that automatically declines Windows Error Reporting second-level data requests, so extra data is never sent after an initial report.",
+      "rationale": "Prevents follow-up data collection while leaving basic error reporting intact; no functional side effects.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Error Reporting",
+          "name": "DontSendAdditionalData",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "ErrorReporting/DoNotSendAdditionalData",
+        "groupPolicyPath": null
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-errorreporting"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "wer",
+        "crash-reporting"
+      ]
+    },
+    {
+      "id": "privacy.wer.no-auto-approve-os-dumps",
+      "title": "Do not auto-approve sending OS crash dumps",
+      "description": "Ensures the Windows Error Reporting policy that would automatically send operating-system crash dumps is not enabled.",
+      "rationale": "Keeps OS dumps from being sent without consent. This is the private default; the entry ensures it is not overridden.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Error Reporting",
+          "name": "AutoApproveOSDumps",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-errorreporting"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "wer",
+        "crash-dumps"
+      ]
+    }
+  ]
+}

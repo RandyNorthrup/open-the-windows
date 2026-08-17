@@ -1,0 +1,432 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "privacy.sync.disable-settings-sync",
+      "title": "Turn off settings sync (Enterprise State Roaming)",
+      "description": "Sets the SettingSync policy to disable syncing of Windows settings, themes, saved passwords, language and other preferences to the Microsoft account, and prevents the user from turning sync back on.",
+      "rationale": "Settings sync roams personalization, credentials (saved passwords/Wi-Fi) and other data through Microsoft's cloud. Enterprise State Roaming needs Entra ID P1, but the consumer Microsoft-account sync works across editions, and the policy is honoured on Home even though the GPO editor is Pro and above. Disabling it keeps those settings on the device.",
+      "category": "Privacy",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22000,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\SettingSync",
+          "name": "DisableSettingSync",
+          "type": "Dword",
+          "value": 2,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\SettingSync",
+          "name": "DisableSettingSyncUserOverride",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Experience/AllowSyncMySettings",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Sync your settings\\Do not sync"
+      },
+      "sideEffects": [
+        "Windows settings, themes and saved credentials no longer roam between devices.",
+        "In the Windows Backup app, 'Remember my preferences' is greyed out."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-settingsync",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "sync",
+        "roaming",
+        "credentials"
+      ]
+    },
+    {
+      "id": "privacy.sync.disable-settings-sync-pref",
+      "title": "Turn off settings sync toggles (per-user)",
+      "description": "Turns off the per-user 'Remember my preferences' sync switches by setting SyncPolicy to off and disabling each sync group (personalization, language, accessibility, credentials, Windows settings and browser settings).",
+      "rationale": "This is the Settings-app equivalent of turning off sync for the interactive user, for editions or scenarios where the machine-wide policy is not applied. Microsoft documents the behaviour but not these exact registry values; the keys are community-verified.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22000,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\SettingSync",
+          "name": "SyncPolicy",
+          "type": "Dword",
+          "value": 5,
+          "default": null,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\SettingSync\\Groups\\Personalization",
+          "name": "Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\SettingSync\\Groups\\Language",
+          "name": "Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\SettingSync\\Groups\\Accessibility",
+          "name": "Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\SettingSync\\Groups\\Credentials",
+          "name": "Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\SettingSync\\Groups\\Windows",
+          "name": "Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\SettingSync\\Groups\\BrowserSettings",
+          "name": "Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": null
+      },
+      "sideEffects": [
+        "Microsoft documents the behaviour but not this exact registry value; community-verified (privacy.sexy / Sophia / winutil).",
+        "Windows settings, themes and saved credentials no longer roam between devices for this user."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-settingsync",
+        "https://github.com/undergroundwires/privacy.sexy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "sync",
+        "roaming",
+        "unverified-ms"
+      ]
+    },
+    {
+      "id": "privacy.sync.disable-cross-device-clipboard",
+      "title": "Turn off cloud clipboard sync across devices",
+      "description": "Sets the policy that blocks the clipboard from syncing across devices through the Microsoft account. Local clipboard history (Win+V) is unaffected.",
+      "rationale": "Cross-device clipboard uploads clipboard contents to Microsoft's cloud so they can roam to other signed-in devices. Disabling it keeps clipboard data on the device.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": 22000,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "AllowCrossDeviceClipboard",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Privacy/AllowCrossDeviceClipboard",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\OS Policies\\Allow Cross Device Clipboard"
+      },
+      "sideEffects": [
+        "Clipboard contents no longer roam to other devices; local clipboard history (Win+V) still works."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "sync",
+        "clipboard"
+      ]
+    },
+    {
+      "id": "privacy.sync.disable-find-my-device",
+      "title": "Turn off Find My Device",
+      "description": "Sets the FindMyDevice policy to off so Windows stops periodically uploading the device location to the Microsoft account.",
+      "rationale": "Find My Device periodically reports the device's location to account.microsoft.com so a lost device can be located. Disabling it stops the location uploads. This is a genuine anti-theft trade-off, so it is offered as a user decision.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": 22000,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\FindMyDevice",
+          "name": "AllowFindMyDevice",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Experience/AllowFindMyDevice",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Find My Device\\Turn On/Off Find My Device"
+      },
+      "sideEffects": [
+        "A lost or stolen device can no longer be located or locked from account.microsoft.com."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "sync",
+        "location",
+        "find-my-device"
+      ]
+    },
+    {
+      "id": "privacy.sync.disable-message-sync",
+      "title": "Turn off Messaging cloud sync",
+      "description": "Sets the Messaging policy that stops text messages (SMS/MMS) from being backed up and synced to the Microsoft account.",
+      "rationale": "Messaging cloud sync copies text-message content to Microsoft's cloud so it can roam between devices. Disabling it keeps messages on the device.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22000,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Messaging",
+          "name": "AllowMessageSync",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Messaging/AllowMessageSync",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Messaging\\Allow Message Service Cloud Sync"
+      },
+      "sideEffects": [
+        "Text messages are no longer backed up to or synced from the Microsoft account."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-messaging"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "sync",
+        "messaging"
+      ]
+    },
+    {
+      "id": "privacy.sync.disable-shared-experiences",
+      "title": "Turn off shared experiences and nearby-sharing hand-off",
+      "description": "Sets the EnableCdp policy to off, disabling the Connected Devices Platform used for 'Continue experiences on this device' cross-device app hand-off (Project Rome) and related nearby-sharing features.",
+      "rationale": "The Connected Devices Platform advertises the device and exchanges activity so apps can hand off between devices. Disabling the policy stops that cross-device advertising. The CDPSvc/CDPUserSvc services are deliberately left alone (disabling them would break Nearby Share, cloud clipboard and Phone Link outright).",
+      "category": "Privacy",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": 22000,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "EnableCdp",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Group Policy\\Continue experiences on this device"
+      },
+      "sideEffects": [
+        "Cross-device app hand-off ('Continue on this device') is turned off; some Nearby Sharing and Phone Link features may be affected."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://github.com/undergroundwires/privacy.sexy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "sync",
+        "cdp",
+        "nearby-sharing"
+      ]
+    },
+    {
+      "id": "privacy.defender.never-submit-samples",
+      "title": "Never auto-submit file samples to Defender cloud",
+      "description": "Sets Microsoft Defender's automatic sample submission to 'Never send' so suspicious files are never uploaded, while cloud-delivered protection (MAPS) itself stays on.",
+      "rationale": "Cloud-delivered protection is kept enabled for security, but automatic sample submission can upload copies of files (which may contain personal data) to Microsoft. Setting it to 'Never send' is the privacy-respecting middle ground that keeps cloud verdicts while never uploading file samples.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 22000,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Spynet",
+          "name": "SubmitSamplesConsent",
+          "type": "Dword",
+          "value": 2,
+          "default": 1,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Defender/SubmitSamplesConsent",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\MAPS\\Send file samples when further analysis is required"
+      },
+      "sideEffects": [
+        "Novel or unknown files are never uploaded for deep analysis, so protection against brand-new malware can be slightly slower; cloud-delivered protection (MAPS) itself stays on.",
+        "Tamper Protection (on by default) may block this change on unmanaged devices until it is turned off in Windows Security."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender",
+        "https://learn.microsoft.com/en-us/defender-endpoint/cloud-protection-microsoft-defender-antivirus"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "defender",
+        "samples"
+      ]
+    }
+  ]
+}
