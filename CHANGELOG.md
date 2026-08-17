@@ -130,7 +130,14 @@ what was planned (plans live in `PLAN.md`).
   notify-before-install by `conflictsWith`. Updates reaches 25 and **all six
   catalogue categories now meet their M4 per-category minimums** (435 entries
   total: Security 150, Privacy 107, Performance 61, Debloat 61, Shell 31,
-  Updates 25). `OpenTheWindows.Core.Engine.ApplyEngine`
+  Updates 25).
+- M4 catalogue invariant tests (`BuiltInCatalogTests`): the built-in catalogue
+  ships ≥ 300 entries and meets every per-category minimum; every security entry
+  tagged `baseline` or `stig` declares a Policy CSP or Group Policy path; no entry
+  reconfigures a protected service; every `Appx` removal carries a `reinstallHint`;
+  and every `Verified` entry points at an evidence file that exists in the repo.
+  (SEHOP, a registry-only mitigation with no Group Policy surface, now carries only
+  its specific `stig-wn11-00-000150` provenance tag, not the generic `stig` tag.) `OpenTheWindows.Core.Engine.ApplyEngine`
   plans a run (dependency-ordered, flagging conflicts, managed settings, risk
   gating and not-applicable entries), then applies it journal-first — every prior
   state is written to the journal before the first machine change, each action is

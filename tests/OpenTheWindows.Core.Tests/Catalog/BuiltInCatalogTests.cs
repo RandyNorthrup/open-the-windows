@@ -93,6 +93,97 @@ public sealed class BuiltInCatalogTests
         => Assert.Contains("usoclient.exe", CommandAction.AllowedExecutables, StringComparer.OrdinalIgnoreCase);
 
     [Fact]
+    public void Catalogue_meets_the_M4_total_minimum()
+        => Assert.True(Load().Count >= 300, "M4 requires at least 300 catalogue entries.");
+
+    [Fact]
+    public void Baseline_and_stig_security_entries_declare_management()
+    {
+        foreach (TweakDefinition entry in Load().Entries.Where(e => e.Category == Category.Security))
+        {
+            bool framework = entry.Tags.Any(t =>
+                string.Equals(t, "stig", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(t, "baseline", StringComparison.OrdinalIgnoreCase));
+            if (!framework)
+            {
+                continue;
+            }
+
+            bool managed = entry.ManagedBy is { } m
+                && (!string.IsNullOrWhiteSpace(m.PolicyCsp) || !string.IsNullOrWhiteSpace(m.GroupPolicyPath));
+
+            Assert.True(managed, string.Create(System.Globalization.CultureInfo.InvariantCulture,
+                $"{entry.Id.Value} is tagged baseline/stig but declares no Policy CSP or Group Policy path."));
+        }
+    }
+
+    [Fact]
+    public void No_entry_reconfigures_a_protected_service()
+    {
+        foreach (TweakDefinition entry in Load().Entries)
+        {
+            foreach (ServiceAction service in entry.Actions.OfType<ServiceAction>())
+            {
+                Assert.False(ProtectedServices.IsProtected(service.Name),
+                    string.Create(System.Globalization.CultureInfo.InvariantCulture,
+                        $"{entry.Id.Value} reconfigures the protected service '{service.Name}'."));
+            }
+        }
+    }
+
+    [Fact]
+    public void Every_appx_entry_declares_a_reinstall_hint()
+    {
+        foreach (TweakDefinition entry in Load().Entries)
+        {
+            foreach (AppxAction appx in entry.Actions.OfType<AppxAction>())
+            {
+                Assert.False(string.IsNullOrWhiteSpace(appx.ReinstallHint),
+                    string.Create(System.Globalization.CultureInfo.InvariantCulture,
+                        $"{entry.Id.Value} removes '{appx.PackageFamilyName}' without a reinstallHint."));
+            }
+        }
+    }
+
+    [Fact]
+    public void Every_verified_entry_points_at_an_evidence_file_that_exists()
+    {
+        string? repoRoot = FindRepoRoot();
+        if (repoRoot is null)
+        {
+            return; // Off-repo run (e.g. the VM test host); repository evidence files are not present.
+        }
+
+        foreach (TweakDefinition entry in Load().Entries.Where(e => e.Status == TweakStatus.Verified))
+        {
+            foreach (Verification verification in entry.VerifiedOn)
+            {
+                if (verification.Evidence.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                string path = Path.Combine(repoRoot, verification.Evidence.Replace('/', Path.DirectorySeparatorChar));
+                Assert.True(File.Exists(path), string.Create(System.Globalization.CultureInfo.InvariantCulture,
+                    $"{entry.Id.Value} references missing evidence file '{verification.Evidence}'."));
+            }
+        }
+    }
+
+    private static string? FindRepoRoot()
+    {
+        for (DirectoryInfo? dir = new(AppContext.BaseDirectory); dir is not null; dir = dir.Parent)
+        {
+            if (File.Exists(Path.Combine(dir.FullName, "global.json")))
+            {
+                return dir.FullName;
+            }
+        }
+
+        return null;
+    }
+
+    [Fact]
     public void No_entry_touches_defender_signature_updates_or_disables_a_protection()
     {
         foreach (TweakDefinition entry in Load().Entries)
