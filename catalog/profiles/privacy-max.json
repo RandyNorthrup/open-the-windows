@@ -1,0 +1,14 @@
+{
+  "$schema": "https://github.com/RandyNorthrup/open-the-windows/catalog/schema/profile.schema.json",
+  "schemaVersion": 1,
+  "id": "privacy-max",
+  "name": "Privacy Max",
+  "description": "Privacy above convenience. Every non-breaking telemetry, cloud and tracking control on, with strong security and debloat; expect some cloud features to stop working.",
+  "levels": { "Privacy": "Paranoid", "Updates": "Balanced", "Security": "Strict", "Performance": "Balanced", "Debloat": "Strict", "Shell": "Balanced" },
+  "include": [],
+  "exclude": [],
+  "includeDraft": false,
+  "scope": "User",
+  "options": { "restorePoint": true, "restartExplorer": true, "allowAdvanced": true, "allowBreaking": false },
+  "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] }
+}

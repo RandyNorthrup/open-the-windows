@@ -1,0 +1,14 @@
+{
+  "$schema": "https://github.com/RandyNorthrup/open-the-windows/catalog/schema/profile.schema.json",
+  "schemaVersion": 1,
+  "id": "kiosk-shared",
+  "name": "Kiosk / Shared",
+  "description": "Locked-down shared or single-purpose device. Strict privacy, security and debloat with a minimal shell, applied to every user including future ones.",
+  "levels": { "Privacy": "Strict", "Updates": "Balanced", "Security": "Strict", "Performance": "Balanced", "Debloat": "Strict", "Shell": "Strict" },
+  "include": [],
+  "exclude": [],
+  "includeDraft": false,
+  "scope": "AllUsers",
+  "options": { "restorePoint": true, "restartExplorer": false, "allowAdvanced": true, "allowBreaking": false },
+  "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] }
+}

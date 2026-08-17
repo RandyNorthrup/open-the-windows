@@ -1,0 +1,14 @@
+{
+  "$schema": "https://github.com/RandyNorthrup/open-the-windows/catalog/schema/profile.schema.json",
+  "schemaVersion": 1,
+  "id": "enterprise-workstation",
+  "name": "Enterprise Workstation",
+  "description": "Managed corporate device. Strict privacy and security hardening, updates kept controllable but not aggressive, applied to every user on the machine.",
+  "levels": { "Privacy": "Strict", "Updates": "Balanced", "Security": "Strict", "Performance": "Basic", "Debloat": "Balanced", "Shell": "Basic" },
+  "include": [],
+  "exclude": [],
+  "includeDraft": false,
+  "scope": "AllUsers",
+  "options": { "restorePoint": true, "restartExplorer": false, "allowAdvanced": true, "allowBreaking": false },
+  "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] }
+}

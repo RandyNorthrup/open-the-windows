@@ -30,10 +30,6 @@ public static class CatalogLoader
 
     private static readonly Lazy<JsonSchema> Schema = new(LoadSchema);
 
-    // Detailed output (per-location errors) is only built when a document is
-    // invalid; the common valid case uses the much cheaper pass/fail evaluation.
-    private static readonly EvaluationOptions DetailedOptions = new() { OutputFormat = OutputFormat.List };
-
     /// <summary>The embedded schema text (for tooling and tests).</summary>
     public static string SchemaText => ReadResource(SchemaResourceName);
 
@@ -183,40 +179,7 @@ public static class CatalogLoader
     }
 
     private static bool EvaluateSchema(CatalogSource source, JsonElement root, List<CatalogIssue> issues)
-    {
-        // Fast pass/fail first (default Flag output). Building the detailed List
-        // output is expensive on large documents, so only do it when invalid.
-        if (Schema.Value.Evaluate(root).IsValid)
-        {
-            return true;
-        }
-
-        EvaluationResults results = Schema.Value.Evaluate(root, DetailedOptions);
-
-        bool reported = false;
-        foreach (EvaluationResults detail in results.Details ?? [])
-        {
-            if (detail.IsValid || detail.Errors is not { Count: > 0 })
-            {
-                continue;
-            }
-
-            foreach ((string keyword, string message) in detail.Errors)
-            {
-                reported = true;
-                issues.Add(new CatalogIssue(CatalogIssueSeverity.Error, source.Name, detail.InstanceLocation.ToString(),
-                    "schema", $"{keyword}: {message}"));
-            }
-        }
-
-        if (!reported)
-        {
-            issues.Add(new CatalogIssue(CatalogIssueSeverity.Error, source.Name, string.Empty, "schema",
-                "Document does not conform to the catalogue schema."));
-        }
-
-        return false;
-    }
+        => SchemaEvaluation.Validate(Schema.Value, root, source.Name, "catalogue schema", issues);
 
     private static JsonSchema LoadSchema() => JsonSchema.FromText(SchemaText);
 

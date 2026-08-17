@@ -9,6 +9,23 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M5 (profiles, part 1 — the profile format): named, data-defined profiles in
+  `OpenTheWindows.Core.Profiles`. A `Profile` is a level dial per category plus
+  explicit `include`/`exclude` overrides, an application `Scope`, apply
+  `ProfileOptions` and machine applicability, described by
+  `catalog/schema/profile.schema.json` and loaded by `ProfileLoader` (embedded
+  built-ins, an operator file, or raw text; schema-validated before
+  deserialization). `ProfileResolver.Resolve` turns a profile into the ordered,
+  deduplicated set of catalogue entries it selects on a given machine: level
+  dials first (dropping Advanced/Breaking entries unless the options allow them),
+  then explicit includes (which bypass the level and risk gates but never pull in
+  a Deprecated entry), then excludes (which always win), then per-entry
+  applicability. `ProfileValidator` adds the catalogue-aware checks the schema
+  cannot express (include/exclude ids must exist and not collide or reference
+  retired entries; a built-in profile can never apply a Breaking-risk entry).
+  Seven built-in profiles ship embedded (`home`, `power-user`,
+  `enterprise-workstation`, `developer`, `gamer`, `kiosk-shared`, `privacy-max`),
+  none of which allows or resolves to a Breaking entry.
 - M4 (Windows Update guardrails): the safe, reversible update controls
   (`OpenTheWindows.Core.Updates`). `PauseCalculator` computes the six Settings-app
   pause values (`PauseUpdatesStartTime`/`ExpiryTime`,

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/RandyNorthrup/open-the-windows/catalog/schema/profile.schema.json",
+  "title": "Open the Windows profile",
+  "description": "A named profile: per-category level dials plus explicit include/exclude overrides, application scope, apply options and machine applicability. Enum values use the C# member names (PascalCase). Rules the schema cannot express (include/exclude ids must exist and not collide, built-in profiles never allow Breaking) are enforced by ProfileValidator.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "name", "description", "levels", "include", "exclude", "includeDraft", "scope", "options", "appliesTo"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "type": "integer", "minimum": 1 },
+    "id": { "$ref": "#/$defs/profileId" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "description": { "type": "string", "minLength": 1, "maxLength": 400 },
+    "levels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["Privacy", "Updates", "Security", "Performance", "Debloat", "Shell"],
+      "properties": {
+        "Privacy": { "$ref": "#/$defs/level" },
+        "Updates": { "$ref": "#/$defs/level" },
+        "Security": { "$ref": "#/$defs/level" },
+        "Performance": { "$ref": "#/$defs/level" },
+        "Debloat": { "$ref": "#/$defs/level" },
+        "Shell": { "$ref": "#/$defs/level" }
+      }
+    },
+    "include": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/tweakId" } },
+    "exclude": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/tweakId" } },
+    "includeDraft": { "type": "boolean" },
+    "scope": { "$ref": "#/$defs/scope" },
+    "options": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["restorePoint", "restartExplorer", "allowAdvanced", "allowBreaking"],
+      "properties": {
+        "restorePoint": { "type": "boolean" },
+        "restartExplorer": { "type": "boolean" },
+        "allowAdvanced": { "type": "boolean" },
+        "allowBreaking": { "type": "boolean" }
+      }
+    },
+    "appliesTo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["editions", "minBuild", "maxBuild", "architectures"],
+      "properties": {
+        "editions": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/edition" } },
+        "minBuild": { "oneOf": [{ "$ref": "#/$defs/build" }, { "type": "null" }] },
+        "maxBuild": { "oneOf": [{ "$ref": "#/$defs/build" }, { "type": "null" }] },
+        "architectures": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/architecture" } }
+      }
+    }
+  },
+  "$defs": {
+    "profileId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "tweakId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 96,
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(\\.[a-z0-9]+(-[a-z0-9]+)*)*$"
+    },
+    "level": { "enum": ["Off", "Basic", "Balanced", "Strict", "Paranoid"] },
+    "scope": { "enum": ["User", "AllUsers"] },
+    "edition": { "enum": ["Home", "Pro", "Enterprise", "Education"] },
+    "architecture": { "enum": ["x64", "arm64"] },
+    "build": { "type": "integer", "minimum": 22000, "maximum": 99999 }
+  }
+}

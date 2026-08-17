@@ -310,6 +310,7 @@ shipped `core-6.1.0-windows` profile.
 | `BannedSymbols.txt` | applies to `src/` only | tests use HKCU sandbox keys and DateTime in assertions | never |
 | `Directory.Build.props` | `EnableReferenceTrimmer=false` when `MSBuildProjectName` ends with `_wpftmp` | the WPF markup-compile pass builds a generated `<Project>_<hash>_wpftmp.csproj` that omits the code-behind using Core/Windows; ReferenceTrimmer then falsely reports those refs as removable (RT0002), failing the temp build under warnings-as-errors and cascading to BG1002 in the real build. RT still runs on the real App project | when the WPF SDK stops leaking analyzers into the temp project |
 | `AppInfo.HomepageUri` (`SuppressMessage`) | Sonar `S1075` (URIs should not be hardcoded) | the project homepage is an immutable product-identity constant used as the SARIF tool `informationUri`, not environment-specific configuration that S1075 targets | never |
+| `Profile` record (`SuppressMessage`) | `CA1724` (type names should not match namespaces) | the domain concept is a profile and the M5 spec names the type `Profile`; the only clash is the legacy ASP.NET `System.Web.Profile` namespace, which this net10.0 assembly never references | never |
 | `WindowsCommandRunner.cs` (`#pragma RS0030`) | `System.Diagnostics.Process` ban | the guarded command runner is the single sanctioned process host; an architecture test asserts no other `src/` file suppresses RS0030 | never |
 | `ApplyEngine.Capture` (`SuppressMessage CA1031`) | catch general exception | the transactional apply/revert boundary must catch any writer failure (Win32/COM/WMI/IO) to journal it and roll back rather than leave a partially-applied run | never |
 | `LocalGroupPolicy.RunSta` (`SuppressMessage CA1031`) | catch general exception | the STA worker must marshal any COM/registry failure back to the calling thread as one fault | never |
@@ -336,7 +337,7 @@ or the agent instruction files disagree.
 | M2 | [docs/milestones/M2-scan.md](docs/milestones/M2-scan.md) — detection engine, health checks, reports | DONE 2026-08-16 | `docs/certification/M2.md` |
 | M3 | [docs/milestones/M3-apply.md](docs/milestones/M3-apply.md) — apply/verify/revert, journal, restore points, Event Log | DONE 2026-08-17 | `docs/certification/M3.md` |
 | M4 | [docs/milestones/M4-catalogue-population.md](docs/milestones/M4-catalogue-population.md) — ≥ 300 entries + VM verification + WU guardrails | in progress | pending |
-| M5 | [docs/milestones/M5-profiles-enterprise.md](docs/milestones/M5-profiles-enterprise.md) — profiles, all-users, MDM/GPO awareness, drift task | not started | pending |
+| M5 | [docs/milestones/M5-profiles-enterprise.md](docs/milestones/M5-profiles-enterprise.md) — profiles, all-users, MDM/GPO awareness, drift task | in progress | pending |
 | M6 | [docs/milestones/M6-gui.md](docs/milestones/M6-gui.md) — WPF GUI | not started | pending |
 | M7 | [docs/milestones/M7-packaging.md](docs/milestones/M7-packaging.md) — MSI, ZIP, winget, release workflow | not started | pending |
 | M8 | [docs/milestones/M8-audit.md](docs/milestones/M8-audit.md) — baseline audit mode and reports | not started | pending |
@@ -523,7 +524,23 @@ Remaining for M4: a console-session verification pass for the 150 deferred entri
 is M5 work (the interactive-user resolver returns null over headless SSH, and the
 network/auth entries need a session that is not the one being reconfigured).
 
-### M5 — Profiles and enterprise (not started)
+### M5 — Profiles and enterprise (in progress)
+
+Landed so far (branch `feature/m5-profiles-enterprise`, stacked on the M4 branch,
+committed locally):
+
+- **Profile format** (`Core/Profiles`): the `Profile` model (level dial per
+  category, `include`/`exclude`, `Scope`, `ProfileOptions`, applicability),
+  `catalog/schema/profile.schema.json`, `ProfileLoader` (embedded built-ins /
+  file / text, schema-validated before deserialization; the profile schema rides
+  under `catalog/schema/` and profiles are embedded under a separate `profiles/`
+  logical prefix so the catalogue loader never parses them as tweak documents),
+  `ProfileResolver` (levels → risk gate → includes → excludes → per-entry
+  applicability, in catalogue order) and `ProfileValidator` (unknown/colliding/
+  deprecated include-exclude ids; built-ins never apply Breaking). Seven built-in
+  profiles ship embedded; none allows or resolves to a Breaking entry. The JSON
+  Schema evaluation shared with the catalogue loader was factored into
+  `Core/Catalog/SchemaEvaluation`. `Profile` suppresses `CA1724` (PLAN §7.3).
 
 ### M6 — GUI (not started)
 

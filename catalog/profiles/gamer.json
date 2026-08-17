@@ -1,0 +1,14 @@
+{
+  "$schema": "https://github.com/RandyNorthrup/open-the-windows/catalog/schema/profile.schema.json",
+  "schemaVersion": 1,
+  "id": "gamer",
+  "name": "Gamer",
+  "description": "Gaming desktop. Maximum performance and heavy debloat, privacy kept balanced and updates near default so anti-cheat and drivers keep working.",
+  "levels": { "Privacy": "Balanced", "Updates": "Basic", "Security": "Basic", "Performance": "Paranoid", "Debloat": "Strict", "Shell": "Balanced" },
+  "include": [],
+  "exclude": [],
+  "includeDraft": false,
+  "scope": "User",
+  "options": { "restorePoint": true, "restartExplorer": true, "allowAdvanced": true, "allowBreaking": false },
+  "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] }
+}

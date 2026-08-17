@@ -1,0 +1,14 @@
+{
+  "$schema": "https://github.com/RandyNorthrup/open-the-windows/catalog/schema/profile.schema.json",
+  "schemaVersion": 1,
+  "id": "developer",
+  "name": "Developer",
+  "description": "Developer workstation. Balanced privacy and security that will not interfere with tooling, with performance tuned up and the shell kept usable.",
+  "levels": { "Privacy": "Balanced", "Updates": "Balanced", "Security": "Balanced", "Performance": "Strict", "Debloat": "Balanced", "Shell": "Balanced" },
+  "include": [],
+  "exclude": [],
+  "includeDraft": false,
+  "scope": "User",
+  "options": { "restorePoint": true, "restartExplorer": true, "allowAdvanced": true, "allowBreaking": false },
+  "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] }
+}

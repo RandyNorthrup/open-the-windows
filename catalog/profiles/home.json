@@ -1,0 +1,14 @@
+{
+  "$schema": "https://github.com/RandyNorthrup/open-the-windows/catalog/schema/profile.schema.json",
+  "schemaVersion": 1,
+  "id": "home",
+  "name": "Home",
+  "description": "Everyday consumer PC. Sensible privacy and cleanup with zero functional loss the household would notice; updates stay close to default.",
+  "levels": { "Privacy": "Balanced", "Updates": "Basic", "Security": "Balanced", "Performance": "Balanced", "Debloat": "Basic", "Shell": "Basic" },
+  "include": [],
+  "exclude": [],
+  "includeDraft": false,
+  "scope": "User",
+  "options": { "restorePoint": true, "restartExplorer": true, "allowAdvanced": false, "allowBreaking": false },
+  "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] }
+}

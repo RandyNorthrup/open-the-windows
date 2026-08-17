@@ -1,0 +1,14 @@
+{
+  "$schema": "https://github.com/RandyNorthrup/open-the-windows/catalog/schema/profile.schema.json",
+  "schemaVersion": 1,
+  "id": "power-user",
+  "name": "Power User",
+  "description": "Enthusiast single-user desktop. Strong privacy, aggressive performance and a decluttered shell, accepting minor, well-understood trade-offs.",
+  "levels": { "Privacy": "Strict", "Updates": "Balanced", "Security": "Balanced", "Performance": "Strict", "Debloat": "Balanced", "Shell": "Balanced" },
+  "include": [],
+  "exclude": [],
+  "includeDraft": false,
+  "scope": "User",
+  "options": { "restorePoint": true, "restartExplorer": true, "allowAdvanced": true, "allowBreaking": false },
+  "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] }
+}
