@@ -1,6 +1,9 @@
+using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
+using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Windows;
+using OpenTheWindows.Windows.Readers;
 
 namespace OpenTheWindows.Cli;
 
@@ -10,11 +13,33 @@ namespace OpenTheWindows.Cli;
 /// </summary>
 /// <param name="Doctor">Pre-flight checker.</param>
 /// <param name="LoadCatalog">Loads the catalogue; the argument is an optional override directory.</param>
-internal sealed record CliServices(DoctorService Doctor, Func<string?, CatalogLoadResult> LoadCatalog)
+/// <param name="CreateScanEngine">Builds a scan engine over the real state readers.</param>
+/// <param name="Health">The read-only machine health probe.</param>
+internal sealed record CliServices(
+    DoctorService Doctor,
+    Func<string?, CatalogLoadResult> LoadCatalog,
+    Func<ScanEngine> CreateScanEngine,
+    IMachineHealthProbe Health)
 {
     /// <summary>Production services.</summary>
     public static CliServices CreateDefault()
         => new(
             new DoctorService(new WindowsOperatingSystemInfo(), new WindowsElevationContext()),
-            directory => directory is null ? CatalogLoader.LoadBuiltIn() : CatalogLoader.LoadWithDirectory(directory));
+            directory => directory is null ? CatalogLoader.LoadBuiltIn() : CatalogLoader.LoadWithDirectory(directory),
+            CreateDefaultScanEngine,
+            new WindowsMachineHealthProbe());
+
+    private static ScanEngine CreateDefaultScanEngine()
+        => new(
+            new WindowsRegistryReader(),
+            new WindowsServiceReader(),
+            new WindowsScheduledTaskReader(),
+            new WindowsAppxReader(),
+            new WindowsOptionalFeatureReader(),
+            new WindowsDefenderPreferenceReader(),
+            new WindowsPowerSettingReader(),
+            new WindowsInteractiveUserResolver(),
+            new WindowsManagedSettingDetector(),
+            new WindowsOperatingSystemInfo(),
+            TimeProvider.System);
 }

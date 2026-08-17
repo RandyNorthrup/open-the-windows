@@ -17,7 +17,7 @@ public sealed class CatalogCommandTests
             new FakeOperatingSystemInfo(FakeOperatingSystemInfo.Windows11Pro24H2()),
             new FakeElevationContext(isElevated: true));
         Func<string?, CatalogLoadResult> load = loadCatalog ?? (_ => CatalogLoader.LoadBuiltIn());
-        return CliTestHost.Host(new CliServices(doctor, load));
+        return CliTestHost.Host(TestCli.Services(doctor, load));
     }
 
     private static int Invoke(RootCommand root, StringWriter stdout, StringWriter stderr, params string[] args)

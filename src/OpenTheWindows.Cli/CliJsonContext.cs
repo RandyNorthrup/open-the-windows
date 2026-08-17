@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Diagnostics;
 
 namespace OpenTheWindows.Cli;
@@ -14,4 +15,5 @@ namespace OpenTheWindows.Cli;
     UseStringEnumConverter = true,
     DefaultIgnoreCondition = JsonIgnoreCondition.Never)]
 [JsonSerializable(typeof(SystemReport))]
+[JsonSerializable(typeof(IReadOnlyList<HealthCheckResult>))]
 internal sealed partial class CliJsonContext : JsonSerializerContext;

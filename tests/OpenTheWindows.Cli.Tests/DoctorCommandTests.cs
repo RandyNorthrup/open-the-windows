@@ -14,7 +14,7 @@ public sealed class DoctorCommandTests
         var doctor = new DoctorService(
             new FakeOperatingSystemInfo(win11 ? FakeOperatingSystemInfo.Windows11Pro24H2() : FakeOperatingSystemInfo.Windows10Pro22H2()),
             new FakeElevationContext(elevated));
-        return CliTestHost.Host(new CliServices(doctor, _ => CatalogLoader.LoadBuiltIn()));
+        return CliTestHost.Host(TestCli.Services(doctor, _ => CatalogLoader.LoadBuiltIn()));
     }
 
     private static int Invoke(RootCommand root, StringWriter stdout, StringWriter stderr, params string[] args)

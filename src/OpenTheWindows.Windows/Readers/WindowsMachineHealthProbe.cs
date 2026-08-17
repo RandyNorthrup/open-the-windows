@@ -67,7 +67,7 @@ public sealed class WindowsMachineHealthProbe : IMachineHealthProbe
         }
         catch (Exception ex) when (IsExpected(ex))
         {
-            return new HealthCheckResult(id, title, HealthStatus.Unknown, "Unavailable: " + ex.Message, null);
+            return new HealthCheckResult(id, title, HealthStatus.Unknown, "Unavailable: " + ex.Message.Trim(), null);
         }
     }
 

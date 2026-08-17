@@ -90,6 +90,19 @@ what was planned (plans live in `PLAN.md`).
   the probe never throws. Tested against the real machine unelevated (28 unique
   checks, all with detail; the registry-backed checks return a real verdict).
 
+- M2: `otw scan` and `otw health` CLI commands. `otw scan --profile
+  <basic|balanced|strict|paranoid>` runs a read-only drift scan of a built-in
+  level profile (`NamedProfile` selects Verified entries at or below the level;
+  `--include-draft` adds drafts; `--catalog-dir` overrides) and prints a text
+  summary or, with `--json`/`--csv`/`--html`/`--sarif` (and optional `--out`),
+  a report; exit 0 compliant, 1 drift, 2 error, 3 unsupported platform.
+  `otw health [--json]` runs the 28 read-only checks; exit 0. The CLI composes
+  the real Windows readers into the `ScanEngine` and the health probe; command
+  tests drive both through the parser with fake readers/probe (drift lists ids,
+  unsupported exits 3, unknown profile and conflicting formats exit 2, report
+  formats emit to stdout/file). New docs `docs/reports.md`; README documents
+  both commands.
+
 - M1: catalogue model (`OpenTheWindows.Core.Catalog`), JSON Schema
   `catalog/schema/tweak.schema.json`, embedded loader with directory overrides
   and a structural validator (stable rule ids), 29 Draft entries across six
