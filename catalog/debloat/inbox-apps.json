@@ -1,0 +1,134 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "debloat.apps.remove-solitaire-collection",
+      "title": "Remove Microsoft Solitaire Collection",
+      "description": "Removes the Solitaire Collection app for all users and deprovisions it so new users do not get it.",
+      "rationale": "Ad-supported game with no system dependencies; reinstall from the Store at any time.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.MicrosoftSolitaireCollection_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Microsoft Store: ms-windows-store://pdp/?productid=9WZDNCRFHWD2"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/windows/application-management/provisioned-apps-windows-client-os",
+        "https://learn.microsoft.com/powershell/module/dism/remove-appxprovisionedpackage"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "games"]
+    },
+    {
+      "id": "debloat.apps.remove-feedback-hub",
+      "title": "Remove Feedback Hub",
+      "description": "Removes the Feedback Hub app for all users and deprovisions it.",
+      "rationale": "Only used to send feedback to Microsoft; nothing else depends on it.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Microsoft.WindowsFeedbackHub_8wekyb3d8bbwe",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Microsoft Store: ms-windows-store://pdp/?productid=9NBLGGH4R32N"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/windows/application-management/provisioned-apps-windows-client-os"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "feedback"]
+    },
+    {
+      "id": "debloat.content-delivery.disable-app-suggestions",
+      "title": "Stop automatic installation of suggested apps",
+      "description": "Turns off Content Delivery Manager features that silently install promoted third-party apps and pin suggestions in Start.",
+      "rationale": "These are the Start-menu stubs (streaming, games, social) that appear after setup and after feature updates.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SilentInstalledAppsEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "OemPreInstalledAppsEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "PreInstalledAppsEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SubscribedContent-338388Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Experience/AllowWindowsConsumerFeatures",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Cloud Content\\Turn off Microsoft consumer experiences"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-experience"
+      ],
+      "verifiedOn": [],
+      "tags": ["ads", "start"]
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "performance.services.disable-diagtrack",
+      "title": "Disable the Connected User Experiences and Telemetry service",
+      "description": "Sets the DiagTrack service to Disabled and stops it. This is the service that batches and uploads diagnostic data.",
+      "rationale": "Removes a persistent background uploader. On managed devices it also breaks Windows Update for Business reports, Update Compliance and some Defender for Endpoint features, so it is Balanced, not Basic.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Service",
+          "name": "DiagTrack",
+          "startType": "Disabled",
+          "default": "Automatic",
+          "stopIfRunning": true
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "Windows Update for Business reports, Update Compliance and Endpoint Analytics stop receiving data from this device.",
+        "Feature updates may re-enable the service; the drift task re-applies."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/windows/privacy/configure-windows-diagnostic-data-in-your-organization",
+        "https://learn.microsoft.com/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
+      ],
+      "verifiedOn": [],
+      "tags": ["telemetry", "services"]
+    },
+    {
+      "id": "performance.tasks.disable-compatibility-appraiser",
+      "title": "Disable the Compatibility Appraiser scheduled task",
+      "description": "Disables the Application Experience task that periodically inventories installed software and hardware for compatibility telemetry.",
+      "rationale": "The appraiser causes noticeable CPU/disk bursts and its output only feeds diagnostic data. Feature-update readiness checks run their own appraiser pass, so upgrades still work.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "ScheduledTask",
+          "path": "\\Microsoft\\Windows\\Application Experience\\Microsoft Compatibility Appraiser",
+          "enabled": false,
+          "default": true
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": ["Windows Update for Business / Update Compliance readiness data for this device is stale."],
+      "sources": [
+        "https://learn.microsoft.com/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
+      ],
+      "verifiedOn": [],
+      "tags": ["telemetry", "tasks"]
+    },
+    {
+      "id": "performance.gaming.disable-game-dvr",
+      "title": "Disable Game DVR background recording",
+      "description": "Turns off Xbox Game Bar background recording and app capture for this user.",
+      "rationale": "Background recording keeps a capture pipeline running during games and costs measurable frame time; screenshots and manual clips still work from the Game Bar.",
+      "category": "Performance",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "System\\GameConfigStore",
+          "name": "GameDVR_Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\GameDVR",
+          "name": "AppCaptureEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "ApplicationManagement/AllowGameDVR",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Game Recording and Broadcasting\\Enables or disables Windows Game Recording and Broadcasting"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-applicationmanagement"
+      ],
+      "verifiedOn": [],
+      "tags": ["gamer", "gaming"]
+    },
+    {
+      "id": "performance.storage.enable-storage-sense",
+      "title": "Turn on Storage Sense",
+      "description": "Enables Storage Sense so temporary files and the recycle bin are cleaned on a schedule.",
+      "rationale": "Keeps free space healthy without third-party cleaners; the schedule and what it deletes remain configurable in Settings.",
+      "category": "Performance",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\StorageSense",
+          "name": "AllowStorageSenseGlobal",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Storage/AllowStorageSenseGlobal",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Storage Sense\\Allow Storage Sense"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-storage"
+      ],
+      "verifiedOn": [],
+      "tags": ["disk"]
+    }
+  ]
+}

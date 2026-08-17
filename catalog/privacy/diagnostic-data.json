@@ -1,0 +1,165 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "privacy.diagnostic-data.required-only",
+      "title": "Limit diagnostic data to Required",
+      "description": "Sets the diagnostic data policy to Required (formerly Basic) so Windows sends only the data needed to keep the device secure and up to date, instead of Optional data (app usage, browsing, inking and typing).",
+      "rationale": "Required is the lowest level honoured on Home and Pro; 'Diagnostic data off' (0) is only honoured on Enterprise, Education and IoT. Windows Update, Defender and Store keep working at Required.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+          "name": "AllowTelemetry",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "System/AllowTelemetry",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Data Collection and Preview Builds\\Allow Diagnostic Data"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/windows/privacy/configure-windows-diagnostic-data-in-your-organization",
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-system"
+      ],
+      "verifiedOn": [],
+      "tags": ["telemetry"]
+    },
+    {
+      "id": "privacy.diagnostic-data.limit-log-collection",
+      "title": "Do not upload diagnostic logs and memory dumps",
+      "description": "Prevents Windows from uploading additional diagnostic logs and crash memory dumps as part of diagnostic data.",
+      "rationale": "Logs and dumps can contain file names, paths and memory contents; they are not needed for updates or security.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+          "name": "LimitDiagnosticLogCollection",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+          "name": "LimitDumpCollection",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "System/LimitDiagnosticLogCollection",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Data Collection and Preview Builds"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-system"
+      ],
+      "verifiedOn": [],
+      "tags": ["telemetry"]
+    },
+    {
+      "id": "privacy.feedback.disable-notifications",
+      "title": "Turn off feedback requests",
+      "description": "Stops Windows from asking for feedback (the Feedback Hub prompts) and disables the feedback notification policy.",
+      "rationale": "Feedback prompts are interruptions that upload usage context; nothing depends on them.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+          "name": "DoNotShowFeedbackNotifications",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Experience/DoNotShowFeedbackNotifications",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Data Collection and Preview Builds\\Do not show feedback notifications"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-experience"
+      ],
+      "verifiedOn": [],
+      "tags": ["telemetry", "feedback"]
+    },
+    {
+      "id": "privacy.recall.disable",
+      "title": "Disable Windows Recall",
+      "description": "Sets the WindowsAI policy that disables Recall snapshots (Copilot+ PCs) so no screen history is captured or analysed.",
+      "rationale": "Recall stores continuous screenshots of activity; even encrypted, it is an unwanted data store for privacy-focused and managed devices. The policy is harmless on devices without Recall.",
+      "category": "Privacy",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": 26100, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+          "name": "DisableAIDataAnalysis",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "WindowsAI/DisableAIDataAnalysis",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows AI\\Turn off saving snapshots for Windows"
+      },
+      "sideEffects": ["Recall and its timeline are unavailable."],
+      "sources": [
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-windowsai",
+        "https://learn.microsoft.com/windows/client-management/manage-recall"
+      ],
+      "verifiedOn": [],
+      "tags": ["ai", "recall"]
+    }
+  ]
+}

@@ -99,7 +99,21 @@ jobs:
         shell: pwsh
         run: |
           Install-Module PSScriptAnalyzer -RequiredVersion 1.25.0 -Scope CurrentUser -Force -AcceptLicense
-          $records = @(Invoke-ScriptAnalyzer -Path build -Recurse -Settings ./PSScriptAnalyzerSettings.psd1)
+          Import-Module PSScriptAnalyzer
+          # Invoke-ScriptAnalyzer 1.25 intermittently throws a NullReferenceException
+          # from a compatibility rule (a tool crash, not a finding). Retry on a thrown
+          # exception; a real finding is a non-empty result set and is never retried.
+          $records = $null
+          for ($attempt = 1; ; $attempt++) {
+            try {
+              $records = @(Invoke-ScriptAnalyzer -Path build -Recurse -Settings ./PSScriptAnalyzerSettings.psd1)
+              break
+            }
+            catch {
+              if ($attempt -ge 3) { throw }
+              Write-Host "PSScriptAnalyzer crashed ($($_.Exception.GetType().Name)); retry $attempt/2."
+            }
+          }
           if ($records.Count -gt 0) { $records | Format-Table -AutoSize | Out-String | Write-Host; exit 1 }
 
       - name: Plan / spec / certification consistency

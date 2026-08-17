@@ -1,0 +1,114 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "shell.explorer.show-file-extensions",
+      "title": "Show file name extensions",
+      "description": "Makes File Explorer show extensions for known file types.",
+      "rationale": "Hidden extensions are a classic phishing aid ('invoice.pdf.exe'); showing them costs nothing.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "HideFileExt",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/windows/security/operating-system-security/device-management/windows-security-configuration-framework/windows-security-baselines",
+        "https://support.microsoft.com/windows/common-file-name-extensions-in-windows-da4a4430-8e76-89c5-59f7-1cdbbc75cb01"
+      ],
+      "verifiedOn": [],
+      "tags": ["explorer", "phishing"]
+    },
+    {
+      "id": "shell.taskbar.disable-widgets",
+      "title": "Turn off Widgets (news and interests)",
+      "description": "Applies the policy that removes the Widgets board and taskbar button.",
+      "rationale": "Widgets stream MSN news and ads and keep a WebView process alive; the taskbar toggle alone is reverted by feature updates.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Dsh",
+          "name": "AllowNewsAndInterests",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "NewsAndInterests/AllowNewsAndInterests",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Widgets\\Allow widgets"
+      },
+      "sideEffects": ["The Widgets board, its taskbar button and lock-screen widgets are unavailable."],
+      "sources": [
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-newsandinterests"
+      ],
+      "verifiedOn": [],
+      "tags": ["taskbar", "widgets", "ads"]
+    },
+    {
+      "id": "shell.start.disable-recommendations",
+      "title": "Hide recommendations and promoted apps in Start",
+      "description": "Turns off the recommendation and app-promotion content in the Start menu for this user.",
+      "rationale": "The Recommended section shows promoted Store apps and recently used files that many users consider ads or a privacy leak on shared screens.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "Start_IrisRecommendations",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Start/HideRecommendedSection",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Start Menu and Taskbar\\Remove Recommended section from Start Menu"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-start"
+      ],
+      "verifiedOn": [],
+      "tags": ["start", "ads"]
+    }
+  ]
+}

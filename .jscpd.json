@@ -8,7 +8,7 @@
   "absolute": false,
   "gitignore": true,
   "format": ["csharp", "xml", "powershell", "yaml", "json"],
-  "$comment": "markdown is deliberately excluded: the Linux tokenizer reports code fences (```text) as clones across unrelated docs; prose duplication is not the risk this gate exists for.",
+  "$comment": "markdown is deliberately excluded: the Linux tokenizer reports code fences (```text) as clones across unrelated docs; prose duplication is not the risk this gate exists for. catalog/** is excluded because catalogue entries are declarative data whose action blocks are intentionally uniform in shape (a registry or service action looks the same across many tweaks); that structural repetition is not copy-pasted logic.",
   "ignore": [
     "**/artifacts/**",
     "**/node_modules/**",
@@ -19,6 +19,7 @@
     "**/*.Designer.cs",
     "**/packages.lock.json",
     "**/package-lock.json",
+    "catalog/**",
     "docs/research/**",
     "temp/**"
   ]

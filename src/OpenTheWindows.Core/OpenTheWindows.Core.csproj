@@ -15,6 +15,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="JsonSchema.Net" />
+  </ItemGroup>
+
+  <!-- The built-in catalogue and its schema are embedded so the engine works
+       offline and the shipped catalogue is tamper-evident (same hash as the repo).
+       Logical names use forward slashes: catalog/<category>/<file>.json -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\catalog\**\*.json" LogicalName="catalog/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="OpenTheWindows.Core.Tests" />
   </ItemGroup>
 

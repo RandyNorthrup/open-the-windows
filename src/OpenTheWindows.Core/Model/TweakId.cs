@@ -11,6 +11,7 @@ namespace OpenTheWindows.Core.Model;
 /// Validation is a single linear pass; no regular expression, so there is no
 /// backtracking to reason about and the check is safe on untrusted input.
 /// </remarks>
+[System.Text.Json.Serialization.JsonConverter(typeof(TweakIdJsonConverter))]
 public readonly record struct TweakId
 {
     /// <summary>Maximum accepted length; keeps ids readable in logs and Event Log entries.</summary>
