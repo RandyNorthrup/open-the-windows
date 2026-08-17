@@ -192,6 +192,9 @@ before they leave `draft` state.
 | System.CommandLine | 2.0.11 | `Directory.Packages.props` |
 | CommunityToolkit.Mvvm | 8.4.2 | same |
 | Microsoft.Extensions.DependencyInjection / Logging.Abstractions | 10.0.11 | same |
+| System.ServiceProcess.ServiceController | 10.0.11 | same (Windows project; service reads) |
+| TaskScheduler | 2.12.2 | same (Windows project; scheduled-task reads) |
+| System.Management | 10.0.11 | same (Windows project; WMI optional-feature and Defender reads) |
 | xunit.v3 | 4.0.0 | same |
 | Microsoft.Testing.Extensions.CodeCoverage | 18.10.0 | same |
 | Roslynator.Analyzers | 4.16.1 | same (global) |
@@ -212,12 +215,20 @@ before they leave `draft` state.
 | GitHub Actions | checkout v7.0.1, setup-dotnet v6.0.0, setup-node v7.0.0, setup-python v7.0.0, upload-artifact v7.0.1, raven-actions/actionlint v2.2.0 — all pinned to commit SHAs (semgrep `p/github-actions` mutable-tag rule) | `.github/workflows/ci.yml` |
 
 Planned (not yet referenced; add at the milestone that needs them, with the
-same verification): TaskScheduler 2.12.2, Microsoft.Windows.CsWin32 0.3.298,
-System.Management 10.0.11, Vanara.PInvoke.WUApi 5.0.7 (or hand-written WUA COM
-interfaces — `<COMReference>` does not build under `dotnet build`),
-Corvus.Json.Validator 5.3.2 or JsonSchema.Net 9.4.0, Serilog 4.4.0 +
-Serilog.Sinks.EventLog 4.0.0, FlaUI.UIA3 5.0.0, Stryker.NET 4.16.0, WiX 7.0.0,
-Verify.XunitV3 31.28.0.
+same verification): Microsoft.Windows.CsWin32 0.3.298, Vanara.PInvoke.WUApi
+5.0.7 (or hand-written WUA COM interfaces — `<COMReference>` does not build
+under `dotnet build`), Corvus.Json.Validator 5.3.2 or JsonSchema.Net 9.4.0,
+Serilog 4.4.0 + Serilog.Sinks.EventLog 4.0.0, FlaUI.UIA3 5.0.0, Stryker.NET
+4.16.0, WiX 7.0.0, Verify.XunitV3 31.28.0.
+
+M2 deviation from the M2-scan spec: optional-feature state is read via WMI
+`Win32_OptionalFeature` (through `System.Management`), not the DISM API the
+spec suggested. Opening a DISM online session requires administrator rights and
+the DISM API can also modify the image; `Win32_OptionalFeature` is strictly
+read-only and queryable unelevated, so the scan needs no elevation for feature
+detection and the reader is testable on an unelevated developer box. The
+InstallState mapping (1 enabled, 2 disabled, 3/4/absent ⇒ not present) is
+documented in `WindowsOptionalFeatureReader`.
 
 ### 7.2 Gate verification log (each gate seen to FAIL on a broken input, then reverted)
 

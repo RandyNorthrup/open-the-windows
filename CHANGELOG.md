@@ -30,9 +30,13 @@ what was planned (plans live in `PLAN.md`).
   `Windows.Management.Deployment.PackageManager` plus the `Deprovisioned`
   registry key; the all-users / provisioned enumeration needs elevation and
   degrades to a documented user-scoped lower bound when denied, never a silent
-  success). All four readers have tests that read the real registry / SCM / task
-  store / package store unelevated. Remaining Windows readers (optional feature,
-  Defender, power, interactive user, managed detection), report writers,
+  success), and `WindowsOptionalFeatureReader` (enabled state via WMI
+  `Win32_OptionalFeature` — read-only and unelevated, chosen over the spec's
+  DISM suggestion because a DISM online session needs elevation and can modify
+  the image; deviation recorded in PLAN §7.1; new package `System.Management`
+  10.0.11). All five readers have tests that read the real registry / SCM /
+  task store / package store / WMI unelevated. Remaining Windows readers
+  (Defender, power, interactive user, managed detection), report writers,
   `otw scan` / `otw health` and VM integration are still to come (see
   docs/milestones/M2-scan.md).
 
