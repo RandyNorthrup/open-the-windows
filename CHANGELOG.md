@@ -34,9 +34,13 @@ what was planned (plans live in `PLAN.md`).
   `Win32_OptionalFeature` — read-only and unelevated, chosen over the spec's
   DISM suggestion because a DISM online session needs elevation and can modify
   the image; deviation recorded in PLAN §7.1; new package `System.Management`
-  10.0.11). All five readers have tests that read the real registry / SCM /
-  task store / package store / WMI unelevated. Remaining Windows readers
-  (Defender, power, interactive user, managed detection), report writers,
+  10.0.11), and `WindowsDefenderPreferenceReader` (a named `MSFT_MpPreference`
+  property read from WMI and materialised to JSON with `Utf8JsonWriter`;
+  Defender absent or property unknown ⇒ `null`). The trim-safe JSON
+  materialisation helper is now shared (`JsonMaterialization`) between the
+  registry and Defender readers. All six readers have tests that read the real
+  registry / SCM / task store / package store / WMI unelevated. Remaining
+  Windows readers (power, interactive user, managed detection), report writers,
   `otw scan` / `otw health` and VM integration are still to come (see
   docs/milestones/M2-scan.md).
 

@@ -1,4 +1,3 @@
-using System.Buffers;
 using System.Globalization;
 using System.Runtime.Versioning;
 using System.Text.Json;
@@ -57,20 +56,20 @@ public sealed class WindowsRegistryReader : IRegistryReader
     private static RegistryValueSnapshot Snapshot(RegistryValueKind kind, object raw) => kind switch
     {
         RegistryValueKind.DWord => new RegistryValueSnapshot(true, CatalogValueType.Dword,
-            Write(w => w.WriteNumberValue(unchecked((uint)(int)raw)))),
+            JsonMaterialization.Write(w => w.WriteNumberValue(unchecked((uint)(int)raw)))),
         RegistryValueKind.QWord => new RegistryValueSnapshot(true, CatalogValueType.Qword,
-            Write(w => w.WriteNumberValue(unchecked((ulong)(long)raw)))),
+            JsonMaterialization.Write(w => w.WriteNumberValue(unchecked((ulong)(long)raw)))),
         RegistryValueKind.String => new RegistryValueSnapshot(true, CatalogValueType.Sz,
-            Write(w => w.WriteStringValue((string)raw))),
+            JsonMaterialization.Write(w => w.WriteStringValue((string)raw))),
         RegistryValueKind.ExpandString => new RegistryValueSnapshot(true, CatalogValueType.ExpandSz,
-            Write(w => w.WriteStringValue((string)raw))),
+            JsonMaterialization.Write(w => w.WriteStringValue((string)raw))),
         RegistryValueKind.MultiString => new RegistryValueSnapshot(true, CatalogValueType.MultiSz, WriteStrings((string[])raw)),
         RegistryValueKind.Binary => new RegistryValueSnapshot(true, CatalogValueType.Binary,
-            Write(w => w.WriteStringValue(Convert.ToBase64String((byte[])raw)))),
+            JsonMaterialization.Write(w => w.WriteStringValue(Convert.ToBase64String((byte[])raw)))),
         _ => new RegistryValueSnapshot(true, null, null),
     };
 
-    private static JsonElement WriteStrings(string[] values) => Write(writer =>
+    private static JsonElement WriteStrings(string[] values) => JsonMaterialization.Write(writer =>
     {
         writer.WriteStartArray();
         foreach (string value in values)
@@ -80,16 +79,4 @@ public sealed class WindowsRegistryReader : IRegistryReader
 
         writer.WriteEndArray();
     });
-
-    private static JsonElement Write(Action<Utf8JsonWriter> write)
-    {
-        var buffer = new ArrayBufferWriter<byte>();
-        using (var writer = new Utf8JsonWriter(buffer))
-        {
-            write(writer);
-        }
-
-        using var document = JsonDocument.Parse(buffer.WrittenMemory);
-        return document.RootElement.Clone();
-    }
 }
