@@ -81,6 +81,11 @@
           "Json.More.Net": "3.0.1"
         }
       },
+      "System.Diagnostics.EventLog": {
+        "type": "Transitive",
+        "resolved": "10.0.11",
+        "contentHash": "QTXEoQBzz00SFWbo7nAg1Ogd4f99lwqcO9uAJ7MYSLEUR28f6As32QktrqG2Fr9cfAfd1GjLyGYspE7Ipj7P6w=="
+      },
       "openthewindows.core": {
         "type": "Project",
         "dependencies": {
@@ -90,7 +95,8 @@
       "openthewindows.windows": {
         "type": "Project",
         "dependencies": {
-          "OpenTheWindows.Core": "[0.1.0-local, )"
+          "OpenTheWindows.Core": "[0.1.0-local, )",
+          "System.ServiceProcess.ServiceController": "[10.0.11, )"
         }
       },
       "JsonSchema.Net": {
@@ -101,9 +107,48 @@
         "dependencies": {
           "JsonPointer.Net": "7.0.2"
         }
+      },
+      "System.ServiceProcess.ServiceController": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.11, )",
+        "resolved": "10.0.11",
+        "contentHash": "khROyIQ3GAZy5MbCabfmlbvxf9nuvdveFP2XbRCteZ9Lq8OFEvImmrjV6acl1LegRu/9T6VMxi9Lr+KZu29VHg==",
+        "dependencies": {
+          "System.Diagnostics.EventLog": "10.0.11"
+        }
       }
     },
-    "net10.0-windows10.0.26100/win-arm64": {},
-    "net10.0-windows10.0.26100/win-x64": {}
+    "net10.0-windows10.0.26100/win-arm64": {
+      "System.Diagnostics.EventLog": {
+        "type": "Transitive",
+        "resolved": "10.0.11",
+        "contentHash": "QTXEoQBzz00SFWbo7nAg1Ogd4f99lwqcO9uAJ7MYSLEUR28f6As32QktrqG2Fr9cfAfd1GjLyGYspE7Ipj7P6w=="
+      },
+      "System.ServiceProcess.ServiceController": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.11, )",
+        "resolved": "10.0.11",
+        "contentHash": "khROyIQ3GAZy5MbCabfmlbvxf9nuvdveFP2XbRCteZ9Lq8OFEvImmrjV6acl1LegRu/9T6VMxi9Lr+KZu29VHg==",
+        "dependencies": {
+          "System.Diagnostics.EventLog": "10.0.11"
+        }
+      }
+    },
+    "net10.0-windows10.0.26100/win-x64": {
+      "System.Diagnostics.EventLog": {
+        "type": "Transitive",
+        "resolved": "10.0.11",
+        "contentHash": "QTXEoQBzz00SFWbo7nAg1Ogd4f99lwqcO9uAJ7MYSLEUR28f6As32QktrqG2Fr9cfAfd1GjLyGYspE7Ipj7P6w=="
+      },
+      "System.ServiceProcess.ServiceController": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.11, )",
+        "resolved": "10.0.11",
+        "contentHash": "khROyIQ3GAZy5MbCabfmlbvxf9nuvdveFP2XbRCteZ9Lq8OFEvImmrjV6acl1LegRu/9T6VMxi9Lr+KZu29VHg==",
+        "dependencies": {
+          "System.Diagnostics.EventLog": "10.0.11"
+        }
+      }
+    }
   }
 }

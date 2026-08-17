@@ -23,6 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.ServiceProcess.ServiceController" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="OpenTheWindows.Windows.Tests" />
   </ItemGroup>
 

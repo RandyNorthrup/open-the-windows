@@ -19,9 +19,14 @@ what was planned (plans live in `PLAN.md`).
   `ScanReport`. Consolidated `FakeReaders`/`FixedTimeProvider` test doubles and 28
   `ScanEngineTests`. First Windows reader: `WindowsRegistryReader` (64-bit view,
   `HKEY_USERS\<sid>` for the user hive — never `HKCU`; values materialised as JSON
-  via `Utf8JsonWriter` so the trimmable project stays reflection-free), with
-  registry-backed tests. Remaining Windows readers, report writers, `otw scan` /
-  `otw health` and VM integration are still to come (see docs/milestones/M2-scan.md).
+  via `Utf8JsonWriter` so the trimmable project stays reflection-free), and
+  `WindowsServiceReader` (start type incl. delayed auto-start from the registry,
+  and run state, via `ServiceController`; new package
+  `System.ServiceProcess.ServiceController` 10.0.11). Both readers have tests that
+  read the real registry / SCM unelevated. Remaining Windows readers (task, Appx,
+  optional feature, Defender, power, interactive user, managed detection), report
+  writers, `otw scan` / `otw health` and VM integration are still to come (see
+  docs/milestones/M2-scan.md).
 
 - M1: catalogue model (`OpenTheWindows.Core.Catalog`), JSON Schema
   `catalog/schema/tweak.schema.json`, embedded loader with directory overrides
