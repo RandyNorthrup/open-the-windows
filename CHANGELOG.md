@@ -9,6 +9,17 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M2 (in progress): read-only detection engine core. `OpenTheWindows.Core.Abstractions`
+  gains per-kind reader interfaces (registry, service, scheduled task, Appx,
+  optional feature, Defender preference, power) plus interactive-user resolution,
+  managed-setting detection and machine health probing, each with a snapshot
+  record. `OpenTheWindows.Core.Engine.ScanEngine` compares each entry against the
+  machine (per-kind compliance semantics, worst-of-actions aggregation,
+  applicability short-circuit, interactive-user hive targeting) and produces a
+  `ScanReport`. Consolidated `FakeReaders`/`FixedTimeProvider` test doubles and 28
+  `ScanEngineTests`. Windows reader implementations, report writers, `otw scan` /
+  `otw health` and VM integration are still to come (see docs/milestones/M2-scan.md).
+
 - M1: catalogue model (`OpenTheWindows.Core.Catalog`), JSON Schema
   `catalog/schema/tweak.schema.json`, embedded loader with directory overrides
   and a structural validator (stable rule ids), 29 Draft entries across six
