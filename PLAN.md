@@ -310,6 +310,12 @@ shipped `core-6.1.0-windows` profile.
 | `BannedSymbols.txt` | applies to `src/` only | tests use HKCU sandbox keys and DateTime in assertions | never |
 | `Directory.Build.props` | `EnableReferenceTrimmer=false` when `MSBuildProjectName` ends with `_wpftmp` | the WPF markup-compile pass builds a generated `<Project>_<hash>_wpftmp.csproj` that omits the code-behind using Core/Windows; ReferenceTrimmer then falsely reports those refs as removable (RT0002), failing the temp build under warnings-as-errors and cascading to BG1002 in the real build. RT still runs on the real App project | when the WPF SDK stops leaking analyzers into the temp project |
 | `AppInfo.HomepageUri` (`SuppressMessage`) | Sonar `S1075` (URIs should not be hardcoded) | the project homepage is an immutable product-identity constant used as the SARIF tool `informationUri`, not environment-specific configuration that S1075 targets | never |
+| `WindowsCommandRunner.cs` (`#pragma RS0030`) | `System.Diagnostics.Process` ban | the guarded command runner is the single sanctioned process host; an architecture test asserts no other `src/` file suppresses RS0030 | never |
+| `ApplyEngine.Capture` (`SuppressMessage CA1031`) | catch general exception | the transactional apply/revert boundary must catch any writer failure (Win32/COM/WMI/IO) to journal it and roll back rather than leave a partially-applied run | never |
+| `LocalGroupPolicy.RunSta` (`SuppressMessage CA1031`) | catch general exception | the STA worker must marshal any COM/registry failure back to the calling thread as one fault | never |
+| `LocalGroupPolicy.Open` (`UnconditionalSuppressMessage IL2072`) | trimmer reflection pattern | activates a fixed in-box COM server (GPClass) by CLSID; the OS COM class is not managed code the trimmer can remove | never |
+| `LocalGroupPolicy.MachineRoot` (`SuppressMessage CA2000`, `IDISP001`) | dispose created object | `RegistryKey.FromHandle` takes ownership of the `SafeRegistryHandle`; the caller's `using` disposes both | never |
+| `WindowsAppxWriter.Await` (`#pragma VSTHRD002`) | synchronous wait on async | `IAppxWriter` is a synchronous contract; the WinRT deployment operation is awaited to completion on a console/service thread with no synchronization context, so it cannot deadlock | never |
 
 ## 8. Milestones
 
@@ -328,7 +334,7 @@ or the agent instruction files disagree.
 | M0 | Scaffold, gates, research (recorded inline below) | DONE 2026-08-16 | inline (§8.1) |
 | M1 | [docs/milestones/M1-catalogue.md](docs/milestones/M1-catalogue.md) — catalogue model, schema, loader, `otw catalog` | DONE 2026-08-16 | `docs/certification/M1.md` |
 | M2 | [docs/milestones/M2-scan.md](docs/milestones/M2-scan.md) — detection engine, health checks, reports | DONE 2026-08-16 | `docs/certification/M2.md` |
-| M3 | [docs/milestones/M3-apply.md](docs/milestones/M3-apply.md) — apply/verify/revert, journal, restore points, Event Log | not started | pending |
+| M3 | [docs/milestones/M3-apply.md](docs/milestones/M3-apply.md) — apply/verify/revert, journal, restore points, Event Log | DONE 2026-08-17 | `docs/certification/M3.md` |
 | M4 | [docs/milestones/M4-catalogue-population.md](docs/milestones/M4-catalogue-population.md) — ≥ 300 entries + VM verification + WU guardrails | not started | pending |
 | M5 | [docs/milestones/M5-profiles-enterprise.md](docs/milestones/M5-profiles-enterprise.md) — profiles, all-users, MDM/GPO awareness, drift task | not started | pending |
 | M6 | [docs/milestones/M6-gui.md](docs/milestones/M6-gui.md) — WPF GUI | not started | pending |
@@ -366,7 +372,40 @@ entries, a `catalog` quality gate, and 141 tests (87.7% line / 78.5% branch).
 
 ### M2 — Scan (DONE 2026-08-16)
 
-### M3 — Apply (not started)
+### M3 — Apply (DONE 2026-08-17)
+
+See `docs/milestones/M3-apply.md`; certification in `docs/certification/M3.md`.
+Transactional `ApplyEngine` (plan → preflight → optional restore point →
+journal-first → apply in dependency order → verify → roll back on any failure)
+with `ActionApplier` executing all eight action kinds; `RevertEngine` behaviour
+folded into `ApplyEngine.Revert`, replayed from the journal alone; a
+hash-chained journal (`Core/Journal`, `docs/journal-format.md`); the full writer
+set + `LocalGroupPolicy` (COM `IGroupPolicyObject`), restore-point, Event Log +
+JSONL audit (`docs/event-log.md`), pre-flight and Explorer-restart Windows
+adapters; `otw apply` / `revert` / `history`. Coverage thresholds raised to
+90/80 with the OS-mutating `Writers`/`Interop` namespaces, the restore-point /
+explorer services and the environment-dependent `WindowsMachineHealthProbe`
+scoped out of coverage (each verified by the VM integration tests,
+`OTW_INTEGRATION=1`, not by units; the health probe's per-check threshold and
+exception branches are structurally unreachable on any single machine run).
+
+**Deviations (accepted):**
+
+- **Optional features** use the in-box `dism.exe` through the guarded command
+  runner rather than a hand-rolled DISM API binding — same effect, no fragile
+  marshalling (`dism.exe` is on the command allow-list).
+- **Local GPO** uses classic `[ComImport] IGroupPolicyObject` (declaring only
+  the three used v-table slots, the rest as ordered placeholders) on an STA
+  thread; policy values are saved to `Registry.pol` and mirrored to the live
+  hive for immediate effect (no per-write `RefreshPolicyEx`).
+- **Explorer restart** targets the active console session (the interactive user
+  in the single-user case); multi-session SID-precise restart is a later
+  refinement.
+- **Per-user Local GPO (MLGPO)** is still deferred to M5; per-user policy values
+  are mirrored directly to `HKU\<sid>\Software\Policies`.
+- The **mutation gate stays DEFERRED** (Stryker.NET has no Microsoft.Testing.Platform
+  support, stryker-net#3094); the M3 spec's "mutation now enforcing" cannot hold
+  until that lands, so the gate still reports DEFERRED rather than a false pass.
 
 ### M4 — Catalogue population (not started)
 

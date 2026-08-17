@@ -82,10 +82,11 @@ jobs:
           "-targetdir:artifacts/coverage/report"
           "-reporttypes:TextSummary;Cobertura;MarkdownSummaryGithub"
           "-assemblyfilters:-*.Tests;-OpenTheWindows.TestSupport"
+          "-classfilters:-OpenTheWindows.Windows.Writers.*;-OpenTheWindows.Windows.Interop.*;-OpenTheWindows.Windows.WindowsRestorePointService;-OpenTheWindows.Windows.WindowsExplorerRestarter;-OpenTheWindows.Windows.Readers.WindowsMachineHealthProbe"
           "-filefilters:-*.g.cs;-*.g.i.cs"
           "-verbosity:Warning"
-          "minimumCoverageThresholds:lineCoverage=85"
-          "minimumCoverageThresholds:branchCoverage=75"
+          "minimumCoverageThresholds:lineCoverage=90"
+          "minimumCoverageThresholds:branchCoverage=80"
 
       - name: Coverage summary
         if: always()

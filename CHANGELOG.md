@@ -9,6 +9,36 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M3 (apply/verify/revert): the transactional change engine. `OpenTheWindows.Core.Engine.ApplyEngine`
+  plans a run (dependency-ordered, flagging conflicts, managed settings, risk
+  gating and not-applicable entries), then applies it journal-first — every prior
+  state is written to the journal before the first machine change, each action is
+  verified by re-reading, and any failure rolls back every already-applied action
+  in reverse. `Revert` replays a prior run's captured state from the journal
+  alone. `ActionApplier` executes all eight action kinds (capture / apply / verify
+  / restore); code-level refusals (protected and protected-process services,
+  disallowed executables) are enforced regardless of the catalogue. New writer
+  interfaces in `Core.Abstractions` (registry, service, scheduled task, Appx,
+  optional feature, Defender preference, power, command runner, restore point,
+  Explorer restart, audit sink, pre-flight) and a hash-chained journal
+  (`Core.Journal`, `docs/journal-format.md`). Value comparison is shared between
+  scan and apply-verify (`StateComparison`). Windows adapters: `WindowsRegistryWriter`
+  (policy values written through the Local GPO via COM `IGroupPolicyObject` and
+  mirrored to the live hive so they survive `gpupdate`; preference and user-hive
+  values written directly), `WindowsServiceWriter` (`ChangeServiceConfig`; refuses
+  PPL and protected services — protected-process detection now populated in
+  `WindowsServiceReader` via `QueryServiceConfig2`), `WindowsScheduledTaskWriter`,
+  `WindowsAppxWriter`, `WindowsOptionalFeatureWriter` (drives the in-box `dism.exe`
+  through the guarded command runner — deviation recorded in PLAN §7.1),
+  `WindowsDefenderPreferenceWriter`, `WindowsPowerSettingWriter`, `WindowsCommandRunner`
+  (the single sanctioned `Process` host), `WindowsJournalStore` (ProgramData with a
+  restrictive ACL and hash chain), `WindowsRestorePointService` (`SRSetRestorePointW`,
+  truthful Created/Skipped24h/Disabled), `WindowsAuditSink` (Windows Event Log +
+  monthly JSONL, `docs/event-log.md`), `WindowsPreflight` and `WindowsExplorerRestarter`.
+  New CLI: `otw apply`, `otw revert`, `otw history`. New package
+  `System.Diagnostics.EventLog` 10.0.11. Coverage thresholds raised to 90 line /
+  80 branch, with the OS-mutating writer/interop namespaces scoped out of coverage
+  (verified by the `OTW_INTEGRATION` VM tests, not units).
 - M2 (in progress): read-only detection engine core. `OpenTheWindows.Core.Abstractions`
   gains per-kind reader interfaces (registry, service, scheduled task, Appx,
   optional feature, Defender preference, power) plus interactive-user resolution,

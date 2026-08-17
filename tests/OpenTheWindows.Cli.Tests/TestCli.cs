@@ -1,14 +1,16 @@
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
+using OpenTheWindows.Core.Engine;
 using OpenTheWindows.TestSupport.Fakes;
 
 namespace OpenTheWindows.Cli.Tests;
 
 /// <summary>
 /// Builds a <see cref="CliServices"/> for command tests, defaulting the scan
-/// engine (over fake readers) and health probe so tests that do not exercise
-/// them need not construct them.
+/// engine (over fake readers), the apply engine (over an in-memory machine), the
+/// health probe and the elevation context so tests that do not exercise them need
+/// not construct them.
 /// </summary>
 internal static class TestCli
 {
@@ -18,13 +20,17 @@ internal static class TestCli
         DoctorService doctor,
         Func<string?, CatalogLoadResult> loadCatalog,
         FakeReaders? readers = null,
-        IMachineHealthProbe? health = null)
+        IMachineHealthProbe? health = null,
+        Func<ApplyEngine>? createApplyEngine = null,
+        IElevationContext? elevation = null)
     {
         FakeReaders scanReaders = readers ?? new FakeReaders();
         return new CliServices(
             doctor,
             loadCatalog,
             () => FakeScanEngine.Create(scanReaders, FakeOperatingSystemInfo.Windows11Pro24H2(), FixedTime),
-            health ?? new FakeHealthProbe([]));
+            createApplyEngine ?? (() => FakeApplyEngine.Create(new FakeMachine()).Engine),
+            health ?? new FakeHealthProbe([]),
+            elevation ?? new FakeElevationContext(isElevated: true));
     }
 }

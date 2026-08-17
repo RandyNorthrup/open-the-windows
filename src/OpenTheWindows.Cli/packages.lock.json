@@ -86,11 +86,6 @@
         "resolved": "10.0.11",
         "contentHash": "v40pNeBoZTYsiVxz+PzyZmmIr2JIhpK4VsFpQqZSZCXa51PDlNXIN2ESm8kDU0voZYVfLhxF9HvmBsxCJmkiRg=="
       },
-      "System.Diagnostics.EventLog": {
-        "type": "Transitive",
-        "resolved": "10.0.11",
-        "contentHash": "QTXEoQBzz00SFWbo7nAg1Ogd4f99lwqcO9uAJ7MYSLEUR28f6As32QktrqG2Fr9cfAfd1GjLyGYspE7Ipj7P6w=="
-      },
       "openthewindows.core": {
         "type": "Project",
         "dependencies": {
@@ -101,6 +96,7 @@
         "type": "Project",
         "dependencies": {
           "OpenTheWindows.Core": "[0.1.0-local, )",
+          "System.Diagnostics.EventLog": "[10.0.11, )",
           "System.Management": "[10.0.11, )",
           "System.ServiceProcess.ServiceController": "[10.0.11, )",
           "TaskScheduler": "[2.12.2, )"
@@ -114,6 +110,12 @@
         "dependencies": {
           "JsonPointer.Net": "7.0.2"
         }
+      },
+      "System.Diagnostics.EventLog": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.11, )",
+        "resolved": "10.0.11",
+        "contentHash": "QTXEoQBzz00SFWbo7nAg1Ogd4f99lwqcO9uAJ7MYSLEUR28f6As32QktrqG2Fr9cfAfd1GjLyGYspE7Ipj7P6w=="
       },
       "System.Management": {
         "type": "CentralTransitive",
@@ -145,7 +147,8 @@
     },
     "net10.0-windows10.0.26100/win-arm64": {
       "System.Diagnostics.EventLog": {
-        "type": "Transitive",
+        "type": "CentralTransitive",
+        "requested": "[10.0.11, )",
         "resolved": "10.0.11",
         "contentHash": "QTXEoQBzz00SFWbo7nAg1Ogd4f99lwqcO9uAJ7MYSLEUR28f6As32QktrqG2Fr9cfAfd1GjLyGYspE7Ipj7P6w=="
       },
@@ -170,7 +173,8 @@
     },
     "net10.0-windows10.0.26100/win-x64": {
       "System.Diagnostics.EventLog": {
-        "type": "Transitive",
+        "type": "CentralTransitive",
+        "requested": "[10.0.11, )",
         "resolved": "10.0.11",
         "contentHash": "QTXEoQBzz00SFWbo7nAg1Ogd4f99lwqcO9uAJ7MYSLEUR28f6As32QktrqG2Fr9cfAfd1GjLyGYspE7Ipj7P6w=="
       },

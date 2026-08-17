@@ -111,7 +111,7 @@ public sealed class ScanEngine
         }
         else
         {
-            state = RegistryValueEquals(actualData, action.Value, action.Type) ? ComplianceState.Compliant : ComplianceState.Drift;
+            state = StateComparison.RegistryEquals(actualData, action.Value, action.Type) ? ComplianceState.Compliant : ComplianceState.Drift;
         }
 
         return new ActionObservation(action, state, actual, desired, managed);
@@ -146,9 +146,7 @@ public sealed class ScanEngine
     private ActionObservation EvaluateAppx(AppxAction action, string? userSid)
     {
         AppxSnapshot snapshot = _appx.Read(action.PackageFamilyName, userSid);
-        bool compliant = action.Mode == AppxRemovalMode.CurrentUser
-            ? !snapshot.InstalledForUser
-            : !snapshot.InstalledForAnyUser && snapshot.Deprovisioned;
+        bool compliant = StateComparison.AppxCompliant(snapshot, action.Mode);
         string desired = action.Mode == AppxRemovalMode.CurrentUser
             ? "removed for the user"
             : "removed for all users and deprovisioned";
@@ -179,7 +177,7 @@ public sealed class ScanEngine
             return new ActionObservation(action, ComplianceState.Unknown, "(unreadable)", desired, ManagedState.NotManaged);
         }
 
-        ComplianceState state = JsonEquals(actualValue, action.Value) ? ComplianceState.Compliant : ComplianceState.Drift;
+        ComplianceState state = StateComparison.JsonEquals(actualValue, action.Value) ? ComplianceState.Compliant : ComplianceState.Drift;
         return new ActionObservation(action, state, actualValue.GetRawText(), desired, ManagedState.NotManaged);
     }
 
@@ -202,83 +200,4 @@ public sealed class ScanEngine
 
     private static string DescribeRegistry(RegistryValueType? type, JsonElement value)
         => string.Create(CultureInfo.InvariantCulture, $"{type} {value.GetRawText()}");
-
-    private static bool RegistryValueEquals(JsonElement actual, JsonElement desired, RegistryValueType type) => type switch
-    {
-        RegistryValueType.Dword or RegistryValueType.Qword =>
-            actual.ValueKind == JsonValueKind.Number && desired.ValueKind == JsonValueKind.Number
-            && actual.TryGetUInt64(out ulong a) && desired.TryGetUInt64(out ulong d) && a == d,
-        RegistryValueType.Sz or RegistryValueType.ExpandSz =>
-            actual.ValueKind == JsonValueKind.String && desired.ValueKind == JsonValueKind.String
-            && string.Equals(actual.GetString(), desired.GetString(), StringComparison.Ordinal),
-        RegistryValueType.MultiSz => JsonArrayOfStringsEquals(actual, desired),
-        RegistryValueType.Binary => BinaryEquals(actual, desired),
-        _ => false,
-    };
-
-    private static bool BinaryEquals(JsonElement actual, JsonElement desired)
-    {
-        if (actual.ValueKind != JsonValueKind.String || desired.ValueKind != JsonValueKind.String)
-        {
-            return false;
-        }
-
-        return actual.TryGetBytesFromBase64(out byte[]? actualBytes)
-            && desired.TryGetBytesFromBase64(out byte[]? desiredBytes)
-            && actualBytes.AsSpan().SequenceEqual(desiredBytes);
-    }
-
-    private static bool JsonArrayOfStringsEquals(JsonElement actual, JsonElement desired)
-    {
-        if (actual.ValueKind != JsonValueKind.Array || desired.ValueKind != JsonValueKind.Array
-            || actual.GetArrayLength() != desired.GetArrayLength())
-        {
-            return false;
-        }
-
-        for (int i = 0; i < actual.GetArrayLength(); i++)
-        {
-            if (!string.Equals(actual[i].GetString(), desired[i].GetString(), StringComparison.Ordinal))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private static bool JsonEquals(JsonElement actual, JsonElement desired)
-    {
-        if (actual.ValueKind != desired.ValueKind)
-        {
-            return false;
-        }
-
-        switch (actual.ValueKind)
-        {
-            case JsonValueKind.Number:
-                return actual.TryGetDecimal(out decimal a) && desired.TryGetDecimal(out decimal d)
-                    ? a == d
-                    : string.Equals(actual.GetRawText(), desired.GetRawText(), StringComparison.Ordinal);
-            case JsonValueKind.String:
-                return string.Equals(actual.GetString(), desired.GetString(), StringComparison.Ordinal);
-            case JsonValueKind.Array:
-                if (actual.GetArrayLength() != desired.GetArrayLength())
-                {
-                    return false;
-                }
-
-                for (int i = 0; i < actual.GetArrayLength(); i++)
-                {
-                    if (!JsonEquals(actual[i], desired[i]))
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            default:
-                return string.Equals(actual.GetRawText(), desired.GetRawText(), StringComparison.Ordinal);
-        }
-    }
 }
