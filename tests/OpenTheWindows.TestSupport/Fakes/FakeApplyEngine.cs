@@ -14,16 +14,18 @@ public static class FakeApplyEngine
     /// <param name="os">OS facts (defaults to Windows 11 Pro 24H2).</param>
     /// <param name="at">Fixed clock instant.</param>
     /// <param name="trace">Optional shared list the journal store and machine append their operations to.</param>
+    /// <param name="time">Optional clock; when given it overrides <paramref name="at"/> (use a <see cref="MutableTimeProvider"/> to give successive runs distinct timestamps).</param>
     public static ApplyHarness Create(
-        FakeMachine machine, OperatingSystemFacts? os = null, DateTimeOffset? at = null, IList<string>? trace = null)
+        FakeMachine machine, OperatingSystemFacts? os = null, DateTimeOffset? at = null, IList<string>? trace = null,
+        TimeProvider? time = null)
     {
         ArgumentNullException.ThrowIfNull(machine);
 
         var osInfo = new FakeOperatingSystemInfo(os ?? FakeOperatingSystemInfo.Windows11Pro24H2());
-        var time = new FixedTimeProvider(at ?? DefaultInstant);
+        TimeProvider clock = time ?? new FixedTimeProvider(at ?? DefaultInstant);
         var readers = new StateReaders(machine, machine, machine, machine, machine, machine, machine);
         var writers = new StateWriters(machine, machine, machine, machine, machine, machine, machine, machine);
-        var scan = new ScanEngine(machine, machine, machine, machine, machine, machine, machine, machine, machine, osInfo, time);
+        var scan = new ScanEngine(machine, machine, machine, machine, machine, machine, machine, machine, machine, osInfo, clock);
         var applier = new ActionApplier(readers, writers);
         var journal = new FakeJournalStore { Trace = trace };
         var audit = new FakeAuditSink();
@@ -32,7 +34,7 @@ public static class FakeApplyEngine
         var preflight = new FakePreflight();
         var elevation = new FakeElevationContext(isElevated: true);
         var services = new ApplyServices(journal, restore, explorer, preflight, audit, elevation, machine);
-        var engine = new ApplyEngine(scan, applier, services, osInfo, time);
+        var engine = new ApplyEngine(scan, applier, services, osInfo, clock);
 
         return new ApplyHarness(engine, scan, machine, journal, audit, restore, explorer, preflight, elevation);
     }

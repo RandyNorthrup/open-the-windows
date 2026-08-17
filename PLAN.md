@@ -483,12 +483,24 @@ Three more Windows Update client-policy entries (Microsoft-Update opt-in, an
 with notify-before-install by `conflictsWith`) bring Updates to 25. **All six
 categories now meet their M4 per-category minimums** — Security 150, Privacy 107,
 Performance 61, Debloat 61, Shell 31, Updates 25 (**435 entries total**), enforced
-by the `BuiltInCatalogTests` theory. Remaining for M4: the tag / managedBy /
-reinstallHint validation rules, the per-entry VM verification, and the M4
-certification record. Note
-the M3-discovered limitation: over headless SSH the
-interactive-user resolver returns null, so per-user (`User`-hive) entries cannot
-be VM-verified from the lab session and stay `Draft` pending the M5
+by the `BuiltInCatalogTests` theory.
+
+**Acceptance #3 (Windows Update pause / resume / status + EOS) is verified on the
+lab VM** (25H2, 26200.9168, elevated) — evidence in
+[docs/certification/M4/updates-pause-resume.md](docs/certification/M4/updates-pause-resume.md):
+what-if writes nothing; `pause --days 7` writes the six `UX\Settings` values (read
+back independently); `pause --days 45` is rejected at the 35-day cap (exit 4);
+`pause --days 60 --extended` warns and writes Event 4002 (custom `OpenTheWindows`
+log + JSONL trail); `resume` returns all six values to absent and `status` reports
+"not paused". This run surfaced and fixed a **stacked-pause resume bug** (resume
+had reverted only the most-recent pause, restoring an earlier one) — see the
+CHANGELOG; regressioned by `Resume_after_a_restacked_pause_clears_every_active_pause`.
+
+Remaining for M4: the per-entry VM verification of the Basic/Balanced catalogue
+entries (acceptance #2) and the consolidated M4 certification record
+(`docs/certification/M4.md`). Note the M3-discovered limitation: over headless SSH
+the interactive-user resolver returns null, so per-user (`User`-hive) entries
+cannot be VM-verified from the lab session and stay `Draft` pending the M5
 console-session fallback; machine-scope entries verify normally.
 
 ### M5 — Profiles and enterprise (not started)

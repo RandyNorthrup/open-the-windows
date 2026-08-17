@@ -55,6 +55,42 @@ public sealed class UpdateControlServiceTests
     }
 
     [Fact]
+    public void Resume_after_a_restacked_pause_clears_every_active_pause()
+    {
+        var machine = new FakeMachine();
+        var clock = new MutableTimeProvider(FakeApplyEngine.DefaultInstant);
+        (UpdateControlService service, _) = FakeUpdateControl.Create(machine, time: clock);
+
+        // Re-pause without resuming first: the second pause captures the first
+        // pause's values as its own revert baseline, so reverting only the latest
+        // run would restore the earlier pause and leave updates paused. The clock
+        // advances between the two so the runs journal distinct timestamps and the
+        // newest-first ordering resume relies on is unambiguous.
+        service.Pause(7);
+        clock.Advance(TimeSpan.FromMinutes(1));
+        service.Pause(21);
+
+        ResumeOutcome outcome = service.Resume();
+
+        Assert.True(outcome.WasPaused);
+        Assert.True(outcome.ScanTriggered);
+        foreach (string name in new[]
+        {
+            WindowsUpdateSettings.PauseUpdatesStartTime,
+            WindowsUpdateSettings.PauseUpdatesExpiryTime,
+            WindowsUpdateSettings.PauseFeatureUpdatesStartTime,
+            WindowsUpdateSettings.PauseFeatureUpdatesEndTime,
+            WindowsUpdateSettings.PauseQualityUpdatesStartTime,
+            WindowsUpdateSettings.PauseQualityUpdatesEndTime,
+        })
+        {
+            Assert.Null(ReadUx(machine, name));
+        }
+
+        Assert.False(service.Status().IsPaused);
+    }
+
+    [Fact]
     public void Resume_when_not_paused_reports_nothing_to_clear_but_still_scans()
     {
         var machine = new FakeMachine();

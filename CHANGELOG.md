@@ -20,8 +20,8 @@ what was planned (plans live in `PLAN.md`).
   -of-servicing per version and servicing track, warning within 90 days.
   `UpdateControlService` runs pause / resume / status through the transactional
   apply engine so every change is journaled and reversible: pause applies the six
-  values (and writes a Windows Event 4002 when extended); resume reverts the most
-  recent Open the Windows pause and triggers a fresh scan (`usoclient StartScan`);
+  values (and writes a Windows Event 4002 when extended); resume reverts every
+  active Open the Windows pause and triggers a fresh scan (`usoclient StartScan`);
   status reports the running version, its end-of-servicing warning, the pause
   state and any `TargetReleaseVersion` pin. New CLI `otw updates pause`,
   `otw updates resume` and `otw updates status`, plus a `--only <id>` selector on
@@ -324,6 +324,19 @@ what was planned (plans live in `PLAN.md`).
 
 ### Fixed
 
+- `otw updates resume` now clears **every** active Open the Windows pause, not
+  just the most recent one. When a user re-paused (for example `pause --days 7`
+  then later `pause --days 60 --extended`) without resuming in between, the second
+  pause captured the first pause's values as its own revert baseline; resume then
+  reverted only the latest run and *restored the earlier pause*, leaving Windows
+  Update still paused and `status` still reporting a pause. `UpdateControlService.Resume`
+  now reverts all active pause runs newest-first, returning the six `UX\Settings`
+  values to absent regardless of how many pauses stacked. Found during M4
+  acceptance #3 on the lab VM (25H2); regressioned by
+  `Resume_after_a_restacked_pause_clears_every_active_pause` (proven to fail
+  against the single-revert implementation), which needed a new advanceable
+  `MutableTimeProvider` test clock so the stacked runs journal distinct,
+  strictly-increasing timestamps.
 - `otw apply --what-if` now exits 0 (success) even when the previewed plan
   contains reboot-required entries. A dry run makes no machine changes, so it
   never itself requires a reboot; the would-be restart requirement is still

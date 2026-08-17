@@ -16,12 +16,13 @@ public static class FakeUpdateControl
         OperatingSystemFacts? os = null,
         DateTimeOffset? at = null,
         EndOfServicingCalendar? calendar = null,
-        int extendedCeilingDays = PauseCalculator.DefaultExtendedCeilingDays)
+        int extendedCeilingDays = PauseCalculator.DefaultExtendedCeilingDays,
+        TimeProvider? time = null)
     {
         ArgumentNullException.ThrowIfNull(machine);
 
-        DateTimeOffset instant = at ?? FakeApplyEngine.DefaultInstant;
-        ApplyHarness harness = FakeApplyEngine.Create(machine, os, instant);
+        TimeProvider clock = time ?? new FixedTimeProvider(at ?? FakeApplyEngine.DefaultInstant);
+        ApplyHarness harness = FakeApplyEngine.Create(machine, os, time: clock);
         var osInfo = new FakeOperatingSystemInfo(os ?? FakeOperatingSystemInfo.Windows11Pro24H2());
         var service = new UpdateControlService(
             harness.Engine,
@@ -30,7 +31,7 @@ public static class FakeUpdateControl
             harness.Audit,
             osInfo,
             calendar ?? EndOfServicingCalendar.LoadBuiltIn(),
-            new FixedTimeProvider(instant),
+            clock,
             extendedCeilingDays);
         return (service, harness);
     }

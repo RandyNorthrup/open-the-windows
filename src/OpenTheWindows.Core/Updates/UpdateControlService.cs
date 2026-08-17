@@ -14,7 +14,7 @@ namespace OpenTheWindows.Core.Updates;
 /// The Windows Update guardrail engine (spec M4): pause, resume and status, all
 /// routed through the transactional apply engine so every change is journaled and
 /// reversible. Pause writes the six Settings-app <c>UX\Settings</c> values
-/// (research 03 §5.1); resume reverts the most recent Open the Windows pause and
+/// (research 03 §5.1); resume reverts every active Open the Windows pause and
 /// triggers a fresh scan (<c>usoclient StartScan</c>); status reads the effective
 /// state and warns when a release is within 90 days of end-of-servicing.
 /// </summary>
@@ -100,20 +100,35 @@ public sealed class UpdateControlService
     }
 
     /// <summary>
-    /// Resumes updates by reverting the most recent Open the Windows pause run (if
-    /// any) and triggering a fresh update scan.
+    /// Resumes updates by reverting <em>every</em> active Open the Windows pause run
+    /// (newest first, so a re-pause that stacked on an earlier one is fully unwound
+    /// back to the pre-pause state) and triggering a fresh update scan. Reverting
+    /// only the latest pause would leave an earlier one in force, so the reported
+    /// state would still be "paused"; resume must clear the pause outright.
     /// </summary>
     public ResumeOutcome Resume(bool whatIf = false)
     {
-        JournalSummary? pause = FindActivePause();
-        if (pause is null)
+        IReadOnlyList<JournalSummary> pauses = FindActivePauses();
+        if (pauses.Count == 0)
         {
             return new ResumeOutcome(false, null, null, !whatIf && TriggerScan());
         }
 
-        RevertResult revert = _engine.Revert(pause.RunId, new RevertOptions(whatIf, RestartExplorer: false));
+        RevertResult? firstFailure = null;
+        RevertResult? lastRevert = null;
+        Guid newestRunId = pauses[0].RunId;
+        foreach (JournalSummary pause in pauses)
+        {
+            RevertResult revert = _engine.Revert(pause.RunId, new RevertOptions(whatIf, RestartExplorer: false));
+            lastRevert = revert;
+            if (revert.State == RunState.Failed)
+            {
+                firstFailure ??= revert;
+            }
+        }
+
         bool scanned = !whatIf && TriggerScan();
-        return new ResumeOutcome(true, pause.RunId, revert, scanned);
+        return new ResumeOutcome(true, newestRunId, firstFailure ?? lastRevert, scanned);
     }
 
     /// <summary>Reads the effective update state for the status dashboard.</summary>
@@ -137,17 +152,19 @@ public sealed class UpdateControlService
             paused, until, target, targetDays, targetWarning);
     }
 
-    private JournalSummary? FindActivePause()
+    private IReadOnlyList<JournalSummary> FindActivePauses()
     {
         IReadOnlyList<JournalSummary> history = _engine.History();
         HashSet<Guid> reverted = [.. history.Where(h => h.RevertOf is not null).Select(h => h.RevertOf!.Value)];
-        return history
-            .Where(h => string.Equals(h.Profile, PauseProfileName, StringComparison.Ordinal)
-                && h.Result == RunState.Completed
-                && h.RevertOf is null
-                && !reverted.Contains(h.RunId))
-            .OrderByDescending(h => h.StartedAt)
-            .FirstOrDefault();
+        return
+        [
+            .. history
+                .Where(h => string.Equals(h.Profile, PauseProfileName, StringComparison.Ordinal)
+                    && h.Result == RunState.Completed
+                    && h.RevertOf is null
+                    && !reverted.Contains(h.RunId))
+                .OrderByDescending(h => h.StartedAt),
+        ];
     }
 
     private bool TriggerScan()
