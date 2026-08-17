@@ -100,15 +100,7 @@ public sealed class ScanEngineTests
     public void Registry_user_hive_read_receives_the_interactive_user_sid()
     {
         string? capturedSid = "unset";
-        var readers = new FakeReaders
-        {
-            OnInteractiveUser = () => new InteractiveUser("S-1-5-21-1-2-3-1001", @"PC\user", HiveLoaded: true),
-            OnRegistry = (_, sid, _, _) =>
-            {
-                capturedSid = sid;
-                return new RegistryValueSnapshot(true, RegistryValueType.Dword, Number(1));
-            },
-        };
+        FakeReaders readers = SidCapturingReaders(sid => capturedSid = sid);
         TweakDefinition entry = WithActions(Registry(RegistryValueType.Dword, Number(1), RegistryHive.User)) with { Scope = Scope.User };
 
         ScanOne(readers, entry);
@@ -120,20 +112,22 @@ public sealed class ScanEngineTests
     public void Registry_machine_hive_read_receives_no_sid()
     {
         string? capturedSid = "unset";
-        var readers = new FakeReaders
-        {
-            OnInteractiveUser = () => new InteractiveUser("S-1-5-21-1-2-3-1001", @"PC\user", HiveLoaded: true),
-            OnRegistry = (_, sid, _, _) =>
-            {
-                capturedSid = sid;
-                return new RegistryValueSnapshot(true, RegistryValueType.Dword, Number(1));
-            },
-        };
+        FakeReaders readers = SidCapturingReaders(sid => capturedSid = sid);
 
         ScanOne(readers, WithActions(Registry(RegistryValueType.Dword, Number(1))));
 
         Assert.Null(capturedSid);
     }
+
+    private static FakeReaders SidCapturingReaders(Action<string?> onSid) => new()
+    {
+        OnInteractiveUser = () => new InteractiveUser("S-1-5-21-1-2-3-1001", @"PC\user", HiveLoaded: true),
+        OnRegistry = (_, sid, _, _) =>
+        {
+            onSid(sid);
+            return new RegistryValueSnapshot(true, RegistryValueType.Dword, Number(1));
+        },
+    };
 
     // ---- Service ----------------------------------------------------------
 
@@ -296,6 +290,68 @@ public sealed class ScanEngineTests
         TweakObservation result = ScanOne(readers, WithActions(new PowerSettingAction(Guid.Empty, Guid.Empty, 10u, 5u)));
 
         Assert.Equal(ComplianceState.NotApplicable, result.State);
+    }
+
+    // ---- Registry value types & drift paths -------------------------------
+
+    [Fact]
+    public void Registry_qword_matching_is_compliant_and_mismatch_is_drift()
+    {
+        var match = new FakeReaders { OnRegistry = (_, _, _, _) => new RegistryValueSnapshot(true, RegistryValueType.Qword, Number(42)) };
+        var mismatch = new FakeReaders { OnRegistry = (_, _, _, _) => new RegistryValueSnapshot(true, RegistryValueType.Qword, Number(7)) };
+
+        Assert.Equal(ComplianceState.Compliant, ScanOne(match, WithActions(Registry(RegistryValueType.Qword, Number(42)))).State);
+        Assert.Equal(ComplianceState.Drift, ScanOne(mismatch, WithActions(Registry(RegistryValueType.Qword, Number(42)))).State);
+    }
+
+    [Fact]
+    public void Registry_sz_matching_is_compliant_and_mismatch_is_drift()
+    {
+        var match = new FakeReaders { OnRegistry = (_, _, _, _) => new RegistryValueSnapshot(true, RegistryValueType.Sz, Text("keep")) };
+        var mismatch = new FakeReaders { OnRegistry = (_, _, _, _) => new RegistryValueSnapshot(true, RegistryValueType.Sz, Text("other")) };
+
+        Assert.Equal(ComplianceState.Compliant, ScanOne(match, WithActions(Registry(RegistryValueType.Sz, Text("keep")))).State);
+        Assert.Equal(ComplianceState.Drift, ScanOne(mismatch, WithActions(Registry(RegistryValueType.Sz, Text("keep")))).State);
+    }
+
+    [Fact]
+    public void Registry_binary_matching_is_compliant_and_mismatch_is_drift()
+    {
+        var match = new FakeReaders { OnRegistry = (_, _, _, _) => new RegistryValueSnapshot(true, RegistryValueType.Binary, Text("AQID")) };
+        var mismatch = new FakeReaders { OnRegistry = (_, _, _, _) => new RegistryValueSnapshot(true, RegistryValueType.Binary, Text("AQIE")) };
+
+        Assert.Equal(ComplianceState.Compliant, ScanOne(match, WithActions(Registry(RegistryValueType.Binary, Text("AQID")))).State);
+        Assert.Equal(ComplianceState.Drift, ScanOne(mismatch, WithActions(Registry(RegistryValueType.Binary, Text("AQID")))).State);
+    }
+
+    [Fact]
+    public void Feature_enabled_when_it_should_be_disabled_is_drift()
+    {
+        var readers = new FakeReaders { OnFeature = _ => true };
+
+        TweakObservation result = ScanOne(readers, WithActions(new OptionalFeatureAction("SMB1Protocol", false, true)));
+
+        Assert.Equal(ComplianceState.Drift, result.State);
+    }
+
+    [Fact]
+    public void Power_different_values_is_drift()
+    {
+        var readers = new FakeReaders { OnPower = (_, _) => (1u, 2u) };
+
+        TweakObservation result = ScanOne(readers, WithActions(new PowerSettingAction(Guid.Empty, Guid.Empty, 10u, 5u)));
+
+        Assert.Equal(ComplianceState.Drift, result.State);
+    }
+
+    [Fact]
+    public void Defender_different_value_is_drift()
+    {
+        var readers = new FakeReaders { OnDefender = _ => Number(2) };
+
+        TweakObservation result = ScanOne(readers, WithActions(new DefenderPreferenceAction("PUAProtection", Number(1), Number(0))));
+
+        Assert.Equal(ComplianceState.Drift, result.State);
     }
 
     // ---- Command ----------------------------------------------------------

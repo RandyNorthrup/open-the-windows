@@ -277,7 +277,7 @@ Invoke-Gate 'plan' {
 # (no VSTest packages). Until Stryker adds MTP support the step cannot run its
 # tests; the gate detects exactly that condition and reports DEFERRED instead of a
 # spurious failure, while any OTHER Stryker error still fails the gate. See PLAN.md
-# §7.1. The tool, config and gate are wired so this activates unchanged once
+# section 7.1. The tool, config and gate are wired so this activates unchanged once
 # support lands. (See PLAN.md "Gate verification log" for the deferral record.)
 if ($runOnly -eq 'mutation') {
     Invoke-Gate 'mutation' {

@@ -1,7 +1,11 @@
+using System.Security.Principal;
 using System.Text.Json;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Windows.Readers;
+using Win32Key = Microsoft.Win32.RegistryKey;
+using Win32Registry = Microsoft.Win32.Registry;
+using Win32ValueKind = Microsoft.Win32.RegistryValueKind;
 
 namespace OpenTheWindows.Windows.Tests;
 
@@ -71,5 +75,49 @@ public sealed class WindowsRegistryReaderTests
         RegistryValueSnapshot snapshot = reader.Read(RegistryHive.User, null, @"Software\Microsoft", "Any");
 
         Assert.False(snapshot.Exists);
+    }
+
+    [Fact]
+    public void Reads_every_value_type_from_the_user_hive()
+    {
+        // Tests may write to the current user's own hive (HKU\<own sid>); the
+        // reader opens it via Registry.Users, exercising the user-hive path and
+        // every value-type branch.
+        string sid = WindowsIdentity.GetCurrent().User!.Value;
+        const string SubPath = @"Software\OpenTheWindows\ReaderTest";
+        using (Win32Key key = Win32Registry.CurrentUser.CreateSubKey(SubPath))
+        {
+            key.SetValue("dword", 7, Win32ValueKind.DWord);
+            key.SetValue("qword", 8L, Win32ValueKind.QWord);
+            key.SetValue("sz", "hi", Win32ValueKind.String);
+            key.SetValue("expand", "%SystemRoot%", Win32ValueKind.ExpandString);
+            key.SetValue("multi", new[] { "a", "b" }, Win32ValueKind.MultiString);
+            key.SetValue("bin", new byte[] { 1, 2, 3 }, Win32ValueKind.Binary);
+        }
+
+        try
+        {
+            var reader = new WindowsRegistryReader();
+            Assert.Equal(RegistryValueType.Dword, reader.Read(RegistryHive.User, sid, SubPath, "dword").Type);
+            Assert.Equal(RegistryValueType.Qword, reader.Read(RegistryHive.User, sid, SubPath, "qword").Type);
+            Assert.Equal(RegistryValueType.Sz, reader.Read(RegistryHive.User, sid, SubPath, "sz").Type);
+
+            RegistryValueSnapshot expand = reader.Read(RegistryHive.User, sid, SubPath, "expand");
+            Assert.Equal(RegistryValueType.ExpandSz, expand.Type);
+            // Not expanded (DoNotExpandEnvironmentNames).
+            Assert.Equal("%SystemRoot%", expand.Data!.Value.GetString());
+
+            RegistryValueSnapshot multi = reader.Read(RegistryHive.User, sid, SubPath, "multi");
+            Assert.Equal(RegistryValueType.MultiSz, multi.Type);
+            Assert.Equal(JsonValueKind.Array, multi.Data!.Value.ValueKind);
+
+            RegistryValueSnapshot binary = reader.Read(RegistryHive.User, sid, SubPath, "bin");
+            Assert.Equal(RegistryValueType.Binary, binary.Type);
+            Assert.Equal(JsonValueKind.String, binary.Data!.Value.ValueKind);
+        }
+        finally
+        {
+            Win32Registry.CurrentUser.DeleteSubKeyTree(SubPath, throwOnMissingSubKey: false);
+        }
     }
 }
