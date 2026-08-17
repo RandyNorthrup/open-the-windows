@@ -103,6 +103,15 @@ what was planned (plans live in `PLAN.md`).
   formats emit to stdout/file). New docs `docs/reports.md`; README documents
   both commands.
 
+- M2: read-only architectural guard. A test (`ReadOnlyArchitectureTests`)
+  metadata-scans the compiled Windows assembly's member references and fails if
+  any mutating registry / service / package / task / file API is referenced
+  (`RegistryKey.SetValue`/`Delete*`, `ServiceController.Start/Stop`,
+  `PackageManager.Add/Remove/Stage/…`, task `Register`/`Delete`, `File`/
+  `Directory` writes). It matches the declaring type and member, so ordinary
+  `List.Add` and friends are not flagged. Proven to fail on an injected
+  `SetValue` and pass once reverted (PLAN §7.2).
+
 - M1: catalogue model (`OpenTheWindows.Core.Catalog`), JSON Schema
   `catalog/schema/tweak.schema.json`, embedded loader with directory overrides
   and a structural validator (stable rule ids), 29 Draft entries across six

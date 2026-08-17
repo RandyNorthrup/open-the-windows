@@ -270,6 +270,7 @@ real drift. The read-only PReg parser is also the read half of M5's PolicyWriter
 | duplication | `jscpd --config .jscpd.json .` | duplicated `DoctorService.cs` | "Clone found (csharp)", exit 1 |
 | markdown | `markdownlint-cli2` | real MD060/MD034 issues in early docs | exit 1, then fixed |
 | powershell | `Invoke-ScriptAnalyzer … -Settings PSScriptAnalyzerSettings.psd1` (fail on any record) | `ls C:\` alias in a script | `PSAvoidUsingCmdletAliases`, gate FAIL |
+| read-only guard (M2) | `Windows_assembly_references_no_write_apis` test (metadata scan of the Windows assembly's member references) | temporary `RegistryKey.SetValue` call added to a reader | test FAIL: "Write API(s) referenced: RegistryKey.SetValue"; reverted, green again |
 
 Two decorative-gate traps found and fixed during M0: (1) `-EnableExit` inside
 the runner script set a host exit code that the runner overwrote (gate reported
