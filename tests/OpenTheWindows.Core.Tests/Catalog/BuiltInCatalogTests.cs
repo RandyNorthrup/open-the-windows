@@ -30,6 +30,16 @@ public sealed class BuiltInCatalogTests
     }
 
     [Fact]
+    public void Security_category_meets_its_M4_target()
+    {
+        int security = Load().InCategory(Category.Security).Count();
+
+        Assert.True(security >= 120,
+            string.Create(System.Globalization.CultureInfo.InvariantCulture,
+                $"M4 requires at least 120 Security entries; found {security}."));
+    }
+
+    [Fact]
     public void Every_category_is_represented()
     {
         TweakCatalog catalog = Load();

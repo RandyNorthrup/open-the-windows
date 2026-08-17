@@ -134,6 +134,14 @@ internal static class ApplyCommand
             return ExitCodes.Error;
         }
 
+        // A --what-if run changes nothing, so it never itself requires a reboot: the
+        // preview succeeded. The would-be reboot requirement is still reported in the
+        // text/JSON output; only an actual apply returns the 3010 reboot-required code.
+        if (whatIf)
+        {
+            return ExitCodes.Success;
+        }
+
         return result.Requires == RestartRequirement.Reboot ? ExitCodes.RebootRequired : ExitCodes.Success;
     }
 

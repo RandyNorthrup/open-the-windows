@@ -48,7 +48,32 @@ what was planned (plans live in `PLAN.md`).
   the organisation name in notifications. Deferral presets and the release pin
   conflict-guard each other; all are Draft pending VM verification. The catalogue
   now ships 47 entries.
-- M3 (apply/verify/revert): the transactional change engine. `OpenTheWindows.Core.Engine.ApplyEngine`
+- Security hardening catalogue (WP 4.3, research 04 §4.A–§4.Q): 147 new Security
+  entries across seven domain files under `catalog/security/` — credential and
+  identity protection (`credential-identity.json`: VBS / memory integrity /
+  kernel-shadow-stacks / Credential Guard, WDigest, LM/NTLM session security,
+  PKU2U, credential delegation, MSA restriction), UAC and logon/session/lock
+  (`uac-logon.json`), network / firewall / remote (`network-remote.json`: SMBv1
+  removal, LLMNR/mDNS/NetBIOS/WPAD, anonymous restrictions, firewall profiles and
+  logging, Remote Assistance / WinRM / RDP hardening, Point-and-Print), Microsoft
+  Defender and all 18 applicable Attack Surface Reduction rules
+  (`defender-asr.json`, modelled as paired `AttackSurfaceReductionRules_Ids` /
+  `_Actions` preferences with audit-first Balanced and Block Strict variants),
+  exploit protection and application control (`exploit-appcontrol.json`: SEHOP,
+  SmartScreen, Mark-of-the-Web, Windows Script Host, App Installer protocol,
+  Sudo), logging / audit policy / removable media / TLS
+  (`audit-media-crypto.json`: event-log sizing, nine `auditpol.exe` advanced-audit
+  subcategories, PowerShell module logging and transcription, removable-storage
+  and DMA device-class controls, TLS 1.0/1.1 and SSL 3.0 disablement, FIPS mode),
+  and disk-encryption / boot / 24H2–25H2 feature controls (`boot-features.json`:
+  BitLocker XTS-AES-256 and TPM+PIN policy, Early-Launch Antimalware, Recall and
+  Sudo). Every entry is transcribed from the research mechanism tables with exact
+  registry paths, values, `valueKind`, edition and build gating, `managedBy`
+  (Group Policy / CSP) and provenance tags (`baseline` / `stig-…` / `cis` /
+  `acsc`); chk-only health checks, domain-only settings and no-fallback refusals
+  were excluded, and each entry was adversarially re-verified against its research
+  section for value, hex-conversion, hive, type and ASR-GUID fidelity. All Draft;
+  the catalogue now ships 194 entries (153 Security). `OpenTheWindows.Core.Engine.ApplyEngine`
   plans a run (dependency-ordered, flagging conflicts, managed settings, risk
   gating and not-applicable entries), then applies it journal-first — every prior
   state is written to the journal before the first machine change, each action is
@@ -235,6 +260,12 @@ what was planned (plans live in `PLAN.md`).
 
 ### Fixed
 
+- `otw apply --what-if` now exits 0 (success) even when the previewed plan
+  contains reboot-required entries. A dry run makes no machine changes, so it
+  never itself requires a reboot; the would-be restart requirement is still
+  reported in the text and JSON output, and only an actual apply returns the
+  3010 reboot-required code. (Surfaced once the security catalogue added
+  Basic-level reboot entries such as SEHOP and Early-Launch Antimalware.)
 - Flaky PSScriptAnalyzer check: `Invoke-ScriptAnalyzer` (PSScriptAnalyzer 1.25)
   intermittently threw a `NullReferenceException` from a compatibility rule,
   failing at random (this reddened an otherwise green `main`). Both the

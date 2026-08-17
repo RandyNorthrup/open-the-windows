@@ -1,0 +1,787 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "security.network.remove-smbv1",
+      "title": "Remove the SMBv1 protocol",
+      "description": "Ensures the legacy SMBv1 optional feature (client and server) is not installed.",
+      "rationale": "SMBv1 has no signing or encryption and is the WannaCry/EternalBlue vector. Windows 11 does not install it by default, but users can re-add it for old devices.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "OptionalFeature", "name": "SMB1Protocol", "enabled": false, "default": false }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\MS Security Guide\\Configure SMB v1 server"
+      },
+      "sideEffects": ["Legacy NAS, printers or scanners that only speak SMBv1 become unreachable until replaced or updated."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
+        "https://stigaview.com/products/win11/v2r8/WN11-00-000160/",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
+      ],
+      "verifiedOn": [],
+      "tags": ["smb", "network", "baseline", "stig", "stig-wn11-00-000160", "cis", "acsc"]
+    },
+    {
+      "id": "security.network.require-smb-signing",
+      "title": "Require SMB signing (client and server)",
+      "description": "Forces the SMB client and server to sign every connection so traffic cannot be tampered with in transit.",
+      "rationale": "Blocks SMB relay and man-in-the-middle tampering. Windows 11 24H2 requires signing by default; older builds and upgraded machines often do not.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\LanmanWorkstation\\Parameters", "name": "RequireSecuritySignature", "type": "Dword", "value": 1, "default": null, "valueKind": "Preference" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\LanmanWorkstation\\Parameters", "name": "EnableSecuritySignature", "type": "Dword", "value": 1, "default": null, "valueKind": "Preference" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters", "name": "RequireSecuritySignature", "type": "Dword", "value": 1, "default": null, "valueKind": "Preference" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters", "name": "EnableSecuritySignature", "type": "Dword", "value": 1, "default": null, "valueKind": "Preference" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\Microsoft network client: Digitally sign communications (always)"
+      },
+      "sideEffects": ["Third-party servers that do not sign SMB (older NAS, some Samba configs, scan-to-SMB MFPs) fail with a signing-mismatch error.", "Small throughput reduction on 1 GbE and faster links."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
+        "https://stigaview.com/products/win11/v2r8/WN11-SO-000100/",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
+      ],
+      "verifiedOn": [],
+      "tags": ["smb", "network", "baseline", "stig", "stig-wn11-so-000100", "cis", "acsc"]
+    },
+    {
+      "id": "security.network.disable-mdns",
+      "title": "Disable multicast DNS (mDNS)",
+      "description": "Turns off the Windows mDNS responder so the machine no longer answers or issues .local multicast queries.",
+      "rationale": "mDNS is an attacker-spoofable name-resolution channel similar to LLMNR. Disabling it removes another local poisoning surface; requires a Dnscache service restart.",
+      "category": "Security",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\Dnscache\\Parameters", "name": "EnableMDNS", "type": "Dword", "value": 0, "default": null, "valueKind": "Preference" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": { "policyCsp": null, "groupPolicyPath": null },
+      "sideEffects": ["Breaks discovery of Bonjour/AirPrint printers, Chromecast/AirPlay devices, HomeKit, Sonos and hostname.local resolution."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
+      ],
+      "verifiedOn": [],
+      "tags": ["network", "dns"]
+    },
+    {
+      "id": "security.network.disable-netbios-public",
+      "title": "Disable NetBIOS over TCP/IP on public networks",
+      "description": "Uses the Configure NetBIOS settings policy to turn off NetBIOS name resolution on networks classified as public.",
+      "rationale": "NetBIOS name resolution is spoofable (NBT-NS poisoning). Disabling it on public networks removes the attack surface where it is riskiest while keeping workgroup name resolution on trusted LANs.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": 22631, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\DNSClient", "name": "EnableNetbios", "type": "Dword", "value": 3, "default": null, "valueKind": "Policy" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": ["security.network.disable-netbios-all"],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Network\\DNS Client\\Configure NetBIOS settings"
+      },
+      "sideEffects": ["Legacy name resolution and Network Neighborhood browsing over public networks stop working."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
+        "https://stigaview.com/products/win11/v2r8/WN11-CC-000035/",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": ["network", "netbios", "baseline", "stig", "stig-wn11-cc-000035", "cis", "acsc"]
+    },
+    {
+      "id": "security.network.disable-netbios-all",
+      "title": "Disable NetBIOS over TCP/IP on all networks",
+      "description": "Turns off NetBIOS name resolution on every network and sets the node type to P-node so the machine never broadcasts NetBIOS queries.",
+      "rationale": "Fully removes the NBT-NS poisoning surface (the 25H2 baseline default). P-node prevents broadcast name resolution entirely.",
+      "category": "Security",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": 22631, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\DNSClient", "name": "EnableNetbios", "type": "Dword", "value": 0, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\NetBT\\Parameters", "name": "NodeType", "type": "Dword", "value": 2, "default": null, "valueKind": "Preference" }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": ["security.network.disable-netbios-public"],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Network\\DNS Client\\Configure NetBIOS settings"
+      },
+      "sideEffects": ["Name resolution by NetBIOS name (old NAS/printers, UNC names in workgroups without DNS or mDNS) and Network Neighborhood browsing break on all networks."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
+      ],
+      "verifiedOn": [],
+      "tags": ["network", "netbios", "baseline", "cis", "acsc"]
+    },
+    {
+      "id": "security.network.disable-wpad",
+      "title": "Disable WPAD proxy auto-discovery",
+      "description": "Sets the documented Disable WPAD switch so WinHTTP no longer auto-discovers a proxy via DHCP/DNS.",
+      "rationale": "WPAD auto-discovery lets a network attacker advertise a malicious proxy and intercept traffic. Home networks do not use WPAD.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\WinHttp", "name": "DisableWpad", "type": "Dword", "value": 1, "default": null, "valueKind": "Preference" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": { "policyCsp": null, "groupPolicyPath": null },
+      "sideEffects": ["Networks that rely on WPAD/PAC proxy auto-discovery lose Internet until a proxy is set manually."],
+      "sources": [
+        "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
+      ],
+      "verifiedOn": [],
+      "tags": ["network", "proxy", "wpad", "acsc"]
+    },
+    {
+      "id": "security.network.disable-smart-multihomed-resolution",
+      "title": "Turn off smart multi-homed name resolution",
+      "description": "Stops Windows from sending DNS queries out every interface in parallel, so only the preferred interface's DNS is used.",
+      "rationale": "Parallel multi-homed resolution leaks DNS queries outside a VPN tunnel and lets a rogue interface answer first. Disabling it prevents the leak.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\DNSClient", "name": "DisableSmartNameResolution", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Network\\DNS Client\\Turn off smart multi-homed name resolution"
+      },
+      "sideEffects": ["Slower or failed name resolution in multi-NIC or VPN setups where the primary DNS is unreachable."],
+      "sources": [
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": ["network", "dns", "cis"]
+    },
+    {
+      "id": "security.network.dns-over-https-allow",
+      "title": "Allow and auto-upgrade to DNS over HTTPS",
+      "description": "Sets the DoH policy to allow encrypted DNS and auto-upgrade to it whenever the configured resolver is known to support DoH.",
+      "rationale": "Encrypts DNS queries against on-path tampering and eavesdropping. Allow/auto-upgrade is safe because it falls back to plaintext when the resolver is not DoH-capable.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\DNSClient", "name": "DoHPolicy", "type": "Dword", "value": 2, "default": null, "valueKind": "Policy" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Network\\DNS Client\\Configure DNS over HTTPS (DoH) name resolution"
+      },
+      "sideEffects": ["Encrypted DNS can bypass local DNS-filtering appliances."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows-server/networking/dns/doh-client-support"
+      ],
+      "verifiedOn": [],
+      "tags": ["network", "dns", "doh"]
+    },
+    {
+      "id": "security.network.disable-ip-source-routing",
+      "title": "Harden the TCP/IP stack (source routing, ICMP redirects, name release)",
+      "description": "Applies the MSS network hardening values: block IPv4/IPv6 source routing, ignore ICMP redirects, and refuse NetBIOS name-release requests.",
+      "rationale": "These MSS-legacy settings block classic spoofing and route-hijack tricks. No realistic breakage on modern networks.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters", "name": "DisableIPSourceRouting", "type": "Dword", "value": 2, "default": null, "valueKind": "Preference" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters", "name": "EnableICMPRedirect", "type": "Dword", "value": 0, "default": 1, "valueKind": "Preference" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters", "name": "DisableIPSourceRouting", "type": "Dword", "value": 2, "default": null, "valueKind": "Preference" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\NetBT\\Parameters", "name": "NoNameReleaseOnDemand", "type": "Dword", "value": 1, "default": null, "valueKind": "Preference" }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\MSS (Legacy)\\MSS: (DisableIPSourceRouting) IP source routing protection level"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
+        "https://stigaview.com/products/win11/v2r8/WN11-CC-000020/",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": ["network", "baseline", "stig", "stig-wn11-cc-000020", "cis"]
+    },
+    {
+      "id": "security.network.safe-dll-search-mode",
+      "title": "Enable Safe DLL search mode",
+      "description": "Pins Safe DLL search mode so the system directories are searched before the current directory when a process loads a DLL.",
+      "rationale": "Mitigates DLL-preloading/hijack attacks that drop a malicious DLL in the working directory. Enabled by default; this pins the safe state.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Control\\Session Manager", "name": "SafeDllSearchMode", "type": "Dword", "value": 1, "default": 1, "valueKind": "Preference" }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\MSS (Legacy)\\MSS: (SafeDllSearchMode) Enable Safe DLL search mode"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": ["exploit", "baseline", "cis"]
+    },
+    {
+      "id": "security.network.restrict-anonymous-access",
+      "title": "Restrict anonymous and null-session access",
+      "description": "Blocks anonymous enumeration of SAM accounts and shares, removes Everyone-includes-anonymous, restricts remote SAM access to administrators, and disables null-session fallback.",
+      "rationale": "Anonymous/null-session access lets an unauthenticated attacker enumerate accounts and shares for reconnaissance. The STIG rates several of these CAT I.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Control\\Lsa", "name": "RestrictAnonymous", "type": "Dword", "value": 1, "default": 0, "valueKind": "Preference" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Control\\Lsa", "name": "RestrictAnonymousSAM", "type": "Dword", "value": 1, "default": 1, "valueKind": "Preference" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Control\\Lsa", "name": "EveryoneIncludesAnonymous", "type": "Dword", "value": 0, "default": 0, "valueKind": "Preference" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Control\\Lsa", "name": "RestrictRemoteSAM", "type": "Sz", "value": "O:BAG:BAD:(A;;RC;;;BA)", "default": "O:BAG:BAD:(A;;RC;;;BA)", "valueKind": "Preference" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters", "name": "RestrictNullSessAccess", "type": "Dword", "value": 1, "default": 1, "valueKind": "Preference" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Control\\Lsa\\MSV1_0", "name": "allownullsessionfallback", "type": "Dword", "value": 0, "default": 0, "valueKind": "Preference" }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\Network access: Do not allow anonymous enumeration of SAM accounts and shares"
+      },
+      "sideEffects": ["Old multi-function printers that scan-to-share via null sessions, and legacy apps that enumerate shares anonymously, stop working."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
+        "https://stigaview.com/products/win11/v2r8/WN11-SO-000145/",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": ["network", "baseline", "stig", "stig-wn11-so-000145", "cis"]
+    },
+    {
+      "id": "security.firewall.enable-all-profiles",
+      "title": "Enable Windows Firewall on all profiles",
+      "description": "Turns the Windows Defender Firewall on for the Domain, Private and Public profiles via policy.",
+      "rationale": "A running firewall on every profile is the baseline network defense. Policy values keep it enabled even if a tool or malware tries to turn it off.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile", "name": "EnableFirewall", "type": "Dword", "value": 1, "default": 1, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile", "name": "EnableFirewall", "type": "Dword", "value": 1, "default": 1, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile", "name": "EnableFirewall", "type": "Dword", "value": 1, "default": 1, "valueKind": "Policy" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Windows Defender Firewall with Advanced Security\\Windows Defender Firewall Properties\\Domain Profile\\Firewall state"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
+        "https://stigaview.com/products/win11/v2r8/WN11-00-000135/",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": ["firewall", "baseline", "stig", "stig-wn11-00-000135", "cis"]
+    },
+    {
+      "id": "security.firewall.default-inbound-block",
+      "title": "Firewall default: block inbound, allow outbound",
+      "description": "Sets the default action to block unsolicited inbound connections and allow outbound on all three firewall profiles.",
+      "rationale": "Blocking inbound by default is the core firewall posture; anything not explicitly allowed is dropped.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile", "name": "DefaultInboundAction", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile", "name": "DefaultInboundAction", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile", "name": "DefaultInboundAction", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile", "name": "DefaultOutboundAction", "type": "Dword", "value": 0, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile", "name": "DefaultOutboundAction", "type": "Dword", "value": 0, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile", "name": "DefaultOutboundAction", "type": "Dword", "value": 0, "default": null, "valueKind": "Policy" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Windows Defender Firewall with Advanced Security\\Windows Defender Firewall Properties\\Domain Profile\\Inbound connections"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": ["firewall", "baseline", "cis"]
+    },
+    {
+      "id": "security.firewall.enable-logging",
+      "title": "Enable firewall logging (dropped and successful) on all profiles",
+      "description": "Logs dropped packets and successful connections with a 16 MB log file on each firewall profile.",
+      "rationale": "Firewall logs are essential forensic data after a network intrusion. Disk impact is negligible.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile\\Logging", "name": "LogDroppedPackets", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile\\Logging", "name": "LogSuccessfulConnections", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile\\Logging", "name": "LogFileSize", "type": "Dword", "value": 16384, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile\\Logging", "name": "LogDroppedPackets", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile\\Logging", "name": "LogSuccessfulConnections", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile\\Logging", "name": "LogFileSize", "type": "Dword", "value": 16384, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile\\Logging", "name": "LogDroppedPackets", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile\\Logging", "name": "LogSuccessfulConnections", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile\\Logging", "name": "LogFileSize", "type": "Dword", "value": 16384, "default": null, "valueKind": "Policy" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Windows Defender Firewall with Advanced Security\\Windows Defender Firewall Properties\\Domain Profile\\Logging"
+      },
+      "sideEffects": ["Firewall log files grow up to 16 MB per profile."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": ["firewall", "logging", "baseline", "cis"]
+    },
+    {
+      "id": "security.firewall.public-no-local-merge",
+      "title": "Public profile: ignore local firewall rules",
+      "description": "On the Public profile, applies only domain/GPO firewall and IPsec rules and ignores locally created rules.",
+      "rationale": "Prevents apps (and malware) from opening inbound holes on untrusted networks by adding their own local rules.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile", "name": "AllowLocalPolicyMerge", "type": "Dword", "value": 0, "default": 1, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile", "name": "AllowLocalIPsecPolicyMerge", "type": "Dword", "value": 0, "default": 1, "valueKind": "Policy" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Windows Defender Firewall with Advanced Security\\Windows Defender Firewall Properties\\Public Profile\\Settings\\Apply local firewall rules"
+      },
+      "sideEffects": ["Apps can no longer add their own inbound firewall rules on the Public profile; some games/VoIP prompts will not appear."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": ["firewall", "baseline", "cis"]
+    },
+    {
+      "id": "security.firewall.public-suppress-notifications",
+      "title": "Firewall notifications: prompt on Private/Domain, silent on Public",
+      "description": "Keeps the allow-an-app prompt on the Domain and Private profiles and suppresses it on the Public profile so blocked apps are dropped silently.",
+      "rationale": "Matches the Microsoft baseline: users get prompts on trusted networks but untrusted networks never surface a prompt that could be click-allowed.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile", "name": "DisableNotifications", "type": "Dword", "value": 0, "default": 0, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile", "name": "DisableNotifications", "type": "Dword", "value": 0, "default": 0, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile", "name": "DisableNotifications", "type": "Dword", "value": 1, "default": 0, "valueKind": "Policy" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Windows Defender Firewall with Advanced Security\\Windows Defender Firewall Properties\\Public Profile\\Settings\\Display a notification"
+      },
+      "sideEffects": ["The Public profile no longer prompts when a program starts listening; it is blocked silently."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": ["firewall", "baseline", "cis"]
+    },
+    {
+      "id": "security.remote.disable-remote-assistance",
+      "title": "Turn off Remote Assistance (solicited and offered)",
+      "description": "Disables both solicited and unsolicited (offered) Windows Remote Assistance.",
+      "rationale": "Classic Remote Assistance is an unnecessary remote-control surface; the STIG rates it CAT I. Quick Assist is a separate Store app and is unaffected.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services", "name": "fAllowToGetHelp", "type": "Dword", "value": 0, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services", "name": "fAllowUnsolicited", "type": "Dword", "value": 0, "default": null, "valueKind": "Policy" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Remote Assistance\\Configure Solicited Remote Assistance"
+      },
+      "sideEffects": ["Classic Windows Remote Assistance (msra) invitations stop; Quick Assist is unaffected."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
+        "https://stigaview.com/products/win11/v2r8/WN11-CC-000155/",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
+      ],
+      "verifiedOn": [],
+      "tags": ["remote", "baseline", "stig", "stig-wn11-cc-000155", "cis", "acsc"]
+    },
+    {
+      "id": "security.remote.disable-rdp",
+      "title": "Disable inbound Remote Desktop",
+      "description": "Denies inbound Remote Desktop connections to this machine.",
+      "rationale": "RDP is a top ransomware entry point. On a PC that never accepts remote sessions, denying connections removes the exposure entirely.",
+      "category": "Security",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Control\\Terminal Server", "name": "fDenyTSConnections", "type": "Dword", "value": 1, "default": 1, "valueKind": "Preference" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Remote Desktop Services\\Remote Desktop Session Host\\Connections\\Allow users to connect remotely by using Remote Desktop Services"
+      },
+      "sideEffects": ["Users who rely on inbound Remote Desktop lose access to this PC."],
+      "sources": [
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
+      ],
+      "verifiedOn": [],
+      "tags": ["remote", "rdp", "cis", "acsc"]
+    },
+    {
+      "id": "security.remote.harden-rdp",
+      "title": "Harden Remote Desktop when enabled",
+      "description": "Requires Network Level Authentication, the TLS security layer, high encryption and secure RPC for RDP, always prompts for a password, and disables drive redirection and saved passwords.",
+      "rationale": "When RDP must stay on, these settings raise the bar against unauthenticated and downgrade attacks and reduce the data exposed to a session.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": ["Pro", "Enterprise", "Education"], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services", "name": "UserAuthentication", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services", "name": "SecurityLayer", "type": "Dword", "value": 2, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services", "name": "MinEncryptionLevel", "type": "Dword", "value": 3, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services", "name": "fEncryptRPCTraffic", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services", "name": "fPromptForPassword", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services", "name": "fDisableCdm", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services", "name": "DisablePasswordSaving", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Remote Desktop Services\\Remote Desktop Session Host\\Security\\Require user authentication for remote connections by using Network Level Authentication"
+      },
+      "sideEffects": ["Drive and clipboard redirection are disabled for RDP sessions; pre-Vista clients cannot connect (NLA)."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
+        "https://stigaview.com/products/win11/v2r8/WN11-CC-000280/",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
+      ],
+      "verifiedOn": [],
+      "tags": ["remote", "rdp", "baseline", "stig", "stig-wn11-cc-000280", "cis", "acsc"]
+    },
+    {
+      "id": "security.remote.harden-winrm",
+      "title": "Harden WinRM authentication (client and service)",
+      "description": "Disables Basic, unencrypted and Digest authentication on the WinRM client and service, and disables the service RunAs credential store.",
+      "rationale": "Basic/unencrypted WinRM sends credentials in the clear and enables relay; disabling it forces Kerberos/NTLM over encrypted channels. The STIG rates the core settings CAT I.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WinRM\\Client", "name": "AllowBasic", "type": "Dword", "value": 0, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WinRM\\Client", "name": "AllowUnencryptedTraffic", "type": "Dword", "value": 0, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WinRM\\Client", "name": "AllowDigest", "type": "Dword", "value": 0, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WinRM\\Service", "name": "AllowBasic", "type": "Dword", "value": 0, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WinRM\\Service", "name": "AllowUnencryptedTraffic", "type": "Dword", "value": 0, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WinRM\\Service", "name": "DisableRunAs", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Remote Management (WinRM)\\WinRM Service\\Allow Basic authentication"
+      },
+      "sideEffects": ["HTTP-Basic or unencrypted WinRM to non-domain hosts stops working; use HTTPS with Kerberos or NTLM instead."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
+        "https://stigaview.com/products/win11/v2r8/WN11-CC-000330/",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
+      ],
+      "verifiedOn": [],
+      "tags": ["remote", "winrm", "baseline", "stig", "stig-wn11-cc-000330", "cis", "acsc"]
+    },
+    {
+      "id": "security.remote.block-inbound-remote-printing",
+      "title": "Block inbound remote printing (PrintNightmare)",
+      "description": "Disables the spooler's remote RPC endpoint so this machine cannot accept inbound remote print jobs; local printing continues.",
+      "rationale": "The remote spooler RPC endpoint is the PrintNightmare RCE vector. Disabling it closes the inbound attack surface without stopping local printing.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Printers", "name": "RegisterSpoolerRemoteRpcEndPoint", "type": "Dword", "value": 2, "default": 1, "valueKind": "Policy" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Printers\\Allow Print Spooler to accept client connections"
+      },
+      "sideEffects": ["This PC can no longer share its printers over the network; local printing continues."],
+      "sources": [
+        "https://support.microsoft.com/en-us/topic/kb5005652-manage-new-point-and-print-default-driver-installation-behavior-cve-2021-34481-873642bf-2634-49c5-a23b-6d8e9a302872",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
+      ],
+      "verifiedOn": [],
+      "tags": ["remote", "printing", "baseline", "cis", "acsc"]
+    },
+    {
+      "id": "security.remote.point-and-print-restrictions",
+      "title": "Restrict Point and Print driver installation",
+      "description": "Restricts printer driver installation from print servers to administrators, requires warnings/elevation, and enforces Redirection Guard and RPC privacy for the spooler.",
+      "rationale": "Point and Print without restrictions let a malicious print server push a driver and gain SYSTEM (PrintNightmare). These are the Microsoft-recommended mitigations.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Printers\\PointAndPrint", "name": "RestrictDriverInstallationToAdministrators", "type": "Dword", "value": 1, "default": 1, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Printers\\PointAndPrint", "name": "NoWarningNoElevationOnInstall", "type": "Dword", "value": 0, "default": 0, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Printers\\PointAndPrint", "name": "UpdatePromptSettings", "type": "Dword", "value": 0, "default": 0, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Printers", "name": "RedirectionGuardPolicy", "type": "Dword", "value": 1, "default": 1, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Printers", "name": "CopyFilesPolicy", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Control\\Print", "name": "RpcAuthnLevelPrivacyEnabled", "type": "Dword", "value": 1, "default": 1, "valueKind": "Preference" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Printers\\Point and Print Restrictions"
+      },
+      "sideEffects": ["Standard users can no longer install printer drivers from print servers or network printers without an administrator."],
+      "sources": [
+        "https://support.microsoft.com/en-us/topic/kb5005652-manage-new-point-and-print-default-driver-installation-behavior-cve-2021-34481-873642bf-2634-49c5-a23b-6d8e9a302872",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
+      ],
+      "verifiedOn": [],
+      "tags": ["remote", "printing", "baseline", "cis", "acsc"]
+    },
+    {
+      "id": "security.remote.disable-http-printing",
+      "title": "Turn off HTTP printing and print-driver downloads over HTTP",
+      "description": "Blocks downloading print drivers over HTTP, printing to HTTP printers, web-services print wizards, and fetching device metadata from the Internet.",
+      "rationale": "HTTP printing and Internet driver/metadata downloads fetch content from untrusted hosts. Disabling them removes those download paths.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Printers", "name": "DisableWebPnPDownload", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\Printers", "name": "DisableHTTPPrinting", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "name": "NoWebServices", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" },
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Device Metadata", "name": "PreventDeviceMetadataFromNetwork", "type": "Dword", "value": 1, "default": null, "valueKind": "Policy" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Internet Communication Management\\Internet Communication settings\\Turn off downloading of print drivers over HTTP"
+      },
+      "sideEffects": ["Web Point-and-Print and IPP-over-HTTP setups stop; device icons/metadata are not fetched from the Internet."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
+        "https://stigaview.com/products/win11/v2r8/WN11-CC-000105/",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": ["remote", "printing", "baseline", "stig", "stig-wn11-cc-000105", "cis"]
+    },
+    {
+      "id": "security.remote.prevent-user-printer-drivers",
+      "title": "Prevent standard users from installing printer drivers",
+      "description": "Requires administrator rights to add printer drivers to the machine.",
+      "rationale": "Printer driver installation runs privileged code; limiting it to administrators reduces a local privilege-escalation avenue. Mopria/IPP class drivers still work for users.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "Registry", "hive": "LocalMachine", "path": "SYSTEM\\CurrentControlSet\\Control\\Print\\Providers\\LanMan Print Services\\Servers", "name": "AddPrinterDrivers", "type": "Dword", "value": 1, "default": null, "valueKind": "Preference" }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\Devices: Prevent users from installing printer drivers"
+      },
+      "sideEffects": ["Standard users need an administrator to add printers that require a driver."],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": ["remote", "printing", "baseline", "cis"]
+    },
+    {
+      "id": "security.remote.remove-legacy-network-clients",
+      "title": "Remove legacy network clients (Telnet, TFTP, Simple TCP/IP)",
+      "description": "Ensures the Telnet client, TFTP client and Simple TCP/IP Services optional features are not installed.",
+      "rationale": "These legacy clients speak unauthenticated, cleartext protocols and are common living-off-the-land tools. They are not needed on a modern workstation.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        { "kind": "OptionalFeature", "name": "TelnetClient", "enabled": false, "default": false },
+        { "kind": "OptionalFeature", "name": "TFTP", "enabled": false, "default": false },
+        { "kind": "OptionalFeature", "name": "SimpleTCP", "enabled": false, "default": false }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": { "policyCsp": null, "groupPolicyPath": null },
+      "sideEffects": ["Only affects machines that actually use the Telnet, TFTP or Simple TCP/IP clients."],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-00-000110/",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": ["remote", "network"]
+    }
+  ]
+}

@@ -1,0 +1,1289 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "security.uac.enable-admin-approval-mode",
+      "title": "Keep User Account Control enabled",
+      "description": "Ensures Admin Approval Mode (UAC) is on for all administrators by pinning EnableLUA to 1.",
+      "rationale": "With UAC off, administrator processes run fully elevated and Store apps, Edge and other AppContainer sandboxes stop working. The app never sets this to 0; it only asserts the secure value.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "EnableLUA",
+          "type": "Dword",
+          "value": 1,
+          "default": 1,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "LocalPoliciesSecurityOptions/UserAccountControl_RunAllAdministratorsInAdminApprovalMode",
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\User Account Control: Run all administrators in Admin Approval Mode"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-SO-000270/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "uac",
+        "baseline",
+        "stig",
+        "stig-wn11-so-000270",
+        "cis",
+        "acsc"
+      ]
+    },
+    {
+      "id": "security.uac.filter-administrator-token",
+      "title": "Apply UAC to the built-in Administrator account",
+      "description": "Puts the built-in Administrator account into Admin Approval Mode by setting FilterAdministratorToken to 1, so it also gets elevation prompts.",
+      "rationale": "Without this, the built-in Administrator (if enabled) runs everything fully elevated with no prompt. STIG, Microsoft baseline and CIS all enable it.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "FilterAdministratorToken",
+          "type": "Dword",
+          "value": 1,
+          "default": 0,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "LocalPoliciesSecurityOptions/UserAccountControl_UseAdminApprovalMode",
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\User Account Control: Admin Approval Mode for the Built-in Administrator account"
+      },
+      "sideEffects": [
+        "If the built-in Administrator account is enabled, it now receives UAC prompts instead of running silently elevated."
+      ],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-SO-000245/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "uac",
+        "baseline",
+        "stig",
+        "stig-wn11-so-000245",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.uac.admin-consent-prompt",
+      "title": "Prompt admins for consent on the secure desktop",
+      "description": "Sets the elevation prompt for administrators to \"prompt for consent on the secure desktop\" (ConsentPromptBehaviorAdmin = 2).",
+      "rationale": "The default (5) only prompts for non-Windows binaries; value 2 prompts for every elevation on the isolated secure desktop. Paranoid presets can raise this to 1 (prompt for credentials).",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "ConsentPromptBehaviorAdmin",
+          "type": "Dword",
+          "value": 2,
+          "default": 5,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "LocalPoliciesSecurityOptions/UserAccountControl_BehaviorOfTheElevationPromptForAdministrators",
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\User Account Control: Behavior of the elevation prompt for administrators in Admin Approval Mode"
+      },
+      "sideEffects": [
+        "Administrators get a consent dialog for elevations that previously ran silently."
+      ],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-SO-000250/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "uac",
+        "baseline",
+        "stig",
+        "stig-wn11-so-000250",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.uac.standard-user-prompt",
+      "title": "Prompt standard users for credentials on the secure desktop",
+      "description": "Sets the elevation prompt for standard users to \"prompt for credentials on the secure desktop\" (ConsentPromptBehaviorUser = 1), so a standard user can still elevate by entering an admin password.",
+      "rationale": "The org-hardening value is 0 (automatically deny), but on a single-user home PC where the account is a standard user that blocks all installs. Value 1 keeps elevation possible while still using the secure desktop. Strict/org presets use 0.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "ConsentPromptBehaviorUser",
+          "type": "Dword",
+          "value": 1,
+          "default": 3,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "LocalPoliciesSecurityOptions/UserAccountControl_BehaviorOfTheElevationPromptForStandardUsers",
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\User Account Control: Behavior of the elevation prompt for standard users"
+      },
+      "sideEffects": [
+        "The stricter org value (0) would auto-deny all standard-user elevation, blocking installs on single-user standard-account PCs; this entry uses 1 to preserve elevation on the secure desktop."
+      ],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-SO-000255/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "uac",
+        "baseline",
+        "stig",
+        "stig-wn11-so-000255",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.uac.installer-detection",
+      "title": "Detect application installations and prompt for elevation",
+      "description": "Enables installer detection heuristics (EnableInstallerDetection = 1) so setup programs trigger a UAC prompt.",
+      "rationale": "Ensures legacy installers are elevated through UAC rather than silently failing or writing to virtualized locations. STIG, Microsoft baseline and CIS enable it.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "EnableInstallerDetection",
+          "type": "Dword",
+          "value": 1,
+          "default": 1,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "LocalPoliciesSecurityOptions/UserAccountControl_DetectApplicationInstallationsAndPromptForElevation",
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\User Account Control: Detect application installations and prompt for elevation"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-SO-000260/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "uac",
+        "baseline",
+        "stig",
+        "stig-wn11-so-000260",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.uac.secure-uiaccess-paths",
+      "title": "Only elevate UIAccess apps from secure locations",
+      "description": "Requires UIAccess applications to run from secure locations (EnableSecureUIAPaths = 1) before they can bypass the secure desktop.",
+      "rationale": "Prevents malware in a user-writable path from claiming UIAccess to interact with elevated windows. STIG, Microsoft baseline and CIS enable it.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "EnableSecureUIAPaths",
+          "type": "Dword",
+          "value": 1,
+          "default": 1,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "LocalPoliciesSecurityOptions/UserAccountControl_OnlyElevateUIAccessApplicationsThatAreInstalledInSecureLocations",
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\User Account Control: Only elevate UIAccess applications that are installed in secure locations"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-SO-000265/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "uac",
+        "baseline",
+        "stig",
+        "stig-wn11-so-000265",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.uac.secure-desktop-prompt",
+      "title": "Show UAC prompts on the secure desktop",
+      "description": "Switches to the secure desktop when prompting for elevation (PromptOnSecureDesktop = 1), isolating the prompt from other running software.",
+      "rationale": "The secure desktop stops other processes from spoofing or auto-clicking the UAC dialog. STIG, Microsoft baseline and CIS enable it.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "PromptOnSecureDesktop",
+          "type": "Dword",
+          "value": 1,
+          "default": 1,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "LocalPoliciesSecurityOptions/UserAccountControl_SwitchToTheSecureDesktopWhenPromptingForElevation",
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\User Account Control: Switch to the secure desktop when prompting for elevation"
+      },
+      "sideEffects": [
+        "Some remote-control tools (certain VNC/RMM agents) cannot see or interact with the UAC prompt unless they run as SYSTEM."
+      ],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-SO-000250/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "uac",
+        "baseline",
+        "stig",
+        "stig-wn11-so-000250",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.uac.virtualize-write-failures",
+      "title": "Virtualize file and registry write failures",
+      "description": "Redirects legacy apps' writes to protected file and registry locations into per-user virtualized stores (EnableVirtualization = 1).",
+      "rationale": "Lets older applications run as a standard user without silently corrupting system-wide state or demanding elevation. STIG, Microsoft baseline and CIS enable it.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "EnableVirtualization",
+          "type": "Dword",
+          "value": 1,
+          "default": 1,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "LocalPoliciesSecurityOptions/UserAccountControl_VirtualizeFileAndRegistryWriteFailuresToPerUserLocations",
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\User Account Control: Virtualize file and registry write failures to per-user locations"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-SO-000275/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "uac",
+        "baseline",
+        "stig",
+        "stig-wn11-so-000275",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.uac.validate-admin-code-signatures",
+      "title": "Only elevate signed and validated executables",
+      "description": "Requires that any executable requesting elevation is signed and its signature validates (ValidateAdminCodeSignatures = 1).",
+      "rationale": "Blocks elevation of unsigned or tampered binaries. This is a Paranoid-tier control because it also blocks legitimate unsigned tools.",
+      "category": "Security",
+      "level": "Paranoid",
+      "risk": "Breaking",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "ValidateAdminCodeSignatures",
+          "type": "Dword",
+          "value": 1,
+          "default": 0,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "LocalPoliciesSecurityOptions/UserAccountControl_OnlyElevateExecutableFilesThatAreSignedAndValidated",
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\User Account Control: Only elevate executables that are signed and validated"
+      },
+      "sideEffects": [
+        "Breaks elevation of any unsigned installer or tool, including many open-source utilities, portable apps and developer builds."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "uac"
+      ]
+    },
+    {
+      "id": "security.uac.hide-admin-enumeration",
+      "title": "Do not enumerate administrator accounts on elevation",
+      "description": "Stops the credential UI from listing administrator account names when a standard user elevates (EnumerateAdministrators = 0).",
+      "rationale": "Not showing admin usernames removes free reconnaissance for an attacker at the elevation prompt. STIG, Microsoft baseline and CIS set it.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\CredUI",
+          "name": "EnumerateAdministrators",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "CredentialsUI/EnumerateAdministrators",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Credential User Interface\\Enumerate administrator accounts on elevation"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-CC-000200/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "uac",
+        "baseline",
+        "stig",
+        "stig-wn11-cc-000200",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.uac.disable-password-reveal",
+      "title": "Hide the password reveal button",
+      "description": "Removes the eye/reveal button from password fields (DisablePasswordReveal = 1) so entered passwords cannot be shown as plaintext.",
+      "rationale": "Prevents shoulder-surfing of typed passwords. Microsoft baseline and CIS set it; low UX cost.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\CredUI",
+          "name": "DisablePasswordReveal",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "CredentialsUI/DisablePasswordReveal",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Credential User Interface\\Do not display the password reveal button"
+      },
+      "sideEffects": [
+        "Users can no longer un-mask a password field to check what they typed."
+      ],
+      "sources": [
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://github.com/scipag/HardeningKitty"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "uac",
+        "baseline",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.uac.disable-local-password-reset-questions",
+      "title": "Prevent security questions for local accounts",
+      "description": "Blocks the use of security questions as a recovery method for local accounts (NoLocalPasswordResetQuestions = 1).",
+      "rationale": "Security questions are weak, guessable recovery factors. Microsoft baseline and CIS set it. Users must rely on other recovery methods.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "NoLocalPasswordResetQuestions",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Credential User Interface\\Prevent the use of security questions for local accounts"
+      },
+      "sideEffects": [
+        "Users cannot set or use security questions to reset a local password and need another recovery method."
+      ],
+      "sources": [
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "uac",
+        "baseline",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.uac.administrator-protection",
+      "title": "Enable UAC Administrator protection (24H2+)",
+      "description": "Selects the new \"Admin Approval Mode with Administrator protection\" type (TypeOfAdminApprovalMode = 2), giving each elevation a just-in-time, system-managed shadow admin token gated by Windows Hello.",
+      "rationale": "Administrator protection removes the always-available admin token from the interactive session, so malware cannot silently reuse it. Rolled out on Windows 11 24H2/25H2; verify the feature is present on the build before applying.",
+      "category": "Security",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 26100,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "TypeOfAdminApprovalMode",
+          "type": "Dword",
+          "value": 2,
+          "default": 1,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "LocalPoliciesSecurityOptions/UserAccountControl_TypeOfAdminApprovalMode",
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\User Account Control: Configure type of Admin Approval Mode"
+      },
+      "sideEffects": [
+        "Elevated apps run under a separate system-managed admin profile, so per-user paths and HKCU state differ in the elevated context; some legacy admin tools and installers that assume the same profile break.",
+        "Windows Hello is required to authorize each elevation prompt."
+      ],
+      "sources": [
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-24h2-security-baseline/4252801",
+        "https://learn.microsoft.com/en-us/windows/whats-new/whats-new-windows-11-version-24h2"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "uac",
+        "baseline"
+      ]
+    },
+    {
+      "id": "security.logon.inactivity-lock",
+      "title": "Lock the machine after 15 minutes idle",
+      "description": "Sets the machine inactivity limit to 900 seconds (InactivityTimeoutSecs) so Windows locks automatically after 15 minutes with no input.",
+      "rationale": "Stops an unattended, unlocked session from being used. STIG, Microsoft baseline, CIS and ACSC all cap this at 15 minutes.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "InactivityTimeoutSecs",
+          "type": "Dword",
+          "value": 900,
+          "default": 0,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "LocalPoliciesSecurityOptions/InteractiveLogon_MachineInactivityLimit",
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\Interactive logon: Machine inactivity limit"
+      },
+      "sideEffects": [
+        "The screen locks during long reads or presentations; the user cannot set a longer idle limit than the policy allows."
+      ],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-SO-000070/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "logon",
+        "baseline",
+        "stig",
+        "stig-wn11-so-000070",
+        "cis",
+        "acsc"
+      ]
+    },
+    {
+      "id": "security.logon.require-password-on-wake",
+      "title": "Require a password when the PC wakes",
+      "description": "Requires a password on resume from sleep on both AC and battery power by setting ACSettingIndex and DCSettingIndex to 1 under the wake power-policy GUID.",
+      "rationale": "Without this, a device woken from sleep goes straight to the desktop. Microsoft baseline, STIG and CIS require a password on wake.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Power\\PowerSettings\\0e796bdb-100d-47d6-a2d5-f7d2daa51f51",
+          "name": "ACSettingIndex",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Power\\PowerSettings\\0e796bdb-100d-47d6-a2d5-f7d2daa51f51",
+          "name": "DCSettingIndex",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Power Management\\Sleep Settings\\Require a password when a computer wakes"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-CC-000145/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "logon",
+        "baseline",
+        "stig",
+        "stig-wn11-cc-000145",
+        "stig-wn11-cc-000150",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.logon.hide-last-username",
+      "title": "Do not display the last signed-in user",
+      "description": "Hides the previously signed-in username on the logon screen (DontDisplayLastUserName = 1) so it must be typed each time.",
+      "rationale": "Removes a free username for an attacker at the console. CIS and ACSC recommend it. This is friction on single-user PCs, so it is a Strict-tier control.",
+      "category": "Security",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "DontDisplayLastUserName",
+          "type": "Dword",
+          "value": 1,
+          "default": 0,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "LocalPoliciesSecurityOptions/InteractiveLogon_DoNotDisplayLastSignedIn",
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\Interactive logon: Do not display last signed-in"
+      },
+      "sideEffects": [
+        "Users must type their username at every sign-in; Windows Hello still works after the name is entered, but the convenience flow is interrupted."
+      ],
+      "sources": [
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "logon",
+        "cis",
+        "acsc"
+      ]
+    },
+    {
+      "id": "security.logon.require-ctrl-alt-del",
+      "title": "Require Ctrl+Alt+Del to sign in",
+      "description": "Requires the secure attention sequence before the logon prompt appears by setting DisableCAD to 0.",
+      "rationale": "Ctrl+Alt+Del invokes the trusted logon path, defeating credential-harvesting fake logon screens. Microsoft baseline and CIS require it.",
+      "category": "Security",
+      "level": "Strict",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "DisableCAD",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "LocalPoliciesSecurityOptions/InteractiveLogon_DoNotRequireCTRLALTDEL",
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\Interactive logon: Do not require CTRL+ALT+DEL"
+      },
+      "sideEffects": [
+        "Adds a keystroke before sign-in; on tablets and Windows Hello face-unlock devices this is extra friction."
+      ],
+      "sources": [
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "logon",
+        "baseline",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.logon.disable-shutdown-without-logon",
+      "title": "Require sign-in before shutting down",
+      "description": "Removes the shutdown control from the sign-in screen by setting ShutdownWithoutLogon to 0.",
+      "rationale": "Stops someone at the lock screen from shutting the machine down (a minor availability and forensics protection). CIS recommends it.",
+      "category": "Security",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "ShutdownWithoutLogon",
+          "type": "Dword",
+          "value": 0,
+          "default": 1,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "LocalPoliciesSecurityOptions/Shutdown_AllowSystemToBeShutDownWithoutHavingToLogOn",
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Local Policies\\Security Options\\Shutdown: Allow system to be shut down without having to log on"
+      },
+      "sideEffects": [
+        "The power/shutdown button is removed from the lock screen; users must sign in first, which is inconvenient on laptops."
+      ],
+      "sources": [
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://github.com/scipag/HardeningKitty"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "logon",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.logon.disable-auto-restart-signon",
+      "title": "Disable automatic sign-in after a restart (ARSO)",
+      "description": "Turns off Automatic Restart Sign-On (DisableAutomaticRestartSignOn = 1) so Windows does not silently sign the last user back in and relaunch their apps after an update restart.",
+      "rationale": "ARSO restores the interactive session without re-authenticating, which weakens the value of the lock screen after an update. STIG, Microsoft baseline and CIS disable it.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "DisableAutomaticRestartSignOn",
+          "type": "Dword",
+          "value": 1,
+          "default": 0,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Logon Options\\Sign-in and lock last interactive user automatically after a restart"
+      },
+      "sideEffects": [
+        "After a Windows Update restart the machine lands on the lock screen instead of auto-relaunching the previous apps; BitLocker devices lose the auto sign-in convenience."
+      ],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-CC-000325/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "logon",
+        "baseline",
+        "stig",
+        "stig-wn11-cc-000325",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.logon.harden-lock-screen",
+      "title": "Disable lock-screen camera, slideshow and app notifications",
+      "description": "Blocks the lock-screen camera (NoLockScreenCamera), the lock-screen slideshow (NoLockScreenSlideshow) and app notifications on the lock screen (DisableLockScreenAppNotifications) so no content or previews are shown before sign-in.",
+      "rationale": "Notification previews and slideshow images can leak information from a locked device; the lock-screen camera is an unauthenticated entry point. Microsoft baseline (camera/slideshow), STIG and CIS set these.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Personalization",
+          "name": "NoLockScreenCamera",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Personalization",
+          "name": "NoLockScreenSlideshow",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "DisableLockScreenAppNotifications",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Control Panel\\Personalization\\Prevent enabling lock screen camera"
+      },
+      "sideEffects": [
+        "No notification previews, slideshow or camera are available on the lock screen."
+      ],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-CC-000005/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "logon",
+        "lock-screen",
+        "baseline",
+        "stig",
+        "stig-wn11-cc-000005",
+        "stig-wn11-cc-000010",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.logon.restrict-ink-and-voice-above-lock",
+      "title": "Restrict Windows Ink and voice activation above the lock screen",
+      "description": "Keeps the Windows Ink Workspace enabled but not available above the lock screen (AllowWindowsInkWorkspace = 1) and blocks apps from being activated by voice while the device is locked (LetAppsActivateWithVoiceAboveLock = 2).",
+      "rationale": "Ink and voice surfaces above the lock screen can be abused to interact with a locked device. STIG, Microsoft baseline and CIS restrict them.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\WindowsInkWorkspace",
+          "name": "AllowWindowsInkWorkspace",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+          "name": "LetAppsActivateWithVoiceAboveLock",
+          "type": "Dword",
+          "value": 2,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows Ink Workspace\\Allow Windows Ink Workspace"
+      },
+      "sideEffects": [
+        "Pen users can no longer open the Ink Workspace from the lock screen; voice assistants cannot activate apps while locked."
+      ],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-CC-000385/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "logon",
+        "lock-screen",
+        "baseline",
+        "stig",
+        "stig-wn11-cc-000385",
+        "stig-wn11-cc-000365",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.logon.hide-network-selection-ui",
+      "title": "Do not show the network selection UI at logon",
+      "description": "Removes the network (Wi-Fi) selection UI from the sign-in screen by setting DontDisplayNetworkSelectionUI to 1.",
+      "rationale": "The lock-screen network UI lets an unauthenticated person reconfigure connectivity. STIG and CIS remove it.",
+      "category": "Security",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "DontDisplayNetworkSelectionUI",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Logon\\Do not display network selection UI"
+      },
+      "sideEffects": [
+        "A laptop joining a new Wi-Fi network cannot pick it from the lock screen; the user must sign in first using cached or local credentials."
+      ],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-CC-000120/",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "logon",
+        "stig",
+        "stig-wn11-cc-000120",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.logon.block-account-details-on-signin",
+      "title": "Block showing account details on the sign-in screen",
+      "description": "Prevents the sign-in screen from displaying account details such as the email address (BlockUserFromShowingAccountDetailsOnSignin = 1).",
+      "rationale": "Hides the account's email/identity from anyone at the lock screen. Microsoft baseline and CIS set it.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "BlockUserFromShowingAccountDetailsOnSignin",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Logon\\Block user from showing account details on sign-in"
+      },
+      "sideEffects": [
+        "The account email is no longer shown on the sign-in screen."
+      ],
+      "sources": [
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "logon",
+        "baseline",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.logon.remove-run-as-different-user",
+      "title": "Remove \"Run as different user\" from context menus",
+      "description": "Suppresses the \"Run as different user\" shell verb for batch, command, executable and MMC files by setting SuppressionPolicy to 4096 on each file class.",
+      "rationale": "Removes an easy path to launch processes under other credentials from Explorer. STIG and the Microsoft Security Guide recommend it.",
+      "category": "Security",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Classes\\batfile\\shell\\runasuser",
+          "name": "SuppressionPolicy",
+          "type": "Dword",
+          "value": 4096,
+          "default": null,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Classes\\cmdfile\\shell\\runasuser",
+          "name": "SuppressionPolicy",
+          "type": "Dword",
+          "value": 4096,
+          "default": null,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Classes\\exefile\\shell\\runasuser",
+          "name": "SuppressionPolicy",
+          "type": "Dword",
+          "value": 4096,
+          "default": null,
+          "valueKind": "Preference"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Classes\\mscfile\\shell\\runasuser",
+          "name": "SuppressionPolicy",
+          "type": "Dword",
+          "value": 4096,
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\MS Security Guide\\Remove 'Run as different user' from context menus"
+      },
+      "sideEffects": [
+        "The \"Run as different user\" entry disappears from the right-click menu for scripts, executables and MMC consoles."
+      ],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-CC-000039/",
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "logon",
+        "baseline",
+        "stig",
+        "stig-wn11-cc-000039"
+      ]
+    }
+  ]
+}

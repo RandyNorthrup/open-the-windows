@@ -1,0 +1,677 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "security.boot.bitlocker-encryption-method",
+      "title": "Set BitLocker to encrypt with XTS-AES-256",
+      "description": "Sets the BitLocker Group Policy so operating-system, fixed-data and removable-data drives are encrypted with XTS-AES-256 instead of the XTS-AES-128 default. Only affects volumes encrypted after the policy is applied.",
+      "rationale": "XTS-AES-256 is the strongest built-in BitLocker cipher and is imperceptibly slower on modern CPUs. The policy alone does not turn BitLocker on; it only chooses the cipher used when a drive is encrypted.",
+      "category": "Security",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\FVE",
+          "name": "EncryptionMethodWithXtsOs",
+          "type": "Dword",
+          "value": 7,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\FVE",
+          "name": "EncryptionMethodWithXtsFdv",
+          "type": "Dword",
+          "value": 7,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\FVE",
+          "name": "EncryptionMethodWithXtsRdv",
+          "type": "Dword",
+          "value": 7,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "BitLocker/EncryptionMethodByDriveType",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\BitLocker Drive Encryption\\Choose drive encryption method and cipher strength (Windows 10 [Version 1511] and later)"
+      },
+      "sideEffects": [
+        "Applies only to drives encrypted after the change; existing volumes keep their current cipher until they are decrypted and re-encrypted.",
+        "You must enable BitLocker yourself (this app does not run manage-bde); this policy only governs the cipher used when you do."
+      ],
+      "sources": [
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-24h2-security-baseline/4252801",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://github.com/scipag/HardeningKitty"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "boot",
+        "bitlocker",
+        "crypto",
+        "baseline",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.boot.bitlocker-require-tpm-pin",
+      "title": "Require a TPM plus startup PIN for BitLocker",
+      "description": "Turns on the BitLocker pre-boot authentication policy so operating-system drives require both a TPM and a startup PIN before Windows loads.",
+      "rationale": "A pre-boot PIN blocks DMA/cold-boot and 'evil maid' key-extraction attacks that a TPM-only configuration allows. The policy takes effect the next time BitLocker is enabled or reconfigured on the OS drive.",
+      "category": "Security",
+      "level": "Strict",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\FVE",
+          "name": "UseAdvancedStartup",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\FVE",
+          "name": "UseTPMPIN",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "BitLocker/SystemDrivesRequireStartupAuthentication",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\BitLocker Drive Encryption\\Operating System Drives\\Require additional authentication at startup"
+      },
+      "sideEffects": [
+        "A PIN prompt appears at every boot, which breaks unattended reboots, Wake-on-LAN patching and remote management.",
+        "You must enable BitLocker yourself (this app does not run manage-bde); this policy only governs the pre-boot authentication method."
+      ],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-00-000031/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-24h2-security-baseline/4252801",
+        "https://github.com/scipag/HardeningKitty"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "boot",
+        "bitlocker",
+        "crypto",
+        "baseline",
+        "stig",
+        "stig-wn11-00-000031"
+      ]
+    },
+    {
+      "id": "security.boot.bitlocker-require-removable-encryption",
+      "title": "Deny write access to unencrypted removable drives",
+      "description": "Sets the BitLocker policy that makes removable drives read-only unless they are protected by BitLocker To Go. Paranoid because it can lock users out of writing to any USB stick that is not encrypted.",
+      "rationale": "Forces data written to removable media to be encrypted, preventing casual data exfiltration or loss of an unencrypted stick. High friction: unencrypted removable drives become read-only.",
+      "category": "Security",
+      "level": "Paranoid",
+      "risk": "Breaking",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [
+          "Pro",
+          "Enterprise",
+          "Education"
+        ],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\FVE",
+          "name": "RDVDenyWriteAccess",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "BitLocker/RemovableDrivesRequireEncryption",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\BitLocker Drive Encryption\\Removable Data Drives\\Deny write access to removable drives not protected by BitLocker"
+      },
+      "sideEffects": [
+        "Every removable drive that is not BitLocker-encrypted becomes read-only, so ordinary USB sticks cannot be written to until they are encrypted.",
+        "You must enable BitLocker To Go on the removable drives you need to write to."
+      ],
+      "sources": [
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-24h2-security-baseline/4252801",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "boot",
+        "bitlocker",
+        "crypto",
+        "removable-media",
+        "baseline",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.boot.early-launch-antimalware",
+      "title": "Let the boot-start driver policy block bad drivers (ELAM)",
+      "description": "Sets the Early Launch Antimalware boot-start driver initialization policy to allow good, unknown and bad-but-boot-critical drivers, so known-bad boot drivers are blocked at startup.",
+      "rationale": "ELAM lets the anti-malware driver vet other boot-start drivers before they load, blocking known-bad rootkits. Value 3 is Microsoft's recommended setting; the stricter value 8 (good only) can prevent boot.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SYSTEM\\CurrentControlSet\\Policies\\EarlyLaunch",
+          "name": "DriverLoadPolicy",
+          "type": "Dword",
+          "value": 3,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Early Launch Antimalware\\Boot-Start Driver Initialization Policy"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-CC-000085/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-24h2-security-baseline/4252801",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://github.com/scipag/HardeningKitty"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "boot",
+        "malware",
+        "baseline",
+        "stig",
+        "stig-wn11-cc-000085",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.boot.disable-standby-s1-s3",
+      "title": "Disallow S1-S3 standby to protect keys in RAM",
+      "description": "Disables the S1-S3 sleep (standby) power states on AC and battery, so the machine can only hibernate or shut down. Prevents encryption keys from lingering in powered RAM during sleep.",
+      "rationale": "Keys held in RAM during S1-S3 standby are exposed to cold-boot and DMA attacks; requiring hibernate or shutdown clears them. Modern Standby (S0 low-power idle) devices ignore this setting.",
+      "category": "Security",
+      "level": "Paranoid",
+      "risk": "Breaking",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Power\\PowerSettings\\abfc2519-3608-4c2a-94ea-171b0ed546ab",
+          "name": "ACSettingIndex",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Power\\PowerSettings\\abfc2519-3608-4c2a-94ea-171b0ed546ab",
+          "name": "DCSettingIndex",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Power Management\\Sleep Settings\\Allow standby states (S1-S3) when sleeping (plugged in)"
+      },
+      "sideEffects": [
+        "Laptops can no longer sleep and must hibernate or shut down instead, affecting battery life and resume speed.",
+        "Modern Standby (S0 low-power idle) devices ignore this policy."
+      ],
+      "sources": [
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://github.com/scipag/HardeningKitty"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "boot",
+        "bitlocker",
+        "power",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.feature.disable-sudo",
+      "title": "Disable Sudo for Windows",
+      "description": "Sets the Sudo for Windows policy to Disabled so the sudo command cannot elevate from the console. Sudo is off by default; this pins the disabled state against later changes.",
+      "rationale": "Sudo's inline and input-closed modes let an unelevated process drive the elevated one through the shared console, a privilege-escalation vector Microsoft documents. The 24H2 security baseline sets it Disabled.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 26100,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Sudo",
+          "name": "Enabled",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\System\\Configure the behavior of the sudo command"
+      },
+      "sideEffects": [
+        "Developers who use sudo to elevate in place lose that convenience; the forceNewWindow mode (value 1) is the safer alternative if it is required."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/advanced-settings/sudo/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-24h2-security-baseline/4252801",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://github.com/scipag/HardeningKitty"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "feature",
+        "sudo",
+        "privilege",
+        "baseline",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.feature.disable-recall",
+      "title": "Turn off Windows Recall snapshot saving",
+      "description": "Sets the Windows AI policies that stop Recall from saving screen snapshots and remove the ability to enable Recall, on Copilot+ PCs running 24H2 or later.",
+      "rationale": "Recall periodically screenshots the desktop; even with local encryption those snapshots are a target for local malware or a coerced user who has Windows Hello access. These policies keep the feature from capturing data.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 26100,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+          "name": "DisableAIDataAnalysis",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+          "name": "AllowRecallEnablement",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "WindowsAI/DisableAIDataAnalysis",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows AI\\Turn off saving snapshots for Windows"
+      },
+      "sideEffects": [
+        "Recall and its Click-to-Do-in-Recall timeline are disabled; the user loses the ability to search their activity history."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/manage-recall",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "feature",
+        "recall",
+        "ai",
+        "privacy",
+        "cis"
+      ]
+    },
+    {
+      "id": "security.misc.disable-index-encrypted-files",
+      "title": "Do not index encrypted files in Windows Search",
+      "description": "Turns off Windows Search indexing of EFS/BitLocker-encrypted files and stores so their contents are not written into the plaintext search index.",
+      "rationale": "Indexing encrypted items copies their content into the unencrypted search database, defeating the encryption. The STIG and Microsoft baseline require this disabled.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search",
+          "name": "AllowIndexingEncryptedStoresOrItems",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Search/AllowIndexingEncryptedStoresOrItems",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Search\\Allow indexing of encrypted files"
+      },
+      "sideEffects": [
+        "Encrypted files no longer appear in Windows Search results and must be located manually."
+      ],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-CC-000305/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-24h2-security-baseline/4252801"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "search",
+        "crypto",
+        "baseline",
+        "stig",
+        "stig-wn11-cc-000305"
+      ]
+    },
+    {
+      "id": "security.misc.harden-rss-feeds",
+      "title": "Block RSS enclosure downloads and clear-text feed auth",
+      "description": "Prevents the Windows RSS platform from automatically downloading feed enclosures (attachments) and from sending Basic authentication credentials in clear text over HTTP.",
+      "rationale": "Auto-downloaded enclosures are an unsolicited file-delivery path, and clear-text Basic auth over HTTP exposes credentials. Both are required off by the STIG and Microsoft baseline.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Internet Explorer\\Feeds",
+          "name": "DisableEnclosureDownload",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Internet Explorer\\Feeds",
+          "name": "AllowBasicAuthInClear",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\RSS Feeds\\Prevent downloading of enclosures"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-CC-000295/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-24h2-security-baseline/4252801"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "feeds",
+        "network",
+        "baseline",
+        "stig",
+        "stig-wn11-cc-000295"
+      ]
+    },
+    {
+      "id": "security.misc.disable-ie-com",
+      "title": "Disable Internet Explorer and its COM automation",
+      "description": "Sets the policies that block launching the retired Internet Explorer engine through COM automation and mark Internet Explorer as disabled. Edge IE mode is unaffected.",
+      "rationale": "The legacy MSHTML/IE engine remains a scripting and exploit surface reachable through COM automation; blocking it removes that path. DisableInternetExplorerLaunchViaCOM ships in the 25H2 baseline.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Internet Explorer\\Main",
+          "name": "NotifyDisableIEOptions",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Internet Explorer\\Main",
+          "name": "DisableInternetExplorerLaunchViaCOM",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Internet Explorer\\Prevent launching Internet Explorer engine through COM automation"
+      },
+      "sideEffects": [
+        "Legacy line-of-business apps that automate Internet Explorer through COM stop working; migrate them to Microsoft Edge IE mode."
+      ],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-CC-000391/",
+        "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-25h2-security-baseline/4456231",
+        "https://github.com/scipag/HardeningKitty"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "ie",
+        "network",
+        "baseline",
+        "stig",
+        "stig-wn11-cc-000391"
+      ]
+    },
+    {
+      "id": "security.misc.attachment-manager-motw",
+      "title": "Preserve Mark-of-the-Web on downloaded attachments",
+      "description": "Configures the interactive user's Attachment Manager so zone (Mark-of-the-Web) information is preserved on saved attachments, the unblock control stays visible, and antivirus is always notified when an attachment is opened.",
+      "rationale": "Mark-of-the-Web is what triggers SmartScreen and Office Protected View on downloaded files; preserving it and forcing an antivirus scan keeps those defences working. Applies to the interactive user's hive.",
+      "category": "Security",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "User",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Attachments",
+          "name": "SaveZoneInformation",
+          "type": "Dword",
+          "value": 2,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Attachments",
+          "name": "HideZoneInfoOnProperties",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "User",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Attachments",
+          "name": "ScanWithAntiVirus",
+          "type": "Dword",
+          "value": 3,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "User Configuration\\Administrative Templates\\Windows Components\\Attachment Manager\\Do not preserve zone information in file attachments"
+      },
+      "sideEffects": [],
+      "sources": [
+        "https://stigaview.com/products/win11/v2r8/WN11-UC-000020/",
+        "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "motw",
+        "browser",
+        "baseline",
+        "stig",
+        "stig-wn11-uc-000020",
+        "cis"
+      ]
+    }
+  ]
+}

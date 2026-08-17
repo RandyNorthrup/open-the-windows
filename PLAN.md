@@ -431,12 +431,32 @@ Landed so far (branch `feature/m4-catalogue-population`, committed locally):
   entries in `catalog/updates/windows-update-controls.json` (deferral presets,
   release pin, Delivery Optimization modes, restart deadlines, AU behaviour, MSRT
   and Store update opt-outs, notifications), transcribed from research 03 §5.2–5.12
-  / §6; catalogue now 47 entries, all Draft, `otw catalog validate` clean.
+  / §6; all Draft, `otw catalog validate` clean.
+- **Security hardening catalogue (WP 4.3)**: 147 new Security entries across seven
+  domain files under `catalog/security/` (credential/identity, UAC/logon,
+  network/firewall/remote, Defender + 18 ASR rules, exploit/app-control,
+  audit/media/crypto, boot/features), transcribed from research 04 §4.A–§4.Q with
+  exact registry/DefenderPreference/Command mechanisms, edition/build gating,
+  `managedBy` and `baseline`/`stig`/`cis`/`acsc` provenance tags. chk-only health
+  checks, domain-only settings and no-fallback refusals were excluded; every entry
+  was adversarially re-verified against its research section (value, hex, hive,
+  type, ASR-GUID fidelity). Catalogue now **194 entries** (153 Security), all
+  Draft, `otw catalog validate` clean, 0 warnings. A `BuiltInCatalogTests` guard
+  asserts the ≥120 Security target. **Deferred:** local account / password /
+  lockout policy (research §4.B) is not authorable in the closed action set — a
+  bare `secedit.exe` Command cannot stage its `.inf` — and waits on a dedicated
+  security-policy action kind (candidate for a later milestone) rather than
+  shipping non-functional command entries. Fixed on the way: `otw apply --what-if`
+  now returns 0 for a clean preview even when the plan contains reboot-required
+  entries (the restart requirement is still reported in output).
 
-Still to do (the bulk of M4): populate the catalogue to ≥ 300 research-backed
-entries across the six categories, extend the catalogue tests to the per-category
-targets and the M4 tag/managedBy/reinstallHint rules, and run the per-entry VM
-verification. Note the M3-discovered limitation: over headless SSH the
+Still to do: the updates (WP 4.2, 22 entries) and security (WP 4.3, 153 entries)
+categories are populated; the remaining categories bring the total to ≥ 300 —
+privacy (≥ 90, research 01), performance (≥ 40, research 05 §3/§6), debloat (≥ 60,
+research 05 §1/§2, `reinstallHint` mandatory) and shell (≥ 30, research 05 §6 /
+01). Then extend the catalogue tests to the remaining per-category targets and the
+M4 tag/managedBy/reinstallHint rules, and run the per-entry VM verification. Note
+the M3-discovered limitation: over headless SSH the
 interactive-user resolver returns null, so per-user (`User`-hive) entries cannot
 be VM-verified from the lab session and stay `Draft` pending the M5
 console-session fallback; machine-scope entries verify normally.
