@@ -17,7 +17,10 @@ what was planned (plans live in `PLAN.md`).
   machine (per-kind compliance semantics, worst-of-actions aggregation,
   applicability short-circuit, interactive-user hive targeting) and produces a
   `ScanReport`. Consolidated `FakeReaders`/`FixedTimeProvider` test doubles and 28
-  `ScanEngineTests`. Windows reader implementations, report writers, `otw scan` /
+  `ScanEngineTests`. First Windows reader: `WindowsRegistryReader` (64-bit view,
+  `HKEY_USERS\<sid>` for the user hive — never `HKCU`; values materialised as JSON
+  via `Utf8JsonWriter` so the trimmable project stays reflection-free), with
+  registry-backed tests. Remaining Windows readers, report writers, `otw scan` /
   `otw health` and VM integration are still to come (see docs/milestones/M2-scan.md).
 
 - M1: catalogue model (`OpenTheWindows.Core.Catalog`), JSON Schema
