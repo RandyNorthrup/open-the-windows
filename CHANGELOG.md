@@ -45,10 +45,14 @@ what was planned (plans live in `PLAN.md`).
   build-time generator dependency; deviation recorded in PLAN §7.1); every
   P/Invoke pins `DllImportSearchPath.System32` (CA5392) and `AllowUnsafeBlocks`
   is enabled for the Windows project only, for the generated marshalling stubs.
-  All seven readers have tests that read the real registry / SCM / task store /
-  package store / WMI / power scheme unelevated. Remaining Windows readers
-  (interactive user, managed detection), report writers, `otw scan` /
-  `otw health` and VM integration are still to come (see
+  `WindowsInteractiveUserResolver` resolves the interactive (console/RDP)
+  session's signed-in user via the Terminal Services API
+  (`WTSQuerySessionInformation`) — never the elevated process token — and maps
+  the account to a SID with the managed `NTAccount` translation, reporting
+  whether `HKEY_USERS\<sid>` is loaded. All eight readers have tests that read
+  the real registry / SCM / task store / package store / WMI / power scheme /
+  session unelevated. Remaining Windows work (managed-setting detection, report
+  writers, `otw scan` / `otw health` and VM integration) is still to come (see
   docs/milestones/M2-scan.md).
 
 - M1: catalogue model (`OpenTheWindows.Core.Catalog`), JSON Schema
