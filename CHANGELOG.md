@@ -25,10 +25,15 @@ what was planned (plans live in `PLAN.md`).
   `System.ServiceProcess.ServiceController` 10.0.11), and
   `WindowsScheduledTaskReader` (enabled state via the Task Scheduler 2.0 API;
   new package `TaskScheduler` 2.12.2; a missing task reads as `null`, which the
-  engine treats as not-applicable). All three readers have tests that read the
-  real registry / SCM / task store unelevated. Remaining Windows readers (Appx,
-  optional feature, Defender, power, interactive user, managed detection), report
-  writers, `otw scan` / `otw health` and VM integration are still to come (see
+  engine treats as not-applicable), and `WindowsAppxReader` (per-user, all-users,
+  provisioned and deprovisioned state via WinRT
+  `Windows.Management.Deployment.PackageManager` plus the `Deprovisioned`
+  registry key; the all-users / provisioned enumeration needs elevation and
+  degrades to a documented user-scoped lower bound when denied, never a silent
+  success). All four readers have tests that read the real registry / SCM / task
+  store / package store unelevated. Remaining Windows readers (optional feature,
+  Defender, power, interactive user, managed detection), report writers,
+  `otw scan` / `otw health` and VM integration are still to come (see
   docs/milestones/M2-scan.md).
 
 - M1: catalogue model (`OpenTheWindows.Core.Catalog`), JSON Schema
