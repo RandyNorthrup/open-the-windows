@@ -66,13 +66,13 @@ public sealed class ScanEngine
         {
             if (!entry.AppliesTo.Matches(os))
             {
-                results.Add(new TweakObservation(entry.Id, ComplianceState.NotApplicable, []));
+                results.Add(new TweakObservation(entry.Id, ComplianceState.NotApplicable, entry.Risk, []));
                 continue;
             }
 
             List<ActionObservation> actions = [.. entry.Actions.Select(action => Evaluate(action, userSid))];
             ComplianceState state = actions.Count == 0 ? ComplianceState.Compliant : actions.Max(o => o.State);
-            results.Add(new TweakObservation(entry.Id, state, actions));
+            results.Add(new TweakObservation(entry.Id, state, entry.Risk, actions));
         }
 
         return new ScanReport(_time.GetUtcNow(), os, profileName, results);

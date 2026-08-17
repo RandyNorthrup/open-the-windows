@@ -66,6 +66,17 @@ what was planned (plans live in `PLAN.md`).
   / `otw health`, the no-write architectural guard, Stryker.NET, and VM
   integration) is still to come (see docs/milestones/M2-scan.md).
 
+- M2: scan report writers (`OpenTheWindows.Core.Reports`). `IReportWriter` with
+  four formats — `JsonReportWriter` (source-generated, camelCase, indented),
+  `CsvReportWriter` (RFC 4180, `\n` line endings, one row per action),
+  `HtmlReportWriter` (a single self-contained file: inline CSS, no external
+  scripts/styles/fonts/images, so it renders offline as archivable evidence),
+  and `SarifReportWriter` (SARIF 2.1.0; one rule per drifting id; result `level`
+  derived from the entry's risk tier — Breaking ⇒ error, Advanced ⇒ warning,
+  else note). `TweakObservation` now carries the entry's `RiskTier` so reports
+  can express severity. Golden/validation tests cover all four (CSV exact-string
+  golden, JSON/SARIF parse-and-assert, HTML self-containment).
+
 - M1: catalogue model (`OpenTheWindows.Core.Catalog`), JSON Schema
   `catalog/schema/tweak.schema.json`, embedded loader with directory overrides
   and a structural validator (stable rule ids), 29 Draft entries across six
