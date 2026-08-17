@@ -326,8 +326,8 @@ or the agent instruction files disagree.
 | # | Spec | Status | Certification |
 | --- | ------ | -------- | --------------- |
 | M0 | Scaffold, gates, research (recorded inline below) | DONE 2026-08-16 | inline (§8.1) |
-| M1 | [docs/milestones/M1-catalogue.md](docs/milestones/M1-catalogue.md) — catalogue model, schema, loader, `otw catalog` | in progress (uncommitted WIP; see spec "Current WIP") | `docs/certification/M1.md` (pending) |
-| M2 | [docs/milestones/M2-scan.md](docs/milestones/M2-scan.md) — detection engine, health checks, reports | not started | pending |
+| M1 | [docs/milestones/M1-catalogue.md](docs/milestones/M1-catalogue.md) — catalogue model, schema, loader, `otw catalog` | DONE 2026-08-16 | `docs/certification/M1.md` |
+| M2 | [docs/milestones/M2-scan.md](docs/milestones/M2-scan.md) — detection engine, health checks, reports | DONE 2026-08-16 | `docs/certification/M2.md` |
 | M3 | [docs/milestones/M3-apply.md](docs/milestones/M3-apply.md) — apply/verify/revert, journal, restore points, Event Log | not started | pending |
 | M4 | [docs/milestones/M4-catalogue-population.md](docs/milestones/M4-catalogue-population.md) — ≥ 300 entries + VM verification + WU guardrails | not started | pending |
 | M5 | [docs/milestones/M5-profiles-enterprise.md](docs/milestones/M5-profiles-enterprise.md) — profiles, all-users, MDM/GPO awareness, drift task | not started | pending |
@@ -364,7 +364,7 @@ Catalogue model + JSON Schema + embedded loader (directory overrides) + structur
 validator (stable rule ids) + read-only `otw catalog list|show|validate`, 29 Draft
 entries, a `catalog` quality gate, and 141 tests (87.7% line / 78.5% branch).
 
-### M2 — Scan (not started)
+### M2 — Scan (DONE 2026-08-16)
 
 ### M3 — Apply (not started)
 

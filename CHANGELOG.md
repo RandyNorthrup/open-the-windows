@@ -158,6 +158,11 @@ what was planned (plans live in `PLAN.md`).
 ### Changed
 
 - PLAN.md section 8 is now an index/status board over the milestone specs.
+- Milestone M2 (Scan) certified and marked DONE: `docs/certification/M2.md`
+  records all 12 gates green (line 89.3% / branch 75.3%) and the five acceptance
+  criteria verified end-to-end on the lab VM (Windows 11 Pro 25H2). PLAN.md
+  section 8 and `docs/milestones/M2-scan.md` updated; the M1 status-board row was
+  also corrected to DONE.
 
 ### Fixed
 
