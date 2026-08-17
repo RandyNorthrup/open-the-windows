@@ -110,4 +110,44 @@ internal static class CommandSupport
     {
         Description = "Include Draft entries (verified-only by default).",
     };
+
+    /// <summary>The shared <c>--only</c> option: restrict the run to a single entry id.</summary>
+    public static Option<string?> OnlyOption() => new("--only")
+    {
+        Description = "Operate on only the entry with this exact id (ignores the profile selection; includes Draft). Used for per-entry verification.",
+    };
+
+    /// <summary>
+    /// Selects the entries a scan/apply run operates on. With <paramref name="onlyId"/>
+    /// set it picks exactly that entry from the catalogue (regardless of level or
+    /// status); otherwise it uses the named level profile. On an unknown
+    /// <paramref name="onlyId"/> it writes the reason and returns <see langword="false"/>.
+    /// </summary>
+    public static bool TrySelectEntries(
+        TweakCatalog catalog,
+        Level level,
+        bool includeDraft,
+        string? onlyId,
+        TextWriter stderr,
+        out IReadOnlyList<TweakDefinition> entries)
+    {
+        ArgumentNullException.ThrowIfNull(catalog);
+
+        if (!string.IsNullOrEmpty(onlyId))
+        {
+            TweakDefinition? entry = catalog.Entries.FirstOrDefault(e => string.Equals(e.Id.Value, onlyId, StringComparison.Ordinal));
+            if (entry is null)
+            {
+                stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"No catalogue entry with id '{onlyId}'."));
+                entries = [];
+                return false;
+            }
+
+            entries = [entry];
+            return true;
+        }
+
+        entries = NamedProfile.Select(catalog, level, includeDraft);
+        return true;
+    }
 }

@@ -335,7 +335,7 @@ or the agent instruction files disagree.
 | M1 | [docs/milestones/M1-catalogue.md](docs/milestones/M1-catalogue.md) — catalogue model, schema, loader, `otw catalog` | DONE 2026-08-16 | `docs/certification/M1.md` |
 | M2 | [docs/milestones/M2-scan.md](docs/milestones/M2-scan.md) — detection engine, health checks, reports | DONE 2026-08-16 | `docs/certification/M2.md` |
 | M3 | [docs/milestones/M3-apply.md](docs/milestones/M3-apply.md) — apply/verify/revert, journal, restore points, Event Log | DONE 2026-08-17 | `docs/certification/M3.md` |
-| M4 | [docs/milestones/M4-catalogue-population.md](docs/milestones/M4-catalogue-population.md) — ≥ 300 entries + VM verification + WU guardrails | not started | pending |
+| M4 | [docs/milestones/M4-catalogue-population.md](docs/milestones/M4-catalogue-population.md) — ≥ 300 entries + VM verification + WU guardrails | in progress | pending |
 | M5 | [docs/milestones/M5-profiles-enterprise.md](docs/milestones/M5-profiles-enterprise.md) — profiles, all-users, MDM/GPO awareness, drift task | not started | pending |
 | M6 | [docs/milestones/M6-gui.md](docs/milestones/M6-gui.md) — WPF GUI | not started | pending |
 | M7 | [docs/milestones/M7-packaging.md](docs/milestones/M7-packaging.md) — MSI, ZIP, winget, release workflow | not started | pending |
@@ -407,7 +407,34 @@ exception branches are structurally unreachable on any single machine run).
   support, stryker-net#3094); the M3 spec's "mutation now enforcing" cannot hold
   until that lands, so the gate still reports DEFERRED rather than a false pass.
 
-### M4 — Catalogue population (not started)
+### M4 — Catalogue population (in progress)
+
+Landed so far (branch `feature/m4-catalogue-population`, committed locally):
+
+- **Windows Update guardrails** (`Core/Updates`): `PauseCalculator` (six
+  Settings-app pause values as ISO-8601 UTC, 35-day cap, opt-in extended pause to
+  a configurable ceiling, default 365), `EndOfServicingCalendar` (embedded
+  `catalog/updates/eos.json`, per-track days-to-EOS, 90-day warning), and
+  `UpdateControlService` (pause / resume / status all routed through the apply
+  engine so they are journaled and reversible; extended pause writes Windows
+  Event 4002; resume reverts the latest Open the Windows pause and triggers
+  `usoclient StartScan`). New CLI `otw updates pause|resume|status` and a
+  `--only <id>` selector on `scan`/`apply`. Wired by
+  `WindowsUpdateControlFactory`.
+- **Defender safety boundary** (`Core/Engine/DefenderSafety`): the engine refuses
+  any registry write under `Windows Defender\Signature Updates` and any Defender
+  preference that disables a protection or signature updates (audited refusal);
+  `usoclient.exe` added to the command allow-list with a validator test.
+- **Refusal / not-included docs**: `docs/refusals.md` and
+  `docs/not-included.md`, linked from the README.
+
+Still to do (the bulk of M4): populate the catalogue to ≥ 300 research-backed
+entries across the six categories, extend the catalogue tests to the per-category
+targets and the M4 tag/managedBy/reinstallHint rules, and run the per-entry VM
+verification. Note the M3-discovered limitation: over headless SSH the
+interactive-user resolver returns null, so per-user (`User`-hive) entries cannot
+be VM-verified from the lab session and stay `Draft` pending the M5
+console-session fallback; machine-scope entries verify normally.
 
 ### M5 — Profiles and enterprise (not started)
 

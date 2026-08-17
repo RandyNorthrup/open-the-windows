@@ -34,7 +34,7 @@ internal static class ScanCommand
         TextWriter stderr = parseResult.InvocationConfiguration.Error;
 
         if (!CommandSupport.TryResolveProfileCatalog(
-            services, parseResult, options.Profile, options.CatalogDir, ExitCodes.Error, stderr,
+            services, parseResult, options.Common.Profile, options.Common.CatalogDir, ExitCodes.Error, stderr,
             out Level level, out TweakCatalog catalog, out int exitCode))
         {
             return exitCode;
@@ -47,8 +47,14 @@ internal static class ScanCommand
             return ExitCodes.Error;
         }
 
-        string profileName = parseResult.GetValue(options.Profile)!;
-        IReadOnlyList<TweakDefinition> entries = NamedProfile.Select(catalog, level, parseResult.GetValue(options.IncludeDraft));
+        string profileName = parseResult.GetValue(options.Common.Profile)!;
+        if (!CommandSupport.TrySelectEntries(
+            catalog, level, parseResult.GetValue(options.Common.IncludeDraft), parseResult.GetValue(options.Common.Only), stderr,
+            out IReadOnlyList<TweakDefinition> entries))
+        {
+            return ExitCodes.Error;
+        }
+
         ScanReport report = services.CreateScanEngine().Scan(entries, profileName);
 
         string? outPath = parseResult.GetValue(options.Out);
@@ -104,11 +110,7 @@ internal static class ScanCommand
 
     private sealed class ScanOptions
     {
-        public Option<string> Profile { get; } = CommandSupport.ProfileOption();
-
-        public Option<string?> CatalogDir { get; } = CommandSupport.CatalogDirOption();
-
-        public Option<bool> IncludeDraft { get; } = CommandSupport.IncludeDraftOption();
+        public CommonProfileOptions Common { get; } = new();
 
         public Option<bool> Json { get; } = new("--json") { Description = "Write a JSON report." };
 
@@ -122,9 +124,7 @@ internal static class ScanCommand
 
         public void AddTo(Command command)
         {
-            command.Options.Add(Profile);
-            command.Options.Add(CatalogDir);
-            command.Options.Add(IncludeDraft);
+            Common.AddTo(command);
             command.Options.Add(Json);
             command.Options.Add(Csv);
             command.Options.Add(Html);

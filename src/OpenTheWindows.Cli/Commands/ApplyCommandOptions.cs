@@ -5,11 +5,7 @@ namespace OpenTheWindows.Cli.Commands;
 /// <summary>The options of <see cref="ApplyCommand"/>, grouped so the action stays small.</summary>
 internal sealed class ApplyCommandOptions
 {
-    public Option<string> Profile { get; } = CommandSupport.ProfileOption();
-
-    public Option<string?> CatalogDir { get; } = CommandSupport.CatalogDirOption();
-
-    public Option<bool> IncludeDraft { get; } = CommandSupport.IncludeDraftOption();
+    public CommonProfileOptions Common { get; } = new();
 
     public Option<bool> WhatIf { get; } = new("--what-if")
     {
@@ -54,9 +50,7 @@ internal sealed class ApplyCommandOptions
     public void AddTo(Command command)
     {
         ArgumentNullException.ThrowIfNull(command);
-        command.Options.Add(Profile);
-        command.Options.Add(CatalogDir);
-        command.Options.Add(IncludeDraft);
+        Common.AddTo(command);
         command.Options.Add(WhatIf);
         command.Options.Add(NoRestorePoint);
         command.Options.Add(BreakGlass);

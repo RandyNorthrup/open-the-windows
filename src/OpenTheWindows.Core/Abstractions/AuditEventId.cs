@@ -40,6 +40,9 @@ public enum AuditEventId
     /// <summary>A managed setting was overridden under break-glass.</summary>
     BreakGlass = 4001,
 
+    /// <summary>An extended Windows Update pause (beyond Microsoft's 35-day cap) was applied.</summary>
+    ExtendedPause = 4002,
+
     /// <summary>An unexpected error.</summary>
     Error = 9000,
 }

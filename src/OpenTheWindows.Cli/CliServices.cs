@@ -2,6 +2,7 @@ using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.Core.Engine;
+using OpenTheWindows.Core.Updates;
 using OpenTheWindows.Windows;
 using OpenTheWindows.Windows.Readers;
 
@@ -15,6 +16,7 @@ namespace OpenTheWindows.Cli;
 /// <param name="LoadCatalog">Loads the catalogue; the argument is an optional override directory.</param>
 /// <param name="CreateScanEngine">Builds a scan engine over the real state readers.</param>
 /// <param name="CreateApplyEngine">Builds the transactional apply engine over the real readers, writers and services.</param>
+/// <param name="CreateUpdateControl">Builds the Windows Update guardrail service over the real apply engine and adapters.</param>
 /// <param name="Health">The read-only machine health probe.</param>
 /// <param name="Elevation">The process elevation context.</param>
 internal sealed record CliServices(
@@ -22,6 +24,7 @@ internal sealed record CliServices(
     Func<string?, CatalogLoadResult> LoadCatalog,
     Func<ScanEngine> CreateScanEngine,
     Func<ApplyEngine> CreateApplyEngine,
+    Func<UpdateControlService> CreateUpdateControl,
     IMachineHealthProbe Health,
     IElevationContext Elevation)
 {
@@ -32,6 +35,7 @@ internal sealed record CliServices(
             directory => directory is null ? CatalogLoader.LoadBuiltIn() : CatalogLoader.LoadWithDirectory(directory),
             CreateDefaultScanEngine,
             CreateDefaultApplyEngine,
+            static () => WindowsUpdateControlFactory.Create(),
             new WindowsMachineHealthProbe(),
             new WindowsElevationContext());
 

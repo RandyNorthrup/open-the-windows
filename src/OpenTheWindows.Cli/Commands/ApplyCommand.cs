@@ -37,13 +37,13 @@ internal static class ApplyCommand
         TextWriter stderr = parseResult.InvocationConfiguration.Error;
 
         if (!CommandSupport.TryResolveProfileCatalog(
-            services, parseResult, options.Profile, options.CatalogDir, ExitCodes.InvalidInput, stderr,
+            services, parseResult, options.Common.Profile, options.Common.CatalogDir, ExitCodes.InvalidInput, stderr,
             out Level level, out TweakCatalog catalog, out int exitCode))
         {
             return exitCode;
         }
 
-        string profileName = parseResult.GetValue(options.Profile)!;
+        string profileName = parseResult.GetValue(options.Common.Profile)!;
         bool whatIf = parseResult.GetValue(options.WhatIf);
         if (!whatIf && !services.Elevation.IsElevated)
         {
@@ -51,7 +51,13 @@ internal static class ApplyCommand
             return ExitCodes.ElevationRequired;
         }
 
-        IReadOnlyList<TweakDefinition> entries = NamedProfile.Select(catalog, level, parseResult.GetValue(options.IncludeDraft));
+        if (!CommandSupport.TrySelectEntries(
+            catalog, level, parseResult.GetValue(options.Common.IncludeDraft), parseResult.GetValue(options.Common.Only), stderr,
+            out IReadOnlyList<TweakDefinition> entries))
+        {
+            return ExitCodes.InvalidInput;
+        }
+
         var applyOptions = new ApplyOptions(
             whatIf,
             !parseResult.GetValue(options.NoRestorePoint),

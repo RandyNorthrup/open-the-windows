@@ -55,7 +55,7 @@ properties are **errors** (schema `additionalProperties:false` and STJ
 | `OptionalFeature` | `name` (DISM name), `enabled`, `default` | |
 | `DefenderPreference` | `property`, `value`, `default` | `MSFT_MpPreference` property names; never anything that disables real-time protection or signature updates. |
 | `PowerSetting` | `subgroupGuid`, `settingGuid`, `acValue`, `dcValue` | Active scheme only. |
-| `Command` | `executable` (allow-list: `powercfg.exe` `netsh.exe` `auditpol.exe` `secedit.exe` `dism.exe` `fsutil.exe`), `arguments[]`, `revertArguments[]` | Last resort; both directions required; no shell; arguments are passed verbatim (no interpolation). |
+| `Command` | `executable` (allow-list: `powercfg.exe` `netsh.exe` `auditpol.exe` `secedit.exe` `dism.exe` `fsutil.exe` `usoclient.exe`), `arguments[]`, `revertArguments[]` | Last resort; both directions required; no shell; arguments are passed verbatim (no interpolation). |
 
 ## Authoring workflow
 

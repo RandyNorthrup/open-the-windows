@@ -6,7 +6,8 @@ namespace OpenTheWindows.TestSupport.Fakes;
 /// <summary>Wires an <see cref="ApplyEngine"/> and its scan engine over a single <see cref="FakeMachine"/>.</summary>
 public static class FakeApplyEngine
 {
-    private static readonly DateTimeOffset DefaultInstant = new(2026, 8, 17, 0, 0, 0, TimeSpan.Zero);
+    /// <summary>The fixed instant the fake engine and its dependents use when no clock is given.</summary>
+    public static readonly DateTimeOffset DefaultInstant = new(2026, 8, 17, 0, 0, 0, TimeSpan.Zero);
 
     /// <summary>Builds the engine and returns a harness exposing every fake for assertions.</summary>
     /// <param name="machine">The in-memory machine (create it with the same <paramref name="trace"/> to assert write ordering).</param>

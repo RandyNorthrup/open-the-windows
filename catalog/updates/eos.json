@@ -1,0 +1,14 @@
+{
+  "source": "https://learn.microsoft.com/lifecycle/products/windows-11-home-and-pro",
+  "asOf": "2026-08-11",
+  "releases": [
+    { "version": "26H1", "build": 28000, "family": "Consumer",   "endOfService": "2028-03-14" },
+    { "version": "26H1", "build": 28000, "family": "Enterprise",  "endOfService": "2029-03-13" },
+    { "version": "25H2", "build": 26200, "family": "Consumer",   "endOfService": "2027-10-12" },
+    { "version": "25H2", "build": 26200, "family": "Enterprise",  "endOfService": "2028-10-10" },
+    { "version": "24H2", "build": 26100, "family": "Consumer",   "endOfService": "2026-10-13" },
+    { "version": "24H2", "build": 26100, "family": "Enterprise",  "endOfService": "2027-10-12" },
+    { "version": "23H2", "build": 22631, "family": "Consumer",   "endOfService": "2025-11-11" },
+    { "version": "23H2", "build": 22631, "family": "Enterprise",  "endOfService": "2026-11-10" }
+  ]
+}

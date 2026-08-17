@@ -173,7 +173,7 @@
       "required": ["kind", "executable", "arguments", "revertArguments"],
       "properties": {
         "kind": { "const": "Command" },
-        "executable": { "enum": ["powercfg.exe", "netsh.exe", "auditpol.exe", "secedit.exe", "dism.exe", "fsutil.exe"] },
+        "executable": { "enum": ["powercfg.exe", "netsh.exe", "auditpol.exe", "secedit.exe", "dism.exe", "fsutil.exe", "usoclient.exe"] },
         "arguments": { "type": "array", "minItems": 1, "items": { "type": "string" } },
         "revertArguments": { "type": "array", "minItems": 1, "items": { "type": "string" } }
       }

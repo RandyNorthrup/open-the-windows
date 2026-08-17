@@ -2,6 +2,7 @@ using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.Core.Engine;
+using OpenTheWindows.Core.Updates;
 using OpenTheWindows.TestSupport.Fakes;
 
 namespace OpenTheWindows.Cli.Tests;
@@ -22,6 +23,7 @@ internal static class TestCli
         FakeReaders? readers = null,
         IMachineHealthProbe? health = null,
         Func<ApplyEngine>? createApplyEngine = null,
+        Func<UpdateControlService>? createUpdateControl = null,
         IElevationContext? elevation = null)
     {
         FakeReaders scanReaders = readers ?? new FakeReaders();
@@ -30,6 +32,7 @@ internal static class TestCli
             loadCatalog,
             () => FakeScanEngine.Create(scanReaders, FakeOperatingSystemInfo.Windows11Pro24H2(), FixedTime),
             createApplyEngine ?? (() => FakeApplyEngine.Create(new FakeMachine()).Engine),
+            createUpdateControl ?? (() => FakeUpdateControl.Create(new FakeMachine()).Service),
             health ?? new FakeHealthProbe([]),
             elevation ?? new FakeElevationContext(isElevated: true));
     }

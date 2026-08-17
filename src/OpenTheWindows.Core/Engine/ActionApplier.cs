@@ -42,6 +42,10 @@ public sealed class ActionApplier
             CommandAction c => CommandAction.AllowedExecutables.Contains(c.Executable)
                 ? null
                 : string.Create(CultureInfo.InvariantCulture, $"Executable '{c.Executable}' is not on the command allow-list."),
+            RegistryAction r when DefenderSafety.RefusesRegistry(r) =>
+                string.Create(CultureInfo.InvariantCulture, $"Writing under '{DefenderSafety.SignatureUpdatesPathFragment}' would interfere with Defender security-intelligence updates."),
+            DefenderPreferenceAction d when DefenderSafety.RefusesDefender(d) =>
+                string.Create(CultureInfo.InvariantCulture, $"Defender preference '{d.Property}' would disable a protection and must not be changed."),
             _ => null,
         };
     }

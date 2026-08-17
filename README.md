@@ -121,7 +121,23 @@ Windows Event Log and JSONL ([docs/event-log.md](docs/event-log.md)).
 
 `otw revert <runId|last> [--what-if] [--json]` restores the state captured before
 a prior run, journaling a new revert run. `otw history [--json]` lists prior
-apply and revert runs, newest first.
+apply and revert runs, newest first. `scan` and `apply` also take `--only <id>`
+to operate on a single catalogue entry (including Draft) for per-entry
+verification.
+
+`otw updates` controls Windows Update safely and reversibly (research 03):
+`pause --days <1-35> [--extended] [--what-if]` writes the Settings-app pause
+values (the six `UX\Settings` timestamps) so updates stop for that window — the
+default cap is Microsoft's 35 days, and `--extended` raises it up to a
+configurable ceiling as an Advanced-risk change with a warning and a Windows
+Event 4002; `resume [--what-if]` clears an Open the Windows pause and triggers a
+fresh scan; `status` shows the running version, its days to end-of-servicing
+(with a 90-day warning), the pause state and any `TargetReleaseVersion` pin.
+Pause and resume need elevation and are journaled/reversible; status is
+read-only. What the app **refuses** to do to Windows Update (and Defender,
+services, the shell) is listed in [docs/refusals.md](docs/refusals.md); placebo
+and low-value "optimisations" it deliberately leaves out are in
+[docs/not-included.md](docs/not-included.md).
 
 Publish (single-file trimmed CLI + self-contained app + SBOM + hashes):
 

@@ -1,4 +1,6 @@
 using OpenTheWindows.Core.Catalog;
+using OpenTheWindows.Core.Catalog.Actions;
+using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Model;
 
 namespace OpenTheWindows.Core.Tests.Catalog;
@@ -67,6 +69,34 @@ public sealed class BuiltInCatalogTests
         {
             Assert.NotEmpty(entry.VerifiedOn);
             Assert.All(entry.VerifiedOn, v => Assert.False(string.IsNullOrWhiteSpace(v.Evidence)));
+        }
+    }
+
+    [Fact]
+    public void Usoclient_is_on_the_command_allow_list()
+        => Assert.Contains("usoclient.exe", CommandAction.AllowedExecutables, StringComparer.OrdinalIgnoreCase);
+
+    [Fact]
+    public void No_entry_touches_defender_signature_updates_or_disables_a_protection()
+    {
+        foreach (TweakDefinition entry in Load().Entries)
+        {
+            foreach (ITweakAction action in entry.Actions)
+            {
+                switch (action)
+                {
+                    case RegistryAction registry:
+                        Assert.False(DefenderSafety.RefusesRegistry(registry),
+                            string.Create(System.Globalization.CultureInfo.InvariantCulture, $"{entry.Id.Value} writes under Defender Signature Updates."));
+                        break;
+                    case DefenderPreferenceAction defender:
+                        Assert.False(DefenderSafety.RefusesDefender(defender),
+                            string.Create(System.Globalization.CultureInfo.InvariantCulture, $"{entry.Id.Value} disables a Defender protection."));
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     }
 }

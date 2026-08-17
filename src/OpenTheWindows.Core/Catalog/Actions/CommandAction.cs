@@ -22,6 +22,7 @@ public sealed record CommandAction(
         "secedit.exe",
         "dism.exe",
         "fsutil.exe",
+        "usoclient.exe",
     };
 
     /// <inheritdoc />

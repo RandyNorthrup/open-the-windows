@@ -9,6 +9,35 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M4 (Windows Update guardrails): the safe, reversible update controls
+  (`OpenTheWindows.Core.Updates`). `PauseCalculator` computes the six Settings-app
+  pause values (`PauseUpdatesStartTime`/`ExpiryTime`,
+  `PauseFeatureUpdatesStartTime`/`EndTime`, `PauseQualityUpdatesStartTime`/`EndTime`)
+  as ISO-8601 UTC strings (research 03 §5.1), capping the pause at Microsoft's
+  35 days by default and up to a configurable ceiling (default 365) with an
+  opt-in extended pause. `EndOfServicingCalendar` loads an embedded
+  `catalog/updates/eos.json` snapshot (research 03 §4.2) and answers days-to-end
+  -of-servicing per version and servicing track, warning within 90 days.
+  `UpdateControlService` runs pause / resume / status through the transactional
+  apply engine so every change is journaled and reversible: pause applies the six
+  values (and writes a Windows Event 4002 when extended); resume reverts the most
+  recent Open the Windows pause and triggers a fresh scan (`usoclient StartScan`);
+  status reports the running version, its end-of-servicing warning, the pause
+  state and any `TargetReleaseVersion` pin. New CLI `otw updates pause`,
+  `otw updates resume` and `otw updates status`, plus a `--only <id>` selector on
+  `scan` and `apply` for per-entry verification. Wired through the Windows
+  adapters by `WindowsUpdateControlFactory`.
+- Defender safety boundary (`OpenTheWindows.Core.Engine.DefenderSafety`): the
+  engine refuses, at plan time, any registry write under
+  `Windows Defender\Signature Updates` and any Defender preference that would
+  disable a protection or signature updates — recorded as an audited refusal and
+  never partially applied. `usoclient.exe` was added to the command allow-list
+  (with a validator test) for the resume scan.
+- Published safety documentation: [docs/refusals.md](docs/refusals.md) (what the
+  app refuses to do to Windows Update, Defender, security services, apps and the
+  network, and what it does instead) and
+  [docs/not-included.md](docs/not-included.md) (the placebo / low-value
+  "optimisation" tweaks it deliberately leaves out), both linked from the README.
 - M3 (apply/verify/revert): the transactional change engine. `OpenTheWindows.Core.Engine.ApplyEngine`
   plans a run (dependency-ordered, flagging conflicts, managed settings, risk
   gating and not-applicable entries), then applies it journal-first — every prior
