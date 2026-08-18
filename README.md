@@ -108,10 +108,13 @@ trust store (`%ProgramData%\OpenTheWindows\trusted-keys\*.pem`). Signatures are
 taken over a canonical form of the JSON, so they survive re-formatting. Exit 0
 when valid/verified, 4 on invalid input or a signature that does not verify.
 
-`otw scan --profile <basic|balanced|strict|paranoid>` runs a read-only drift
-scan of that built-in level profile against the machine — it never changes
-anything. `--include-draft` also scans Draft entries; `--catalog-dir` adds an
-override directory; `--json`, `--csv`, `--html` or `--sarif` (with optional
+`otw scan --profile <value>` runs a read-only drift scan against the machine —
+it never changes anything. `--profile` accepts a **level** (`basic`, `balanced`,
+`strict`, `paranoid`, applied uniformly), a **built-in profile id** (`home`,
+`enterprise-workstation`, … — see `otw profile list`), or a **path to a profile
+`.json` file**; a named profile carries its own per-category dials, include/
+exclude, risk gate and Draft setting. `--include-draft` also scans Draft entries
+(level profiles only); `--catalog-dir` adds an override directory; `--json`, `--csv`, `--html` or `--sarif` (with optional
 `--out <file>`) write a report instead of the text summary. Exit 0 = compliant,
 1 = drift, 2 = error, 3 = unsupported platform. Report formats are documented in
 [docs/reports.md](docs/reports.md).
@@ -121,10 +124,11 @@ TPM, Defender, BitLocker, firewall, and more — research 04 §5). It only reads
 checks whose source needs elevation report `Unknown`. Exit 0 unless the command
 itself errors.
 
-`otw apply --profile <basic|balanced|strict|paranoid>` **applies** a profile
-transactionally (elevated). It journals every prior state before changing
-anything, verifies each change by re-reading it, and rolls the whole run back if
-any step fails. `--what-if` plans without changing anything; `--include-draft`
+`otw apply --profile <value>` **applies** a profile transactionally (elevated),
+where `--profile` accepts the same three forms as `scan` (a level, a built-in
+profile id, or a profile `.json` file). It journals every prior state before
+changing anything, verifies each change by re-reading it, and rolls the whole run
+back if any step fails. `--what-if` plans without changing anything; `--include-draft`
 also applies Draft entries; a System Restore point is created first unless
 `--no-restore-point`; `--allow-advanced` / `--allow-breaking` permit higher-risk
 entries (Breaking also needs typed confirmation unless `--yes`); `--break-glass`

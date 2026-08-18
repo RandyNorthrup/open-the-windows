@@ -544,6 +544,13 @@ committed locally):
 - **Profile CLI** (`otw profile list|show|validate`): read-only inspection of the
   built-in profiles or an operator profile file (built-in id or path), with
   `--json` on each and schema + catalogue-aware validation on `validate`.
+- **Profiles drive scan/apply** (`CommandSupport.TrySelectEntries`): `--profile`
+  on `scan`/`apply` now resolves a level name (uniform, as before), a built-in
+  profile id, or a profile file — the latter two through `ProfileResolver` using
+  the machine facts from `otw doctor`. Only entry *selection* is profile-driven so
+  far; a profile's apply `options`/`scope` are not yet consumed (deferred to the
+  all-users work package). The engine layer is unchanged (it already takes an
+  explicit entry set).
 - **Profile signing** (`Core/Profiles/ProfileSignature`, `otw profile sign|verify`):
   detached ES256 (ECDSA P-256 / SHA-256, decision D11) over a canonicalised form
   of the profile JSON; `keyId` = hex SHA-256 of the SubjectPublicKeyInfo; `sign`

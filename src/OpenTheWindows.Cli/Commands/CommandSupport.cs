@@ -1,10 +1,12 @@
 using System.CommandLine;
 using System.Globalization;
 using OpenTheWindows.Core;
+using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Model;
+using OpenTheWindows.Core.Profiles;
 
 namespace OpenTheWindows.Cli.Commands;
 
@@ -16,35 +18,22 @@ namespace OpenTheWindows.Cli.Commands;
 internal static class CommandSupport
 {
     /// <summary>
-    /// Runs the shared preamble of a profile command: supported platform, resolvable
-    /// profile and a loadable catalogue. On failure writes the reason and yields the
-    /// exit code (unknown profile uses <paramref name="unknownProfileExit"/>).
+    /// Runs the shared preamble of a profile command: supported platform and a
+    /// loadable catalogue. Also yields the machine facts so the caller can resolve
+    /// a profile. On failure writes the reason and yields the exit code.
     /// </summary>
     public static bool TryResolveProfileCatalog(
         CliServices services,
         ParseResult parseResult,
-        Option<string> profileOption,
-        Option<string?> onlyOption,
         Option<string?> catalogDirOption,
-        int unknownProfileExit,
         TextWriter stderr,
-        out Level level,
         out TweakCatalog catalog,
-        out string profileLabel,
+        out OperatingSystemFacts facts,
         out int exitCode)
     {
-        level = default;
         catalog = null!;
-        profileLabel = string.Empty;
 
-        if (!IsSupported(services.Doctor, stderr, out exitCode))
-        {
-            return false;
-        }
-
-        if (!TryResolveLevelAndLabel(
-                parseResult.GetValue(onlyOption), parseResult.GetValue(profileOption) ?? string.Empty,
-                unknownProfileExit, stderr, out level, out profileLabel, out exitCode))
+        if (!IsSupported(services.Doctor, stderr, out exitCode, out facts))
         {
             return false;
         }
@@ -68,50 +57,118 @@ internal static class CommandSupport
     }
 
     /// <summary>
-    /// Resolves the level and the run/report label for a scan or apply. In profile
-    /// mode (<paramref name="onlyId"/> empty) a named <paramref name="profileName"/>
-    /// is required and selects the level. With <c>--only</c> the profile is ignored:
-    /// an explicit profile still sets the level label, otherwise the level is a
-    /// placeholder (<see cref="TrySelectEntries"/> ignores it) and the run is
-    /// labelled <c>only:&lt;id&gt;</c> so history reads clearly.
+    /// Selects the entries a scan/apply run operates on and the run/report label.
+    /// <c>--only &lt;id&gt;</c> wins and picks exactly that entry (regardless of level
+    /// or status). Otherwise <paramref name="profileValue"/> is resolved as, in
+    /// order: a built-in level name (<c>basic</c>..<c>paranoid</c>, applied uniformly
+    /// with <paramref name="includeDraft"/>); a built-in profile id or a path to a
+    /// profile <c>.json</c> file (resolved through <see cref="ProfileResolver"/>,
+    /// which honours the profile's own dials, include/exclude, risk gate and draft
+    /// setting). On an unknown or unloadable value it writes the reason and yields
+    /// <paramref name="unknownProfileExit"/>.
     /// </summary>
-    private static bool TryResolveLevelAndLabel(
-        string? onlyId, string profileName, int unknownProfileExit, TextWriter stderr,
-        out Level level, out string profileLabel, out int exitCode)
+    public static bool TrySelectEntries(
+        TweakCatalog catalog,
+        OperatingSystemFacts facts,
+        string? profileValue,
+        string? onlyId,
+        bool includeDraft,
+        int unknownProfileExit,
+        TextWriter stderr,
+        out IReadOnlyList<TweakDefinition> entries,
+        out string label,
+        out int exitCode)
     {
-        level = Level.Basic;
-        profileLabel = string.Empty;
+        ArgumentNullException.ThrowIfNull(catalog);
+        entries = [];
+        label = string.Empty;
         exitCode = ExitCodes.Success;
 
-        if (string.IsNullOrEmpty(onlyId))
+        if (!string.IsNullOrEmpty(onlyId))
         {
-            if (string.IsNullOrEmpty(profileName))
+            TweakDefinition? entry = catalog.Entries.FirstOrDefault(e => string.Equals(e.Id.Value, onlyId, StringComparison.Ordinal));
+            if (entry is null)
             {
-                stderr.WriteLine("Option '--profile' is required unless '--only <id>' is given.");
+                stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"No catalogue entry with id '{onlyId}'."));
                 exitCode = unknownProfileExit;
                 return false;
             }
-        }
-        else if (string.IsNullOrEmpty(profileName))
-        {
-            profileLabel = string.Create(CultureInfo.InvariantCulture, $"only:{onlyId}");
+
+            entries = [entry];
+            label = string.Create(CultureInfo.InvariantCulture, $"only:{onlyId}");
             return true;
         }
 
-        if (!TryResolveProfile(profileName, stderr, out level))
+        string value = profileValue ?? string.Empty;
+        if (string.IsNullOrEmpty(value))
         {
+            stderr.WriteLine("Option '--profile' is required unless '--only <id>' is given.");
             exitCode = unknownProfileExit;
             return false;
         }
 
-        profileLabel = profileName;
+        if (NamedProfile.TryResolve(value, out Level level))
+        {
+            entries = NamedProfile.Select(catalog, level, includeDraft);
+            label = value;
+            return true;
+        }
+
+        return TryResolveProfileEntries(catalog, facts, value, unknownProfileExit, stderr, out entries, out label, out exitCode);
+    }
+
+    /// <summary>Resolves a built-in profile id or a profile file through the profile engine.</summary>
+    private static bool TryResolveProfileEntries(
+        TweakCatalog catalog,
+        OperatingSystemFacts facts,
+        string value,
+        int unknownProfileExit,
+        TextWriter stderr,
+        out IReadOnlyList<TweakDefinition> entries,
+        out string label,
+        out int exitCode)
+    {
+        entries = [];
+        label = string.Empty;
+        exitCode = ExitCodes.Success;
+
+        ProfileLoadResult? loaded = File.Exists(value) ? ProfileLoader.LoadFile(value) : ProfileLoader.TryLoadBuiltIn(value);
+        if (loaded is null)
+        {
+            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture,
+                $"Unknown profile '{value}'. Use a level ({string.Join(", ", NamedProfile.Names)}), a built-in profile id " +
+                $"({string.Join(", ", ProfileLoader.BuiltInIds)}), or a path to a profile .json file."));
+            exitCode = unknownProfileExit;
+            return false;
+        }
+
+        if (loaded.Profile is null)
+        {
+            foreach (CatalogIssue issue in loaded.Errors)
+            {
+                stderr.WriteLine(issue.ToString());
+            }
+
+            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Profile '{value}' failed to load."));
+            exitCode = unknownProfileExit;
+            return false;
+        }
+
+        entries = ProfileResolver.Resolve(loaded.Profile, catalog, facts);
+        label = loaded.Profile.Id;
         return true;
     }
 
     /// <summary>Returns whether the platform is supported; on failure writes the reason and yields the exit code.</summary>
     public static bool IsSupported(DoctorService doctor, TextWriter stderr, out int exitCode)
+        => IsSupported(doctor, stderr, out exitCode, out _);
+
+    /// <summary>As <see cref="IsSupported(DoctorService, TextWriter, out int)"/>, also yielding the machine facts.</summary>
+    public static bool IsSupported(DoctorService doctor, TextWriter stderr, out int exitCode, out OperatingSystemFacts facts)
     {
+        ArgumentNullException.ThrowIfNull(doctor);
         SystemReport support = doctor.Run();
+        facts = support.OperatingSystem;
         if (support.Status != SupportStatus.Supported)
         {
             stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Unsupported platform ({support.Status}); see 'otw doctor'."));
@@ -123,23 +180,12 @@ internal static class CommandSupport
         return true;
     }
 
-    /// <summary>Resolves a named level profile; on failure writes the reason and returns <see langword="false"/>.</summary>
-    public static bool TryResolveProfile(string? name, TextWriter stderr, out Level level)
-    {
-        if (!NamedProfile.TryResolve(name ?? string.Empty, out level))
-        {
-            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture,
-                $"Unknown profile '{name}'. Use one of: {string.Join(", ", NamedProfile.Names)}."));
-            return false;
-        }
-
-        return true;
-    }
-
     /// <summary>The shared <c>--profile</c> option (required unless <c>--only</c> is given).</summary>
     public static Option<string> ProfileOption() => new("--profile")
     {
-        Description = "Built-in level profile: " + string.Join(", ", NamedProfile.Names) + " (required unless --only is given).",
+        Description = "A level (" + string.Join("|", NamedProfile.Names)
+            + "), a built-in profile id (see 'otw profile list'), or a path to a profile .json file "
+            + "(required unless --only is given).",
     };
 
     /// <summary>The shared <c>--catalog-dir</c> option.</summary>
@@ -151,7 +197,7 @@ internal static class CommandSupport
     /// <summary>The shared <c>--include-draft</c> option.</summary>
     public static Option<bool> IncludeDraftOption() => new("--include-draft")
     {
-        Description = "Include Draft entries (verified-only by default).",
+        Description = "Include Draft entries (verified-only by default). Applies to level profiles; a named profile carries its own draft setting.",
     };
 
     /// <summary>The shared <c>--only</c> option: restrict the run to a single entry id.</summary>
@@ -159,38 +205,4 @@ internal static class CommandSupport
     {
         Description = "Operate on only the entry with this exact id (ignores the profile selection; includes Draft). Used for per-entry verification.",
     };
-
-    /// <summary>
-    /// Selects the entries a scan/apply run operates on. With <paramref name="onlyId"/>
-    /// set it picks exactly that entry from the catalogue (regardless of level or
-    /// status); otherwise it uses the named level profile. On an unknown
-    /// <paramref name="onlyId"/> it writes the reason and returns <see langword="false"/>.
-    /// </summary>
-    public static bool TrySelectEntries(
-        TweakCatalog catalog,
-        Level level,
-        bool includeDraft,
-        string? onlyId,
-        TextWriter stderr,
-        out IReadOnlyList<TweakDefinition> entries)
-    {
-        ArgumentNullException.ThrowIfNull(catalog);
-
-        if (!string.IsNullOrEmpty(onlyId))
-        {
-            TweakDefinition? entry = catalog.Entries.FirstOrDefault(e => string.Equals(e.Id.Value, onlyId, StringComparison.Ordinal));
-            if (entry is null)
-            {
-                stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"No catalogue entry with id '{onlyId}'."));
-                entries = [];
-                return false;
-            }
-
-            entries = [entry];
-            return true;
-        }
-
-        entries = NamedProfile.Select(catalog, level, includeDraft);
-        return true;
-    }
 }

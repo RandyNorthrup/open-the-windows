@@ -37,9 +37,8 @@ internal static class ApplyCommand
         TextWriter stderr = parseResult.InvocationConfiguration.Error;
 
         if (!CommandSupport.TryResolveProfileCatalog(
-            services, parseResult, options.Common.Profile, options.Common.Only, options.Common.CatalogDir,
-            ExitCodes.InvalidInput, stderr,
-            out Level level, out TweakCatalog catalog, out string profileName, out int exitCode))
+            services, parseResult, options.Common.CatalogDir, stderr,
+            out TweakCatalog catalog, out OperatingSystemFacts facts, out int exitCode))
         {
             return exitCode;
         }
@@ -52,10 +51,11 @@ internal static class ApplyCommand
         }
 
         if (!CommandSupport.TrySelectEntries(
-            catalog, level, parseResult.GetValue(options.Common.IncludeDraft), parseResult.GetValue(options.Common.Only), stderr,
-            out IReadOnlyList<TweakDefinition> entries))
+            catalog, facts, parseResult.GetValue(options.Common.Profile), parseResult.GetValue(options.Common.Only),
+            parseResult.GetValue(options.Common.IncludeDraft), ExitCodes.InvalidInput, stderr,
+            out IReadOnlyList<TweakDefinition> entries, out string profileName, out int selectExit))
         {
-            return ExitCodes.InvalidInput;
+            return selectExit;
         }
 
         var applyOptions = new ApplyOptions(

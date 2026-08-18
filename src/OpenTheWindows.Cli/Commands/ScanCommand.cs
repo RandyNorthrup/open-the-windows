@@ -2,9 +2,9 @@ using System.CommandLine;
 using System.Globalization;
 using System.Text;
 using OpenTheWindows.Core;
+using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Engine;
-using OpenTheWindows.Core.Model;
 using OpenTheWindows.Core.Reports;
 
 namespace OpenTheWindows.Cli.Commands;
@@ -34,9 +34,8 @@ internal static class ScanCommand
         TextWriter stderr = parseResult.InvocationConfiguration.Error;
 
         if (!CommandSupport.TryResolveProfileCatalog(
-            services, parseResult, options.Common.Profile, options.Common.Only, options.Common.CatalogDir,
-            ExitCodes.Error, stderr,
-            out Level level, out TweakCatalog catalog, out string profileName, out int exitCode))
+            services, parseResult, options.Common.CatalogDir, stderr,
+            out TweakCatalog catalog, out OperatingSystemFacts facts, out int exitCode))
         {
             return exitCode;
         }
@@ -49,10 +48,11 @@ internal static class ScanCommand
         }
 
         if (!CommandSupport.TrySelectEntries(
-            catalog, level, parseResult.GetValue(options.Common.IncludeDraft), parseResult.GetValue(options.Common.Only), stderr,
-            out IReadOnlyList<TweakDefinition> entries))
+            catalog, facts, parseResult.GetValue(options.Common.Profile), parseResult.GetValue(options.Common.Only),
+            parseResult.GetValue(options.Common.IncludeDraft), ExitCodes.Error, stderr,
+            out IReadOnlyList<TweakDefinition> entries, out string profileName, out int selectExit))
         {
-            return ExitCodes.Error;
+            return selectExit;
         }
 
         ScanReport report = services.CreateScanEngine().Scan(entries, profileName);

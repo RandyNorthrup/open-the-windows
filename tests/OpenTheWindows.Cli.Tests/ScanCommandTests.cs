@@ -99,6 +99,39 @@ public sealed class ScanCommandTests
     }
 
     [Fact]
+    public void Built_in_profile_id_resolves_via_the_profile_engine()
+    {
+        var (root, stdout, stderr) = Build();
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "scan", "--profile", "home", "--json");
+
+        Assert.True(code is ExitCodes.Success or ExitCodes.Drift, "a real-profile scan should succeed or report drift, not error");
+        using var document = JsonDocument.Parse(stdout.ToString());
+        Assert.Equal("home", document.RootElement.GetProperty("profile").GetString());
+    }
+
+    [Fact]
+    public void Profile_file_path_is_resolved()
+    {
+        string path = Path.Combine(Path.GetTempPath(), "otw-scan-profile-" + Guid.NewGuid().ToString("N") + ".json");
+        File.WriteAllText(path, ProfileFixtures.ValidProfile);
+        try
+        {
+            var (root, stdout, stderr) = Build();
+
+            int code = CliTestHost.Invoke(root, stdout, stderr, "scan", "--profile", path, "--json");
+
+            Assert.True(code is ExitCodes.Success or ExitCodes.Drift, "a profile-file scan should succeed or report drift, not error");
+            using var document = JsonDocument.Parse(stdout.ToString());
+            Assert.Equal("custom-file", document.RootElement.GetProperty("profile").GetString());
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
     public void Out_file_writes_csv_report()
     {
         var (root, stdout, stderr) = Build();

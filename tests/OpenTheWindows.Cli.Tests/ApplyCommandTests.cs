@@ -134,6 +134,18 @@ public sealed class ApplyCommandTests
     }
 
     [Fact]
+    public void Built_in_profile_id_resolves_and_plans()
+    {
+        var (root, stdout, stderr) = Build(engine: FakeApplyEngine.Create(new FakeMachine()).Engine);
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "apply", "--profile", "home", "--what-if", "--json");
+
+        Assert.Equal(ExitCodes.Success, code);
+        using var document = JsonDocument.Parse(stdout.ToString());
+        Assert.True(document.RootElement.GetProperty("entries").GetArrayLength() >= 1, "the home profile should resolve to at least one applicable entry");
+    }
+
+    [Fact]
     public void Blocking_preflight_exits_2_and_reports_blocked()
     {
         ApplyHarness harness = FakeApplyEngine.Create(new FakeMachine());

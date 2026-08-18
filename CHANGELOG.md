@@ -31,6 +31,15 @@ what was planned (plans live in `PLAN.md`).
   id or a profile file), and `otw profile validate <id|path>` validates it
   against the schema and the catalogue. All read-only; `--json` on each; exit 0
   when valid, 4 on invalid input.
+- M5 (profiles, part 4 — profiles drive scan/apply): `otw scan --profile` and
+  `otw apply --profile` now accept, besides a level name (`basic`..`paranoid`), a
+  **built-in profile id** (`home`, `enterprise-workstation`, …) or a **path to a
+  profile `.json` file**. A named profile is resolved through `ProfileResolver`,
+  so it selects exactly the entries its per-category dials, include/exclude, risk
+  gate and Draft setting call for on this machine. Level names keep their previous
+  uniform-level behaviour and the CLI `--include-draft` flag. (Consuming a
+  profile's apply `options` — restore point, restart Explorer, all-users scope —
+  is deferred to the all-users work package.)
 - M5 (profiles, part 3 — profile signing): `ProfileSignature` signs and verifies
   profiles with detached **ES256** (ECDSA P-256 / SHA-256) signatures (decision
   D11) over a canonical form of the JSON, so a signature survives re-formatting;

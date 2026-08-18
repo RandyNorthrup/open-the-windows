@@ -10,21 +10,7 @@ namespace OpenTheWindows.Cli.Tests;
 
 public sealed class ProfileCommandTests
 {
-    private const string ValidFileProfile = """
-    {
-      "schemaVersion": 1,
-      "id": "custom-file",
-      "name": "Custom File",
-      "description": "A profile loaded from a file by a CLI test.",
-      "levels": { "Privacy": "Basic", "Updates": "Basic", "Security": "Basic", "Performance": "Basic", "Debloat": "Basic", "Shell": "Basic" },
-      "include": [],
-      "exclude": [],
-      "includeDraft": false,
-      "scope": "User",
-      "options": { "restorePoint": true, "restartExplorer": true, "allowAdvanced": false, "allowBreaking": false },
-      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] }
-    }
-    """;
+    private const string ValidFileProfile = ProfileFixtures.ValidProfile;
 
     private const string UnknownIncludeProfile = """
     {
