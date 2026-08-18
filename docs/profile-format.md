@@ -145,11 +145,14 @@ The result is the set `scan` reports drift for and `apply` would change.
 | `restorePoint` | Requests a System Restore point before applying. |
 | `restartExplorer` | Requests an Explorer restart after applying shell changes. |
 
-**Current support.** `allowAdvanced` and `allowBreaking` are consumed today —
-they gate resolution as described. `restorePoint` and `restartExplorer` are
-validated and shown but are not yet read by `apply`; the restore point and
-Explorer restart are currently driven by the `apply` command's own flags. Wiring
-a profile's `options` into `apply` lands with the all-users application work.
+All four options are consumed. `allowAdvanced` and `allowBreaking` gate
+resolution as described (which entries are selected), and when a profile is
+applied they are also its apply defaults: the profile's own `options` seed the
+run, and the `apply` command's flags still override — `--allow-advanced`,
+`--allow-breaking` and `--restart-explorer` each turn a behaviour on, and
+`--no-restore-point` turns the restore point off, whatever the profile says.
+A profile that sets `allowAdvanced: true` therefore applies its Advanced entries
+without the operator having to repeat `--allow-advanced` on the command line.
 
 ### Scope
 

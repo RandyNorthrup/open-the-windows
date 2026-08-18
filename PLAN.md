@@ -565,8 +565,15 @@ committed locally):
   names are exempt — they are not files. The shared trust-store verification was
   extracted into `ProfileTrust` (also used by `otw profile verify`). Ships the
   GPO template `admx/OpenTheWindows.admx` (+ `en-US/OpenTheWindows.adml`) and the
-  format reference `docs/profile-format.md`. Still deferred to the all-users work
-  package: consuming a profile's apply `options`/`scope`.
+  format reference `docs/profile-format.md`.
+- **`apply` honours a profile's options**: a resolved profile's `options`
+  (`restorePoint`/`restartExplorer`/`allowAdvanced`/`allowBreaking`) now seed the
+  `ApplyOptions`, with the CLI flags still overriding (enable-switches turn on,
+  `--no-restore-point` turns off). Fixes the gap where a profile that selected
+  Advanced entries (`allowAdvanced:true`) had them blocked at apply unless
+  `--allow-advanced` was also passed. `CommandSupport.TrySelectEntries` now yields
+  the resolved `Profile`. Still deferred to the all-users work package: consuming
+  a profile's `scope` (needs the hive enumerator).
 
 ### M6 — GUI (not started)
 

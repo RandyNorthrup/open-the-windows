@@ -52,7 +52,7 @@ internal static class ScanCommand
         if (!CommandSupport.TrySelectEntries(
             catalog, facts, parseResult.GetValue(options.Common.Profile), parseResult.GetValue(options.Common.Only),
             parseResult.GetValue(options.Common.IncludeDraft), policy, ProfileTrust.DefaultTrustStoreDirectory, ExitCodes.Error, stderr,
-            out IReadOnlyList<TweakDefinition> entries, out string profileName, out int selectExit))
+            out IReadOnlyList<TweakDefinition> entries, out string profileName, out int selectExit, out _))
         {
             return selectExit;
         }

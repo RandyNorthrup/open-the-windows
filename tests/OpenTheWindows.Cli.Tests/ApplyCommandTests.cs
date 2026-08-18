@@ -5,6 +5,7 @@ using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.Core.Engine;
+using OpenTheWindows.Core.Model;
 using OpenTheWindows.Core.Profiles;
 using OpenTheWindows.TestSupport.Fakes;
 
@@ -173,6 +174,83 @@ public sealed class ApplyCommandTests
 
             Assert.Equal(ExitCodes.InvalidInput, code);
             Assert.Contains(ProfilePolicy.RequireSignedProfilesValueName, stderr.ToString(), StringComparison.Ordinal);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void Profile_restore_point_option_is_honoured()
+    {
+        // ValidProfile sets restorePoint:true; flip it off and confirm apply does not request one.
+        string json = ProfileFixtures.ValidProfile.Replace("\"restorePoint\": true", "\"restorePoint\": false", StringComparison.Ordinal);
+        string path = Path.Combine(Path.GetTempPath(), "otw-rp-" + Guid.NewGuid().ToString("N") + ".json");
+        File.WriteAllText(path, json);
+        try
+        {
+            var (root, stdout, stderr) = Build(engine: FakeApplyEngine.Create(new FakeMachine()).Engine);
+
+            int code = CliTestHost.Invoke(root, stdout, stderr, "apply", "--profile", path, "--yes", "--json");
+
+            Assert.True(code is ExitCodes.Success or ExitCodes.RebootRequired);
+            using var document = JsonDocument.Parse(stdout.ToString());
+            Assert.Equal("NotRequested", document.RootElement.GetProperty("restorePoint").GetProperty("status").GetString());
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void Profile_allow_advanced_option_unblocks_advanced_entries()
+    {
+        OperatingSystemFacts facts = FakeOperatingSystemInfo.Windows11Pro24H2();
+        string advId = CatalogLoader.LoadBuiltIn().Catalog!.Entries
+            .First(e => e.Risk == RiskTier.Advanced && e.AppliesTo.Matches(facts)).Id.Value;
+        // include forces the Advanced entry into the selection regardless of level; the profile's
+        // allowAdvanced then decides whether apply plans it or blocks it.
+        string included = ProfileFixtures.ValidProfile.Replace("\"include\": []", $"\"include\": [\"{advId}\"]", StringComparison.Ordinal);
+
+        (string risk, _, string blockedNote) = WhatIfEntry(included, advId);
+        Assert.Equal("Advanced", risk);
+        Assert.Contains("allow-advanced", blockedNote, StringComparison.Ordinal);
+
+        string allowed = included.Replace("\"allowAdvanced\": false", "\"allowAdvanced\": true", StringComparison.Ordinal);
+        (_, _, string allowedNote) = WhatIfEntry(allowed, advId);
+        Assert.DoesNotContain("allow-advanced", allowedNote, StringComparison.Ordinal);
+    }
+
+    /// <summary>Runs <c>apply --what-if --json</c> for a profile file and returns the (risk, result, note) of one planned entry.</summary>
+    private static (string Risk, string Result, string Note) WhatIfEntry(string profileJson, string id)
+    {
+        string path = Path.Combine(Path.GetTempPath(), "otw-adv-" + Guid.NewGuid().ToString("N") + ".json");
+        File.WriteAllText(path, profileJson);
+        try
+        {
+            var (root, stdout, stderr) = Build(engine: FakeApplyEngine.Create(new FakeMachine()).Engine);
+            CliTestHost.Invoke(root, stdout, stderr, "apply", "--profile", path, "--what-if", "--json");
+
+            using var document = JsonDocument.Parse(stdout.ToString());
+            JsonElement entries = document.RootElement.GetProperty("entries");
+            for (int i = 0; i < entries.GetArrayLength(); i++)
+            {
+                JsonElement entry = entries[i];
+                if (!string.Equals(entry.GetProperty("id").GetString(), id, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                JsonElement note = entry.GetProperty("note");
+                return (
+                    entry.GetProperty("risk").GetString() ?? string.Empty,
+                    entry.GetProperty("result").GetString() ?? string.Empty,
+                    note.ValueKind == JsonValueKind.String ? note.GetString() ?? string.Empty : string.Empty);
+            }
+
+            throw new InvalidOperationException("Entry '" + id + "' not found in the plan.");
         }
         finally
         {

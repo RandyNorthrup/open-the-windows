@@ -55,19 +55,24 @@ internal static class ApplyCommand
         if (!CommandSupport.TrySelectEntries(
             catalog, facts, parseResult.GetValue(options.Common.Profile), parseResult.GetValue(options.Common.Only),
             parseResult.GetValue(options.Common.IncludeDraft), policy, ProfileTrust.DefaultTrustStoreDirectory, ExitCodes.InvalidInput, stderr,
-            out IReadOnlyList<TweakDefinition> entries, out string profileName, out int selectExit))
+            out IReadOnlyList<TweakDefinition> entries, out string profileName, out int selectExit, out Profile? selectedProfile))
         {
             return selectExit;
         }
 
+        // A resolved profile's own apply options are the defaults; the "enable" flags
+        // (--allow-advanced/--allow-breaking/--restart-explorer) still turn a behaviour on,
+        // and --no-restore-point still turns the restore point off. A level name or --only
+        // carries no options, so the flags decide alone.
+        ProfileOptions? po = selectedProfile?.Options;
         var applyOptions = new ApplyOptions(
             whatIf,
-            !parseResult.GetValue(options.NoRestorePoint),
+            !parseResult.GetValue(options.NoRestorePoint) && (po?.RestorePoint ?? true),
             parseResult.GetValue(options.BreakGlass),
-            parseResult.GetValue(options.AllowAdvanced),
-            parseResult.GetValue(options.AllowBreaking),
+            parseResult.GetValue(options.AllowAdvanced) || (po?.AllowAdvanced ?? false),
+            parseResult.GetValue(options.AllowBreaking) || (po?.AllowBreaking ?? false),
             profileName,
-            parseResult.GetValue(options.RestartExplorer));
+            parseResult.GetValue(options.RestartExplorer) || (po?.RestartExplorer ?? false));
 
         ApplyEngine engine = services.CreateApplyEngine();
 

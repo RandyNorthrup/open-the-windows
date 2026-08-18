@@ -59,6 +59,17 @@ what was planned (plans live in `PLAN.md`).
   `admx/en-US/OpenTheWindows.adml`) for the setting, and a full format reference
   in `docs/profile-format.md`. The shared trust-store verification now lives in
   `ProfileTrust`, which `otw profile verify` also uses.
+- M5 (profiles, part 6 — `apply` honours a profile's options): when
+  `otw apply --profile` resolves a real profile (a built-in id or a file), that
+  profile's `options` now seed the run — `restorePoint`, `restartExplorer`,
+  `allowAdvanced` and `allowBreaking` become the defaults, and the command's
+  flags still override (`--no-restore-point` turns the point off; the
+  `--allow-advanced` / `--allow-breaking` / `--restart-explorer` switches turn a
+  behaviour on). This closes a gap where a profile that selected Advanced entries
+  (via `allowAdvanced: true`) still had them *blocked* at apply time unless the
+  operator repeated `--allow-advanced`. A profile's `scope` is still not consumed
+  (all-users application is a later work package). `CommandSupport.TrySelectEntries`
+  now also yields the resolved `Profile` so the command can read its options.
 - M4 (Windows Update guardrails): the safe, reversible update controls
   (`OpenTheWindows.Core.Updates`). `PauseCalculator` computes the six Settings-app
   pause values (`PauseUpdatesStartTime`/`ExpiryTime`,

@@ -83,13 +83,15 @@ internal static class CommandSupport
         TextWriter stderr,
         out IReadOnlyList<TweakDefinition> entries,
         out string label,
-        out int exitCode)
+        out int exitCode,
+        out Profile? profile)
     {
         ArgumentNullException.ThrowIfNull(policy);
         ArgumentNullException.ThrowIfNull(catalog);
         entries = [];
         label = string.Empty;
         exitCode = ExitCodes.Success;
+        profile = null;
 
         if (!string.IsNullOrEmpty(onlyId))
         {
@@ -121,7 +123,7 @@ internal static class CommandSupport
             return true;
         }
 
-        return TryResolveProfileEntries(catalog, facts, value, policy, trustStoreDirectory, unknownProfileExit, stderr, out entries, out label, out exitCode);
+        return TryResolveProfileEntries(catalog, facts, value, policy, trustStoreDirectory, unknownProfileExit, stderr, out entries, out label, out exitCode, out profile);
     }
 
     /// <summary>Resolves a built-in profile id or a profile file through the profile engine, enforcing the signing policy for files.</summary>
@@ -135,11 +137,13 @@ internal static class CommandSupport
         TextWriter stderr,
         out IReadOnlyList<TweakDefinition> entries,
         out string label,
-        out int exitCode)
+        out int exitCode,
+        out Profile? profile)
     {
         entries = [];
         label = string.Empty;
         exitCode = ExitCodes.Success;
+        profile = null;
 
         bool isFile = File.Exists(value);
         if (isFile && !EnforceSigningPolicy(value, policy, trustStoreDirectory, unknownProfileExit, stderr, out exitCode))
@@ -169,6 +173,7 @@ internal static class CommandSupport
             return false;
         }
 
+        profile = loaded.Profile;
         entries = ProfileResolver.Resolve(loaded.Profile, catalog, facts);
         label = loaded.Profile.Id;
         return true;
