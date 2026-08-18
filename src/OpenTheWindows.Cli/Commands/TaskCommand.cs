@@ -8,11 +8,12 @@ using OpenTheWindows.Core.Profiles;
 namespace OpenTheWindows.Cli.Commands;
 
 /// <summary>
-/// <c>otw task install --profile &lt;id&gt; [--daily|--weekly|--on-logon]</c> and
-/// <c>otw task remove</c>: register or remove the drift-remediation scheduled task
+/// <c>otw task install --profile &lt;id&gt; [--daily|--weekly|--on-logon|--on-build-change]</c>
+/// and <c>otw task remove</c>: register or remove the drift-remediation scheduled task
 /// (<c>\OpenTheWindows\Remediate</c>, SYSTEM, highest privileges, hidden) that runs
-/// <c>otw remediate</c> for a profile. Both need elevation. Exit codes: 0 success,
-/// 2 error, 3 unsupported OS, 4 invalid input, 5 elevation required.
+/// <c>otw remediate</c> for a profile. <c>--on-build-change</c> registers a boot-triggered
+/// task that re-applies only after a feature update. Both need elevation. Exit codes:
+/// 0 success, 2 error, 3 unsupported OS, 4 invalid input, 5 elevation required.
 /// </summary>
 internal static class TaskCommand
 {
@@ -32,13 +33,15 @@ internal static class TaskCommand
         var daily = new Option<bool>("--daily") { Description = "Run once a day (the default schedule)." };
         var weekly = new Option<bool>("--weekly") { Description = "Run once a week." };
         var onLogon = new Option<bool>("--on-logon") { Description = "Run at every user logon." };
+        var onBuildChange = new Option<bool>("--on-build-change") { Description = "Run at system start, re-applying only after a feature update (an OS build/UBR change)." };
 
         var command = new Command("install", "Register the remediation task for a profile (replacing any existing one).");
         command.Options.Add(profile);
         command.Options.Add(daily);
         command.Options.Add(weekly);
         command.Options.Add(onLogon);
-        command.SetAction(parseResult => ExecuteInstall(parseResult, services, profile, daily, weekly, onLogon));
+        command.Options.Add(onBuildChange);
+        command.SetAction(parseResult => ExecuteInstall(parseResult, services, profile, daily, weekly, onLogon, onBuildChange));
         return command;
     }
 
@@ -51,7 +54,7 @@ internal static class TaskCommand
 
     private static int ExecuteInstall(
         ParseResult parseResult, CliServices services, Option<string> profileOption,
-        Option<bool> dailyOption, Option<bool> weeklyOption, Option<bool> onLogonOption)
+        Option<bool> dailyOption, Option<bool> weeklyOption, Option<bool> onLogonOption, Option<bool> onBuildChangeOption)
     {
         if (!TryBeginElevated(parseResult, services, "Installing", out TextWriter stdout, out TextWriter stderr, out int exitCode))
         {
@@ -67,9 +70,9 @@ internal static class TaskCommand
             return ExitCodes.InvalidInput;
         }
 
-        if (!TryResolveTrigger(parseResult, dailyOption, weeklyOption, onLogonOption, out TaskTrigger trigger))
+        if (!TryResolveTrigger(parseResult, dailyOption, weeklyOption, onLogonOption, onBuildChangeOption, out TaskTrigger trigger))
         {
-            stderr.WriteLine("Choose at most one of --daily, --weekly, --on-logon.");
+            stderr.WriteLine("Choose at most one of --daily, --weekly, --on-logon, --on-build-change.");
             return ExitCodes.InvalidInput;
         }
 
@@ -123,13 +126,15 @@ internal static class TaskCommand
     }
 
     private static bool TryResolveTrigger(
-        ParseResult parseResult, Option<bool> dailyOption, Option<bool> weeklyOption, Option<bool> onLogonOption, out TaskTrigger trigger)
+        ParseResult parseResult, Option<bool> dailyOption, Option<bool> weeklyOption, Option<bool> onLogonOption,
+        Option<bool> onBuildChangeOption, out TaskTrigger trigger)
     {
         bool daily = parseResult.GetValue(dailyOption);
         bool weekly = parseResult.GetValue(weeklyOption);
         bool onLogon = parseResult.GetValue(onLogonOption);
+        bool onBuildChange = parseResult.GetValue(onBuildChangeOption);
 
-        int chosen = (daily ? 1 : 0) + (weekly ? 1 : 0) + (onLogon ? 1 : 0);
+        int chosen = (daily ? 1 : 0) + (weekly ? 1 : 0) + (onLogon ? 1 : 0) + (onBuildChange ? 1 : 0);
         if (chosen > 1)
         {
             trigger = TaskTrigger.Daily;
@@ -143,6 +148,10 @@ internal static class TaskCommand
         else if (onLogon)
         {
             trigger = TaskTrigger.Logon;
+        }
+        else if (onBuildChange)
+        {
+            trigger = TaskTrigger.BuildChange;
         }
         else
         {

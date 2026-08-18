@@ -580,10 +580,7 @@ committed locally):
   its directory), else `--json`/text to stdout; same option surface and exit
   contract as `apply`. The shared apply plumbing (option-building, exit-code
   mapping, JSON/text rendering) was factored into `Cli/Commands/ApplyReporting`,
-  now used by both `apply` and `remediate`. Still pending in the drift work
-  package: `otw task install/remove` (the `\OpenTheWindows\Remediate` SYSTEM
-  scheduled task), build-change detection, and the Intune templates that wrap
-  `otw remediate`.
+  now used by both `apply` and `remediate`.
 - **Drift scheduled task** (`otw task install|remove`): registers
   `\OpenTheWindows\Remediate` (SYSTEM, highest privileges, hidden) running
   `otw remediate --profile <id> --json --out <reports>\last-remediate.json` on a
@@ -593,8 +590,6 @@ committed locally):
   XML golden); Windows `WindowsScheduledTaskInstaller` via the TaskScheduler 2.0
   API (`RegisterTaskDefinition`); new lazy `CliServices.CreateTaskInstaller`;
   `TaskCommand` modeled on `UpdatesCommand`. Self-path via `Environment.ProcessPath`.
-  Still pending: build-change re-application (current OS build/UBR vs the last
-  journal record).
 - **Enterprise deployment** (`docs/enterprise.md`, `docs/enterprise/*.ps1`): the
   managed-fleet guide and the paired Intune Remediations scripts. `intune-detect.ps1`
   wraps `otw scan` and maps the exit contract onto Intune detection (0 healthy /
@@ -604,8 +599,18 @@ committed locally):
   `otw.exe` from `$OtwPath`, then PATH, then `%ProgramFiles%\OpenTheWindows`; their
   shared bootstrap is excluded from the duplication gate (§7.3). The guide also
   covers signed profiles + `RequireSignedProfiles`/ADMX and WDAC allow-listing of the
-  unsigned binary (file-hash rule, or a signer rule after re-signing). Still pending
-  for M5: build-change re-application, all-users hive scope, and `docs/certification/M5.md`.
+  unsigned binary (file-hash rule, or a signer rule after re-signing).
+- **Build-change detection** (`Core.Engine.BuildChange`, `otw remediate
+  --if-build-changed`, `otw task install --on-build-change`): `BuildChange.Detect`
+  compares the live OS facts (`Build`/`Revision`) against the OS on the most recent
+  journal record (`JournalOs`); `--if-build-changed` short-circuits `remediate` to a
+  no-op exit 0 when the build is unchanged, and applies when it changed or there is
+  no baseline. The CLI reaches the journal store through a new lazy
+  `CliServices.CreateJournalStore` (the store was previously buried inside the apply
+  engine). `TaskTrigger.BuildChange` maps to a `BootTrigger` (a feature update
+  reboots) and `RemediationTask.Build` appends `--if-build-changed` for it, so the
+  boot-triggered task re-applies only after a feature update. Still pending for M5:
+  all-users hive scope (the `scope` folds in here) and `docs/certification/M5.md`.
 
 ### M6 — GUI (not started)
 

@@ -105,6 +105,16 @@ what was planned (plans live in `PLAN.md`).
   Intune's detection contract (0 healthy / non-zero remediate) and remediation
   contract (0 success / non-zero failure). Their shared bootstrap is excluded
   from the duplication gate (PLAN §7.3).
+- M5 (profiles, part 10 — build-change detection): `otw remediate
+  --if-build-changed` compares the running OS build/UBR against the most recent
+  journal (`Core.Engine.BuildChange`) and exits 0 without changes when the build
+  is unchanged; with no prior run to compare against it applies (the safe,
+  reversible default). `otw task install --on-build-change` registers a
+  boot-triggered `\OpenTheWindows\Remediate` task whose `remediate` runs with
+  `--if-build-changed`, so a profile is re-applied only after a feature update
+  (which reboots). New `TaskTrigger.BuildChange` maps to a Task Scheduler
+  `BootTrigger`; `RemediationTask.Build` adds the flag for that trigger; the CLI
+  reaches the journal store through a new lazy `CliServices.CreateJournalStore`.
 - M4 (Windows Update guardrails): the safe, reversible update controls
   (`OpenTheWindows.Core.Updates`). `PauseCalculator` computes the six Settings-app
   pause values (`PauseUpdatesStartTime`/`ExpiryTime`,

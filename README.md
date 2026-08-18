@@ -156,12 +156,18 @@ managed setting. `--out <file>` writes the stable JSON report (creating the
 directory) — for example the task's `last-remediate.json` — otherwise `--json`
 writes it to stdout. It takes the same `--profile`, `--include-draft`,
 `--no-restore-point`, `--allow-advanced`, `--allow-breaking`, `--restart-explorer`
-and `--what-if` options, and returns the same exit codes as `apply`.
+and `--what-if` options, and returns the same exit codes as `apply`. With
+`--if-build-changed` it first compares the running OS build/UBR against the most
+recent journal and exits 0 without changes when the build is unchanged — this is
+how the drift task re-applies only after a feature update (with no prior run to
+compare against, it applies).
 
-`otw task install --profile <value> [--daily|--weekly|--on-logon]` registers a
-scheduled task `\OpenTheWindows\Remediate` that runs `otw remediate` for that
-profile — SYSTEM account, highest privileges, hidden, on the chosen schedule
-(daily by default) — and writes its report to
+`otw task install --profile <value> [--daily|--weekly|--on-logon|--on-build-change]`
+registers a scheduled task `\OpenTheWindows\Remediate` that runs `otw remediate`
+for that profile — SYSTEM account, highest privileges, hidden, on the chosen
+schedule (daily by default; `--on-build-change` registers a boot-triggered task
+that runs `remediate --if-build-changed`, re-applying only after a feature
+update) — and writes its report to
 `%ProgramData%\OpenTheWindows\reports\last-remediate.json`. `otw task remove`
 deletes it. Both need elevation. Exit 0 on success, 4 for an unknown profile or
 conflicting schedule flags, 5 when not elevated.

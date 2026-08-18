@@ -3,6 +3,7 @@ using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.Core.Engine;
+using OpenTheWindows.Core.Journal;
 using OpenTheWindows.Core.Updates;
 using OpenTheWindows.TestSupport.Fakes;
 
@@ -26,10 +27,12 @@ internal static class TestCli
         Func<ApplyEngine>? createApplyEngine = null,
         Func<UpdateControlService>? createUpdateControl = null,
         IElevationContext? elevation = null,
-        IScheduledTaskInstaller? taskInstaller = null)
+        IScheduledTaskInstaller? taskInstaller = null,
+        IJournalStore? journalStore = null)
     {
         FakeReaders scanReaders = readers ?? new FakeReaders();
         FakeScheduledTaskInstaller defaultInstaller = new();
+        FakeJournalStore defaultJournal = new();
         return new CliServices(
             doctor,
             loadCatalog,
@@ -38,6 +41,7 @@ internal static class TestCli
             createUpdateControl ?? (() => FakeUpdateControl.Create(new FakeMachine()).Service),
             () => scanReaders,
             () => taskInstaller ?? defaultInstaller,
+            () => journalStore ?? defaultJournal,
             health ?? new FakeHealthProbe([]),
             elevation ?? new FakeElevationContext(isElevated: true));
     }
@@ -50,7 +54,7 @@ internal static class TestCli
     /// </summary>
     public static (RootCommand Root, StringWriter Out, StringWriter Err) ApplyHost(
         bool supported = true, bool elevated = true, ApplyEngine? engine = null, FakeReaders? readers = null,
-        IScheduledTaskInstaller? taskInstaller = null)
+        IScheduledTaskInstaller? taskInstaller = null, IJournalStore? journalStore = null)
     {
         var doctor = new DoctorService(
             new FakeOperatingSystemInfo(supported ? FakeOperatingSystemInfo.Windows11Pro24H2() : FakeOperatingSystemInfo.WindowsServer2025()),
@@ -61,6 +65,7 @@ internal static class TestCli
             readers,
             createApplyEngine: engine is null ? null : () => engine,
             elevation: new FakeElevationContext(elevated),
-            taskInstaller: taskInstaller));
+            taskInstaller: taskInstaller,
+            journalStore: journalStore));
     }
 }

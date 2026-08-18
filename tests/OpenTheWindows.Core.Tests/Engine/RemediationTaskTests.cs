@@ -26,8 +26,22 @@ public sealed class RemediationTaskTests
     [InlineData(TaskTrigger.Daily)]
     [InlineData(TaskTrigger.Weekly)]
     [InlineData(TaskTrigger.Logon)]
+    [InlineData(TaskTrigger.BuildChange)]
     public void Build_preserves_the_trigger(TaskTrigger trigger)
         => Assert.Equal(trigger, RemediationTask.Build("home", trigger, Exe, Report).Trigger);
+
+    [Fact]
+    public void Build_change_trigger_adds_the_if_build_changed_flag()
+        => Assert.Equal(
+            "remediate --profile \"home\" --if-build-changed --json --out \"" + Report + "\"",
+            RemediationTask.Build("home", TaskTrigger.BuildChange, Exe, Report).Arguments);
+
+    [Fact]
+    public void Non_build_change_triggers_omit_the_if_build_changed_flag()
+        => Assert.DoesNotContain(
+            "--if-build-changed",
+            RemediationTask.Build("home", TaskTrigger.Daily, Exe, Report).Arguments,
+            StringComparison.Ordinal);
 
     [Fact]
     public void Build_rejects_an_empty_profile()

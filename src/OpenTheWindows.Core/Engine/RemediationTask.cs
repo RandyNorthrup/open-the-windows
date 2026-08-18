@@ -24,8 +24,9 @@ public static class RemediationTask
 
     /// <summary>
     /// Builds the task spec that runs
-    /// <c>&lt;executablePath&gt; remediate --profile "&lt;profile&gt;" --json --out "&lt;reportPath&gt;"</c>
-    /// on the given <paramref name="trigger"/>.
+    /// <c>&lt;executablePath&gt; remediate --profile "&lt;profile&gt;" [--if-build-changed] --json --out "&lt;reportPath&gt;"</c>
+    /// on the given <paramref name="trigger"/>. A <see cref="TaskTrigger.BuildChange"/>
+    /// task adds <c>--if-build-changed</c> so it re-applies only after a feature update.
     /// </summary>
     public static ScheduledTaskSpec Build(string profile, TaskTrigger trigger, string executablePath, string reportPath)
     {
@@ -33,9 +34,10 @@ public static class RemediationTask
         ArgumentException.ThrowIfNullOrEmpty(executablePath);
         ArgumentException.ThrowIfNullOrEmpty(reportPath);
 
+        string buildChangeFlag = trigger == TaskTrigger.BuildChange ? " --if-build-changed" : string.Empty;
         string arguments = string.Create(
             CultureInfo.InvariantCulture,
-            $"remediate --profile \"{profile}\" --json --out \"{reportPath}\"");
+            $"remediate --profile \"{profile}\"{buildChangeFlag} --json --out \"{reportPath}\"");
         string description = string.Create(
             CultureInfo.InvariantCulture,
             $"Open the Windows: re-enforce profile '{profile}' (drift remediation).");

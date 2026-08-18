@@ -5,6 +5,7 @@ using OpenTheWindows.Core;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Engine;
+using OpenTheWindows.Core.Journal;
 using OpenTheWindows.Core.Profiles;
 
 namespace OpenTheWindows.Cli.Commands;
@@ -16,8 +17,12 @@ namespace OpenTheWindows.Cli.Commands;
 /// only the drifted entries, with no interactive confirmation. This is the entry
 /// point the drift scheduled task and the Intune remediation script call; it never
 /// break-glasses a managed setting. Writes the stable apply JSON report (to
-/// <c>--out</c> when given, else stdout). Exit codes: 0 compliant/applied, 2 error,
-/// 3 unsupported OS, 4 invalid input, 5 elevation required, 3010 reboot required.
+/// <c>--out</c> when given, else stdout). With <c>--if-build-changed</c> it first
+/// compares the running OS build/UBR against the most recent journal and does
+/// nothing (exit 0) when the build is unchanged — this is the mode the drift
+/// task's <c>--on-build-change</c> trigger uses to re-apply only after a feature
+/// update. Exit codes: 0 compliant/applied/no-op, 2 error, 3 unsupported OS,
+/// 4 invalid input, 5 elevation required, 3010 reboot required.
 /// </summary>
 internal static class RemediateCommand
 {
@@ -34,6 +39,7 @@ internal static class RemediateCommand
             new Option<bool>("--allow-advanced") { Description = "Permit Advanced-risk entries (a profile's own option also enables these)." },
             new Option<bool>("--allow-breaking") { Description = "Permit Breaking-risk entries (a profile's own option also enables these)." },
             new Option<bool>("--restart-explorer") { Description = "Restart Explorer for entries that require it." },
+            new Option<bool>("--if-build-changed") { Description = "Only re-apply when the OS build/UBR differs from the last journaled run (else exit 0 without changes)." },
             new Option<bool>("--json") { Description = "Emit the result as JSON on stdout (implied when --out is given)." },
             new Option<string?>("--out") { Description = "Write the JSON report to this file (e.g. the drift task's last-remediate.json)." });
 
@@ -71,6 +77,16 @@ internal static class RemediateCommand
             return selectExit;
         }
 
+        if (parseResult.GetValue(options.IfBuildChanged))
+        {
+            BuildChangeStatus change = BuildChange.Detect(facts, LatestJournalOs(services));
+            if (!change.Changed)
+            {
+                stdout.WriteLine(string.Create(CultureInfo.InvariantCulture, $"OS build unchanged ({change.Current}); '{profileName}' not re-applied."));
+                return ExitCodes.Success;
+            }
+        }
+
         // Unattended: a profile's own options seed the run and never break-glass a managed setting.
         ApplyOptions applyOptions = ApplyReporting.BuildOptions(
             whatIf,
@@ -85,6 +101,17 @@ internal static class RemediateCommand
         ApplyResult result = services.CreateApplyEngine().Apply(entries, applyOptions);
         WriteReport(result, whatIf, parseResult.GetValue(options.Out), parseResult.GetValue(options.Json), stdout, stderr);
         return ApplyReporting.ExitCode(result, whatIf);
+    }
+
+    /// <summary>
+    /// The OS recorded in the most recent journal, or <see langword="null"/> when
+    /// there is no prior run to compare the live build against.
+    /// </summary>
+    private static JournalOs? LatestJournalOs(CliServices services)
+    {
+        IJournalStore journal = services.CreateJournalStore();
+        IReadOnlyList<JournalSummary> history = journal.List();
+        return history.Count == 0 ? null : journal.Load(history[0].RunId).Os;
     }
 
     /// <summary>
@@ -135,6 +162,7 @@ internal static class RemediateCommand
         Option<bool> AllowAdvanced,
         Option<bool> AllowBreaking,
         Option<bool> RestartExplorer,
+        Option<bool> IfBuildChanged,
         Option<bool> Json,
         Option<string?> Out)
     {
@@ -149,6 +177,7 @@ internal static class RemediateCommand
             command.Options.Add(AllowAdvanced);
             command.Options.Add(AllowBreaking);
             command.Options.Add(RestartExplorer);
+            command.Options.Add(IfBuildChanged);
             command.Options.Add(Json);
             command.Options.Add(Out);
         }

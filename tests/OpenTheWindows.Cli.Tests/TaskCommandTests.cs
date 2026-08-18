@@ -88,6 +88,20 @@ public sealed class TaskCommandTests
     }
 
     [Fact]
+    public void Install_on_build_change_registers_a_boot_task_that_re_applies_only_after_a_build_change()
+    {
+        var installer = new FakeScheduledTaskInstaller();
+        var (root, stdout, stderr) = Build(installer);
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "task", "install", "--profile", "home", "--on-build-change");
+
+        Assert.Equal(ExitCodes.Success, code);
+        ScheduledTaskSpec spec = Assert.Single(installer.Installed);
+        Assert.Equal(TaskTrigger.BuildChange, spec.Trigger);
+        Assert.Contains("--if-build-changed", spec.Arguments, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Remove_deletes_the_task()
     {
         var installer = new FakeScheduledTaskInstaller();

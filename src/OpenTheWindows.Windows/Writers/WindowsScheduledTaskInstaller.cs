@@ -59,6 +59,9 @@ public sealed class WindowsScheduledTaskInstaller : IScheduledTaskInstaller
         TaskTrigger.Daily => new DailyTrigger(),
         TaskTrigger.Weekly => new WeeklyTrigger(),
         TaskTrigger.Logon => new LogonTrigger(),
+        // A feature update reboots, so a boot trigger fires after one; the task's
+        // remediate runs with --if-build-changed and no-ops when the build is unchanged.
+        TaskTrigger.BuildChange => new BootTrigger(),
         _ => throw new ArgumentOutOfRangeException(nameof(trigger), trigger, "Unknown task trigger."),
     };
 }

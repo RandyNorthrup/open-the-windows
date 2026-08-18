@@ -2,6 +2,7 @@ using System.CommandLine;
 using System.Text.Json;
 using OpenTheWindows.Core;
 using OpenTheWindows.Core.Engine;
+using OpenTheWindows.Core.Journal;
 using OpenTheWindows.TestSupport.Fakes;
 
 namespace OpenTheWindows.Cli.Tests;
@@ -9,8 +10,27 @@ namespace OpenTheWindows.Cli.Tests;
 public sealed class RemediateCommandTests
 {
     private static (RootCommand Root, StringWriter Out, StringWriter Err) Build(
-        bool supported = true, bool elevated = true, ApplyEngine? engine = null)
-        => TestCli.ApplyHost(supported, elevated, engine);
+        bool supported = true, bool elevated = true, ApplyEngine? engine = null, IJournalStore? journalStore = null)
+        => TestCli.ApplyHost(supported, elevated, engine, journalStore: journalStore);
+
+    /// <summary>A journal store whose only record captured the given OS build/UBR.</summary>
+    private static FakeJournalStore JournalWithBuild(int build, int revision)
+    {
+        var store = new FakeJournalStore();
+        store.Begin(new JournalRecord
+        {
+            RunId = Guid.NewGuid(),
+            StartedAt = new DateTimeOffset(2026, 8, 17, 0, 0, 0, TimeSpan.Zero),
+            AppVersion = "0.2.0",
+            Os = new JournalOs(build, revision, "Professional"),
+            Profile = "basic",
+            Operator = @"TEST\tester",
+            RestorePoint = new JournalRestorePoint(false, false, "NotRequested", null),
+            Entries = [],
+            Result = RunState.Completed,
+        });
+        return store;
+    }
 
     [Fact]
     public void Unsupported_platform_exits_3()
@@ -87,6 +107,49 @@ public sealed class RemediateCommandTests
         var (root, stdout, stderr) = Build(engine: FakeApplyEngine.Create(new FakeMachine()).Engine);
 
         int code = CliTestHost.Invoke(root, stdout, stderr, "remediate", "--profile", "basic", "--include-draft", "--no-restore-point", "--json");
+
+        Assert.True(code is ExitCodes.Success or ExitCodes.RebootRequired);
+        using var document = JsonDocument.Parse(stdout.ToString());
+        Assert.Equal("Completed", document.RootElement.GetProperty("state").GetString());
+    }
+
+    [Fact]
+    public void If_build_changed_skips_when_the_build_is_unchanged()
+    {
+        // The host reports Windows 11 24H2 (26100.4351); a journal at the same build means no feature update.
+        var machine = new FakeMachine();
+        var (root, stdout, stderr) = Build(engine: FakeApplyEngine.Create(machine).Engine, journalStore: JournalWithBuild(26100, 4351));
+
+        int code = CliTestHost.Invoke(
+            root, stdout, stderr, "remediate", "--profile", "basic", "--include-draft", "--no-restore-point", "--if-build-changed");
+
+        Assert.Equal(ExitCodes.Success, code);
+        Assert.Equal(0, machine.WriteCount);
+        Assert.Contains("unchanged", stdout.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void If_build_changed_applies_when_the_build_differs()
+    {
+        var (root, stdout, stderr) = Build(engine: FakeApplyEngine.Create(new FakeMachine()).Engine, journalStore: JournalWithBuild(26100, 4000));
+
+        int code = CliTestHost.Invoke(
+            root, stdout, stderr, "remediate", "--profile", "basic", "--include-draft", "--no-restore-point", "--if-build-changed", "--json");
+
+        Assert.True(code is ExitCodes.Success or ExitCodes.RebootRequired);
+        Assert.DoesNotContain("unchanged", stdout.ToString(), StringComparison.Ordinal);
+        using var document = JsonDocument.Parse(stdout.ToString());
+        Assert.Equal("Completed", document.RootElement.GetProperty("state").GetString());
+    }
+
+    [Fact]
+    public void If_build_changed_applies_when_there_is_no_prior_journal()
+    {
+        // No journal store record (default empty store) means no baseline, so the safe action is to apply.
+        var (root, stdout, stderr) = Build(engine: FakeApplyEngine.Create(new FakeMachine()).Engine);
+
+        int code = CliTestHost.Invoke(
+            root, stdout, stderr, "remediate", "--profile", "basic", "--include-draft", "--no-restore-point", "--if-build-changed", "--json");
 
         Assert.True(code is ExitCodes.Success or ExitCodes.RebootRequired);
         using var document = JsonDocument.Parse(stdout.ToString());
