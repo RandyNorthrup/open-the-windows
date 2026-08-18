@@ -59,6 +59,7 @@ to its kind.
           "index": 0,
           "kind": "Registry",
           "target": "HKU\\S-1-5-21-...\\Software\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo!Enabled",
+          "sid": "S-1-5-21-...",
           "action": { "kind": "Registry", "hive": "User", "path": "Software\\...\\AdvertisingInfo", "name": "Enabled", "type": "Dword", "value": 0, "default": 1, "valueKind": "Preference" },
           "prior": { "exists": true, "type": "Dword", "data": 1 },
           "desired": { "type": "Dword", "data": 0 },
@@ -87,6 +88,7 @@ to its kind.
 | `targetUser` | The interactive user whose `HKU\<sid>` per-user changes targeted; absent when the run made no per-user changes. |
 | `restorePoint` | Truthful System Restore outcome: `Created` / `Skipped24h` / `Disabled` / `Failed` / `NotRequested`, with the sequence number when created. |
 | `entries[].action` | The full catalogue action, so revert is replayable **from the journal alone** (no dependency on the catalogue at revert time). |
+| `entries[].actions[].sid` | The user SID the action wrote under (`HKU\<sid>`), for a user-hive registry action or a per-user Appx removal; absent for a machine-scope action. Revert and rollback restore the same hive. An all-users run records one action per targeted hive, each with its own `sid`. |
 | `entries[].actions[].prior` | The state captured before the change; revert restores exactly this, including "the value was absent" (`{ "exists": false }`). |
 | `entries[].actions[].result` | `Pending` → `Applied` / `Failed` / `RolledBack` / `Skipped` / `NotApplicable`. |
 | `result` | `InProgress` while running, then `Completed` / `RolledBack` / `Failed`. |

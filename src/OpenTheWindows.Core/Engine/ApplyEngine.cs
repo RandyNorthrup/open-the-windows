@@ -102,7 +102,7 @@ public sealed class ApplyEngine
             string.Create(CultureInfo.InvariantCulture, $"Apply '{options.ProfileName}' started ({record.Entries.Count} entr(y/ies))."),
             runId, null);
 
-        RunState state = ExecuteApply(record, run.UserSid, runId);
+        RunState state = ExecuteApply(record, runId);
         record.Result = state;
         record.Requires = AggregateRequires(record);
         _services.Journal.Update(record);
@@ -135,12 +135,12 @@ public sealed class ApplyEngine
         }
 
         var newRunId = Guid.NewGuid();
-        JournalRecord record = BuildRevertRecord(original, revertable, newRunId, sid);
+        JournalRecord record = BuildRevertRecord(original, revertable, newRunId);
 
         _services.Journal.Begin(record);
         Audit(AuditEventId.RevertStarted, string.Create(CultureInfo.InvariantCulture, $"Revert of {runId} started."), newRunId, null);
 
-        RunState state = ExecuteRevert(record, sid, newRunId);
+        RunState state = ExecuteRevert(record, newRunId);
         record.Result = state;
         _services.Journal.Update(record);
 
@@ -305,6 +305,7 @@ public sealed class ApplyEngine
                     Kind = action.Kind,
                     Target = ActionTarget.Describe(action, run.UserSid),
                     Action = action,
+                    Sid = ActionApplier.EffectiveSid(action, run.UserSid),
                     Prior = willWrite ? _applier.CapturePrior(action, run.UserSid) : null,
                     Desired = ActionApplier.DescribeDesired(action),
                     Result = initial,
@@ -338,7 +339,7 @@ public sealed class ApplyEngine
         };
     }
 
-    private JournalRecord BuildRevertRecord(JournalRecord original, List<JournalEntry> revertable, Guid newRunId, string? sid)
+    private JournalRecord BuildRevertRecord(JournalRecord original, List<JournalEntry> revertable, Guid newRunId)
     {
         List<JournalEntry> entries = [];
         foreach (JournalEntry entry in revertable)
@@ -352,9 +353,10 @@ public sealed class ApplyEngine
                     Kind = a.Kind,
                     Target = a.Target,
                     Action = a.Action,
+                    Sid = a.Sid,
                     // The prior captured here is the current state (before this revert), so the revert
                     // is itself revertible; the desired state is the original run's prior, restored below.
-                    Prior = _applier.CapturePrior(a.Action, sid),
+                    Prior = _applier.CapturePrior(a.Action, a.Sid),
                     Desired = a.Prior ?? new JournalActionState(),
                     Result = ApplyState.Pending,
                 })];
@@ -384,20 +386,20 @@ public sealed class ApplyEngine
         };
     }
 
-    private RunState ExecuteApply(JournalRecord record, string? sid, Guid runId)
+    private RunState ExecuteApply(JournalRecord record, Guid runId)
     {
         foreach (JournalEntry entry in record.Entries)
         {
             foreach (JournalAction action in entry.Actions.Where(a => a.Result == ApplyState.Pending))
             {
-                Exception? failure = ApplyAndVerify(action, sid);
+                Exception? failure = ApplyAndVerify(action);
                 if (failure is not null)
                 {
                     action.Result = ApplyState.Failed;
                     entry.Result = ApplyState.Failed;
                     _services.Journal.Update(record);
                     Audit(AuditEventId.TweakFailed, string.Create(CultureInfo.InvariantCulture, $"{entry.Id}: {failure.Message}"), runId, entry.Id);
-                    return RollBack(record, sid, runId);
+                    return RollBack(record, runId);
                 }
 
                 action.Result = ApplyState.Applied;
@@ -417,9 +419,9 @@ public sealed class ApplyEngine
         return RunState.Completed;
     }
 
-    private Exception? ApplyAndVerify(JournalAction action, string? sid)
+    private Exception? ApplyAndVerify(JournalAction action)
     {
-        Exception? failure = Capture(() => _applier.Apply(action.Action, sid));
+        Exception? failure = Capture(() => _applier.Apply(action.Action, action.Sid));
         action.AppliedAt = _time.GetUtcNow();
         if (failure is not null)
         {
@@ -427,7 +429,7 @@ public sealed class ApplyEngine
         }
 
         bool verified = false;
-        failure = Capture(() => verified = _applier.Verify(action.Action, sid));
+        failure = Capture(() => verified = _applier.Verify(action.Action, action.Sid));
         action.Verified = verified;
         if (failure is null && !verified)
         {
@@ -437,14 +439,14 @@ public sealed class ApplyEngine
         return failure;
     }
 
-    private RunState RollBack(JournalRecord record, string? sid, Guid runId)
+    private RunState RollBack(JournalRecord record, Guid runId)
     {
         bool clean = true;
         foreach (JournalEntry entry in Enumerable.Reverse(record.Entries))
         {
             foreach (JournalAction action in Enumerable.Reverse(entry.Actions).Where(a => a.Result == ApplyState.Applied))
             {
-                Exception? failure = Capture(() => _applier.Restore(action.Action, action.Prior, sid));
+                Exception? failure = Capture(() => _applier.Restore(action.Action, action.Prior, action.Sid));
                 if (failure is null)
                 {
                     action.Result = ApplyState.RolledBack;
@@ -464,19 +466,19 @@ public sealed class ApplyEngine
         return clean ? RunState.RolledBack : RunState.Failed;
     }
 
-    private RunState ExecuteRevert(JournalRecord record, string? sid, Guid runId)
+    private RunState ExecuteRevert(JournalRecord record, Guid runId)
     {
         bool clean = true;
         foreach (JournalEntry entry in record.Entries)
         {
             foreach (JournalAction action in entry.Actions.Where(a => a.Result == ApplyState.Pending))
             {
-                Exception? failure = Capture(() => _applier.Restore(action.Action, action.Desired, sid));
+                Exception? failure = Capture(() => _applier.Restore(action.Action, action.Desired, action.Sid));
                 action.AppliedAt = _time.GetUtcNow();
                 if (failure is null)
                 {
                     bool verified = false;
-                    failure = Capture(() => verified = _applier.VerifyRestored(action.Action, action.Desired, sid));
+                    failure = Capture(() => verified = _applier.VerifyRestored(action.Action, action.Desired, action.Sid));
                     action.Verified = verified;
                     if (failure is null && !verified)
                     {

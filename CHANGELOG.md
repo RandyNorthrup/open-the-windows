@@ -125,6 +125,15 @@ what was planned (plans live in `PLAN.md`).
   `CliServices.CreateUserHiveEnumerator`. This is the first, read-only slice of
   the all-users scope work; loading unloaded hives and applying across them is the
   next slice.
+- M5 (profiles, part 12 — journal records a per-action SID): `JournalAction` now
+  carries the `Sid` the action wrote under (`HKU\<sid>` for a user-hive registry
+  action or a per-user Appx removal, absent for a machine-scope action, via new
+  `ActionApplier.EffectiveSid`), and apply, rollback and revert now drive each
+  action off its own `Sid` rather than one run-level SID. Behaviour is unchanged
+  for today's single-user runs (every action's SID is that one user), but the
+  journal and the transactional core can now represent and correctly revert an
+  entry applied across several hives — the schema groundwork for all-users apply.
+  `docs/journal-format.md` documents the field.
 - M4 (Windows Update guardrails): the safe, reversible update controls
   (`OpenTheWindows.Core.Updates`). `PauseCalculator` computes the six Settings-app
   pause values (`PauseUpdatesStartTime`/`ExpiryTime`,

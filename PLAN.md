@@ -617,11 +617,16 @@ committed locally):
   service accounts and `.DEFAULT`, and reports each `HKEY_USERS\<sid>` hive's loaded
   state; `otw users [--json]` lists them through a new lazy
   `CliServices.CreateUserHiveEnumerator`. VM-verified on 26200.9168 (lists the real
-  account, skips system SIDs). Still pending for M5: loading unloaded hives
-  (`RegLoadKey`/`RegUnLoadKey` under `SeBackup`/`SeRestore`) and applying User-scope
-  entries across every hive under `scope: AllUsers` (the transactional-core change —
-  per-action SID in the journal, rollback per hive), Active Setup fallback, then
-  `docs/certification/M5.md`.
+  account, skips system SIDs).
+- **All-users journal groundwork** (`JournalAction.Sid`, `ActionApplier.EffectiveSid`):
+  the journal now records the SID each action wrote under (user-hive registry /
+  per-user Appx; absent for machine scope), and apply/rollback/revert drive each
+  action off its own `Sid` rather than one run-level SID. Behaviour-preserving for
+  single-user runs; lets one entry be applied across several hives and reverted per
+  hive. Still pending for M5: loading unloaded hives (`RegLoadKey`/`RegUnLoadKey`
+  under `SeBackup`/`SeRestore`), expanding User-scope actions across every hive under
+  `scope: AllUsers` (with the load/unload lifecycle and per-hive rollback), Active
+  Setup fallback, then `docs/certification/M5.md`.
 
 ### M6 — GUI (not started)
 

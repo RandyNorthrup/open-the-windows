@@ -66,6 +66,9 @@ public sealed class ApplyEngineTests
     private static bool Exists(FakeMachine machine, string name)
         => ((IRegistryReader)machine).Read(RegistryHive.LocalMachine, null, Path, name).Exists;
 
+    private static bool UserValueExists(FakeMachine machine, string sid, string name)
+        => ((IRegistryReader)machine).Read(RegistryHive.User, sid, Path, name).Exists;
+
     [Fact]
     public void Applies_a_drifting_value_verifies_and_journals_the_prior()
     {
@@ -184,6 +187,26 @@ public sealed class ApplyEngineTests
         Assert.Equal(h.Journal.Records[0].Hash, h.Journal.Records[1].PreviousHash);
         Assert.True(JournalSerializer.VerifyHash(h.Journal.Records[0]));
         Assert.True(JournalSerializer.VerifyHash(h.Journal.Records[1]));
+    }
+
+    [Fact]
+    public void Journals_the_target_sid_of_a_user_scope_action_and_reverts_it_in_that_hive()
+    {
+        var machine = new FakeMachine { User = new InteractiveUser("S-1-5-21-99", @"TEST\alice", HiveLoaded: true) };
+        ApplyHarness h = FakeApplyEngine.Create(machine);
+
+        ApplyResult applied = h.Engine.Apply([Entry("test.user", [Reg("U", 1, hive: RegistryHive.User)])], Opts());
+
+        Assert.Equal(RunState.Completed, applied.State);
+        JournalAction action = h.Journal.Records[0].Entries[0].Actions[0];
+        Assert.Equal("S-1-5-21-99", action.Sid);
+        Assert.True(UserValueExists(machine, "S-1-5-21-99", "U"));
+
+        // Revert uses the action's journaled SID to restore the same hive it wrote.
+        RevertResult reverted = h.Engine.Revert(applied.RunId, new RevertOptions(false, false));
+
+        Assert.Equal(RunState.Completed, reverted.State);
+        Assert.False(UserValueExists(machine, "S-1-5-21-99", "U"));
     }
 
     [Fact]

@@ -25,6 +25,14 @@ public sealed class JournalAction
     /// <summary>The full catalogue action, so revert can be replayed from the journal alone.</summary>
     public required ITweakAction Action { get; init; }
 
+    /// <summary>
+    /// The user SID whose hive this action targets (<c>HKEY_USERS\&lt;Sid&gt;</c>), or
+    /// <see langword="null"/> for a machine-scope action. Persisted so revert and
+    /// rollback restore each action in the same hive it was applied to — the basis
+    /// for all-users application, where one entry is applied across several hives.
+    /// </summary>
+    public string? Sid { get; init; }
+
     /// <summary>The state captured before the change; <see langword="null"/> when the kind has no revertible prior (e.g. commands).</summary>
     public JournalActionState? Prior { get; init; }
 
