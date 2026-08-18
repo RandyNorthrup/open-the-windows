@@ -166,6 +166,14 @@ profile — SYSTEM account, highest privileges, hidden, on the chosen schedule
 deletes it. Both need elevation. Exit 0 on success, 4 for an unknown profile or
 conflicting schedule flags, 5 when not elevated.
 
+For a managed fleet, [docs/enterprise.md](docs/enterprise.md) is the deployment
+guide: the paired Intune Remediations scripts
+[docs/enterprise/intune-detect.ps1](docs/enterprise/intune-detect.ps1) and
+[docs/enterprise/intune-remediate.ps1](docs/enterprise/intune-remediate.ps1)
+(wrapping `otw scan`/`remediate` and mapping the exit codes onto Intune's
+detection and remediation contracts), signed profiles with the
+`RequireSignedProfiles` policy and its ADMX, and WDAC allow-listing of `otw.exe`.
+
 `otw revert <runId|last> [--what-if] [--json]` restores the state captured before
 a prior run, journaling a new revert run. `otw history [--json]` lists prior
 apply and revert runs, newest first. `scan` and `apply` also take `--only <id>`

@@ -8,7 +8,7 @@
   "absolute": false,
   "gitignore": true,
   "format": ["csharp", "xml", "powershell", "yaml", "json"],
-  "$comment": "markdown is deliberately excluded: the Linux tokenizer reports code fences (```text) as clones across unrelated docs; prose duplication is not the risk this gate exists for. catalog/** is excluded because catalogue entries are declarative data whose action blocks are intentionally uniform in shape (a registry or service action looks the same across many tweaks); that structural repetition is not copy-pasted logic.",
+  "$comment": "markdown is deliberately excluded: the Linux tokenizer reports code fences (```text) as clones across unrelated docs; prose duplication is not the risk this gate exists for. catalog/** is excluded because catalogue entries are declarative data whose action blocks are intentionally uniform in shape (a registry or service action looks the same across many tweaks); that structural repetition is not copy-pasted logic. docs/enterprise/*.ps1 are excluded because Intune uploads each detection/remediation script standalone, so their otw.exe bootstrap must be duplicated in each file rather than shared through a module.",
   "ignore": [
     "**/artifacts/**",
     "**/node_modules/**",
@@ -21,6 +21,7 @@
     "**/package-lock.json",
     "catalog/**",
     "docs/research/**",
+    "docs/enterprise/*.ps1",
     "temp/**"
   ]
 }

@@ -93,6 +93,18 @@ what was planned (plans live in `PLAN.md`).
   Windows `WindowsScheduledTaskInstaller` registers it through the Task Scheduler
   2.0 API. Build-change re-application (compare the current OS build/UBR against
   the last journal) is a follow-up.
+- M5 (profiles, part 9 — enterprise deployment): `docs/enterprise.md`, the
+  managed-fleet deployment guide (exit-code contract, signed profiles and the
+  `RequireSignedProfiles` policy/ADMX, WDAC allow-listing of the unsigned
+  `otw.exe` by file hash or a re-signed publisher rule, auditing), plus the
+  paired Intune Remediations scripts `docs/enterprise/intune-detect.ps1`
+  (wraps `otw scan`) and `docs/enterprise/intune-remediate.ps1` (wraps
+  `otw remediate`). Each script is standalone — Intune uploads detection and
+  remediation separately — resolves `otw.exe` from `$OtwPath`, then PATH, then
+  `%ProgramFiles%\OpenTheWindows`, and maps the Open The Windows exit codes onto
+  Intune's detection contract (0 healthy / non-zero remediate) and remediation
+  contract (0 success / non-zero failure). Their shared bootstrap is excluded
+  from the duplication gate (PLAN §7.3).
 - M4 (Windows Update guardrails): the safe, reversible update controls
   (`OpenTheWindows.Core.Updates`). `PauseCalculator` computes the six Settings-app
   pause values (`PauseUpdatesStartTime`/`ExpiryTime`,

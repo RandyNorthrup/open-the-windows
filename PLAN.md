@@ -305,7 +305,7 @@ shipped `core-6.1.0-windows` profile.
 | `.editorconfig` `[tests/**]` | CA1707, CA2007, CA1515, CA1861, CA1062, CA1812, CA1822 none | test conventions | never |
 | `PSScriptAnalyzerSettings.psd1` | `PSUseShouldProcessForStateChangingFunctions`, `PSAvoidUsingWriteHost`, `PSAvoidUsingPositionalParameters` excluded | imperative build scripts calling native tools | never |
 | `.markdownlint-cli2.jsonc` | `docs/research/**` ignored | generated reference reports with wide tables/raw URLs | never |
-| `.jscpd.json` | markdown excluded from `format`; `catalog/**` ignored | the Linux tokenizer reports ```` ```text ```` code fences as clones across unrelated docs; catalogue entries are declarative data with intentionally uniform action blocks (not copy-pasted logic) | never |
+| `.jscpd.json` | markdown excluded from `format`; `catalog/**` and `docs/enterprise/*.ps1` ignored | the Linux tokenizer reports ```` ```text ```` code fences as clones across unrelated docs; catalogue entries are declarative data with intentionally uniform action blocks (not copy-pasted logic); Intune uploads each detection/remediation script standalone, so their otw.exe bootstrap is duplicated per file rather than shared through a module | never |
 | `.gitleaks.toml` | dir-scan allowlist for `.venv-tools/`, `node_modules/`, `artifacts/`, `temp/` | gitignored, third-party or local-only; history scan unaffected | never |
 | `BannedSymbols.txt` | applies to `src/` only | tests use HKCU sandbox keys and DateTime in assertions | never |
 | `Directory.Build.props` | `EnableReferenceTrimmer=false` when `MSBuildProjectName` ends with `_wpftmp` | the WPF markup-compile pass builds a generated `<Project>_<hash>_wpftmp.csproj` that omits the code-behind using Core/Windows; ReferenceTrimmer then falsely reports those refs as removable (RT0002), failing the temp build under warnings-as-errors and cascading to BG1002 in the real build. RT still runs on the real App project | when the WPF SDK stops leaking analyzers into the temp project |
@@ -594,7 +594,18 @@ committed locally):
   API (`RegisterTaskDefinition`); new lazy `CliServices.CreateTaskInstaller`;
   `TaskCommand` modeled on `UpdatesCommand`. Self-path via `Environment.ProcessPath`.
   Still pending: build-change re-application (current OS build/UBR vs the last
-  journal record), and the Intune templates + `docs/enterprise.md`.
+  journal record).
+- **Enterprise deployment** (`docs/enterprise.md`, `docs/enterprise/*.ps1`): the
+  managed-fleet guide and the paired Intune Remediations scripts. `intune-detect.ps1`
+  wraps `otw scan` and maps the exit contract onto Intune detection (0 healthy /
+  non-zero remediate); `intune-remediate.ps1` wraps `otw remediate` and maps it onto
+  Intune remediation (0 success / non-zero failure), writing `last-remediate.json`.
+  Each is standalone (Intune uploads detection/remediation separately) and resolves
+  `otw.exe` from `$OtwPath`, then PATH, then `%ProgramFiles%\OpenTheWindows`; their
+  shared bootstrap is excluded from the duplication gate (§7.3). The guide also
+  covers signed profiles + `RequireSignedProfiles`/ADMX and WDAC allow-listing of the
+  unsigned binary (file-hash rule, or a signer rule after re-signing). Still pending
+  for M5: build-change re-application, all-users hive scope, and `docs/certification/M5.md`.
 
 ### M6 — GUI (not started)
 
