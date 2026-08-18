@@ -82,6 +82,17 @@ what was planned (plans live in `PLAN.md`).
   required, 3010 reboot). The shared apply plumbing (option-building from a
   profile, exit-code mapping, JSON/text rendering) was factored into
   `ApplyReporting`, which `apply` now also uses.
+- M5 (profiles, part 8 — the drift scheduled task): `otw task install --profile
+  <id> [--daily|--weekly|--on-logon]` registers `\OpenTheWindows\Remediate`, a
+  SYSTEM / highest-privileges / hidden task that runs `otw remediate` for the
+  profile on the chosen schedule and writes its report to
+  `%ProgramData%\OpenTheWindows\reports\last-remediate.json`; `otw task remove`
+  deletes it. Both need elevation. A new Core `IScheduledTaskInstaller` /
+  `ScheduledTaskSpec` / `TaskTrigger` abstraction with the deterministic
+  `RemediationTask` builder (asserted directly in tests) describes the task; the
+  Windows `WindowsScheduledTaskInstaller` registers it through the Task Scheduler
+  2.0 API. Build-change re-application (compare the current OS build/UBR against
+  the last journal) is a follow-up.
 - M4 (Windows Update guardrails): the safe, reversible update controls
   (`OpenTheWindows.Core.Updates`). `PauseCalculator` computes the six Settings-app
   pause values (`PauseUpdatesStartTime`/`ExpiryTime`,

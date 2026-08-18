@@ -25,9 +25,11 @@ internal static class TestCli
         IMachineHealthProbe? health = null,
         Func<ApplyEngine>? createApplyEngine = null,
         Func<UpdateControlService>? createUpdateControl = null,
-        IElevationContext? elevation = null)
+        IElevationContext? elevation = null,
+        IScheduledTaskInstaller? taskInstaller = null)
     {
         FakeReaders scanReaders = readers ?? new FakeReaders();
+        FakeScheduledTaskInstaller defaultInstaller = new();
         return new CliServices(
             doctor,
             loadCatalog,
@@ -35,6 +37,7 @@ internal static class TestCli
             createApplyEngine ?? (() => FakeApplyEngine.Create(new FakeMachine()).Engine),
             createUpdateControl ?? (() => FakeUpdateControl.Create(new FakeMachine()).Service),
             () => scanReaders,
+            () => taskInstaller ?? defaultInstaller,
             health ?? new FakeHealthProbe([]),
             elevation ?? new FakeElevationContext(isElevated: true));
     }
@@ -46,7 +49,8 @@ internal static class TestCli
     /// <paramref name="elevated"/>. Shared so apply and remediate tests do not repeat it.
     /// </summary>
     public static (RootCommand Root, StringWriter Out, StringWriter Err) ApplyHost(
-        bool supported = true, bool elevated = true, ApplyEngine? engine = null, FakeReaders? readers = null)
+        bool supported = true, bool elevated = true, ApplyEngine? engine = null, FakeReaders? readers = null,
+        IScheduledTaskInstaller? taskInstaller = null)
     {
         var doctor = new DoctorService(
             new FakeOperatingSystemInfo(supported ? FakeOperatingSystemInfo.Windows11Pro24H2() : FakeOperatingSystemInfo.WindowsServer2025()),
@@ -56,6 +60,7 @@ internal static class TestCli
             _ => CatalogLoader.LoadBuiltIn(),
             readers,
             createApplyEngine: engine is null ? null : () => engine,
-            elevation: new FakeElevationContext(elevated)));
+            elevation: new FakeElevationContext(elevated),
+            taskInstaller: taskInstaller));
     }
 }

@@ -16,5 +16,6 @@ public sealed class CliServicesTests
         Assert.NotNull(services.Elevation);
         Assert.NotNull(services.CreateScanEngine());
         Assert.NotNull(services.CreateApplyEngine());
+        Assert.NotNull(services.CreateTaskInstaller());
     }
 }

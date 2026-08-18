@@ -5,6 +5,7 @@ using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Updates;
 using OpenTheWindows.Windows;
 using OpenTheWindows.Windows.Readers;
+using OpenTheWindows.Windows.Writers;
 
 namespace OpenTheWindows.Cli;
 
@@ -18,6 +19,7 @@ namespace OpenTheWindows.Cli;
 /// <param name="CreateApplyEngine">Builds the transactional apply engine over the real readers, writers and services.</param>
 /// <param name="CreateUpdateControl">Builds the Windows Update guardrail service over the real apply engine and adapters.</param>
 /// <param name="CreateRegistryReader">Builds a read-only registry reader (used to read the machine profile policy).</param>
+/// <param name="CreateTaskInstaller">Builds the scheduled-task installer (drift remediation task).</param>
 /// <param name="Health">The read-only machine health probe.</param>
 /// <param name="Elevation">The process elevation context.</param>
 internal sealed record CliServices(
@@ -27,6 +29,7 @@ internal sealed record CliServices(
     Func<ApplyEngine> CreateApplyEngine,
     Func<UpdateControlService> CreateUpdateControl,
     Func<IRegistryReader> CreateRegistryReader,
+    Func<IScheduledTaskInstaller> CreateTaskInstaller,
     IMachineHealthProbe Health,
     IElevationContext Elevation)
 {
@@ -39,6 +42,7 @@ internal sealed record CliServices(
             CreateDefaultApplyEngine,
             static () => WindowsUpdateControlFactory.Create(),
             static () => new WindowsRegistryReader(),
+            static () => new WindowsScheduledTaskInstaller(),
             new WindowsMachineHealthProbe(),
             new WindowsElevationContext());
 

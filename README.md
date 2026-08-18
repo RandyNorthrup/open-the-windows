@@ -158,6 +158,14 @@ writes it to stdout. It takes the same `--profile`, `--include-draft`,
 `--no-restore-point`, `--allow-advanced`, `--allow-breaking`, `--restart-explorer`
 and `--what-if` options, and returns the same exit codes as `apply`.
 
+`otw task install --profile <value> [--daily|--weekly|--on-logon]` registers a
+scheduled task `\OpenTheWindows\Remediate` that runs `otw remediate` for that
+profile — SYSTEM account, highest privileges, hidden, on the chosen schedule
+(daily by default) — and writes its report to
+`%ProgramData%\OpenTheWindows\reports\last-remediate.json`. `otw task remove`
+deletes it. Both need elevation. Exit 0 on success, 4 for an unknown profile or
+conflicting schedule flags, 5 when not elevated.
+
 `otw revert <runId|last> [--what-if] [--json]` restores the state captured before
 a prior run, journaling a new revert run. `otw history [--json]` lists prior
 apply and revert runs, newest first. `scan` and `apply` also take `--only <id>`

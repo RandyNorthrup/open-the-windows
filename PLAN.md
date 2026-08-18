@@ -584,6 +584,17 @@ committed locally):
   package: `otw task install/remove` (the `\OpenTheWindows\Remediate` SYSTEM
   scheduled task), build-change detection, and the Intune templates that wrap
   `otw remediate`.
+- **Drift scheduled task** (`otw task install|remove`): registers
+  `\OpenTheWindows\Remediate` (SYSTEM, highest privileges, hidden) running
+  `otw remediate --profile <id> --json --out <reports>\last-remediate.json` on a
+  `--daily`/`--weekly`/`--on-logon` schedule; `remove` deletes it; both elevated.
+  New Core `IScheduledTaskInstaller`/`ScheduledTaskSpec`/`TaskTrigger` +
+  deterministic `RemediationTask` builder (asserted in tests, no Task-Scheduler
+  XML golden); Windows `WindowsScheduledTaskInstaller` via the TaskScheduler 2.0
+  API (`RegisterTaskDefinition`); new lazy `CliServices.CreateTaskInstaller`;
+  `TaskCommand` modeled on `UpdatesCommand`. Self-path via `Environment.ProcessPath`.
+  Still pending: build-change re-application (current OS build/UBR vs the last
+  journal record), and the Intune templates + `docs/enterprise.md`.
 
 ### M6 — GUI (not started)
 
