@@ -182,7 +182,9 @@ detection and remediation contracts), signed profiles with the
 
 `otw revert <runId|last> [--what-if] [--json]` restores the state captured before
 a prior run, journaling a new revert run. `otw history [--json]` lists prior
-apply and revert runs, newest first. `scan` and `apply` also take `--only <id>`
+apply and revert runs, newest first. `otw users [--json]` lists the real user
+profiles on the machine (the per-user hives an all-users apply would target) and
+whether each hive is currently loaded; it is read-only. `scan` and `apply` also take `--only <id>`
 to operate on a single catalogue entry (including Draft) for per-entry
 verification.
 

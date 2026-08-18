@@ -22,6 +22,7 @@ namespace OpenTheWindows.Cli;
 /// <param name="CreateRegistryReader">Builds a read-only registry reader (used to read the machine profile policy).</param>
 /// <param name="CreateTaskInstaller">Builds the scheduled-task installer (drift remediation task).</param>
 /// <param name="CreateJournalStore">Builds a journal store (read to compare the last-run OS build against the live one).</param>
+/// <param name="CreateUserHiveEnumerator">Builds the user-hive enumerator (real user profiles an all-users apply targets).</param>
 /// <param name="Health">The read-only machine health probe.</param>
 /// <param name="Elevation">The process elevation context.</param>
 internal sealed record CliServices(
@@ -33,6 +34,7 @@ internal sealed record CliServices(
     Func<IRegistryReader> CreateRegistryReader,
     Func<IScheduledTaskInstaller> CreateTaskInstaller,
     Func<IJournalStore> CreateJournalStore,
+    Func<IUserHiveEnumerator> CreateUserHiveEnumerator,
     IMachineHealthProbe Health,
     IElevationContext Elevation)
 {
@@ -47,6 +49,7 @@ internal sealed record CliServices(
             static () => new WindowsRegistryReader(),
             static () => new WindowsScheduledTaskInstaller(),
             static () => new WindowsJournalStore(),
+            static () => new WindowsUserHiveEnumerator(),
             new WindowsMachineHealthProbe(),
             new WindowsElevationContext());
 

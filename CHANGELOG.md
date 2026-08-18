@@ -115,6 +115,16 @@ what was planned (plans live in `PLAN.md`).
   (which reboots). New `TaskTrigger.BuildChange` maps to a Task Scheduler
   `BootTrigger`; `RemediationTask.Build` adds the flag for that trigger; the CLI
   reaches the journal store through a new lazy `CliServices.CreateJournalStore`.
+- M5 (profiles, part 11 — all-users foundation): the read-only user-hive
+  enumerator that all-users application will target. New Core
+  `IUserHiveEnumerator` / `UserProfile`; the Windows `WindowsUserHiveEnumerator`
+  reads `HKLM\…\ProfileList`, keeps only real accounts (local/domain `S-1-5-21-…`
+  and Azure AD `S-1-12-1-…`), skips the service accounts and `.DEFAULT`, and
+  reports whether each `HKEY_USERS\<sid>` hive is loaded. New `otw users [--json]`
+  lists them (the hives an all-users apply would touch); new lazy
+  `CliServices.CreateUserHiveEnumerator`. This is the first, read-only slice of
+  the all-users scope work; loading unloaded hives and applying across them is the
+  next slice.
 - M4 (Windows Update guardrails): the safe, reversible update controls
   (`OpenTheWindows.Core.Updates`). `PauseCalculator` computes the six Settings-app
   pause values (`PauseUpdatesStartTime`/`ExpiryTime`,

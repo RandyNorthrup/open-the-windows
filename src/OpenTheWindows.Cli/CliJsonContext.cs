@@ -19,4 +19,5 @@ namespace OpenTheWindows.Cli;
 [JsonSerializable(typeof(IReadOnlyList<HealthCheckResult>))]
 [JsonSerializable(typeof(ApplyJsonReport))]
 [JsonSerializable(typeof(IReadOnlyList<JournalSummary>))]
+[JsonSerializable(typeof(IReadOnlyList<UserProfile>))]
 internal sealed partial class CliJsonContext : JsonSerializerContext;

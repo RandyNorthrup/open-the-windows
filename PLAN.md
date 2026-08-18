@@ -609,8 +609,19 @@ committed locally):
   `CliServices.CreateJournalStore` (the store was previously buried inside the apply
   engine). `TaskTrigger.BuildChange` maps to a `BootTrigger` (a feature update
   reboots) and `RemediationTask.Build` appends `--if-build-changed` for it, so the
-  boot-triggered task re-applies only after a feature update. Still pending for M5:
-  all-users hive scope (the `scope` folds in here) and `docs/certification/M5.md`.
+  boot-triggered task re-applies only after a feature update.
+- **All-users foundation** (`Core.Abstractions.IUserHiveEnumerator`/`UserProfile`,
+  `Windows.Readers.WindowsUserHiveEnumerator`, `otw users`): the read-only first
+  slice of all-users scope. The enumerator reads `HKLM\…\ProfileList`, keeps only
+  real accounts (`S-1-5-21-…` local/domain and `S-1-12-1-…` Azure AD), skips the
+  service accounts and `.DEFAULT`, and reports each `HKEY_USERS\<sid>` hive's loaded
+  state; `otw users [--json]` lists them through a new lazy
+  `CliServices.CreateUserHiveEnumerator`. VM-verified on 26200.9168 (lists the real
+  account, skips system SIDs). Still pending for M5: loading unloaded hives
+  (`RegLoadKey`/`RegUnLoadKey` under `SeBackup`/`SeRestore`) and applying User-scope
+  entries across every hive under `scope: AllUsers` (the transactional-core change —
+  per-action SID in the journal, rollback per hive), Active Setup fallback, then
+  `docs/certification/M5.md`.
 
 ### M6 — GUI (not started)
 

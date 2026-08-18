@@ -28,11 +28,13 @@ internal static class TestCli
         Func<UpdateControlService>? createUpdateControl = null,
         IElevationContext? elevation = null,
         IScheduledTaskInstaller? taskInstaller = null,
-        IJournalStore? journalStore = null)
+        IJournalStore? journalStore = null,
+        IUserHiveEnumerator? userHiveEnumerator = null)
     {
         FakeReaders scanReaders = readers ?? new FakeReaders();
         FakeScheduledTaskInstaller defaultInstaller = new();
         FakeJournalStore defaultJournal = new();
+        FakeUserHiveEnumerator defaultUsers = new();
         return new CliServices(
             doctor,
             loadCatalog,
@@ -42,6 +44,7 @@ internal static class TestCli
             () => scanReaders,
             () => taskInstaller ?? defaultInstaller,
             () => journalStore ?? defaultJournal,
+            () => userHiveEnumerator ?? defaultUsers,
             health ?? new FakeHealthProbe([]),
             elevation ?? new FakeElevationContext(isElevated: true));
     }
@@ -67,5 +70,14 @@ internal static class TestCli
             elevation: new FakeElevationContext(elevated),
             taskInstaller: taskInstaller,
             journalStore: journalStore));
+    }
+
+    /// <summary>A command host wired with a specific user-hive enumerator for <c>otw users</c> tests.</summary>
+    public static (RootCommand Root, StringWriter Out, StringWriter Err) UsersHost(IUserHiveEnumerator enumerator)
+    {
+        var doctor = new DoctorService(
+            new FakeOperatingSystemInfo(FakeOperatingSystemInfo.Windows11Pro24H2()),
+            new FakeElevationContext(isElevated: true));
+        return CliTestHost.Host(Services(doctor, _ => CatalogLoader.LoadBuiltIn(), userHiveEnumerator: enumerator));
     }
 }

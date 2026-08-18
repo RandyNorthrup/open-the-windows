@@ -30,6 +30,7 @@ internal static class CommandLineBuilder
         root.Subcommands.Add(HistoryCommand.Create(services));
         root.Subcommands.Add(UpdatesCommand.Create(services));
         root.Subcommands.Add(TaskCommand.Create(services));
+        root.Subcommands.Add(UsersCommand.Create(services));
         return root;
     }
 }
