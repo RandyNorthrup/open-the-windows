@@ -508,3 +508,6 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 .venv-tools/
+
+# Claude Code local (per-user) settings — never committed
+.claude/settings.local.json
