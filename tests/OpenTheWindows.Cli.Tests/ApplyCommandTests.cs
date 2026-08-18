@@ -3,7 +3,6 @@ using System.Text.Json;
 using OpenTheWindows.Core;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
-using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Model;
 using OpenTheWindows.Core.Profiles;
@@ -13,19 +12,9 @@ namespace OpenTheWindows.Cli.Tests;
 
 public sealed class ApplyCommandTests
 {
-    private static DoctorService Doctor(bool supported = true)
-        => new(
-            new FakeOperatingSystemInfo(supported ? FakeOperatingSystemInfo.Windows11Pro24H2() : FakeOperatingSystemInfo.WindowsServer2025()),
-            new FakeElevationContext(isElevated: true));
-
     private static (RootCommand Root, StringWriter Out, StringWriter Err) Build(
         bool supported = true, bool elevated = true, ApplyEngine? engine = null, FakeReaders? readers = null)
-        => CliTestHost.Host(TestCli.Services(
-            Doctor(supported),
-            _ => CatalogLoader.LoadBuiltIn(),
-            readers,
-            createApplyEngine: engine is null ? null : () => engine,
-            elevation: new FakeElevationContext(elevated)));
+        => TestCli.ApplyHost(supported, elevated, engine, readers);
 
     [Fact]
     public void Unsupported_platform_exits_3()

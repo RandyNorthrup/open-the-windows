@@ -142,9 +142,21 @@ overrides MDM/Group-Policy-managed settings (audited); `--restart-explorer`
 restarts the shell for entries that need it; `--json` emits a stable result
 document. Exit 0 = applied, 3010 = applied but a reboot is required, 2 = error
 (rolled back), 3 = unsupported platform, 4 = invalid input / conflict, 5 =
-elevation required. Journals live in `%ProgramData%\OpenTheWindows\journal`
+elevation required. When `--profile` resolves to a real profile (a built-in id or
+a file), that profile's `options` seed these defaults — restore point, restart
+Explorer, allow-advanced and allow-breaking — and the flags above still override.
+Journals live in `%ProgramData%\OpenTheWindows\journal`
 ([docs/journal-format.md](docs/journal-format.md)); the audit trail goes to the
 Windows Event Log and JSONL ([docs/event-log.md](docs/event-log.md)).
+
+`otw remediate --profile <value>` is the **unattended** form of apply, meant for
+automation (the drift scheduled task and Intune): it scans, then applies only the
+drifted entries, with no interactive confirmation, and never break-glasses a
+managed setting. `--out <file>` writes the stable JSON report (creating the
+directory) — for example the task's `last-remediate.json` — otherwise `--json`
+writes it to stdout. It takes the same `--profile`, `--include-draft`,
+`--no-restore-point`, `--allow-advanced`, `--allow-breaking`, `--restart-explorer`
+and `--what-if` options, and returns the same exit codes as `apply`.
 
 `otw revert <runId|last> [--what-if] [--json]` restores the state captured before
 a prior run, journaling a new revert run. `otw history [--json]` lists prior

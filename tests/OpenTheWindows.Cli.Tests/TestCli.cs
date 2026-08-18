@@ -1,3 +1,4 @@
+using System.CommandLine;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
@@ -36,5 +37,25 @@ internal static class TestCli
             () => scanReaders,
             health ?? new FakeHealthProbe([]),
             elevation ?? new FakeElevationContext(isElevated: true));
+    }
+
+    /// <summary>
+    /// A command host wired for the write commands (apply/remediate): the built-in
+    /// catalogue, a doctor reporting <paramref name="supported"/>, the given apply
+    /// <paramref name="engine"/> (default in-memory) and an elevation context set by
+    /// <paramref name="elevated"/>. Shared so apply and remediate tests do not repeat it.
+    /// </summary>
+    public static (RootCommand Root, StringWriter Out, StringWriter Err) ApplyHost(
+        bool supported = true, bool elevated = true, ApplyEngine? engine = null, FakeReaders? readers = null)
+    {
+        var doctor = new DoctorService(
+            new FakeOperatingSystemInfo(supported ? FakeOperatingSystemInfo.Windows11Pro24H2() : FakeOperatingSystemInfo.WindowsServer2025()),
+            new FakeElevationContext(isElevated: true));
+        return CliTestHost.Host(Services(
+            doctor,
+            _ => CatalogLoader.LoadBuiltIn(),
+            readers,
+            createApplyEngine: engine is null ? null : () => engine,
+            elevation: new FakeElevationContext(elevated)));
     }
 }

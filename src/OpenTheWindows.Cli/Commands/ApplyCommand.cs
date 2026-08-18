@@ -5,7 +5,6 @@ using OpenTheWindows.Core;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Engine;
-using OpenTheWindows.Core.Journal;
 using OpenTheWindows.Core.Model;
 using OpenTheWindows.Core.Profiles;
 
@@ -60,19 +59,15 @@ internal static class ApplyCommand
             return selectExit;
         }
 
-        // A resolved profile's own apply options are the defaults; the "enable" flags
-        // (--allow-advanced/--allow-breaking/--restart-explorer) still turn a behaviour on,
-        // and --no-restore-point still turns the restore point off. A level name or --only
-        // carries no options, so the flags decide alone.
-        ProfileOptions? po = selectedProfile?.Options;
-        var applyOptions = new ApplyOptions(
+        ApplyOptions applyOptions = ApplyReporting.BuildOptions(
             whatIf,
-            !parseResult.GetValue(options.NoRestorePoint) && (po?.RestorePoint ?? true),
+            parseResult.GetValue(options.NoRestorePoint),
             parseResult.GetValue(options.BreakGlass),
-            parseResult.GetValue(options.AllowAdvanced) || (po?.AllowAdvanced ?? false),
-            parseResult.GetValue(options.AllowBreaking) || (po?.AllowBreaking ?? false),
+            parseResult.GetValue(options.AllowAdvanced),
+            parseResult.GetValue(options.AllowBreaking),
+            parseResult.GetValue(options.RestartExplorer),
             profileName,
-            parseResult.GetValue(options.RestartExplorer) || (po?.RestartExplorer ?? false));
+            selectedProfile?.Options);
 
         ApplyEngine engine = services.CreateApplyEngine();
 
@@ -117,76 +112,13 @@ internal static class ApplyCommand
     {
         if (json)
         {
-            stdout.WriteLine(JsonSerializer.Serialize(ToJson(result), CliJsonContext.Default.ApplyJsonReport));
+            stdout.WriteLine(JsonSerializer.Serialize(ApplyReporting.ToJson(result), CliJsonContext.Default.ApplyJsonReport));
         }
         else
         {
-            WriteText(result, whatIf, stdout);
+            ApplyReporting.WriteText(result, whatIf, stdout);
         }
 
-        if (result.Plan.HasErrors)
-        {
-            return ExitCodes.InvalidInput;
-        }
-
-        if (result.State == RunState.Failed)
-        {
-            return result.Preflight.Blocking.Any(i => i.Check == PreflightCheck.Elevation)
-                ? ExitCodes.ElevationRequired
-                : ExitCodes.Error;
-        }
-
-        if (result.State == RunState.RolledBack)
-        {
-            return ExitCodes.Error;
-        }
-
-        // A --what-if run changes nothing, so it never itself requires a reboot: the
-        // preview succeeded. The would-be reboot requirement is still reported in the
-        // text/JSON output; only an actual apply returns the 3010 reboot-required code.
-        if (whatIf)
-        {
-            return ExitCodes.Success;
-        }
-
-        return result.Requires == RestartRequirement.Reboot ? ExitCodes.RebootRequired : ExitCodes.Success;
+        return ApplyReporting.ExitCode(result, whatIf);
     }
-
-    private static void WriteText(ApplyResult result, bool whatIf, TextWriter stdout)
-    {
-        if (result.Plan.HasErrors)
-        {
-            foreach (string error in result.Plan.Errors)
-            {
-                stdout.WriteLine(string.Create(CultureInfo.InvariantCulture, $"  ERROR  {error}"));
-            }
-
-            return;
-        }
-
-        foreach (PreflightIssue issue in result.Preflight.Blocking)
-        {
-            stdout.WriteLine(string.Create(CultureInfo.InvariantCulture, $"  BLOCKED  {issue.Check}: {issue.Detail}"));
-        }
-
-        string verb = whatIf ? "Would apply" : "Applied";
-        foreach (EntryOutcome entry in result.Entries)
-        {
-            stdout.WriteLine(string.Create(CultureInfo.InvariantCulture, $"  {entry.Result,-13} {entry.Id.Value}{Suffix(entry.Note)}"));
-        }
-
-        stdout.WriteLine(string.Create(CultureInfo.InvariantCulture,
-            $"{verb}: {result.State}. Restart requirement: {result.Requires}. Restore point: {result.RestorePoint.Status}."));
-    }
-
-    private static string Suffix(string? note) => note is null ? string.Empty : string.Create(CultureInfo.InvariantCulture, $"  ({note})");
-
-    private static ApplyJsonReport ToJson(ApplyResult result)
-        => new(
-            result.RunId.ToString(),
-            result.State.ToString(),
-            result.Requires.ToString(),
-            new ApplyJsonRestore(result.RestorePoint.Status.ToString(), result.RestorePoint.SequenceNumber),
-            result.Plan.Errors,
-            [.. result.Entries.Select(e => new ApplyJsonEntry(e.Id.Value, e.Result.ToString(), e.Risk.ToString(), e.Requires.ToString(), e.Note))]);
 }

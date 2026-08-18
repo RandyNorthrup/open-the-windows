@@ -70,6 +70,18 @@ what was planned (plans live in `PLAN.md`).
   operator repeated `--allow-advanced`. A profile's `scope` is still not consumed
   (all-users application is a later work package). `CommandSupport.TrySelectEntries`
   now also yields the resolved `Profile` so the command can read its options.
+- M5 (profiles, part 7 — `otw remediate`): the unattended re-enforcement command
+  the drift scheduled task and the Intune remediation script call. It scans, then
+  applies only the drifted entries of a profile, with no interactive confirmation,
+  and never break-glasses a managed setting. `--out <file>` writes the stable JSON
+  report (creating its directory) — e.g. the task's `last-remediate.json` —
+  otherwise `--json` writes it to stdout. Same `--profile` / `--include-draft` /
+  `--no-restore-point` / `--allow-advanced` / `--allow-breaking` /
+  `--restart-explorer` / `--what-if` options and the same exit contract as `apply`
+  (0 applied/compliant, 2 error, 3 unsupported, 4 invalid input, 5 elevation
+  required, 3010 reboot). The shared apply plumbing (option-building from a
+  profile, exit-code mapping, JSON/text rendering) was factored into
+  `ApplyReporting`, which `apply` now also uses.
 - M4 (Windows Update guardrails): the safe, reversible update controls
   (`OpenTheWindows.Core.Updates`). `PauseCalculator` computes the six Settings-app
   pause values (`PauseUpdatesStartTime`/`ExpiryTime`,

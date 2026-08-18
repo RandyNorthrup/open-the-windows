@@ -574,6 +574,16 @@ committed locally):
   `--allow-advanced` was also passed. `CommandSupport.TrySelectEntries` now yields
   the resolved `Profile`. Still deferred to the all-users work package: consuming
   a profile's `scope` (needs the hive enumerator).
+- **`otw remediate`**: the unattended re-enforcement command for automation (the
+  drift task and Intune) — scan, then apply only drift, no interactive
+  confirmation, never break-glass; `--out` writes the stable JSON report (creating
+  its directory), else `--json`/text to stdout; same option surface and exit
+  contract as `apply`. The shared apply plumbing (option-building, exit-code
+  mapping, JSON/text rendering) was factored into `Cli/Commands/ApplyReporting`,
+  now used by both `apply` and `remediate`. Still pending in the drift work
+  package: `otw task install/remove` (the `\OpenTheWindows\Remediate` SYSTEM
+  scheduled task), build-change detection, and the Intune templates that wrap
+  `otw remediate`.
 
 ### M6 — GUI (not started)
 
