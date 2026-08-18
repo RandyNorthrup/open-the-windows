@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Open the Windows administrative template.
+
+  Deploy by copying OpenTheWindows.admx into the PolicyDefinitions store
+  (%SystemRoot%\PolicyDefinitions for a single machine, or the domain
+  \\<domain>\SYSVOL\<domain>\Policies\PolicyDefinitions Central Store) together
+  with the matching en-US\OpenTheWindows.adml language file.
+
+  The category is a self-contained product root under Administrative Templates,
+  so the template has no dependency on Windows.admx.
+-->
+<policyDefinitions revision="1.0" schemaVersion="1.0"
+                   xmlns="http://schemas.microsoft.com/GroupPolicy/2006/07/PolicyDefinitions">
+  <policyNamespaces>
+    <target prefix="openthewindows" namespace="OpenTheWindows.Policies" />
+  </policyNamespaces>
+  <resources minRequiredRevision="1.0" />
+  <supportedOn>
+    <definitions>
+      <definition name="SUPPORTED_OpenTheWindows_1" displayName="$(string.SUPPORTED_OpenTheWindows_1)" />
+    </definitions>
+  </supportedOn>
+  <categories>
+    <category name="OpenTheWindows" displayName="$(string.Cat_OpenTheWindows)" />
+  </categories>
+  <policies>
+    <!--
+      RequireSignedProfiles: when Enabled, otw refuses to scan or apply a profile
+      supplied as a file unless that file carries a valid detached signature
+      (<file>.sig) from a key in the machine trust store
+      (%ProgramData%\OpenTheWindows\trusted-keys\*.pem). Built-in profiles ship
+      inside the product and are unaffected. Stored as a REG_DWORD; 1 = required,
+      0 (or absent) = not required.
+    -->
+    <policy name="RequireSignedProfiles" class="Machine"
+            displayName="$(string.RequireSignedProfiles)"
+            explainText="$(string.RequireSignedProfiles_Help)"
+            key="SOFTWARE\Policies\OpenTheWindows"
+            valueName="RequireSignedProfiles">
+      <parentCategory ref="OpenTheWindows" />
+      <supportedOn ref="SUPPORTED_OpenTheWindows_1" />
+      <enabledValue><decimal value="1" /></enabledValue>
+      <disabledValue><decimal value="0" /></disabledValue>
+    </policy>
+  </policies>
+</policyDefinitions>

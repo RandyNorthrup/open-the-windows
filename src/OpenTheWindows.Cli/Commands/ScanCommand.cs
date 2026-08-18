@@ -5,6 +5,7 @@ using OpenTheWindows.Core;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Engine;
+using OpenTheWindows.Core.Profiles;
 using OpenTheWindows.Core.Reports;
 
 namespace OpenTheWindows.Cli.Commands;
@@ -47,9 +48,10 @@ internal static class ScanCommand
             return ExitCodes.Error;
         }
 
+        var policy = ProfilePolicy.Read(services.CreateRegistryReader());
         if (!CommandSupport.TrySelectEntries(
             catalog, facts, parseResult.GetValue(options.Common.Profile), parseResult.GetValue(options.Common.Only),
-            parseResult.GetValue(options.Common.IncludeDraft), ExitCodes.Error, stderr,
+            parseResult.GetValue(options.Common.IncludeDraft), policy, ProfileTrust.DefaultTrustStoreDirectory, ExitCodes.Error, stderr,
             out IReadOnlyList<TweakDefinition> entries, out string profileName, out int selectExit))
         {
             return selectExit;

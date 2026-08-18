@@ -5,6 +5,7 @@ using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.Core.Engine;
+using OpenTheWindows.Core.Profiles;
 using OpenTheWindows.TestSupport.Fakes;
 
 namespace OpenTheWindows.Cli.Tests;
@@ -17,10 +18,11 @@ public sealed class ApplyCommandTests
             new FakeElevationContext(isElevated: true));
 
     private static (RootCommand Root, StringWriter Out, StringWriter Err) Build(
-        bool supported = true, bool elevated = true, ApplyEngine? engine = null)
+        bool supported = true, bool elevated = true, ApplyEngine? engine = null, FakeReaders? readers = null)
         => CliTestHost.Host(TestCli.Services(
             Doctor(supported),
             _ => CatalogLoader.LoadBuiltIn(),
+            readers,
             createApplyEngine: engine is null ? null : () => engine,
             elevation: new FakeElevationContext(elevated)));
 
@@ -156,5 +158,25 @@ public sealed class ApplyCommandTests
 
         Assert.Equal(ExitCodes.Error, code);
         Assert.Contains("BLOCKED", stdout.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Policy_on_rejects_an_unsigned_profile_file()
+    {
+        string path = Path.Combine(Path.GetTempPath(), "otw-apply-unsigned-" + Guid.NewGuid().ToString("N") + ".json");
+        File.WriteAllText(path, ProfileFixtures.ValidProfile);
+        try
+        {
+            var (root, stdout, stderr) = Build(engine: FakeApplyEngine.Create(new FakeMachine()).Engine, readers: ProfileFixtures.PolicyOn());
+
+            int code = CliTestHost.Invoke(root, stdout, stderr, "apply", "--profile", path, "--what-if", "--json");
+
+            Assert.Equal(ExitCodes.InvalidInput, code);
+            Assert.Contains(ProfilePolicy.RequireSignedProfilesValueName, stderr.ToString(), StringComparison.Ordinal);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
     }
 }

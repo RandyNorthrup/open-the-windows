@@ -311,7 +311,7 @@ public sealed class ProfileCommandTests
             (int exit, _, string error) = RunProfile("verify", profile, "--key", Path.Combine(dir.FullName, "any.pem"));
 
             Assert.Equal(ExitCodes.InvalidInput, exit);
-            Assert.Contains("not valid JSON", error, StringComparison.Ordinal);
+            Assert.Contains("not a valid signature document", error, StringComparison.Ordinal);
         }
         finally
         {

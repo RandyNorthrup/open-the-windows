@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- English (United States) language resources for OpenTheWindows.admx. -->
+<policyDefinitionResources revision="1.0" schemaVersion="1.0"
+                           xmlns="http://schemas.microsoft.com/GroupPolicy/2006/07/PolicyDefinitions">
+  <displayName>Open the Windows administrative template</displayName>
+  <description>Group Policy settings for the Open the Windows system utility.</description>
+  <resources>
+    <stringTable>
+      <string id="Cat_OpenTheWindows">Open the Windows</string>
+      <string id="SUPPORTED_OpenTheWindows_1">Open the Windows 1.0 or later</string>
+      <string id="RequireSignedProfiles">Require signed profiles</string>
+      <string id="RequireSignedProfiles_Help">Controls whether Open the Windows will use a profile supplied as a file (otw scan/apply --profile &lt;path&gt;) only when it carries a trusted signature.
+
+When this policy is Enabled, otw refuses to scan or apply a file profile unless a detached signature (&lt;file&gt;.sig) accompanies it and verifies against a public key in the machine trust store at %ProgramData%\OpenTheWindows\trusted-keys\*.pem. Unsigned or untrusted file profiles are rejected.
+
+When this policy is Disabled or Not Configured, file profiles are accepted whether or not they are signed.
+
+This policy never restricts the built-in profiles (home, enterprise-workstation, and so on): they ship inside the product itself. Distribute your organisation's public key to the trust store — for example through this same Group Policy object or Intune — so that only profiles your administrators signed are honoured on managed devices.</string>
+    </stringTable>
+    <presentationTable />
+  </resources>
+</policyDefinitionResources>

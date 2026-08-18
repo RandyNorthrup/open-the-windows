@@ -1,3 +1,9 @@
+using System.Text.Json;
+using OpenTheWindows.Core.Abstractions;
+using OpenTheWindows.Core.Catalog;
+using OpenTheWindows.Core.Profiles;
+using OpenTheWindows.TestSupport.Fakes;
+
 namespace OpenTheWindows.Cli.Tests;
 
 /// <summary>
@@ -7,6 +13,16 @@ namespace OpenTheWindows.Cli.Tests;
 /// </summary>
 internal static class ProfileFixtures
 {
+    /// <summary>A registry reader whose only configured value is the machine RequireSignedProfiles policy, set on.</summary>
+    public static FakeReaders PolicyOn() => new()
+    {
+        OnRegistry = (_, _, path, name) =>
+            string.Equals(path, ProfilePolicy.PolicyKeyPath, StringComparison.Ordinal)
+            && string.Equals(name, ProfilePolicy.RequireSignedProfilesValueName, StringComparison.Ordinal)
+                ? new RegistryValueSnapshot(true, RegistryValueType.Dword, JsonSerializer.SerializeToElement(1))
+                : new RegistryValueSnapshot(false, null, null),
+    };
+
     /// <summary>A schema- and structurally-valid profile (id <c>custom-file</c>).</summary>
     public const string ValidProfile = """
     {

@@ -66,6 +66,10 @@ internal static class CommandSupport
     /// which honours the profile's own dials, include/exclude, risk gate and draft
     /// setting). On an unknown or unloadable value it writes the reason and yields
     /// <paramref name="unknownProfileExit"/>.
+    /// When <paramref name="profileValue"/> is a file and <paramref name="policy"/>
+    /// requires signed profiles, the file must carry a valid signature from a key in
+    /// <paramref name="trustStoreDirectory"/> or the selection is refused. Built-in
+    /// ids and level names are never subject to that check.
     /// </summary>
     public static bool TrySelectEntries(
         TweakCatalog catalog,
@@ -73,12 +77,15 @@ internal static class CommandSupport
         string? profileValue,
         string? onlyId,
         bool includeDraft,
+        ProfilePolicy policy,
+        string trustStoreDirectory,
         int unknownProfileExit,
         TextWriter stderr,
         out IReadOnlyList<TweakDefinition> entries,
         out string label,
         out int exitCode)
     {
+        ArgumentNullException.ThrowIfNull(policy);
         ArgumentNullException.ThrowIfNull(catalog);
         entries = [];
         label = string.Empty;
@@ -114,14 +121,16 @@ internal static class CommandSupport
             return true;
         }
 
-        return TryResolveProfileEntries(catalog, facts, value, unknownProfileExit, stderr, out entries, out label, out exitCode);
+        return TryResolveProfileEntries(catalog, facts, value, policy, trustStoreDirectory, unknownProfileExit, stderr, out entries, out label, out exitCode);
     }
 
-    /// <summary>Resolves a built-in profile id or a profile file through the profile engine.</summary>
+    /// <summary>Resolves a built-in profile id or a profile file through the profile engine, enforcing the signing policy for files.</summary>
     private static bool TryResolveProfileEntries(
         TweakCatalog catalog,
         OperatingSystemFacts facts,
         string value,
+        ProfilePolicy policy,
+        string trustStoreDirectory,
         int unknownProfileExit,
         TextWriter stderr,
         out IReadOnlyList<TweakDefinition> entries,
@@ -132,7 +141,13 @@ internal static class CommandSupport
         label = string.Empty;
         exitCode = ExitCodes.Success;
 
-        ProfileLoadResult? loaded = File.Exists(value) ? ProfileLoader.LoadFile(value) : ProfileLoader.TryLoadBuiltIn(value);
+        bool isFile = File.Exists(value);
+        if (isFile && !EnforceSigningPolicy(value, policy, trustStoreDirectory, unknownProfileExit, stderr, out exitCode))
+        {
+            return false;
+        }
+
+        ProfileLoadResult? loaded = isFile ? ProfileLoader.LoadFile(value) : ProfileLoader.TryLoadBuiltIn(value);
         if (loaded is null)
         {
             stderr.WriteLine(string.Create(CultureInfo.InvariantCulture,
@@ -157,6 +172,34 @@ internal static class CommandSupport
         entries = ProfileResolver.Resolve(loaded.Profile, catalog, facts);
         label = loaded.Profile.Id;
         return true;
+    }
+
+    /// <summary>
+    /// Applies <see cref="ProfilePolicy.RequireSignedProfiles"/> to a profile file:
+    /// returns true (and <paramref name="exitCode"/> Success) when the file may be
+    /// used, or false (writing the reason and yielding
+    /// <paramref name="unknownProfileExit"/>) when the policy is on and the file is
+    /// unsigned or not signed by a trusted key.
+    /// </summary>
+    private static bool EnforceSigningPolicy(
+        string profilePath, ProfilePolicy policy, string trustStoreDirectory, int unknownProfileExit, TextWriter stderr, out int exitCode)
+    {
+        exitCode = ExitCodes.Success;
+        IReadOnlyList<CatalogIssue> issues = ProfileTrust.Enforce(profilePath, policy, trustStoreDirectory);
+        if (issues.Count == 0)
+        {
+            return true;
+        }
+
+        foreach (CatalogIssue issue in issues)
+        {
+            stderr.WriteLine(issue.ToString());
+        }
+
+        stderr.WriteLine(string.Create(CultureInfo.InvariantCulture,
+            $"Refusing profile file '{profilePath}': policy {ProfilePolicy.RequireSignedProfilesValueName} requires a trusted signature."));
+        exitCode = unknownProfileExit;
+        return false;
     }
 
     /// <summary>Returns whether the platform is supported; on failure writes the reason and yields the exit code.</summary>

@@ -33,6 +33,7 @@ internal static class TestCli
             () => FakeScanEngine.Create(scanReaders, FakeOperatingSystemInfo.Windows11Pro24H2(), FixedTime),
             createApplyEngine ?? (() => FakeApplyEngine.Create(new FakeMachine()).Engine),
             createUpdateControl ?? (() => FakeUpdateControl.Create(new FakeMachine()).Service),
+            () => scanReaders,
             health ?? new FakeHealthProbe([]),
             elevation ?? new FakeElevationContext(isElevated: true));
     }

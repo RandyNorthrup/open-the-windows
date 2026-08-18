@@ -4,10 +4,11 @@ using OpenTheWindows.Core.Model;
 namespace OpenTheWindows.Core.Engine;
 
 /// <summary>
-/// The built-in named level sets accepted by <c>otw scan --profile</c> for M2:
-/// every category set to one level. A JSON profile format (per-category levels
-/// and per-tweak overrides) arrives in M5; until then only these names are
-/// accepted.
+/// The built-in named level sets accepted by <c>otw scan|apply --profile</c>:
+/// every category set to one level (<c>basic</c>..<c>paranoid</c>). These are the
+/// simplest profile form; the richer JSON profiles (per-category dials,
+/// include/exclude, scope, signing) resolve through
+/// <see cref="OpenTheWindows.Core.Profiles.ProfileResolver"/> instead.
 /// </summary>
 public static class NamedProfile
 {

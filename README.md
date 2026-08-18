@@ -106,7 +106,13 @@ signature next to the profile (`<file>.sig`, or `--out`); `verify <file> [--key
 <pem>]` checks that signature against a public key or, by default, the machine
 trust store (`%ProgramData%\OpenTheWindows\trusted-keys\*.pem`). Signatures are
 taken over a canonical form of the JSON, so they survive re-formatting. Exit 0
-when valid/verified, 4 on invalid input or a signature that does not verify.
+when valid/verified, 4 on invalid input or a signature that does not verify. A
+machine can *require* signatures with the Group Policy setting
+`RequireSignedProfiles` (`HKLM\SOFTWARE\Policies\OpenTheWindows`, shipped as
+`admx/OpenTheWindows.admx`): when it is on, `scan`/`apply` refuse a profile
+**file** that is unsigned or not signed by a trusted key, while built-in ids and
+level names stay exempt. The full format, resolution, validation, signing and
+policy reference is [docs/profile-format.md](docs/profile-format.md).
 
 `otw scan --profile <value>` runs a read-only drift scan against the machine —
 it never changes anything. `--profile` accepts a **level** (`basic`, `balanced`,

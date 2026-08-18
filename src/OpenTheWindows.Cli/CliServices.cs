@@ -17,6 +17,7 @@ namespace OpenTheWindows.Cli;
 /// <param name="CreateScanEngine">Builds a scan engine over the real state readers.</param>
 /// <param name="CreateApplyEngine">Builds the transactional apply engine over the real readers, writers and services.</param>
 /// <param name="CreateUpdateControl">Builds the Windows Update guardrail service over the real apply engine and adapters.</param>
+/// <param name="CreateRegistryReader">Builds a read-only registry reader (used to read the machine profile policy).</param>
 /// <param name="Health">The read-only machine health probe.</param>
 /// <param name="Elevation">The process elevation context.</param>
 internal sealed record CliServices(
@@ -25,6 +26,7 @@ internal sealed record CliServices(
     Func<ScanEngine> CreateScanEngine,
     Func<ApplyEngine> CreateApplyEngine,
     Func<UpdateControlService> CreateUpdateControl,
+    Func<IRegistryReader> CreateRegistryReader,
     IMachineHealthProbe Health,
     IElevationContext Elevation)
 {
@@ -36,6 +38,7 @@ internal sealed record CliServices(
             CreateDefaultScanEngine,
             CreateDefaultApplyEngine,
             static () => WindowsUpdateControlFactory.Create(),
+            static () => new WindowsRegistryReader(),
             new WindowsMachineHealthProbe(),
             new WindowsElevationContext());
 

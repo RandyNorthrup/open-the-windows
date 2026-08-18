@@ -7,6 +7,7 @@ using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Journal;
 using OpenTheWindows.Core.Model;
+using OpenTheWindows.Core.Profiles;
 
 namespace OpenTheWindows.Cli.Commands;
 
@@ -50,9 +51,10 @@ internal static class ApplyCommand
             return ExitCodes.ElevationRequired;
         }
 
+        var policy = ProfilePolicy.Read(services.CreateRegistryReader());
         if (!CommandSupport.TrySelectEntries(
             catalog, facts, parseResult.GetValue(options.Common.Profile), parseResult.GetValue(options.Common.Only),
-            parseResult.GetValue(options.Common.IncludeDraft), ExitCodes.InvalidInput, stderr,
+            parseResult.GetValue(options.Common.IncludeDraft), policy, ProfileTrust.DefaultTrustStoreDirectory, ExitCodes.InvalidInput, stderr,
             out IReadOnlyList<TweakDefinition> entries, out string profileName, out int selectExit))
         {
             return selectExit;

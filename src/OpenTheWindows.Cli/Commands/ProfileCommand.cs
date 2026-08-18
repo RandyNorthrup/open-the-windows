@@ -18,8 +18,6 @@ namespace OpenTheWindows.Cli.Commands;
 /// </summary>
 internal static class ProfileCommand
 {
-    private const string SignatureSuffix = ".sig";
-
     public static Command Create(Func<string?, CatalogLoadResult> loadCatalog)
     {
         ArgumentNullException.ThrowIfNull(loadCatalog);
@@ -223,7 +221,7 @@ internal static class ProfileCommand
             return ExitCodes.InvalidInput;
         }
 
-        string sigPath = parseResult.GetValue(outOption) ?? (profilePath + SignatureSuffix);
+        string sigPath = parseResult.GetValue(outOption) ?? (profilePath + ProfileTrust.SignatureSuffix);
         File.WriteAllText(sigPath, JsonSerializer.Serialize(signature, ProfileJsonContext.Default.ProfileSignatureDocument));
         stdout.WriteLine(string.Create(CultureInfo.InvariantCulture,
             $"Signed '{profilePath}' -> '{sigPath}' (keyId {signature.KeyId})."));
@@ -250,7 +248,7 @@ internal static class ProfileCommand
             return ExitCodes.InvalidInput;
         }
 
-        string sigPath = parseResult.GetValue(sigOption) ?? (profilePath + SignatureSuffix);
+        string sigPath = parseResult.GetValue(sigOption) ?? (profilePath + ProfileTrust.SignatureSuffix);
         if (!File.Exists(sigPath))
         {
             stderr.WriteLine(string.Create(CultureInfo.InvariantCulture,
@@ -302,63 +300,27 @@ internal static class ProfileCommand
             return true;
         }
 
-        string directory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "OpenTheWindows", "trusted-keys");
-        List<string> pems = Directory.Exists(directory) ? [.. Directory.EnumerateFiles(directory, "*.pem")] : [];
-        if (pems.Count == 0)
+        string directory = ProfileTrust.DefaultTrustStoreDirectory;
+        if (!Directory.Exists(directory) || !Directory.EnumerateFiles(directory, "*.pem").Any())
         {
             stderr.WriteLine(string.Create(CultureInfo.InvariantCulture,
                 $"No public key given (--key) and no trusted keys in '{directory}'."));
             return false;
         }
 
-        verified = VerifyWithAnyKey(profileJson, signature, pems);
+        verified = ProfileTrust.VerifyAgainstTrustStore(profileJson, signature, directory);
         return true;
-    }
-
-    private static bool VerifyWithAnyKey(string profileJson, ProfileSignatureDocument signature, IEnumerable<string> pemPaths)
-    {
-        foreach (string pem in pemPaths)
-        {
-            using var key = ECDsa.Create();
-            try
-            {
-                key.ImportFromPem(File.ReadAllText(pem));
-            }
-            catch (Exception ex) when (ex is ArgumentException or CryptographicException)
-            {
-                continue;
-            }
-
-            if (ProfileSignature.Verify(profileJson, signature, key))
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private static bool TryReadSignature(string path, TextWriter stderr, out ProfileSignatureDocument signature)
     {
-        signature = null!;
-        try
+        if (ProfileTrust.TryReadSignature(path, out signature))
         {
-            ProfileSignatureDocument? parsed = JsonSerializer.Deserialize(File.ReadAllText(path), ProfileJsonContext.Default.ProfileSignatureDocument);
-            if (parsed is null)
-            {
-                stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Signature file '{path}' is empty."));
-                return false;
-            }
-
-            signature = parsed;
             return true;
         }
-        catch (JsonException ex)
-        {
-            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Signature file '{path}' is not valid JSON: {ex.Message}"));
-            return false;
-        }
+
+        stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Signature file '{path}' is not a valid signature document."));
+        return false;
     }
 
     /// <summary>Loads an EC key (public or private) from a PEM file, or reports why it could not and returns null.</summary>

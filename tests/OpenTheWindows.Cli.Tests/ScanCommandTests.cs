@@ -4,6 +4,7 @@ using OpenTheWindows.Core;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
+using OpenTheWindows.Core.Profiles;
 using OpenTheWindows.TestSupport.Fakes;
 
 namespace OpenTheWindows.Cli.Tests;
@@ -11,12 +12,15 @@ namespace OpenTheWindows.Cli.Tests;
 public sealed class ScanCommandTests
 {
     private static (RootCommand Root, StringWriter Out, StringWriter Err) Build(bool supported = true)
+        => Build(new FakeReaders(), supported);
+
+    private static (RootCommand Root, StringWriter Out, StringWriter Err) Build(FakeReaders readers, bool supported = true)
     {
         OperatingSystemFacts os = supported
             ? FakeOperatingSystemInfo.Windows11Pro24H2()
             : FakeOperatingSystemInfo.WindowsServer2025();
         var doctor = new DoctorService(new FakeOperatingSystemInfo(os), new FakeElevationContext(isElevated: false));
-        return CliTestHost.Host(TestCli.Services(doctor, _ => CatalogLoader.LoadBuiltIn()));
+        return CliTestHost.Host(TestCli.Services(doctor, _ => CatalogLoader.LoadBuiltIn(), readers));
     }
 
     [Fact]
@@ -153,5 +157,35 @@ public sealed class ScanCommandTests
                 File.Delete(path);
             }
         }
+    }
+
+    [Fact]
+    public void Policy_on_rejects_an_unsigned_profile_file()
+    {
+        string path = Path.Combine(Path.GetTempPath(), "otw-unsigned-" + Guid.NewGuid().ToString("N") + ".json");
+        File.WriteAllText(path, ProfileFixtures.ValidProfile);
+        try
+        {
+            var (root, stdout, stderr) = Build(ProfileFixtures.PolicyOn());
+
+            int code = CliTestHost.Invoke(root, stdout, stderr, "scan", "--profile", path, "--json");
+
+            Assert.Equal(ExitCodes.Error, code);
+            Assert.Contains(ProfilePolicy.RequireSignedProfilesValueName, stderr.ToString(), StringComparison.Ordinal);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void Policy_on_does_not_restrict_a_built_in_profile()
+    {
+        var (root, stdout, stderr) = Build(ProfileFixtures.PolicyOn());
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "scan", "--profile", "home", "--json");
+
+        Assert.True(code is ExitCodes.Success or ExitCodes.Drift, "built-in ids are exempt from the signing policy");
     }
 }

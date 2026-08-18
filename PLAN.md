@@ -555,8 +555,18 @@ committed locally):
   detached ES256 (ECDSA P-256 / SHA-256, decision D11) over a canonicalised form
   of the profile JSON; `keyId` = hex SHA-256 of the SubjectPublicKeyInfo; `sign`
   writes `<file>.sig`, `verify` checks a given public key or the machine trust
-  store (`%ProgramData%\OpenTheWindows\trusted-keys`). RequireSignedProfiles
-  enforcement + the ADMX are deferred to the apply-integration work package.
+  store (`%ProgramData%\OpenTheWindows\trusted-keys`).
+- **RequireSignedProfiles policy** (`Core/Profiles/ProfilePolicy`, `ProfileTrust`):
+  `ProfilePolicy.Read` reads `HKLM\SOFTWARE\Policies\OpenTheWindows\RequireSignedProfiles`
+  (REG_DWORD) through the injected `IRegistryReader`; when it is on,
+  `CommandSupport` refuses a profile *file* on `scan`/`apply` unless
+  `ProfileTrust` verifies its `<file>.sig` against the machine trust store
+  (unsigned / unparseable / untrusted-key all refused). Built-in ids and level
+  names are exempt — they are not files. The shared trust-store verification was
+  extracted into `ProfileTrust` (also used by `otw profile verify`). Ships the
+  GPO template `admx/OpenTheWindows.admx` (+ `en-US/OpenTheWindows.adml`) and the
+  format reference `docs/profile-format.md`. Still deferred to the all-users work
+  package: consuming a profile's apply `options`/`scope`.
 
 ### M6 — GUI (not started)
 

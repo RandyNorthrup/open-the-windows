@@ -47,6 +47,18 @@ what was planned (plans live in `PLAN.md`).
   `otw profile sign <file> --key <pem>` writes `<file>.sig`; `otw profile verify
   <file> [--key <pem>]` checks it against a given public key or the machine trust
   store (`%ProgramData%\OpenTheWindows\trusted-keys\*.pem`).
+- M5 (profiles, part 5 — `RequireSignedProfiles` policy): a machine can require
+  that profiles supplied as files be signed by a trusted key before `otw scan` or
+  `otw apply` will use them. `ProfilePolicy` reads
+  `HKLM\SOFTWARE\Policies\OpenTheWindows\RequireSignedProfiles` (REG_DWORD) and
+  `ProfileTrust` verifies a file's `<file>.sig` against the machine trust store;
+  when the policy is on, an unsigned file, an unparseable signature, or a
+  signature from an untrusted key is refused. Built-in profile ids and level
+  names are never gated (they ship inside the product, not as files). The product
+  ships a Group Policy administrative template (`admx/OpenTheWindows.admx` +
+  `admx/en-US/OpenTheWindows.adml`) for the setting, and a full format reference
+  in `docs/profile-format.md`. The shared trust-store verification now lives in
+  `ProfileTrust`, which `otw profile verify` also uses.
 - M4 (Windows Update guardrails): the safe, reversible update controls
   (`OpenTheWindows.Core.Updates`). `PauseCalculator` computes the six Settings-app
   pause values (`PauseUpdatesStartTime`/`ExpiryTime`,
