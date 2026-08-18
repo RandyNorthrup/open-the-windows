@@ -7,6 +7,7 @@ using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Journal;
 using OpenTheWindows.Core.Model;
 using OpenTheWindows.Windows.Readers;
+using OpenTheWindows.Windows.Writers;
 
 namespace OpenTheWindows.Windows.Tests;
 
@@ -141,6 +142,44 @@ public sealed class VmIntegrationTests
                 Directory.Delete(journalDir, recursive: true);
             }
         }
+    }
+
+    [Fact]
+    public void User_hive_loader_loads_and_unloads_the_default_profile()
+    {
+        RequireIntegration();
+
+        // The Default profile hive is always present and never loaded — a safe target
+        // to prove RegLoadKey/RegUnLoadKey (load, confirm mounted, read, unload) without
+        // touching a real user. Nothing is written to it.
+        var loader = new WindowsUserHiveLoader();
+        string mountKey = "OTW-IntegrationTest-" + Guid.NewGuid().ToString("N");
+        string systemDrive = Environment.GetEnvironmentVariable("SystemDrive") ?? "C:";
+        string hivePath = Path.Combine(systemDrive + @"\", "Users", "Default", "NTUSER.DAT");
+        Assert.True(File.Exists(hivePath), $"Default profile hive missing at {hivePath}");
+
+        using var users =
+            Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.Users, Microsoft.Win32.RegistryView.Registry64);
+
+        using (var before = users.OpenSubKey(mountKey))
+        {
+            Assert.Null(before); // not mounted yet
+        }
+
+        loader.Load(mountKey, hivePath);
+        try
+        {
+            using var mounted = users.OpenSubKey(mountKey);
+            Assert.NotNull(mounted);
+            Assert.NotEmpty(mounted.GetSubKeyNames()); // a real hive carries subkeys (Software, Environment, …)
+        }
+        finally
+        {
+            loader.Unload(mountKey);
+        }
+
+        using var after = users.OpenSubKey(mountKey);
+        Assert.Null(after); // unloaded
     }
 
     private static void RunGpupdate()

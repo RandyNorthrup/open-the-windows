@@ -134,6 +134,15 @@ what was planned (plans live in `PLAN.md`).
   journal and the transactional core can now represent and correctly revert an
   entry applied across several hives — the schema groundwork for all-users apply.
   `docs/journal-format.md` documents the field.
+- M5 (profiles, part 13 — user-hive loader): `Core.Abstractions.IUserHiveLoader`
+  and the Windows `WindowsUserHiveLoader`, which loads and unloads a user's
+  `NTUSER.DAT` with `RegLoadKey`/`RegUnLoadKey` (enabling the backup and restore
+  privileges via `AdjustTokenPrivileges`) so an all-users apply can reach the hive
+  of a user who is not logged on. The hive mounts under `HKEY_USERS\<sid>`, so the
+  existing per-user registry writer targets it unchanged. `Load`/`Unload` are
+  explicit (the caller unloads in a `finally`) rather than `IDisposable`, so unload
+  failure surfaces to the engine's audit rather than a throwing `Dispose`.
+  VM-verified on 26200.9168: loads and unloads the Default profile hive.
 - M4 (Windows Update guardrails): the safe, reversible update controls
   (`OpenTheWindows.Core.Updates`). `PauseCalculator` computes the six Settings-app
   pause values (`PauseUpdatesStartTime`/`ExpiryTime`,

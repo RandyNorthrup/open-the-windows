@@ -623,10 +623,18 @@ committed locally):
   per-user Appx; absent for machine scope), and apply/rollback/revert drive each
   action off its own `Sid` rather than one run-level SID. Behaviour-preserving for
   single-user runs; lets one entry be applied across several hives and reverted per
-  hive. Still pending for M5: loading unloaded hives (`RegLoadKey`/`RegUnLoadKey`
-  under `SeBackup`/`SeRestore`), expanding User-scope actions across every hive under
-  `scope: AllUsers` (with the load/unload lifecycle and per-hive rollback), Active
-  Setup fallback, then `docs/certification/M5.md`.
+  hive.
+- **User-hive loader** (`Core.Abstractions.IUserHiveLoader`,
+  `Windows.Writers.WindowsUserHiveLoader`): loads/unloads a user's `NTUSER.DAT` with
+  `RegLoadKey`/`RegUnLoadKey`, enabling `SeBackupPrivilege`/`SeRestorePrivilege` via
+  `AdjustTokenPrivileges`; mounts under `HKEY_USERS\<sid>` so the existing per-user
+  writer targets it unchanged. Explicit `Load`/`Unload` (not `IDisposable`) so unload
+  failure surfaces to the engine, not a throwing `Dispose`. VM-verified on 26200.9168
+  (loads + unloads the Default profile hive; no `GC.Collect` needed). Still pending
+  for M5: expanding User-scope actions across every hive under `scope: AllUsers` (the
+  engine consumes the enumerator + loader with the load/unload lifecycle and per-hive
+  rollback, driven by `profile.Scope`), Active Setup fallback, then
+  `docs/certification/M5.md`.
 
 ### M6 — GUI (not started)
 
