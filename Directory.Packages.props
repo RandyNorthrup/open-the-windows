@@ -65,6 +65,9 @@
     <!-- Code coverage collector for MTP (dotnet test with the coverage switch). Thresholds are
          enforced by ReportGenerator (dotnet tool) in build/quality.ps1. -->
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.10.0" />
+    <!-- UI automation for the GUI smoke (build/ui-smoke.ps1); restored on demand by that
+         script, which drives the published app in an interactive elevated session. MIT. -->
+    <PackageVersion Include="FlaUI.UIA3" Version="5.0.0" />
   </ItemGroup>
 
 </Project>

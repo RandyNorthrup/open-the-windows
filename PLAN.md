@@ -90,7 +90,7 @@ Principles (non-negotiable):
 | # | Question | Impact | Owner |
 | --- | ---------- | -------- | ------- |
 | Q1 | VMware host type for the lab VM (Workstation → `vmrun`; ESXi/vSphere → `govc`) so certification runs can revert to a clean checkpoint automatically. Until answered, M3+ integration runs rely on in-guest System Restore + the app's own journal. | M3 certification automation | owner |
-| Q2 | Should "enterprise mode" hide consumer-only UI (e.g. Gamer profile) — default: no, profiles are just data. | M5 | owner |
+| Q2 | Should "enterprise mode" hide consumer-only UI (e.g. Gamer profile)? | Resolved (M6) | Yes: a Settings "enterprise mode" toggle hides the consumer-only built-in profiles (`home`, `gamer`) on the Profiles page; off by default. |
 | Q3 | Publish framework-dependent builds too (small download, needs .NET 10 Desktop Runtime) in addition to self-contained? Recommendation: yes for the MSI, self-contained for the portable ZIP. | M7 | owner |
 | Q4 | Winget publication account / manifest PR ownership. | M7 | owner |
 | Q5 | Do we want an optional Sysmon install helper (adjacent, out of core scope)? | M4 backlog | owner |
@@ -299,8 +299,8 @@ shipped `core-6.1.0-windows` profile.
 | `Directory.Build.targets` | `NoWarn CA2007` for Exe/WinExe | ConfigureAwait not wanted at UI/CLI entry points | never |
 | `OpenTheWindows.App.csproj`, `App.Tests.csproj` | `NoWarn WPF0001` | Fluent `ThemeMode` is `[Experimental]` in .NET 10 WPF; accepted (ADR 0001) | when WPF drops the attribute |
 | `.editorconfig` | `IDE0058` silent | fires on every fluent-builder call; CA1806 covers the meaningful cases | never |
-| `.editorconfig` | `CA1303` none | user-facing strings will use resx at M6; logs are English | M6 |
-| `.editorconfig` | `CA1848` suggestion | LoggerMessage delegates only for hot paths | M6 |
+| `.editorconfig` | `CA1303` none | M6 shipped the resx infrastructure (`Strings.resx`) for the shared display strings (en-US); the remaining one-off UI labels stay English literals, and logs are English — a localisation pack is post-M8 backlog | never |
+| `.editorconfig` | `CA1848` suggestion | LoggerMessage delegates only for hot paths; the GUI added no logging | never |
 | `.editorconfig` | `CA1812` suggestion | DI-created types | never |
 | `.editorconfig` `[tests/**]` | CA1707, CA2007, CA1515, CA1861, CA1062, CA1812, CA1822 none; `async_methods_suffixed` naming rule none | test conventions (async test methods use descriptive sentence names, not the `Async` suffix) | never |
 | `PSScriptAnalyzerSettings.psd1` | `PSUseShouldProcessForStateChangingFunctions`, `PSAvoidUsingWriteHost`, `PSAvoidUsingPositionalParameters` excluded | imperative build scripts calling native tools | never |
@@ -342,7 +342,7 @@ or the agent instruction files disagree.
 | M3 | [docs/milestones/M3-apply.md](docs/milestones/M3-apply.md) — apply/verify/revert, journal, restore points, Event Log | DONE 2026-08-17 | `docs/certification/M3.md` |
 | M4 | [docs/milestones/M4-catalogue-population.md](docs/milestones/M4-catalogue-population.md) — ≥ 300 entries + VM verification + WU guardrails | in progress | pending |
 | M5 | [docs/milestones/M5-profiles-enterprise.md](docs/milestones/M5-profiles-enterprise.md) — profiles, all-users, MDM/GPO awareness, drift task | DONE 2026-08-19 | `docs/certification/M5.md` |
-| M6 | [docs/milestones/M6-gui.md](docs/milestones/M6-gui.md) — WPF GUI | not started | pending |
+| M6 | [docs/milestones/M6-gui.md](docs/milestones/M6-gui.md) — WPF GUI | DONE 2026-08-19 | `docs/certification/M6.md` |
 | M7 | [docs/milestones/M7-packaging.md](docs/milestones/M7-packaging.md) — MSI, ZIP, winget, release workflow | not started | pending |
 | M8 | [docs/milestones/M8-audit.md](docs/milestones/M8-audit.md) — baseline audit mode and reports | not started | pending |
 
@@ -686,7 +686,24 @@ committed locally):
   (all seven built-ins `apply --what-if` exit 0). Still pending for M5:
   `docs/certification/M5.md` (+ evidence subfiles like M4's).
 
-### M6 — GUI (not started)
+### M6 — GUI (done)
+
+A thin-MVVM WPF shell over the M1–M5 engine: a left navigation rail hosting
+eleven pages (Dashboard, Privacy, Updates, Security, Performance, Debloat,
+Shell, Profiles, History, Settings, About). The five general category pages
+share one `CategoryPageViewModel` (level dial, search, risk/draft filters,
+per-entry badges and a detail pane). Every apply — from a category page or a
+profile — goes through one modal review-and-apply flow: a what-if plan preview,
+a typed confirmation for Breaking entries, a transactional apply on a background
+thread, and a per-entry outcome with the restart requirement; History reverts a
+run. Updates exposes the pause presets, an extended pause behind a warning,
+resume and a managed read-only mode; Profiles lists, applies, exports and
+imports (with signing state); Settings edits the shared `AppSettings` (restore
+point, Explorer restart, drafts, enterprise mode) and applies the theme live.
+No OS calls live in the App project — everything goes through Core services
+(`IApplyCoordinator`, `IUpdateCoordinator`, the profile loader, the doctor).
+Certified in [docs/certification/M6.md](docs/certification/M6.md); GUI reference
+in [docs/gui.md](docs/gui.md); FlaUI smoke harness `build/ui-smoke.ps1`.
 
 ### M7 — Packaging (not started)
 

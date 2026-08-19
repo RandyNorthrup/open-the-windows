@@ -85,6 +85,22 @@ artifacts\bin\OpenTheWindows.Cli\release\otw.exe catalog validate
 artifacts\bin\OpenTheWindows.App\release\OpenTheWindows.exe   # elevates (UAC)
 ```
 
+### The GUI
+
+`OpenTheWindows.exe` is the WPF desktop app over the same engine as the CLI. It
+opens on a **Dashboard** (system health and quick actions) with a left
+navigation rail to the category pages (**Privacy**, **Updates**, **Security**,
+**Performance**, **Debloat**, **Shell**), **Profiles**, **History**, **Settings**
+and **About**. A category page has a level dial, search, risk/draft filters and a
+per-entry detail pane; **Review & apply…** opens a modal flow that previews the
+what-if plan, confirms Breaking entries by typing their id, applies
+transactionally on a background thread, and lets you revert from **History**.
+**Updates** pauses/resumes Windows Update (with an extended pause behind a
+warning, and a read-only mode when it is managed by policy); **Profiles**
+applies, imports and exports profiles with their signing state. See
+[docs/gui.md](docs/gui.md) for the page map and the `build/ui-smoke.ps1` smoke
+harness.
+
 `otw doctor` prints OS/edition/build, whether the process is elevated, and the
 support verdict; exit code 0 = supported, 3 = unsupported platform. Elevation
 does not change the exit code.
