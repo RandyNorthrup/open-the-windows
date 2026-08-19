@@ -72,7 +72,7 @@
     "action": {
       "type": "object",
       "required": ["kind"],
-      "properties": { "kind": { "enum": ["Registry", "Service", "ScheduledTask", "Appx", "OptionalFeature", "DefenderPreference", "PowerSetting", "Command"] } },
+      "properties": { "kind": { "enum": ["Registry", "Service", "ScheduledTask", "Appx", "OptionalFeature", "DefenderPreference", "PowerSetting", "Command", "SecurityPolicy"] } },
       "oneOf": [
         { "$ref": "#/$defs/registryAction" },
         { "$ref": "#/$defs/serviceAction" },
@@ -81,7 +81,8 @@
         { "$ref": "#/$defs/optionalFeatureAction" },
         { "$ref": "#/$defs/defenderPreferenceAction" },
         { "$ref": "#/$defs/powerSettingAction" },
-        { "$ref": "#/$defs/commandAction" }
+        { "$ref": "#/$defs/commandAction" },
+        { "$ref": "#/$defs/securityPolicyAction" }
       ]
     },
     "registryAction": {
@@ -176,6 +177,18 @@
         "executable": { "enum": ["powercfg.exe", "netsh.exe", "auditpol.exe", "secedit.exe", "dism.exe", "fsutil.exe", "usoclient.exe"] },
         "arguments": { "type": "array", "minItems": 1, "items": { "type": "string" } },
         "revertArguments": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+      }
+    },
+    "securityPolicyAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "section", "setting", "value", "default"],
+      "properties": {
+        "kind": { "const": "SecurityPolicy" },
+        "section": { "enum": ["SystemAccess"] },
+        "setting": { "type": "string", "minLength": 1 },
+        "value": { "type": "string", "minLength": 1 },
+        "default": { "type": "string", "minLength": 1 }
       }
     },
     "tweak": {

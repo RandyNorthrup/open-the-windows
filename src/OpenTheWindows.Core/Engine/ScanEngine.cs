@@ -20,6 +20,7 @@ public sealed class ScanEngine
     private readonly IOptionalFeatureReader _features;
     private readonly IDefenderPreferenceReader _defender;
     private readonly IPowerSettingReader _power;
+    private readonly ISecurityPolicyReader _securityPolicy;
     private readonly IInteractiveUserResolver _interactiveUser;
     private readonly IManagedSettingDetector _managed;
     private readonly IOperatingSystemInfo _os;
@@ -34,6 +35,7 @@ public sealed class ScanEngine
         IOptionalFeatureReader features,
         IDefenderPreferenceReader defender,
         IPowerSettingReader power,
+        ISecurityPolicyReader securityPolicy,
         IInteractiveUserResolver interactiveUser,
         IManagedSettingDetector managed,
         IOperatingSystemInfo os,
@@ -46,6 +48,7 @@ public sealed class ScanEngine
         _features = features ?? throw new ArgumentNullException(nameof(features));
         _defender = defender ?? throw new ArgumentNullException(nameof(defender));
         _power = power ?? throw new ArgumentNullException(nameof(power));
+        _securityPolicy = securityPolicy ?? throw new ArgumentNullException(nameof(securityPolicy));
         _interactiveUser = interactiveUser ?? throw new ArgumentNullException(nameof(interactiveUser));
         _managed = managed ?? throw new ArgumentNullException(nameof(managed));
         _os = os ?? throw new ArgumentNullException(nameof(os));
@@ -87,6 +90,7 @@ public sealed class ScanEngine
         OptionalFeatureAction feature => EvaluateFeature(feature),
         DefenderPreferenceAction defender => EvaluateDefender(defender),
         PowerSettingAction power => EvaluatePower(power),
+        SecurityPolicyAction policy => EvaluateSecurityPolicy(policy),
         CommandAction command => new ActionObservation(command, ComplianceState.Unknown,
             "(not detectable)", DescribeCommand(command), ManagedState.NotManaged),
         _ => new ActionObservation(action, ComplianceState.Unknown, "(unsupported)", "(unsupported)", ManagedState.NotManaged),
@@ -199,6 +203,16 @@ public sealed class ScanEngine
         bool compliant = value.Ac == action.AcValue && value.Dc == action.DcValue;
         string actual = string.Create(CultureInfo.InvariantCulture, $"AC={value.Ac}, DC={value.Dc}");
         return new ActionObservation(action, compliant ? ComplianceState.Compliant : ComplianceState.Drift, actual, desired, ManagedState.NotManaged);
+    }
+
+    private ActionObservation EvaluateSecurityPolicy(SecurityPolicyAction action)
+    {
+        string? current = _securityPolicy.Read(action.Section, action.Setting);
+        string actual = current ?? "(absent)";
+        ComplianceState state = string.Equals(current, action.Value, StringComparison.Ordinal)
+            ? ComplianceState.Compliant
+            : ComplianceState.Drift;
+        return new ActionObservation(action, state, actual, action.Value, ManagedState.NotManaged);
     }
 
     private static string DescribeCommand(CommandAction action)

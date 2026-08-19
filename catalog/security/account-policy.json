@@ -1,0 +1,257 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "security.account.password-history",
+      "title": "Enforce password history (remember 24 passwords)",
+      "description": "Sets the account password-history length to 24 so a user cannot immediately reuse a recent password.",
+      "rationale": "Remembering 24 passwords, combined with a minimum password age, prevents users from cycling straight back to a favourite password after a forced change. CIS Windows 11 Benchmark 1.1.1.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "SecurityPolicy",
+          "section": "SystemAccess",
+          "setting": "PasswordHistorySize",
+          "value": "24",
+          "default": "0"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Account Policies\\Password Policy\\Enforce password history"
+      },
+      "sideEffects": [
+        "Only meaningful for local accounts; Microsoft-account and Azure AD sign-ins are governed by their own identity provider."
+      ],
+      "sources": [
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/enforce-password-history"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "account",
+        "password",
+        "cis",
+        "baseline"
+      ]
+    },
+    {
+      "id": "security.account.password-min-age",
+      "title": "Set a minimum password age of 1 day",
+      "description": "Requires a password to be at least one day old before it can be changed again.",
+      "rationale": "Without a minimum age a user can change their password 24 times in a row to flush the password history and return to the original password. One day defeats that while staying invisible in normal use. CIS Windows 11 Benchmark 1.1.3.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "SecurityPolicy",
+          "section": "SystemAccess",
+          "setting": "MinimumPasswordAge",
+          "value": "1",
+          "default": "0"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Account Policies\\Password Policy\\Minimum password age"
+      },
+      "sideEffects": [
+        "A user who genuinely needs to change a just-changed password must wait a day or have an administrator reset it."
+      ],
+      "sources": [
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/minimum-password-age"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "account",
+        "password",
+        "cis",
+        "baseline"
+      ]
+    },
+    {
+      "id": "security.account.password-length",
+      "title": "Require a minimum password length of 14",
+      "description": "Sets the minimum length for local-account passwords to 14 characters.",
+      "rationale": "Fourteen characters is the long-standing CIS/Microsoft baseline minimum and makes offline password cracking dramatically harder. CIS Windows 11 Benchmark 1.1.4.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "SecurityPolicy",
+          "section": "SystemAccess",
+          "setting": "MinimumPasswordLength",
+          "value": "14",
+          "default": "0"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Account Policies\\Password Policy\\Minimum password length"
+      },
+      "sideEffects": [
+        "Applies at the next password change; existing shorter passwords keep working until then. Users who prefer short passwords will have to choose a longer one.",
+        "Only affects local accounts; it does not change the password rules of a Microsoft or Azure AD account."
+      ],
+      "sources": [
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/minimum-password-length"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "account",
+        "password",
+        "cis",
+        "baseline"
+      ]
+    },
+    {
+      "id": "security.account.password-complexity",
+      "title": "Require password complexity",
+      "description": "Enables the built-in password-complexity requirement (mix of character classes, not based on the account name).",
+      "rationale": "Complexity requirements block the weakest passwords (the user name, single-class passwords) and are part of every recognised Windows hardening baseline. CIS Windows 11 Benchmark 1.1.5.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "SecurityPolicy",
+          "section": "SystemAccess",
+          "setting": "PasswordComplexity",
+          "value": "1",
+          "default": "0"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Account Policies\\Password Policy\\Password must meet complexity requirements"
+      },
+      "sideEffects": [
+        "Applies at the next password change. Users must choose passwords with mixed character classes; consider a passphrase policy alongside this.",
+        "Only affects local accounts."
+      ],
+      "sources": [
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/password-must-meet-complexity-requirements"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "account",
+        "password",
+        "cis",
+        "baseline"
+      ]
+    },
+    {
+      "id": "security.account.lockout",
+      "title": "Lock accounts after 5 failed sign-ins",
+      "description": "Locks a local account for 15 minutes after 5 failed sign-in attempts, counting failed attempts over a 15-minute window (LockoutBadCount, LockoutDuration and ResetLockoutCount).",
+      "rationale": "An account-lockout threshold turns online password guessing into a slow, noisy attack. Windows 11 now enables a 10/10/10 lockout by default; 5 attempts with a 15-minute lockout and 15-minute reset window is the CIS Level 1 baseline. CIS Windows 11 Benchmark 1.2.",
+      "category": "Security",
+      "level": "Balanced",
+      "risk": "Advanced",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "SecurityPolicy",
+          "section": "SystemAccess",
+          "setting": "LockoutBadCount",
+          "value": "5",
+          "default": "10"
+        },
+        {
+          "kind": "SecurityPolicy",
+          "section": "SystemAccess",
+          "setting": "LockoutDuration",
+          "value": "15",
+          "default": "10"
+        },
+        {
+          "kind": "SecurityPolicy",
+          "section": "SystemAccess",
+          "setting": "ResetLockoutCount",
+          "value": "15",
+          "default": "10"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Windows Settings\\Security Settings\\Account Policies\\Account Lockout Policy"
+      },
+      "sideEffects": [
+        "A user (or an administrator) who mistypes a password 5 times is locked out for 15 minutes; there is no local-console exemption, so keep an alternative administrative access path.",
+        "The lockout threshold is set first so the duration and reset window can be applied; revert restores each captured prior value in reverse order."
+      ],
+      "sources": [
+        "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
+        "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/account-lockout-policy"
+      ],
+      "verifiedOn": [],
+      "tags": [
+        "account",
+        "lockout",
+        "cis",
+        "baseline"
+      ]
+    }
+  ]
+}

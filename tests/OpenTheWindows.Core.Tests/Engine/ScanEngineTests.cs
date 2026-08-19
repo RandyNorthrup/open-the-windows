@@ -14,7 +14,7 @@ public sealed class ScanEngineTests
     private static readonly DateTimeOffset FixedInstant = new(2026, 8, 16, 12, 0, 0, TimeSpan.Zero);
 
     private static ScanEngine Build(FakeReaders readers, OperatingSystemFacts? os = null)
-        => new(readers, readers, readers, readers, readers, readers, readers, readers, readers,
+        => new(readers, readers, readers, readers, readers, readers, readers, readers, readers, readers,
             new FakeOperatingSystemInfo(os ?? FakeOperatingSystemInfo.Windows11Pro24H2()),
             new FixedTimeProvider(FixedInstant));
 
@@ -123,6 +123,30 @@ public sealed class ScanEngineTests
 
         Assert.Equal(ComplianceState.Compliant, ScanOne(compliant, WithActions(Registry(RegistryValueType.MultiSz, desired))).State);
         Assert.Equal(ComplianceState.Drift, ScanOne(drifted, WithActions(Registry(RegistryValueType.MultiSz, desired))).State);
+    }
+
+    // ---- SecurityPolicy (secedit) -----------------------------------------
+
+    private static SecurityPolicyAction Policy(string value)
+        => new(SecurityPolicySection.SystemAccess, "MinimumPasswordLength", value, "0");
+
+    [Fact]
+    public void SecurityPolicy_matching_value_is_compliant()
+    {
+        var readers = new FakeReaders { OnSecurityPolicy = (_, _) => "14" };
+
+        Assert.Equal(ComplianceState.Compliant, ScanOne(readers, WithActions(Policy("14"))).State);
+    }
+
+    [Fact]
+    public void SecurityPolicy_absent_or_different_value_is_drift()
+    {
+        var absent = new FakeReaders();
+        var different = new FakeReaders { OnSecurityPolicy = (_, _) => "8" };
+
+        Assert.Equal(ComplianceState.Drift, ScanOne(absent, WithActions(Policy("14"))).State);
+        Assert.Equal("(absent)", ScanOne(absent, WithActions(Policy("14"))).Actions[0].Actual);
+        Assert.Equal(ComplianceState.Drift, ScanOne(different, WithActions(Policy("14"))).State);
     }
 
     [Fact]

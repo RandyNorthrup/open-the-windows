@@ -16,6 +16,7 @@ namespace OpenTheWindows.Core.Catalog.Actions;
 [JsonDerivedType(typeof(DefenderPreferenceAction), "DefenderPreference")]
 [JsonDerivedType(typeof(PowerSettingAction), "PowerSetting")]
 [JsonDerivedType(typeof(CommandAction), "Command")]
+[JsonDerivedType(typeof(SecurityPolicyAction), "SecurityPolicy")]
 public interface ITweakAction
 {
     /// <summary>Stable discriminator name used in JSON, logs and journals.</summary>

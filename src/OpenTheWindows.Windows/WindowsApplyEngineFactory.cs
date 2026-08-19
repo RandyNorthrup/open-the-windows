@@ -20,6 +20,9 @@ public static class WindowsApplyEngineFactory
     /// </summary>
     public static ApplyEngine Create(string? journalDirectory = null, string? auditDirectory = null)
     {
+        var runner = new WindowsCommandRunner();
+        var securityPolicy = new WindowsSecurityPolicyManager(runner);
+
         var readers = new StateReaders(
             new WindowsRegistryReader(),
             new WindowsServiceReader(),
@@ -27,9 +30,9 @@ public static class WindowsApplyEngineFactory
             new WindowsAppxReader(),
             new WindowsOptionalFeatureReader(),
             new WindowsDefenderPreferenceReader(),
-            new WindowsPowerSettingReader());
+            new WindowsPowerSettingReader(),
+            securityPolicy);
 
-        var runner = new WindowsCommandRunner();
         var writers = new StateWriters(
             new WindowsRegistryWriter(),
             new WindowsServiceWriter(),
@@ -38,7 +41,8 @@ public static class WindowsApplyEngineFactory
             new WindowsOptionalFeatureWriter(runner),
             new WindowsDefenderPreferenceWriter(),
             new WindowsPowerSettingWriter(),
-            runner);
+            runner,
+            securityPolicy);
 
         var os = new WindowsOperatingSystemInfo();
         var elevation = new WindowsElevationContext();
@@ -56,7 +60,7 @@ public static class WindowsApplyEngineFactory
 
         var scan = new ScanEngine(
             readers.Registry, readers.Services, readers.Tasks, readers.Appx, readers.Features, readers.Defender,
-            readers.Power, interactiveUser, new WindowsManagedSettingDetector(), os, TimeProvider.System);
+            readers.Power, readers.SecurityPolicy, interactiveUser, new WindowsManagedSettingDetector(), os, TimeProvider.System);
 
         return new ApplyEngine(scan, new ActionApplier(readers, writers), services, os, TimeProvider.System);
     }

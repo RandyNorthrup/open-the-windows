@@ -1,6 +1,7 @@
 using System.Text.Json;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
+using OpenTheWindows.Core.Catalog.Actions;
 
 namespace OpenTheWindows.TestSupport.Fakes;
 
@@ -13,7 +14,7 @@ namespace OpenTheWindows.TestSupport.Fakes;
 public sealed class FakeReaders :
     IRegistryReader, IServiceReader, IScheduledTaskReader, IAppxReader,
     IOptionalFeatureReader, IDefenderPreferenceReader, IPowerSettingReader,
-    IInteractiveUserResolver, IManagedSettingDetector
+    ISecurityPolicyReader, IInteractiveUserResolver, IManagedSettingDetector
 {
     public Func<RegistryHive, string?, string, string, RegistryValueSnapshot> OnRegistry { get; set; }
         = (_, _, _, _) => new RegistryValueSnapshot(false, null, null);
@@ -30,6 +31,8 @@ public sealed class FakeReaders :
     public Func<string, JsonElement?> OnDefender { get; set; } = _ => null;
 
     public Func<Guid, Guid, (uint Ac, uint Dc)?> OnPower { get; set; } = (_, _) => null;
+
+    public Func<SecurityPolicySection, string, string?> OnSecurityPolicy { get; set; } = (_, _) => null;
 
     public Func<InteractiveUser?> OnInteractiveUser { get; set; } = () => null;
 
@@ -50,6 +53,8 @@ public sealed class FakeReaders :
     JsonElement? IDefenderPreferenceReader.Read(string propertyName) => OnDefender(propertyName);
 
     (uint Ac, uint Dc)? IPowerSettingReader.Read(Guid subgroup, Guid setting) => OnPower(subgroup, setting);
+
+    string? ISecurityPolicyReader.Read(SecurityPolicySection section, string setting) => OnSecurityPolicy(section, setting);
 
     InteractiveUser? IInteractiveUserResolver.Resolve() => OnInteractiveUser();
 

@@ -9,6 +9,22 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M4 (security-policy action kind): a new `SecurityPolicy` catalogue action applies
+  Windows account, password and lockout policy through `secedit` — the settings in
+  the LSA security database that have no registry value or public API, and which
+  the closed action set previously could not express (the M4 deferral). Apply stages
+  a minimal security template for one setting and imports it with `secedit /configure`;
+  revert replays the value captured beforehand (by parsing a `secedit /export`), so
+  the round-trip is exact and reversible. All process launches go through the
+  existing allow-listed command runner, and the template parse/build logic is
+  factored into a unit-tested `SecurityTemplate` helper. Five entries ship under
+  `catalog/security/account-policy.json`: enforce password history (24), minimum
+  password age (1 day), minimum password length (14), password complexity, and
+  account lockout (5 attempts / 15-minute lockout / 15-minute reset). VM-verified on
+  Windows 11 Pro 25H2: each applies, is confirmed by an independent `secedit /export`,
+  and reverts to the exact prior value — the lockout entry sets its three settings in
+  order and restores them in reverse.
+
 - M8 (audit, part 4 — GUI hooks): the Dashboard gains a **Security baselines** card
   that scores the machine against each built-in baseline (read-only, off the UI
   thread, on first activation) with a per-baseline progress bar, score and outcome

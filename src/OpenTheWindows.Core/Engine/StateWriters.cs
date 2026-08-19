@@ -14,6 +14,7 @@ namespace OpenTheWindows.Core.Engine;
 /// <param name="Defender">Defender preference writer.</param>
 /// <param name="Power">Power setting writer.</param>
 /// <param name="Commands">Allow-listed command runner.</param>
+/// <param name="SecurityPolicy">Security-policy (secedit) writer.</param>
 public sealed record StateWriters(
     IRegistryWriter Registry,
     IServiceWriter Services,
@@ -22,4 +23,5 @@ public sealed record StateWriters(
     IOptionalFeatureWriter Features,
     IDefenderPreferenceWriter Defender,
     IPowerSettingWriter Power,
-    ICommandRunner Commands);
+    ICommandRunner Commands,
+    ISecurityPolicyWriter SecurityPolicy);

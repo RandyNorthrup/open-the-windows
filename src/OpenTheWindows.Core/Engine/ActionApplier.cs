@@ -63,6 +63,7 @@ public sealed class ActionApplier
             OptionalFeatureAction f => CaptureFeature(f),
             DefenderPreferenceAction d => CaptureDefender(d),
             PowerSettingAction p => CapturePower(p),
+            SecurityPolicyAction s => CaptureSecurityPolicy(s),
             CommandAction => null,
             _ => null,
         };
@@ -81,6 +82,7 @@ public sealed class ActionApplier
             OptionalFeatureAction f => new JournalActionState { Enabled = f.Enabled },
             DefenderPreferenceAction d => new JournalActionState { Data = d.Value },
             PowerSettingAction p => new JournalActionState { Ac = p.AcValue, Dc = p.DcValue },
+            SecurityPolicyAction s => new JournalActionState { SecurityValue = s.Value },
             _ => new JournalActionState(),
         };
     }
@@ -145,6 +147,9 @@ public sealed class ActionApplier
             case PowerSettingAction p:
                 _writers.Power.SetValues(p.SubgroupGuid, p.SettingGuid, p.AcValue, p.DcValue);
                 break;
+            case SecurityPolicyAction s:
+                _writers.SecurityPolicy.Configure(s.Section, s.Setting, s.Value);
+                break;
             case CommandAction c:
                 RunCommand(c, c.Arguments);
                 break;
@@ -167,6 +172,7 @@ public sealed class ActionApplier
             OptionalFeatureAction f => _readers.Features.IsEnabled(f.Name) == f.Enabled,
             DefenderPreferenceAction d => _readers.Defender.Read(d.Property) is { } value && StateComparison.JsonEquals(value, d.Value),
             PowerSettingAction p => _readers.Power.Read(p.SubgroupGuid, p.SettingGuid) is { } read && read.Ac == p.AcValue && read.Dc == p.DcValue,
+            SecurityPolicyAction s => string.Equals(_readers.SecurityPolicy.Read(s.Section, s.Setting), s.Value, StringComparison.Ordinal),
             CommandAction => true,
             _ => false,
         };
@@ -184,6 +190,7 @@ public sealed class ActionApplier
             OptionalFeatureAction f => prior?.Enabled is not { } enabled || _readers.Features.IsEnabled(f.Name) == enabled,
             DefenderPreferenceAction d => prior?.Data is not { } value || (_readers.Defender.Read(d.Property) is { } read && StateComparison.JsonEquals(read, value)),
             PowerSettingAction p => prior is not { Ac: { } ac, Dc: { } dc } || (_readers.Power.Read(p.SubgroupGuid, p.SettingGuid) is { } read && read.Ac == ac && read.Dc == dc),
+            SecurityPolicyAction s => prior?.SecurityValue is not { } value || string.Equals(_readers.SecurityPolicy.Read(s.Section, s.Setting), value, StringComparison.Ordinal),
             // Appx reprovision cannot be verified by a subsequent read (staging is asynchronous); trust the writer.
             AppxAction => true,
             CommandAction => true,
@@ -220,6 +227,9 @@ public sealed class ActionApplier
                 break;
             case PowerSettingAction p when prior is { Ac: { } ac, Dc: { } dc }:
                 _writers.Power.SetValues(p.SubgroupGuid, p.SettingGuid, ac, dc);
+                break;
+            case SecurityPolicyAction s when prior is { SecurityValue: { } value }:
+                _writers.SecurityPolicy.Configure(s.Section, s.Setting, value);
                 break;
             case CommandAction c:
                 RunCommand(c, c.RevertArguments);
@@ -341,6 +351,14 @@ public sealed class ActionApplier
         return read is { } value
             ? new JournalActionState { Exists = true, Ac = value.Ac, Dc = value.Dc }
             : new JournalActionState { Exists = false };
+    }
+
+    private JournalActionState CaptureSecurityPolicy(SecurityPolicyAction action)
+    {
+        string? value = _readers.SecurityPolicy.Read(action.Section, action.Setting);
+        return value is null
+            ? new JournalActionState { Exists = false }
+            : new JournalActionState { Exists = true, SecurityValue = value };
     }
 
     private bool VerifyRegistry(RegistryAction action, string? userSid)

@@ -1,6 +1,7 @@
 using System.Runtime.Versioning;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Windows.Readers;
+using OpenTheWindows.Windows.Writers;
 
 namespace OpenTheWindows.Windows;
 
@@ -23,6 +24,7 @@ public static class WindowsScanEngineFactory
             new WindowsOptionalFeatureReader(),
             new WindowsDefenderPreferenceReader(),
             new WindowsPowerSettingReader(),
+            new WindowsSecurityPolicyManager(new WindowsCommandRunner()),
             new WindowsInteractiveUserResolver(),
             new WindowsManagedSettingDetector(),
             new WindowsOperatingSystemInfo(),

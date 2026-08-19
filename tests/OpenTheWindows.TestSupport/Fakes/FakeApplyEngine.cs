@@ -25,9 +25,9 @@ public static class FakeApplyEngine
 
         var osInfo = new FakeOperatingSystemInfo(os ?? FakeOperatingSystemInfo.Windows11Pro24H2());
         TimeProvider clock = time ?? new FixedTimeProvider(at ?? DefaultInstant);
-        var readers = new StateReaders(machine, machine, machine, machine, machine, machine, machine);
-        var writers = new StateWriters(machine, machine, machine, machine, machine, machine, machine, machine);
-        var scan = new ScanEngine(machine, machine, machine, machine, machine, machine, machine, machine, machine, osInfo, clock);
+        var readers = new StateReaders(machine, machine, machine, machine, machine, machine, machine, machine);
+        var writers = new StateWriters(machine, machine, machine, machine, machine, machine, machine, machine, machine);
+        var scan = new ScanEngine(machine, machine, machine, machine, machine, machine, machine, machine, machine, machine, osInfo, clock);
         var applier = new ActionApplier(readers, writers);
         var journal = new FakeJournalStore { Trace = trace };
         var audit = new FakeAuditSink();

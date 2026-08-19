@@ -54,8 +54,8 @@ public sealed class ApplyEngineTests
 
     private static ActionApplier Applier(FakeMachine machine)
         => new(
-            new StateReaders(machine, machine, machine, machine, machine, machine, machine),
-            new StateWriters(machine, machine, machine, machine, machine, machine, machine, machine));
+            new StateReaders(machine, machine, machine, machine, machine, machine, machine, machine),
+            new StateWriters(machine, machine, machine, machine, machine, machine, machine, machine, machine));
 
     private static (ApplyHarness Harness, FakeMachine Machine) SeededAb()
     {
@@ -116,6 +116,25 @@ public sealed class ApplyEngineTests
         Assert.Equal(applied.RunId, h.Journal.Records[^1].RevertOf);
         Assert.True(h.Audit.Has(AuditEventId.RevertStarted));
         Assert.True(h.Audit.Has(AuditEventId.RevertCompleted));
+    }
+
+    [Fact]
+    public void Apply_and_revert_a_security_policy_setting_round_trips()
+    {
+        var machine = new FakeMachine();
+        machine.SetSecurityPolicy(SecurityPolicySection.SystemAccess, "MinimumPasswordLength", "0");
+        ApplyHarness h = FakeApplyEngine.Create(machine);
+        var entry = Entry("test.password.length",
+            [new SecurityPolicyAction(SecurityPolicySection.SystemAccess, "MinimumPasswordLength", "14", "0")]);
+
+        ApplyResult applied = h.Engine.Apply([entry], Opts());
+        Assert.Equal(RunState.Completed, applied.State);
+        Assert.Equal("14", ((ISecurityPolicyReader)machine).Read(SecurityPolicySection.SystemAccess, "MinimumPasswordLength"));
+
+        RevertResult reverted = h.Engine.Revert(applied.RunId, new RevertOptions(false, false));
+
+        Assert.Equal(RunState.Completed, reverted.State);
+        Assert.Equal("0", ((ISecurityPolicyReader)machine).Read(SecurityPolicySection.SystemAccess, "MinimumPasswordLength"));
     }
 
     [Fact]

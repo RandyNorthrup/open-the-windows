@@ -43,4 +43,7 @@ public sealed record JournalActionState
 
     /// <summary>Power: the DC value index.</summary>
     public uint? Dc { get; init; }
+
+    /// <summary>Security policy: the setting's value (from the <c>secedit</c> export).</summary>
+    public string? SecurityValue { get; init; }
 }

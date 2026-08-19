@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Json;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
+using OpenTheWindows.Core.Catalog.Actions;
 
 namespace OpenTheWindows.TestSupport.Fakes;
 
@@ -14,9 +15,10 @@ namespace OpenTheWindows.TestSupport.Fakes;
 public sealed class FakeMachine :
     IRegistryReader, IServiceReader, IScheduledTaskReader, IAppxReader,
     IOptionalFeatureReader, IDefenderPreferenceReader, IPowerSettingReader,
-    IManagedSettingDetector, IInteractiveUserResolver,
+    IManagedSettingDetector, IInteractiveUserResolver, ISecurityPolicyReader,
     IRegistryWriter, IServiceWriter, IScheduledTaskWriter, IAppxWriter,
-    IOptionalFeatureWriter, IDefenderPreferenceWriter, IPowerSettingWriter, ICommandRunner
+    IOptionalFeatureWriter, IDefenderPreferenceWriter, IPowerSettingWriter, ICommandRunner,
+    ISecurityPolicyWriter
 {
     private readonly Dictionary<string, (RegistryValueType Type, JsonElement Data)> _registry = new(StringComparer.Ordinal);
     private readonly Dictionary<string, ServiceSnapshot> _services = new(StringComparer.OrdinalIgnoreCase);
@@ -25,6 +27,7 @@ public sealed class FakeMachine :
     private readonly Dictionary<string, bool> _features = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, JsonElement> _defender = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, (uint Ac, uint Dc)> _power = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, string> _securityPolicy = new(StringComparer.Ordinal);
     private readonly HashSet<string> _managed = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>The commands the run invoked, in order.</summary>
@@ -72,6 +75,10 @@ public sealed class FakeMachine :
     /// <summary>Seeds a power setting value.</summary>
     public void SetPower(Guid subgroup, Guid setting, uint ac, uint dc) => _power[PowerKey(subgroup, setting)] = (ac, dc);
 
+    /// <summary>Seeds a security-policy setting value.</summary>
+    public void SetSecurityPolicy(SecurityPolicySection section, string setting, string value)
+        => _securityPolicy[SecurityPolicyKey(section, setting)] = value;
+
     /// <summary>Seeds an Appx package state.</summary>
     public void SetAppx(string packageFamilyName, AppxSnapshot snapshot) => _appx[packageFamilyName] = snapshot;
 
@@ -105,6 +112,9 @@ public sealed class FakeMachine :
         => _managed.Contains(ManagedKey(hive, path, name)) ? ManagedState.GroupPolicy : ManagedState.NotManaged;
 
     InteractiveUser? IInteractiveUserResolver.Resolve() => User;
+
+    string? ISecurityPolicyReader.Read(SecurityPolicySection section, string setting)
+        => _securityPolicy.GetValueOrDefault(SecurityPolicyKey(section, setting));
 
     // ---- Writers ----------------------------------------------------------
 
@@ -189,6 +199,12 @@ public sealed class FakeMachine :
         return new CommandResult(CommandExitCode, string.Empty, string.Empty, TimedOut: false);
     }
 
+    void ISecurityPolicyWriter.Configure(SecurityPolicySection section, string setting, string value)
+    {
+        Mutate(string.Create(CultureInfo.InvariantCulture, $"securitypolicy:{section}:{setting}"));
+        _securityPolicy[SecurityPolicyKey(section, setting)] = value;
+    }
+
     private void Mutate(string what)
     {
         WriteCount++;
@@ -207,4 +223,7 @@ public sealed class FakeMachine :
 
     private static string PowerKey(Guid subgroup, Guid setting)
         => string.Create(CultureInfo.InvariantCulture, $"{subgroup}|{setting}");
+
+    private static string SecurityPolicyKey(SecurityPolicySection section, string setting)
+        => string.Create(CultureInfo.InvariantCulture, $"{section}|{setting}");
 }

@@ -11,7 +11,7 @@ public static class FakeScanEngine
     {
         ArgumentNullException.ThrowIfNull(readers);
         return new ScanEngine(
-            readers, readers, readers, readers, readers, readers, readers, readers, readers,
+            readers, readers, readers, readers, readers, readers, readers, readers, readers, readers,
             new FakeOperatingSystemInfo(os), new FixedTimeProvider(at));
     }
 }

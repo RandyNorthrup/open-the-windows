@@ -24,8 +24,8 @@ public sealed class ActionApplierTests
     {
         var m = new FakeMachine();
         var applier = new ActionApplier(
-            new StateReaders(m, m, m, m, m, m, m),
-            new StateWriters(m, m, m, m, m, m, m, m));
+            new StateReaders(m, m, m, m, m, m, m, m),
+            new StateWriters(m, m, m, m, m, m, m, m, m));
         return (applier, m);
     }
 
@@ -39,6 +39,7 @@ public sealed class ActionApplierTests
     private static PowerSettingAction Power() => new(Sub, Set, 5, 5);
     private static AppxAction Appx() => new("Pkg_abc", AppxRemovalMode.AllUsersAndDeprovision, "Store");
     private static CommandAction Command() => new("powercfg.exe", ["/a"], ["/b"]);
+    private static SecurityPolicyAction Policy() => new(SecurityPolicySection.SystemAccess, "MinimumPasswordLength", "14", "0");
 
     [Fact]
     public void CapturePrior_reports_absent_for_missing_targets()
@@ -51,7 +52,28 @@ public sealed class ActionApplierTests
         Assert.False(applier.CapturePrior(Feature(), null)!.Exists);
         Assert.False(applier.CapturePrior(Defender(), null)!.Exists);
         Assert.False(applier.CapturePrior(Power(), null)!.Exists);
+        Assert.False(applier.CapturePrior(Policy(), null)!.Exists);
         Assert.Null(applier.CapturePrior(Command(), null));
+    }
+
+    [Fact]
+    public void SecurityPolicy_captures_applies_verifies_and_restores()
+    {
+        (ActionApplier applier, FakeMachine machine) = New();
+        machine.SetSecurityPolicy(SecurityPolicySection.SystemAccess, "MinimumPasswordLength", "0");
+        SecurityPolicyAction action = Policy();
+
+        JournalActionState? prior = applier.CapturePrior(action, null);
+        Assert.True(prior!.Exists);
+        Assert.Equal("0", prior.SecurityValue);
+        Assert.False(applier.Verify(action, null));
+
+        applier.Apply(action, null);
+        Assert.True(applier.Verify(action, null));
+
+        applier.Restore(action, prior, null);
+        Assert.True(applier.VerifyRestored(action, prior, null));
+        Assert.False(applier.Verify(action, null));
     }
 
     [Fact]

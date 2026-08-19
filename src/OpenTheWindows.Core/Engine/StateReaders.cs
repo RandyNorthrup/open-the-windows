@@ -14,6 +14,7 @@ namespace OpenTheWindows.Core.Engine;
 /// <param name="Features">Optional feature reader.</param>
 /// <param name="Defender">Defender preference reader.</param>
 /// <param name="Power">Power setting reader.</param>
+/// <param name="SecurityPolicy">Security-policy (secedit) reader.</param>
 public sealed record StateReaders(
     IRegistryReader Registry,
     IServiceReader Services,
@@ -21,4 +22,5 @@ public sealed record StateReaders(
     IAppxReader Appx,
     IOptionalFeatureReader Features,
     IDefenderPreferenceReader Defender,
-    IPowerSettingReader Power);
+    IPowerSettingReader Power,
+    ISecurityPolicyReader SecurityPolicy);

@@ -56,6 +56,7 @@ properties are **errors** (schema `additionalProperties:false` and STJ
 | `DefenderPreference` | `property`, `value`, `default` | `MSFT_MpPreference` property names; never anything that disables real-time protection or signature updates. |
 | `PowerSetting` | `subgroupGuid`, `settingGuid`, `acValue`, `dcValue` | Active scheme only. |
 | `Command` | `executable` (allow-list: `powercfg.exe` `netsh.exe` `auditpol.exe` `secedit.exe` `dism.exe` `fsutil.exe` `usoclient.exe`), `arguments[]`, `revertArguments[]` | Last resort; both directions required; no shell; arguments are passed verbatim (no interpolation). |
+| `SecurityPolicy` | `section` (`SystemAccess`), `setting`, `value`, `default` | Windows account, password and lockout policy — the `secedit` security database, which has no registry value or public API. Apply imports a minimal `secedit` template carrying the one `setting`; revert replays the value captured from a `secedit /export` taken before the change. `value`/`default` are the template's verbatim text (numeric settings as decimal strings). |
 
 ## Authoring workflow
 
