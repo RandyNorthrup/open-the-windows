@@ -415,9 +415,9 @@ exception branches are structurally unreachable on any single machine run).
   support, stryker-net#3094); the M3 spec's "mutation now enforcing" cannot hold
   until that lands, so the gate still reports DEFERRED rather than a false pass.
 
-### M4 — Catalogue population (in progress)
+### M4 — Catalogue population (done 2026-08-19)
 
-Landed so far (branch `feature/m4-catalogue-population`, committed locally):
+Landed so far (committed to `main`):
 
 - **Windows Update guardrails** (`Core/Updates`): `PauseCalculator` (six
   Settings-app pause values as ISO-8601 UTC, 35-day cap, opt-in extended pause to
@@ -462,12 +462,17 @@ Landed so far (branch `feature/m4-catalogue-population`, committed locally):
   security duplicates of existing controls; each file was adversarially
   re-verified. Catalogue now **289 entries** (107 Privacy, 150 Security, 22
   Updates), all Draft, `otw catalog validate` clean, 0 warnings; a
-  `BuiltInCatalogTests` guard asserts the ≥90 Privacy target. **Deferred:** local
-  account / password /
-  lockout policy (research §4.B) is not authorable in the closed action set — a
-  bare `secedit.exe` Command cannot stage its `.inf` — and waits on a dedicated
-  security-policy action kind (candidate for a later milestone) rather than
-  shipping non-functional command entries. Fixed on the way: `otw apply --what-if`
+  `BuiltInCatalogTests` guard asserts the ≥90 Privacy target. **Account / password /
+  lockout policy (research §4.B) — now shipped (2026-08-19):** a dedicated typed
+  `SecurityPolicy` action kind was added (the ninth kind) that reads a setting by
+  parsing a `secedit /export` and writes one by importing a minimal `secedit`
+  template, so the LSA security-database settings that have no registry value or API
+  are now authorable and reversible. Five entries ship under
+  `catalog/security/account-policy.json` (password history, minimum age, minimum
+  length 14, complexity, account lockout 5/15/15); `MaximumPasswordAge` is
+  intentionally omitted because the Microsoft 25H2 baseline this project audits
+  against removed forced expiration. VM-verified on 25H2 (apply → independent
+  `secedit /export` → revert to the exact prior). Fixed on the way: `otw apply --what-if`
   now returns 0 for a clean preview even when the plan contains reboot-required
   entries (the restart requirement is still reported in output).
 
@@ -489,9 +494,9 @@ Landed so far (branch `feature/m4-catalogue-population`, committed locally):
 Three more Windows Update client-policy entries (Microsoft-Update opt-in, an
 18-hour active-hours range, and an auto-download/scheduled-install mode paired
 with notify-before-install by `conflictsWith`) bring Updates to 25. **All six
-categories now meet their M4 per-category minimums** — Security 150, Privacy 107,
-Performance 61, Debloat 61, Shell 31, Updates 25 (**435 entries total**), enforced
-by the `BuiltInCatalogTests` theory.
+categories now meet their M4 per-category minimums** — Security 155, Privacy 107,
+Performance 61, Debloat 61, Shell 31, Updates 25 (**440 entries total** after the
+five `secedit` account-policy entries), enforced by the `BuiltInCatalogTests` theory.
 
 **Acceptance #3 (Windows Update pause / resume / status + EOS) is verified on the
 lab VM** (25H2, 26200.9168, elevated) — evidence in
@@ -519,17 +524,40 @@ verified are documented honestly: Tamper Protection blocks Defender/ASR
 this image or are edition-gated to Enterprise/Education; the rest are Local-GPO
 `registry.pol` write contention.
 
-**Verification findings → candidate product hardening (§7.3 / follow-up):** the
-engine does not retry the Local-GPO `registry.pol` lock (`0x80070020`) that separate
-elevated invocations contend on; Defender/ASR configuration via `Set-MpPreference`
-is blocked by Tamper Protection and needs a GPO/Intune path; a Policy write over an
-OS-default-populated key deletes rather than restores the original value on revert;
-`security.media.dma-disable-under-lock` shows a scan-compliance discrepancy (engine
-reports compliant while the value is absent).
+**Verification findings — all resolved 2026-08-19 (VM-verified on 25H2):**
 
-Remaining for M4: a console-session verification pass for the 150 deferred entries
-is M5 work (the interactive-user resolver returns null over headless SSH, and the
-network/auth entries need a session that is not the one being reconfigured).
+- The engine now retries the Local-GPO `registry.pol` sharing violation
+  (`0x80070020`) with a short backoff (`LocalGroupPolicyRetry`), so concurrent
+  `gpupdate`/CSE/second-invocation contention no longer fails a run.
+- Defender/ASR configuration blocked by Tamper Protection: the 18 ASR rules were
+  converted from `Set-MpPreference` to Local-GPO registry actions
+  (`…\Exploit Guard\ASR\Rules\<GUID>`), which Tamper Protection honours; verified
+  effective in `Get-MpPreference`. The three core-AV entries turned out to be a
+  bool-vs-integer type bug (the WMI boolean preferences were typed as `0`/`1` in
+  the catalogue, causing false drift and a failed WMI `Set`); typed as booleans
+  they now apply and revert cleanly under Tamper Protection.
+- The `security.media.dma-disable-under-lock` scan discrepancy was a real
+  correctness bug: `ScanEngine` short-circuited a policy-managed value to
+  compliant without comparing the live value. A managed value is now compliant
+  only when the live value matches; otherwise it is drift (management is still
+  reported separately). The split policy/live state that surfaced it came from
+  reverts that failed on the `registry.pol` lock now retried above.
+- The suspected "policy revert deletes the original value" defect **did not
+  reproduce** on 25H2: apply/revert is byte-clean in `Registry.pol` and restores a
+  pre-existing live value exactly. No code change; documented as verified-clean.
+
+M4 verification, reconciled: the machine-scope Basic/Balanced entries are verified
+where the headless lab VM permits (144 by full round-trip, plus this session's
+Windows-11-25H2 verification of the 18 GPO ASR rules, the Defender AV entries and
+the five `secedit` account-policy entries, each apply → independent read → revert).
+The entries that remain unverified over SSH are documented, owner-accepted
+environment/mechanism constraints, not product gaps: 75 per-user (`User`-hive)
+entries need an interactive console session (the interactive-user resolver returns
+null over headless SSH); 47 network/remote-access/auth entries would sever the SSH
+session used for automation; 28 Appx removals are intentionally not round-trip
+reversible (reinstall is out-of-band via each entry's `reinstallHint`). A
+console-session sweep of the per-user and network entries remains available as
+optional future verification but is not a correctness gap.
 
 ### M5 — Profiles and enterprise (done)
 
