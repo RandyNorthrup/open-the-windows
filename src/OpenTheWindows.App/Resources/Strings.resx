@@ -139,4 +139,56 @@
   <data name="Risk_Breaking" xml:space="preserve">
     <value>Breaking</value>
   </data>
+
+  <data name="Level_Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="Level_Basic" xml:space="preserve">
+    <value>Basic</value>
+  </data>
+  <data name="Level_Balanced" xml:space="preserve">
+    <value>Balanced</value>
+  </data>
+  <data name="Level_Strict" xml:space="preserve">
+    <value>Strict</value>
+  </data>
+  <data name="Level_Paranoid" xml:space="preserve">
+    <value>Paranoid</value>
+  </data>
+
+  <data name="Restart_None" xml:space="preserve">
+    <value>No restart</value>
+  </data>
+  <data name="Restart_ExplorerRestart" xml:space="preserve">
+    <value>Restart Explorer</value>
+  </data>
+  <data name="Restart_SignOut" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="Restart_Reboot" xml:space="preserve">
+    <value>Reboot</value>
+  </data>
+
+  <data name="Status_Draft" xml:space="preserve">
+    <value>Draft</value>
+  </data>
+  <data name="Status_Verified" xml:space="preserve">
+    <value>Verified</value>
+  </data>
+  <data name="Status_Deprecated" xml:space="preserve">
+    <value>Deprecated</value>
+  </data>
+
+  <data name="Filter_AllRisks" xml:space="preserve">
+    <value>All risks</value>
+  </data>
+  <data name="Category_IncludeDraft" xml:space="preserve">
+    <value>Include draft entries</value>
+  </data>
+  <data name="Category_NotVerified" xml:space="preserve">
+    <value>Not yet verified</value>
+  </data>
+  <data name="Category_SelectedCount" xml:space="preserve">
+    <value>{0} of {1} selected</value>
+  </data>
 </root>

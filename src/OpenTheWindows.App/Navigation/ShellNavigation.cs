@@ -14,6 +14,11 @@ internal static class ShellNavigation
     public static IReadOnlyList<NavigationItem> Pages { get; } =
     [
         new(PageKeys.Dashboard, Strings.Nav_Dashboard),
+        new(PageKeys.Privacy, Strings.Nav_Privacy),
+        new(PageKeys.Security, Strings.Nav_Security),
+        new(PageKeys.Performance, Strings.Nav_Performance),
+        new(PageKeys.Debloat, Strings.Nav_Debloat),
+        new(PageKeys.Shell, Strings.Nav_Shell),
         new(PageKeys.About, Strings.Nav_About),
     ];
 }

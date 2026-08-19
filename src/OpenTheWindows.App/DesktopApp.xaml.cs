@@ -5,7 +5,9 @@ using OpenTheWindows.App.Navigation;
 using OpenTheWindows.App.Services;
 using OpenTheWindows.App.ViewModels;
 using OpenTheWindows.Core.Abstractions;
+using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
+using OpenTheWindows.Core.Model;
 using OpenTheWindows.Windows;
 
 namespace OpenTheWindows.App;
@@ -28,6 +30,11 @@ internal sealed partial class DesktopApp : Application, IDisposable
         services.AddSingleton<IElevationContext, WindowsElevationContext>();
         services.AddSingleton<DoctorService>();
 
+        // Catalogue + machine facts, loaded once and shared by the category pages.
+        services.AddSingleton<TweakCatalog>(_ => CatalogLoader.LoadBuiltIn().Catalog
+            ?? throw new InvalidOperationException("The built-in catalogue failed to load."));
+        services.AddSingleton<OperatingSystemFacts>(sp => sp.GetRequiredService<DoctorService>().Run().OperatingSystem);
+
         // Shell services.
         services.AddSingleton<IDispatcherService>(_ => new WpfDispatcherService(Dispatcher.CurrentDispatcher));
         services.AddSingleton<IDialogService, DialogService>();
@@ -37,6 +44,13 @@ internal sealed partial class DesktopApp : Application, IDisposable
         // Page view models (keyed by page so the navigation service resolves them).
         services.AddSingleton<DoctorViewModel>();
         services.AddKeyedSingleton<IPageViewModel, DashboardViewModel>(PageKeys.Dashboard);
+        foreach (Category category in new[] { Category.Privacy, Category.Security, Category.Performance, Category.Debloat, Category.Shell })
+        {
+            services.AddKeyedSingleton<IPageViewModel>(
+                CategoryPages.KeyFor(category),
+                (sp, _) => ActivatorUtilities.CreateInstance<CategoryPageViewModel>(sp, category));
+        }
+
         services.AddKeyedSingleton<IPageViewModel, AboutViewModel>(PageKeys.About);
 
         // Shell.

@@ -9,6 +9,17 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M6 (GUI, part 2 — category pages): a shared `CategoryPageViewModel` now backs
+  the **Privacy**, **Security**, **Performance**, **Debloat** and **Shell** pages.
+  Each has a level dial (Off / Basic / Balanced / Strict / Paranoid) that
+  pre-selects the entries a profile at that level would apply, a search box over
+  id / title / description / rationale / tags, and risk and draft filters that
+  narrow the visible list without changing the selection. Every entry is a
+  `TweakItemViewModel` with a selection checkbox and risk / restart / draft /
+  "verified on" badges (colour plus text, never colour alone); the selected row
+  opens a detail pane with the description, rationale, side effects, the
+  human-readable actions, source links and verification history. Selection is
+  cumulative and survives filtering. (Updates has its own page, added later.)
 - M6 (GUI, part 1 — shell, navigation and service layer): the WPF app is now a
   multi-page shell instead of the single doctor window. A left navigation list
   drives a content host through an `INavigationService` that resolves page view

@@ -281,4 +281,148 @@ internal class Strings
             return ResourceManager.GetString("Risk_Breaking", resourceCulture);
         }
     }
+
+    /// <summary>Looks up a localized string similar to Off.</summary>
+    internal static string Level_Off
+    {
+        get
+        {
+            return ResourceManager.GetString("Level_Off", resourceCulture);
+        }
+    }
+
+    /// <summary>Looks up a localized string similar to Basic.</summary>
+    internal static string Level_Basic
+    {
+        get
+        {
+            return ResourceManager.GetString("Level_Basic", resourceCulture);
+        }
+    }
+
+    /// <summary>Looks up a localized string similar to Balanced.</summary>
+    internal static string Level_Balanced
+    {
+        get
+        {
+            return ResourceManager.GetString("Level_Balanced", resourceCulture);
+        }
+    }
+
+    /// <summary>Looks up a localized string similar to Strict.</summary>
+    internal static string Level_Strict
+    {
+        get
+        {
+            return ResourceManager.GetString("Level_Strict", resourceCulture);
+        }
+    }
+
+    /// <summary>Looks up a localized string similar to Paranoid.</summary>
+    internal static string Level_Paranoid
+    {
+        get
+        {
+            return ResourceManager.GetString("Level_Paranoid", resourceCulture);
+        }
+    }
+
+    /// <summary>Looks up a localized string similar to No restart.</summary>
+    internal static string Restart_None
+    {
+        get
+        {
+            return ResourceManager.GetString("Restart_None", resourceCulture);
+        }
+    }
+
+    /// <summary>Looks up a localized string similar to Restart Explorer.</summary>
+    internal static string Restart_ExplorerRestart
+    {
+        get
+        {
+            return ResourceManager.GetString("Restart_ExplorerRestart", resourceCulture);
+        }
+    }
+
+    /// <summary>Looks up a localized string similar to Sign out.</summary>
+    internal static string Restart_SignOut
+    {
+        get
+        {
+            return ResourceManager.GetString("Restart_SignOut", resourceCulture);
+        }
+    }
+
+    /// <summary>Looks up a localized string similar to Reboot.</summary>
+    internal static string Restart_Reboot
+    {
+        get
+        {
+            return ResourceManager.GetString("Restart_Reboot", resourceCulture);
+        }
+    }
+
+    /// <summary>Looks up a localized string similar to Draft.</summary>
+    internal static string Status_Draft
+    {
+        get
+        {
+            return ResourceManager.GetString("Status_Draft", resourceCulture);
+        }
+    }
+
+    /// <summary>Looks up a localized string similar to Verified.</summary>
+    internal static string Status_Verified
+    {
+        get
+        {
+            return ResourceManager.GetString("Status_Verified", resourceCulture);
+        }
+    }
+
+    /// <summary>Looks up a localized string similar to Deprecated.</summary>
+    internal static string Status_Deprecated
+    {
+        get
+        {
+            return ResourceManager.GetString("Status_Deprecated", resourceCulture);
+        }
+    }
+
+    /// <summary>Looks up a localized string similar to All risks.</summary>
+    internal static string Filter_AllRisks
+    {
+        get
+        {
+            return ResourceManager.GetString("Filter_AllRisks", resourceCulture);
+        }
+    }
+
+    /// <summary>Looks up a localized string similar to Include draft entries.</summary>
+    internal static string Category_IncludeDraft
+    {
+        get
+        {
+            return ResourceManager.GetString("Category_IncludeDraft", resourceCulture);
+        }
+    }
+
+    /// <summary>Looks up a localized string similar to Not yet verified.</summary>
+    internal static string Category_NotVerified
+    {
+        get
+        {
+            return ResourceManager.GetString("Category_NotVerified", resourceCulture);
+        }
+    }
+
+    /// <summary>Looks up a localized string similar to {0} of {1} selected.</summary>
+    internal static string Category_SelectedCount
+    {
+        get
+        {
+            return ResourceManager.GetString("Category_SelectedCount", resourceCulture);
+        }
+    }
 }
