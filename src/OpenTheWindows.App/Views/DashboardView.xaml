@@ -8,130 +8,147 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:DashboardViewModel}"
              d:DesignWidth="640">
-    <StackPanel>
-        <TextBlock Text="System check"
-                   FontSize="18"
-                   FontWeight="SemiBold"
-                   Margin="0,0,0,8" />
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel>
+            <TextBlock Text="System check"
+                       Style="{StaticResource SectionHeaderText}"
+                       Margin="0,0,0,8" />
 
-        <Border Padding="16"
-                CornerRadius="8"
-                BorderThickness="1"
-                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                DataContext="{Binding Doctor}"
-                HorizontalAlignment="Stretch">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+            <Border Style="{StaticResource Card}"
+                    DataContext="{Binding Doctor}"
+                    HorizontalAlignment="Stretch">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Operating system" Margin="0,0,16,6" Opacity="0.75" />
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding OperatingSystemSummary}" AutomationProperties.AutomationId="Dashboard_OsText" />
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Operating system" Style="{StaticResource FieldLabelText}" />
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding OperatingSystemSummary}" TextWrapping="Wrap" AutomationProperties.AutomationId="Dashboard_OsText" />
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Edition" Margin="0,0,16,6" Opacity="0.75" />
-                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding EditionSummary}" AutomationProperties.AutomationId="Dashboard_EditionText" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Edition" Style="{StaticResource FieldLabelText}" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding EditionSummary}" AutomationProperties.AutomationId="Dashboard_EditionText" />
 
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Running as" Margin="0,0,16,6" Opacity="0.75" />
-                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding UserSummary}" AutomationProperties.AutomationId="Dashboard_UserText" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Running as" Style="{StaticResource FieldLabelText}" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding UserSummary}"
+                               ToolTip="Applying changes needs an elevated (administrator) session."
+                               AutomationProperties.AutomationId="Dashboard_UserText" />
 
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Status" Margin="0,0,16,6" Opacity="0.75" />
-                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Status}" AutomationProperties.AutomationId="Dashboard_StatusText" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Status" Style="{StaticResource FieldLabelText}" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Status}" AutomationProperties.AutomationId="Dashboard_StatusText" />
 
-                <TextBlock Grid.Row="4" Grid.Column="0" Text="Can apply changes" Margin="0,0,16,6" Opacity="0.75" />
-                <TextBlock Grid.Row="4" Grid.Column="1"
-                           Text="{Binding CanApply, Converter={StaticResource BoolToYesNo}}"
-                           AutomationProperties.AutomationId="Dashboard_CanApplyText" />
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Can apply changes" Style="{StaticResource FieldLabelText}" />
+                    <TextBlock Grid.Row="4" Grid.Column="1"
+                               Text="{Binding CanApply, Converter={StaticResource BoolToYesNo}}"
+                               ToolTip="Whether this session can write changes (needs administrator rights on a supported build)."
+                               AutomationProperties.AutomationId="Dashboard_CanApplyText" />
 
-                <ItemsControl Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
-                              ItemsSource="{Binding Notes}"
-                              Margin="0,8,0,0"
-                              AutomationProperties.AutomationId="Dashboard_NotesList">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,0,0,4" />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                    <ItemsControl Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
+                                  ItemsSource="{Binding Notes}"
+                                  Margin="0,8,0,0"
+                                  AutomationProperties.AutomationId="Dashboard_NotesList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,0,0,4" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
-                <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
-                        Content="Re-check"
-                        Command="{Binding RefreshCommand}"
-                        HorizontalAlignment="Left"
-                        Margin="0,12,0,0"
-                        Padding="16,6"
-                        AutomationProperties.AutomationId="Dashboard_RefreshButton" />
-            </Grid>
-        </Border>
+                    <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
+                            Content="Re-check"
+                            Command="{Binding RefreshCommand}"
+                            HorizontalAlignment="Left"
+                            Margin="0,12,0,0"
+                            Padding="16,6"
+                            ToolTip="Read this PC's Windows version, edition and elevation again."
+                            AutomationProperties.AutomationId="Dashboard_RefreshButton" />
+                </Grid>
+            </Border>
 
-        <TextBlock Text="Security baselines"
-                   FontSize="18"
-                   FontWeight="SemiBold"
-                   Margin="0,24,0,8" />
-        <Border Padding="16"
-                CornerRadius="8"
-                BorderThickness="1"
-                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                HorizontalAlignment="Stretch">
-            <StackPanel>
-                <TextBlock Text="{Binding AuditStatus}"
-                           Opacity="0.75"
-                           Margin="0,0,0,8"
-                           TextWrapping="Wrap"
-                           AutomationProperties.AutomationId="Dashboard_AuditStatus" />
-                <ItemsControl ItemsSource="{Binding BaselineScores}"
-                              AutomationProperties.AutomationId="Dashboard_BaselineScores">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Margin="0,0,0,12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
-                                    <ProgressBar Minimum="0" Maximum="100" Value="{Binding Score, Mode=OneWay}"
-                                                 Height="8" Margin="0,4" />
-                                    <TextBlock Text="{Binding Summary}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
-                                </StackPanel>
-                                <TextBlock Grid.Column="1"
-                                           Text="{Binding ScoreLabel}"
-                                           FontSize="20"
-                                           FontWeight="SemiBold"
-                                           VerticalAlignment="Center" />
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                <Button Content="Re-score"
-                        Command="{Binding RefreshScoresCommand}"
-                        HorizontalAlignment="Left"
-                        Margin="0,4,0,0"
-                        Padding="16,6"
-                        AutomationProperties.AutomationId="Dashboard_ReScoreButton" />
-            </StackPanel>
-        </Border>
+            <TextBlock Text="Security baselines" Style="{StaticResource SectionHeaderText}" Margin="0,24,0,8" />
+            <Border Style="{StaticResource Card}" HorizontalAlignment="Stretch">
+                <StackPanel>
+                    <TextBlock Text="{Binding AuditStatus}"
+                               Style="{StaticResource MutedText}"
+                               Margin="0,0,0,8"
+                               AutomationProperties.AutomationId="Dashboard_AuditStatus" />
+                    <ItemsControl ItemsSource="{Binding BaselineScores}"
+                                  AutomationProperties.AutomationId="Dashboard_BaselineScores">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                        <ProgressBar Minimum="0" Maximum="100" Value="{Binding Score, Mode=OneWay}"
+                                                     Height="8" Margin="0,4"
+                                                     ToolTip="Percentage of this baseline's checks this PC currently passes." />
+                                        <TextBlock Text="{Binding Summary}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding ScoreLabel}"
+                                               FontSize="20"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Content="Score this machine"
+                            Command="{Binding RefreshScoresCommand}"
+                            HorizontalAlignment="Left"
+                            Margin="0,4,0,0"
+                            Padding="16,6"
+                            ToolTip="Audit this PC against the built-in security baselines. Read-only — it changes nothing."
+                            AutomationProperties.AutomationId="Dashboard_ReScoreButton" />
+                </StackPanel>
+            </Border>
 
-        <TextBlock Text="Quick actions"
-                   FontSize="18"
-                   FontWeight="SemiBold"
-                   Margin="0,24,0,8" />
-        <WrapPanel>
-            <Button Content="About"
-                    Command="{Binding OpenCommand}"
-                    CommandParameter="About"
-                    Padding="16,6"
-                    Margin="0,0,8,0"
-                    AutomationProperties.AutomationId="Dashboard_OpenAboutButton" />
-        </WrapPanel>
-    </StackPanel>
+            <TextBlock Text="Quick actions" Style="{StaticResource SectionHeaderText}" Margin="0,24,0,8" />
+            <WrapPanel>
+                <Button Content="Review privacy"
+                        Command="{Binding OpenCommand}"
+                        CommandParameter="Privacy"
+                        Padding="16,6" Margin="0,0,8,8"
+                        ToolTip="Open the Privacy page to turn off telemetry and tracking."
+                        AutomationProperties.AutomationId="Dashboard_OpenPrivacyButton" />
+                <Button Content="Pause Windows Update"
+                        Command="{Binding OpenCommand}"
+                        CommandParameter="Updates"
+                        Padding="16,6" Margin="0,0,8,8"
+                        ToolTip="Open the Updates page to pause, extend a pause or resume Windows Update."
+                        AutomationProperties.AutomationId="Dashboard_OpenUpdatesButton" />
+                <Button Content="Harden security"
+                        Command="{Binding OpenCommand}"
+                        CommandParameter="Security"
+                        Padding="16,6" Margin="0,0,8,8"
+                        ToolTip="Open the Security page to apply hardening mapped to STIG / CIS controls."
+                        AutomationProperties.AutomationId="Dashboard_OpenSecurityButton" />
+                <Button Content="Apply a profile"
+                        Command="{Binding OpenCommand}"
+                        CommandParameter="Profiles"
+                        Padding="16,6" Margin="0,0,8,8"
+                        ToolTip="Open the Profiles page to apply a curated set of tweaks in one step."
+                        AutomationProperties.AutomationId="Dashboard_OpenProfilesButton" />
+                <Button Content="View history"
+                        Command="{Binding OpenCommand}"
+                        CommandParameter="History"
+                        Padding="16,6" Margin="0,0,8,8"
+                        ToolTip="Open the History page to review and revert previous changes."
+                        AutomationProperties.AutomationId="Dashboard_OpenHistoryButton" />
+            </WrapPanel>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

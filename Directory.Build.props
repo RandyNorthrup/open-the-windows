@@ -20,9 +20,10 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/RandyNorthrup/open-the-windows</RepositoryUrl>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <!-- Single source of truth for the version. Release CI overrides with -p:Version=. -->
+    <!-- Single source of truth for the version. Release CI overrides with -p:Version=.
+         No pre-release suffix on local builds: the shipped and the developer build
+         both report the plain version (a "-local" tag only confused users). -->
     <VersionPrefix>0.1.0</VersionPrefix>
-    <VersionSuffix Condition="'$(VersionSuffix)' == '' and '$(CI)' != 'true'">local</VersionSuffix>
   </PropertyGroup>
 
   <!-- ─── Language & compiler ───────────────────────────────────────────── -->

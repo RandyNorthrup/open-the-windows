@@ -12,20 +12,20 @@ namespace OpenTheWindows.App.ViewModels;
 
 /// <summary>
 /// The landing page: system health (the pre-flight <see cref="DoctorViewModel"/>),
-/// the machine's audit score against each built-in security baseline (scored on
-/// first activation, off the UI thread), and quick actions.
+/// the machine's audit score against each built-in security baseline, and quick
+/// actions. Scoring reads the machine, so it never runs on its own — the user
+/// starts it with the score button, off the UI thread.
 /// </summary>
-internal sealed partial class DashboardViewModel : ObservableObject, IPageViewModel, IActivatable
+internal sealed partial class DashboardViewModel : ObservableObject, IPageViewModel
 {
     private readonly INavigationService _navigation;
     private readonly IAuditCoordinator _audit;
-    private bool _loaded;
 
     [ObservableProperty]
     private bool _isBusy;
 
     [ObservableProperty]
-    private string _auditStatus = "Baseline scores load when the dashboard opens.";
+    private string _auditStatus = "This machine has not been scored yet. Select “Score this machine” to audit it against the built-in security baselines.";
 
     /// <summary>Builds the dashboard over the doctor panel, navigation and the audit coordinator.</summary>
     public DashboardViewModel(DoctorViewModel doctor, INavigationService navigation, IAuditCoordinator audit)
@@ -50,19 +50,10 @@ internal sealed partial class DashboardViewModel : ObservableObject, IPageViewMo
     /// <summary>The machine's audit score against each built-in baseline.</summary>
     public ObservableCollection<BaselineScoreViewModel> BaselineScores { get; } = [];
 
-    /// <summary>Whether a re-score can start (not already running).</summary>
+    /// <summary>Whether a score run can start (not already running).</summary>
     public bool CanRefresh => !IsBusy;
 
-    /// <inheritdoc />
-    public void OnActivated()
-    {
-        if (!_loaded)
-        {
-            _ = LoadScoresAsync();
-        }
-    }
-
-    /// <summary>Re-runs the baseline audits and refreshes the scores.</summary>
+    /// <summary>Runs the baseline audits and refreshes the scores. User-initiated only.</summary>
     [RelayCommand(CanExecute = nameof(CanRefresh))]
     private Task RefreshScoresAsync() => LoadScoresAsync();
 
@@ -88,7 +79,6 @@ internal sealed partial class DashboardViewModel : ObservableObject, IPageViewMo
                 BaselineScores.Add(new BaselineScoreViewModel(baseline, report));
             }
 
-            _loaded = true;
             AuditStatus = BaselineScores.Count == 0
                 ? "No baselines are available."
                 : string.Create(CultureInfo.CurrentCulture, $"Scored against {BaselineScores.Count} baseline(s).");

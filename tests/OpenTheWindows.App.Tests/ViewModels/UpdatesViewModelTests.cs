@@ -25,16 +25,28 @@ public sealed class UpdatesViewModelTests
     }
 
     [Fact]
-    public void Activation_loads_the_status()
+    public void Refresh_loads_the_status()
     {
         _coordinator.StatusToReturn = Status();
         UpdatesViewModel page = Build();
 
-        page.OnActivated();
+        page.RefreshCommand.Execute(null);
 
         Assert.Contains("24H2", page.CurrentVersion, StringComparison.Ordinal);
         Assert.Contains("Not paused", page.PauseState, StringComparison.Ordinal);
         Assert.True(page.CanControl);
+    }
+
+    [Fact]
+    public void The_status_is_not_read_until_the_user_refreshes()
+    {
+        _coordinator.StatusToReturn = Status();
+        UpdatesViewModel page = Build();
+
+        // No activation hook and nothing read on construction: the machine is
+        // probed only when the user asks for it.
+        Assert.Equal(0, _coordinator.StatusCount);
+        Assert.DoesNotContain("24H2", page.CurrentVersion, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -43,7 +55,7 @@ public sealed class UpdatesViewModelTests
         _coordinator.StatusToReturn = Status(paused: true, until: new DateTimeOffset(2026, 9, 1, 0, 0, 0, TimeSpan.Zero));
         UpdatesViewModel page = Build();
 
-        page.OnActivated();
+        page.RefreshCommand.Execute(null);
 
         Assert.True(page.IsPaused);
         Assert.True(page.CanResume);
@@ -57,7 +69,7 @@ public sealed class UpdatesViewModelTests
         _coordinator.ManagedToReturn = true;
         UpdatesViewModel page = Build();
 
-        page.OnActivated();
+        page.RefreshCommand.Execute(null);
 
         Assert.True(page.IsManaged);
         Assert.False(page.CanControl);
@@ -69,7 +81,7 @@ public sealed class UpdatesViewModelTests
     public async Task A_preset_pauses_for_that_many_days()
     {
         UpdatesViewModel page = Build();
-        page.OnActivated();
+        page.RefreshCommand.Execute(null);
 
         await page.PauseCommand.ExecuteAsync(14);
 
@@ -83,7 +95,7 @@ public sealed class UpdatesViewModelTests
     {
         _dialog.ConfirmResult = true;
         UpdatesViewModel page = Build();
-        page.OnActivated();
+        page.RefreshCommand.Execute(null);
         page.ExtendedDays = 90;
 
         await page.ExtendedPauseCommand.ExecuteAsync(null);
@@ -99,7 +111,7 @@ public sealed class UpdatesViewModelTests
     {
         _dialog.ConfirmResult = false;
         UpdatesViewModel page = Build();
-        page.OnActivated();
+        page.RefreshCommand.Execute(null);
 
         await page.ExtendedPauseCommand.ExecuteAsync(null);
 
@@ -111,7 +123,7 @@ public sealed class UpdatesViewModelTests
     {
         _coordinator.StatusToReturn = Status(paused: true, until: new DateTimeOffset(2026, 9, 1, 0, 0, 0, TimeSpan.Zero));
         UpdatesViewModel page = Build();
-        page.OnActivated();
+        page.RefreshCommand.Execute(null);
 
         await page.ResumeCommand.ExecuteAsync(null);
 
@@ -124,7 +136,7 @@ public sealed class UpdatesViewModelTests
         _coordinator.StatusToReturn = Status(warning: true);
         UpdatesViewModel page = Build();
 
-        page.OnActivated();
+        page.RefreshCommand.Execute(null);
 
         Assert.True(page.EndOfServiceWarning);
     }

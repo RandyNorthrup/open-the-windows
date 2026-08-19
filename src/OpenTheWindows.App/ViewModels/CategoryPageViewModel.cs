@@ -50,6 +50,9 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
     [ObservableProperty]
     private string _selectionSummary = string.Empty;
 
+    [ObservableProperty]
+    private string _emptyMessage = string.Empty;
+
     /// <summary>Builds the page for one category over the catalogue, machine facts, the baselines, the apply launcher and settings.</summary>
     public CategoryPageViewModel(Category category, TweakCatalog catalog, OperatingSystemFacts facts, IReadOnlyList<Baseline> baselines, IApplyFlowLauncher applyFlow, AppSettings settings)
     {
@@ -105,6 +108,9 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
 
     /// <summary>Every applicable entry in the category, regardless of the current filter.</summary>
     public IReadOnlyList<TweakItemViewModel> AllItems { get; }
+
+    /// <summary>True when no entries are visible after the current search and filters (drives the empty-state hint).</summary>
+    public bool IsEmpty => Items.Count == 0;
 
     /// <summary>The level dial options.</summary>
     public IReadOnlyList<LabeledOption> LevelOptions { get; }
@@ -201,6 +207,35 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
             }
 
             Items.Add(item);
+        }
+
+        UpdateEmptyState();
+    }
+
+    // The message shown in place of the list when nothing is visible, so an empty
+    // section explains itself instead of looking broken. The common case is a
+    // section whose entries are all still drafts (hidden unless the user opts in).
+    private void UpdateEmptyState()
+    {
+        OnPropertyChanged(nameof(IsEmpty));
+        if (Items.Count > 0)
+        {
+            EmptyMessage = string.Empty;
+            return;
+        }
+
+        if (AllItems.Count == 0)
+        {
+            EmptyMessage = "No entries in this section apply to this edition of Windows.";
+        }
+        else if (!IncludeDraft && AllItems.All(i => i.Status == TweakStatus.Draft))
+        {
+            EmptyMessage = "Every entry in this section is still a draft — verified on other builds but not yet on this one. "
+                + "Turn on “Drafts” above (or “Show draft entries” in Settings) to review and apply them.";
+        }
+        else
+        {
+            EmptyMessage = "No entries match the current search and filters. Drafts are hidden unless “Drafts” is on.";
         }
     }
 

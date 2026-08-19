@@ -38,11 +38,14 @@
                     Padding="14,5"
                     Margin="0,0,8,0"
                     Command="{Binding RefreshCommand}"
+                    ToolTip="Reload the list of previous change runs from this PC's journal."
                     AutomationProperties.AutomationId="History_Refresh" />
             <Button Grid.Column="2"
                     Content="Revert selected"
                     Padding="14,5"
                     Command="{Binding RevertCommand}"
+                    ToolTipService.ShowOnDisabled="True"
+                    ToolTip="Undo the selected run — restore the exact values it changed. Select a revertable run first."
                     AutomationProperties.AutomationId="History_Revert" />
         </Grid>
 

@@ -19,14 +19,45 @@ internal sealed class FakeNavigationService : INavigationService
     public string? CurrentPageKey { get; private set; }
 
     /// <inheritdoc />
+    public bool CanGoBack => _back.Count > 0;
+
+    /// <inheritdoc />
     public event EventHandler? CurrentPageChanged;
+
+    private readonly Stack<string> _back = new();
 
     /// <inheritdoc />
     public void NavigateTo(string pageKey)
     {
         ArgumentException.ThrowIfNullOrEmpty(pageKey);
+        if (CurrentPageKey is { } leaving)
+        {
+            _back.Push(leaving);
+        }
+
         Navigations.Add(pageKey);
+        Show(pageKey);
+    }
+
+    /// <inheritdoc />
+    public void GoBack()
+    {
+        if (_back.Count == 0)
+        {
+            return;
+        }
+
+        string previous = _back.Pop();
+        Navigations.Add(previous);
+        Show(previous);
+    }
+
+    // Mirror the real service: set the current page/key, then raise the change.
+    private void Show(string pageKey)
+    {
+        CurrentPage = pageKey;
         CurrentPageKey = pageKey;
+        CurrentPageChanged?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>Sets the current page and raises <see cref="CurrentPageChanged"/>, as the real service does after resolving a page.</summary>

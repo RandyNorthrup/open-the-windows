@@ -22,10 +22,15 @@
         <DockPanel Grid.Row="1" Margin="0,16,0,12">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                 <Button Content="Import…" Padding="14,5" Margin="0,0,8,0" Command="{Binding ImportCommand}"
+                        ToolTip="Load a profile from a .json file and check its signature."
                         AutomationProperties.AutomationId="Profiles_Import" />
                 <Button Content="Export…" Padding="14,5" Margin="0,0,8,0" Command="{Binding ExportCommand}"
+                        ToolTipService.ShowOnDisabled="True"
+                        ToolTip="Save the selected profile to a .json file you can share or import elsewhere. Select a profile first."
                         AutomationProperties.AutomationId="Profiles_Export" />
                 <Button Content="Review &amp; apply…" Padding="14,5" Command="{Binding ApplySelectedCommand}"
+                        ToolTipService.ShowOnDisabled="True"
+                        ToolTip="Review the selected profile's entries and apply them in one step. Nothing changes until you confirm. Select a valid profile first."
                         AutomationProperties.AutomationId="Profiles_Apply" />
             </StackPanel>
             <TextBlock VerticalAlignment="Center" Opacity="0.75" TextWrapping="Wrap"
@@ -53,7 +58,8 @@
                                 <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
                                 <Border BorderThickness="1" CornerRadius="4" Padding="5,0" Margin="8,0,0,0"
                                         VerticalAlignment="Center"
-                                        BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+                                        BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                                        ToolTip="Signing state: built-in, unsigned, or signed with a trusted / untrusted key.">
                                     <TextBlock Text="{Binding SignatureLabel}" FontSize="11" Opacity="0.8" />
                                 </Border>
                             </StackPanel>

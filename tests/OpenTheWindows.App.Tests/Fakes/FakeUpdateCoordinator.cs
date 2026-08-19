@@ -25,8 +25,15 @@ internal sealed class FakeUpdateCoordinator : IUpdateCoordinator
     /// <summary>Whether the last pause was extended.</summary>
     public bool LastPauseExtended { get; private set; }
 
+    /// <summary>How many times <see cref="Status"/> was read.</summary>
+    public int StatusCount { get; private set; }
+
     /// <inheritdoc />
-    public UpdateStatus Status() => StatusToReturn;
+    public UpdateStatus Status()
+    {
+        StatusCount++;
+        return StatusToReturn;
+    }
 
     /// <inheritdoc />
     public bool IsManaged() => ManagedToReturn;

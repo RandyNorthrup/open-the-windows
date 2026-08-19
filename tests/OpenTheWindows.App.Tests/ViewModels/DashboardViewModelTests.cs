@@ -53,6 +53,21 @@ public sealed class DashboardViewModelTests
     }
 
     [Fact]
+    public void Scoring_does_not_run_until_the_user_asks()
+    {
+        var audit = new FakeAuditCoordinator
+        {
+            Baselines = [Baseline("a")],
+            OnAudit = b => Report(b.Id, 50),
+        };
+        DashboardViewModel dashboard = Build(new FakeNavigationService(), audit);
+
+        Assert.Empty(dashboard.BaselineScores);
+        Assert.Equal(0, audit.AuditCount);
+        Assert.Contains("Score this machine", dashboard.AuditStatus, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task Refresh_scores_populates_a_score_per_baseline()
     {
         var audit = new FakeAuditCoordinator

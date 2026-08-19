@@ -70,12 +70,16 @@
                             <Button Content="{Binding StringFormat={}{0} days}"
                                     Padding="14,5" Margin="0,0,8,0"
                                     Command="{Binding DataContext.PauseCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                    CommandParameter="{Binding}" />
+                                    CommandParameter="{Binding}"
+                                    ToolTipService.ShowOnDisabled="True"
+                                    ToolTip="{Binding StringFormat=Pause Windows Update for {0} days. Disabled when updates are managed by your organisation.}" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
                 <Button Content="Resume now" Padding="14,5" Margin="8,0,0,0"
                         Command="{Binding ResumeCommand}"
+                        ToolTipService.ShowOnDisabled="True"
+                        ToolTip="Resume Windows Update now and clear every active pause. Enabled only while updates are paused."
                         AutomationProperties.AutomationId="Updates_Resume" />
             </WrapPanel>
 
@@ -84,15 +88,19 @@
                 <ComboBox MinWidth="110" VerticalContentAlignment="Center"
                           ItemsSource="{Binding ExtendedOptions}"
                           SelectedItem="{Binding ExtendedDays, Mode=TwoWay}"
+                          ToolTip="Choose how many days to pause beyond the 35-day Windows maximum."
                           AutomationProperties.Name="Extended pause days"
                           AutomationProperties.AutomationId="Updates_ExtendedDays" />
                 <Button Content="Pause (extended)…" Padding="14,5" Margin="8,0,0,0"
                         Command="{Binding ExtendedPauseCommand}"
+                        ToolTipService.ShowOnDisabled="True"
+                        ToolTip="Pause beyond the supported maximum. You are warned first — no security updates arrive for the whole period. Defender signature updates still flow."
                         AutomationProperties.AutomationId="Updates_ExtendedPause" />
             </StackPanel>
 
             <Button Content="Refresh status" Padding="14,5" Margin="0,20,0,0" HorizontalAlignment="Left"
                     Command="{Binding RefreshCommand}"
+                    ToolTip="Read the current update, pause and end-of-servicing status from this PC. Nothing is loaded until you do this."
                     AutomationProperties.AutomationId="Updates_Refresh" />
         </StackPanel>
     </ScrollViewer>

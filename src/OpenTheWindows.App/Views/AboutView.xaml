@@ -8,10 +8,10 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:AboutViewModel}"
              d:DesignWidth="640">
-    <StackPanel>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel>
         <TextBlock Text="{Binding ProductName, Mode=OneTime}"
-                   FontSize="24"
-                   FontWeight="SemiBold"
+                   Style="{StaticResource PageTitleText}"
                    AutomationProperties.AutomationId="About_ProductName" />
 
         <Grid Margin="0,16,0,0">
@@ -40,14 +40,15 @@
                      BorderThickness="0"
                      Background="Transparent"
                      Padding="0"
+                     ToolTip="Project source, issues and releases on GitHub. Select the text to copy it."
                      AutomationProperties.Name="Homepage URL"
                      AutomationProperties.AutomationId="About_Homepage" />
         </Grid>
 
         <TextBlock Text="{Binding Disclaimer, Mode=OneTime}"
-                   TextWrapping="Wrap"
                    Margin="0,24,0,0"
-                   Opacity="0.75"
+                   Style="{StaticResource MutedText}"
                    AutomationProperties.AutomationId="About_Disclaimer" />
-    </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

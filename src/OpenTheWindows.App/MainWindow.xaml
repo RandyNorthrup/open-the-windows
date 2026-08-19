@@ -60,6 +60,7 @@
                            Text="{x:Static vm:MainWindowViewModel.Version}"
                            Opacity="0.6"
                            Margin="16,8,16,16"
+                           ToolTip="Installed version of Open the Windows"
                            AutomationProperties.AutomationId="Shell_Version" />
 
                 <ListBox ItemsSource="{Binding NavigationItems}"
@@ -87,14 +88,26 @@
             </DockPanel>
         </Border>
 
-        <!-- Page host -->
-        <ScrollViewer Grid.Column="1"
-                      VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled">
+        <!-- Page host. No scroll viewer here: each page owns its own scrolling,
+             so there is never a second, detached scrollbar over a page that
+             already scrolls its own content. -->
+        <DockPanel Grid.Column="1">
+            <Grid DockPanel.Dock="Top" Margin="24,16,24,0">
+                <Button HorizontalAlignment="Left"
+                        Content="◀  Back"
+                        Padding="12,5"
+                        Command="{Binding BackCommand}"
+                        ToolTipService.ShowOnDisabled="True"
+                        ToolTip="Return to the page you were on before this one"
+                        AutomationProperties.Name="Back"
+                        AutomationProperties.AutomationId="Shell_Back" />
+            </Grid>
             <ContentControl Content="{Binding CurrentPage}"
-                            Margin="24"
+                            Margin="24,12,24,24"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
                             AutomationProperties.Name="Current page"
                             AutomationProperties.AutomationId="Shell_Content" />
-        </ScrollViewer>
+        </DockPanel>
     </Grid>
 </Window>

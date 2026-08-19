@@ -733,6 +733,13 @@ imports (with signing state); Settings edits the shared `AppSettings` (restore
 point, Explorer restart, drafts, enterprise mode) and applies the theme live.
 No OS calls live in the App project — everything goes through Core services
 (`IApplyCoordinator`, `IUpdateCoordinator`, the profile loader, the doctor).
+Reopened 2026-08-19 to button up the GUI after live testing (see the M6.md polish
+note): pages no longer read the machine on load (audit and update status are
+user-triggered; only the lightweight system-check reads on open); a Back button and
+rail-sync fix "no way back"; all-draft sections show an explanatory empty-state;
+each page owns its scrolling (no second scrollbar); the redundant About quick
+action became task shortcuts; the `-local` version tag was dropped; and every
+control and badge gained a tooltip via a shared `Resources/Styles.xaml`.
 Certified in [docs/certification/M6.md](docs/certification/M6.md); GUI reference
 in [docs/gui.md](docs/gui.md); FlaUI smoke harness `build/ui-smoke.ps1`.
 

@@ -1,0 +1,49 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Shared visual language for every page, so the shell reads as one product
+        instead of a set of unrelated screens. Keyed styles are referenced
+        explicitly (StaticResource) rather than made implicit, so they extend the
+        Fluent theme without stripping its default control chrome.
+    -->
+
+    <!-- Page heading (the title at the top of each page). -->
+    <Style x:Key="PageTitleText" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <!-- Section heading within a page. -->
+    <Style x:Key="SectionHeaderText" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Margin" Value="0,20,0,8" />
+    </Style>
+
+    <!-- The muted label in a label/value pair. -->
+    <Style x:Key="FieldLabelText" TargetType="TextBlock">
+        <Setter Property="Opacity" Value="0.75" />
+        <Setter Property="Margin" Value="0,0,16,6" />
+    </Style>
+
+    <!-- Secondary / explanatory text. -->
+    <Style x:Key="MutedText" TargetType="TextBlock">
+        <Setter Property="Opacity" Value="0.75" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <!-- A bordered content card. -->
+    <Style x:Key="Card" TargetType="Border">
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" />
+    </Style>
+
+    <!-- Tooltips wrap instead of running off the screen, and appear promptly. -->
+    <Style TargetType="ToolTip">
+        <Setter Property="MaxWidth" Value="340" />
+    </Style>
+
+</ResourceDictionary>

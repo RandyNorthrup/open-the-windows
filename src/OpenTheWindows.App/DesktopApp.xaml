@@ -8,10 +8,15 @@
     <!-- Startup is wired in code-behind (App.xaml.cs) so the main window is
          resolved from the DI container instead of StartupUri. -->
     <Application.Resources>
-        <conv:BoolToYesNoConverter x:Key="BoolToYesNo" />
-        <conv:RiskToBrushConverter x:Key="RiskToBrush" />
-        <conv:NullToVisibilityConverter x:Key="NullToVisibility" />
-        <conv:EnumToVisibilityConverter x:Key="EnumToVisibility" />
-        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <conv:BoolToYesNoConverter x:Key="BoolToYesNo" />
+            <conv:RiskToBrushConverter x:Key="RiskToBrush" />
+            <conv:NullToVisibilityConverter x:Key="NullToVisibility" />
+            <conv:EnumToVisibilityConverter x:Key="EnumToVisibility" />
+            <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

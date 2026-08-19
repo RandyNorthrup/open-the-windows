@@ -81,4 +81,53 @@ public sealed class NavigationServiceTests
             Assert.Throws<InvalidOperationException>(() => navigation.NavigateTo("NoSuchPage"));
         }
     }
+
+    [Fact]
+    public void Back_is_unavailable_until_a_second_page_is_shown()
+    {
+        (NavigationService navigation, ServiceProvider provider) = Build();
+        using (provider)
+        {
+            Assert.False(navigation.CanGoBack);
+
+            navigation.NavigateTo(PageKeys.Dashboard);
+            Assert.False(navigation.CanGoBack);
+
+            navigation.NavigateTo(PageKeys.About);
+            Assert.True(navigation.CanGoBack);
+        }
+    }
+
+    [Fact]
+    public void GoBack_returns_to_the_previous_page_and_empties_the_stack()
+    {
+        (NavigationService navigation, ServiceProvider provider) = Build();
+        using (provider)
+        {
+            navigation.NavigateTo(PageKeys.Dashboard);
+            navigation.NavigateTo(PageKeys.About);
+
+            navigation.GoBack();
+
+            Assert.Equal(PageKeys.Dashboard, navigation.CurrentPageKey);
+            Assert.False(navigation.CanGoBack);
+        }
+    }
+
+    [Fact]
+    public void GoBack_does_nothing_with_an_empty_stack()
+    {
+        (NavigationService navigation, ServiceProvider provider) = Build();
+        using (provider)
+        {
+            navigation.NavigateTo(PageKeys.Dashboard);
+            int raised = 0;
+            navigation.CurrentPageChanged += (_, _) => raised++;
+
+            navigation.GoBack();
+
+            Assert.Equal(PageKeys.Dashboard, navigation.CurrentPageKey);
+            Assert.Equal(0, raised);
+        }
+    }
 }

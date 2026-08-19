@@ -705,6 +705,36 @@ what was planned (plans live in `PLAN.md`).
 
 ### Changed
 
+- M6 (GUI polish — button-up from live testing): the desktop app was reworked for
+  clarity and to stop reading the machine on its own.
+  - **Nothing scans on load.** The Dashboard's baseline **audit** and the Updates
+    **status** no longer run when their page opens; the user starts them with the
+    “Score this machine” and “Refresh status” buttons. The only automatic read left
+    is the lightweight Dashboard system-check (Windows version, edition, elevation),
+    which is environment detection, not a tweak/update scan; it also has a Re-check
+    button. No `ScanEngine`/`AuditEngine` work happens until the user asks.
+  - **Meaningful tooltips everywhere.** Every interactive control (level dial,
+    search, risk/baseline filters, Drafts, Review & apply, pause presets, resume,
+    extended pause, settings toggles, history/profile actions) and every list badge
+    (risk, restart, draft, signature) has a plain-language tooltip. Tooltips explain
+    the control or the badge concept and point to the detail pane for an entry's
+    specifics — they do not duplicate the detail pane, which stays the source of
+    truth and carries no tooltips. Tooltips on disabled controls (managed Updates,
+    Review & apply, Revert, Export) explain *why* they are disabled.
+  - **Useful Dashboard quick actions.** The single redundant “About” quick action
+    (which duplicated the About page) was replaced with task shortcuts: Review
+    privacy, Pause Windows Update, Harden security, Apply a profile, View history.
+  - **One scrollbar per region.** The shell no longer wraps every page in a second
+    scroll viewer; each page owns its own scrolling, so a page that already scrolls
+    its own content (Updates, Settings) no longer shows a second, detached scrollbar,
+    and the two-pane pages (categories, Profiles, History) scroll their list and
+    detail panes internally instead of the whole window.
+  - **A shared visual language** (`Resources/Styles.xaml`): page titles, section
+    headers, cards, field labels and muted text are defined once so the pages read
+    as one product.
+- Local builds report the plain version (e.g. `0.1.0`) instead of `0.1.0-local`;
+  the developer and the shipped build now carry the same version string (the
+  `-local` pre-release tag only confused users).
 - M7: the MSI now **always** preserves `%ProgramData%\OpenTheWindows` (journals and
   audit) on uninstall; the `REMOVEDATA=1` purge switch was removed. Component
   install-state cannot be driven by an uninstall-time property, so the switch never
@@ -738,6 +768,16 @@ what was planned (plans live in `PLAN.md`).
 
 ### Fixed
 
+- M6 (GUI): navigating from a quick action left the navigation rail highlighting a
+  stale page, and clicking the already-highlighted entry did nothing — so there was
+  no way back to the page you jumped from. The rail now follows the page the shell
+  actually shows (including programmatic navigations), and a **Back** button returns
+  to the previous page via a navigation back-stack.
+- M6 (GUI): a section whose entries are all still drafts (every Shell entry today)
+  showed an empty list with no explanation. Category pages now show a hint that
+  explains the section is all drafts and how to reveal them, instead of looking
+  broken; the message also covers the “no edition match” and “no search/filter
+  match” cases.
 - M4 (Defender ASR under Tamper Protection): the 18 Attack Surface Reduction rules
   now apply through the Local Group Policy registry
   (`SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules\<GUID>`,

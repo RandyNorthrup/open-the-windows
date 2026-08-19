@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using OpenTheWindows.App.Navigation;
 using OpenTheWindows.App.Services;
 using OpenTheWindows.Core;
@@ -15,6 +16,7 @@ namespace OpenTheWindows.App.ViewModels;
 internal sealed partial class MainWindowViewModel : ObservableObject
 {
     private readonly INavigationService _navigation;
+    private bool _syncingSelection;
 
     [ObservableProperty]
     private NavigationItem? _selectedItem;
@@ -46,13 +48,54 @@ internal sealed partial class MainWindowViewModel : ObservableObject
     /// <summary>The page view model currently hosted in the content area.</summary>
     public object? CurrentPage => _navigation.CurrentPage;
 
+    /// <summary>Whether the shell can return to the previous page.</summary>
+    public bool CanGoBack => _navigation.CanGoBack;
+
+    /// <summary>Returns to the previous page on the navigation back stack.</summary>
+    [RelayCommand(CanExecute = nameof(CanGoBack))]
+    private void Back() => _navigation.GoBack();
+
     partial void OnSelectedItemChanged(NavigationItem? value)
     {
-        if (value is not null)
+        // Ignore the selection we set ourselves to mirror a programmatic navigation
+        // (a quick action or Back), otherwise it would navigate a second time.
+        if (_syncingSelection || value is null)
         {
-            _navigation.NavigateTo(value.Key);
+            return;
         }
+
+        _navigation.NavigateTo(value.Key);
     }
 
-    private void OnCurrentPageChanged(object? sender, EventArgs e) => OnPropertyChanged(nameof(CurrentPage));
+    private void OnCurrentPageChanged(object? sender, EventArgs e)
+    {
+        OnPropertyChanged(nameof(CurrentPage));
+        SyncSelectionToCurrentPage();
+        OnPropertyChanged(nameof(CanGoBack));
+        BackCommand.NotifyCanExecuteChanged();
+    }
+
+    // Keep the navigation-rail highlight in step with the page the shell actually
+    // shows, including navigations started from a quick action or Back. Without
+    // this the rail highlights a stale page and clicking the already-highlighted
+    // entry does nothing, so the user cannot get back to it.
+    private void SyncSelectionToCurrentPage()
+    {
+        NavigationItem? match = NavigationItems.FirstOrDefault(
+            item => string.Equals(item.Key, _navigation.CurrentPageKey, StringComparison.Ordinal));
+        if (match is null || ReferenceEquals(match, SelectedItem))
+        {
+            return;
+        }
+
+        _syncingSelection = true;
+        try
+        {
+            SelectedItem = match;
+        }
+        finally
+        {
+            _syncingSelection = false;
+        }
+    }
 }

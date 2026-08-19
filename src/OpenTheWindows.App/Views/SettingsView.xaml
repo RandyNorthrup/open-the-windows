@@ -17,18 +17,22 @@
             <CheckBox Content="Create a System Restore point before applying"
                       Margin="0,4"
                       IsChecked="{Binding Settings.CreateRestorePoint, Mode=TwoWay}"
+                      ToolTip="Snapshot the whole system before an apply, so you can roll Windows back if something goes wrong. Recommended."
                       AutomationProperties.AutomationId="Settings_RestorePoint" />
             <CheckBox Content="Restart Explorer automatically when a change needs it"
                       Margin="0,4"
                       IsChecked="{Binding Settings.RestartExplorerAutomatically, Mode=TwoWay}"
+                      ToolTip="Some shell tweaks need Explorer restarted to show. Do it automatically instead of asking each time."
                       AutomationProperties.AutomationId="Settings_RestartExplorer" />
             <CheckBox Content="Show draft (not yet verified) entries"
                       Margin="0,4"
                       IsChecked="{Binding Settings.IncludeDraft, Mode=TwoWay}"
+                      ToolTip="Show entries not yet verified on this Windows build, in every section. Off by default so only proven entries appear."
                       AutomationProperties.AutomationId="Settings_IncludeDraft" />
             <CheckBox Content="Enterprise mode (hide the consumer-only profiles)"
                       Margin="0,4"
                       IsChecked="{Binding Settings.EnterpriseMode, Mode=TwoWay}"
+                      ToolTip="Hide the consumer-only built-in profiles (Home, Gamer) from the Profiles page."
                       AutomationProperties.AutomationId="Settings_EnterpriseMode" />
 
             <TextBlock Text="Appearance" FontSize="16" FontWeight="SemiBold" Margin="0,20,0,8" />
@@ -46,6 +50,7 @@
                 <ComboBox Grid.Row="0" Grid.Column="1" MinWidth="160" Margin="0,4"
                           ItemsSource="{Binding Themes}"
                           SelectedItem="{Binding SelectedTheme, Mode=TwoWay}"
+                          ToolTip="Follow the Windows setting, or force Light or Dark."
                           AutomationProperties.Name="Theme"
                           AutomationProperties.AutomationId="Settings_Theme" />
 
@@ -54,6 +59,8 @@
                           IsEnabled="False"
                           ItemsSource="{Binding Languages}"
                           SelectedItem="{Binding SelectedLanguage, Mode=OneWay}"
+                          ToolTipService.ShowOnDisabled="True"
+                          ToolTip="Only English (en-US) ships today. More languages are planned."
                           AutomationProperties.Name="Language"
                           AutomationProperties.AutomationId="Settings_Language" />
             </Grid>

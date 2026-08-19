@@ -19,8 +19,7 @@
         <!-- Header -->
         <TextBlock Grid.Row="0"
                    Text="{Binding Title}"
-                   FontSize="24"
-                   FontWeight="SemiBold"
+                   Style="{StaticResource PageTitleText}"
                    AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_Title}" />
 
         <!-- Toolbar: level dial, search, filters -->
@@ -43,6 +42,7 @@
                       DisplayMemberPath="Label"
                       SelectedValuePath="Value"
                       SelectedValue="{Binding Level, Mode=TwoWay}"
+                      ToolTip="Pre-select the entries a profile at this level would apply. Off clears the selection; higher levels include everything below them. You can still tick or untick individual entries afterwards."
                       AutomationProperties.Name="Protection level"
                       AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_LevelDial}" />
 
@@ -50,6 +50,7 @@
                      Margin="16,0"
                      VerticalContentAlignment="Center"
                      Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     ToolTip="Filter the list by title, id or description. Clearing it shows everything again."
                      AutomationProperties.Name="Search entries"
                      AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_Search}" />
 
@@ -60,6 +61,7 @@
                       DisplayMemberPath="Label"
                       SelectedValuePath="Value"
                       SelectedValue="{Binding RiskFilter, Mode=TwoWay}"
+                      ToolTip="Show only entries at the chosen risk level (Safe, Caution, Advanced or Breaking)."
                       AutomationProperties.Name="Filter by risk"
                       AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_RiskFilter}" />
 
@@ -71,6 +73,7 @@
                       DisplayMemberPath="Label"
                       SelectedValuePath="Value"
                       SelectedValue="{Binding BaselineFilter, Mode=TwoWay}"
+                      ToolTip="Show only entries that map to a control in the chosen security baseline (STIG, CIS or Microsoft)."
                       AutomationProperties.Name="Filter by baseline"
                       AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_BaselineFilter}" />
 
@@ -79,6 +82,7 @@
                       Margin="0,0,12,0"
                       Content="Drafts"
                       IsChecked="{Binding IncludeDraft, Mode=TwoWay}"
+                      ToolTip="Also show entries that are not yet verified on this Windows build. Hidden by default so only proven entries appear."
                       AutomationProperties.Name="Include draft entries"
                       AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_IncludeDraft}" />
 
@@ -87,12 +91,15 @@
                        Opacity="0.75"
                        Margin="0,0,12,0"
                        Text="{Binding SelectionSummary}"
+                       ToolTip="How many entries in this section are ticked for applying."
                        AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_SelectionSummary}" />
 
             <Button Grid.Column="7"
                     Content="Review &amp; apply…"
                     Padding="14,5"
                     Command="{Binding ReviewAndApplyCommand}"
+                    ToolTipService.ShowOnDisabled="True"
+                    ToolTip="Review the ticked entries and apply them. Nothing changes until you confirm on the next screen. Tick at least one entry to enable this."
                     AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_Apply}" />
         </Grid>
 
@@ -131,20 +138,23 @@
                                     <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
                                     <Border BorderBrush="{Binding Risk, Converter={StaticResource RiskToBrush}}"
                                             BorderThickness="1" CornerRadius="4" Padding="5,0" Margin="8,0,0,0"
-                                            VerticalAlignment="Center">
+                                            VerticalAlignment="Center"
+                                            ToolTip="How risky this change is. Caution and above can have side effects — the details pane lists them.">
                                         <TextBlock Text="{Binding RiskLabel}" FontSize="11"
                                                    Foreground="{Binding Risk, Converter={StaticResource RiskToBrush}}" />
                                     </Border>
                                     <Border BorderThickness="1" CornerRadius="4" Padding="5,0" Margin="6,0,0,0"
                                             VerticalAlignment="Center"
                                             BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                                            Visibility="{Binding RequiresRestart, Converter={StaticResource BoolToVisibility}}">
+                                            Visibility="{Binding RequiresRestart, Converter={StaticResource BoolToVisibility}}"
+                                            ToolTip="This change only takes full effect after the restart shown here.">
                                         <TextBlock Text="{Binding RestartLabel}" FontSize="11" Opacity="0.8" />
                                     </Border>
                                     <Border BorderThickness="1" CornerRadius="4" Padding="5,0" Margin="6,0,0,0"
                                             VerticalAlignment="Center"
                                             BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                                            Visibility="{Binding IsDraft, Converter={StaticResource BoolToVisibility}}">
+                                            Visibility="{Binding IsDraft, Converter={StaticResource BoolToVisibility}}"
+                                            ToolTip="Not yet verified on this Windows build. Shown because “Drafts” is on.">
                                         <TextBlock Text="Draft" FontSize="11" Opacity="0.8" />
                                     </Border>
                                 </StackPanel>
@@ -157,6 +167,17 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
+
+            <!-- Shown in place of the list when nothing is visible, so an empty
+                 section (e.g. one whose entries are all still drafts) explains
+                 itself instead of looking broken. -->
+            <TextBlock Grid.Column="0"
+                       Text="{Binding EmptyMessage}"
+                       Style="{StaticResource MutedText}"
+                       VerticalAlignment="Top"
+                       Margin="4,8,12,0"
+                       Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}"
+                       AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_Empty}" />
 
             <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Center" VerticalAlignment="Stretch"
                           Background="Transparent" />

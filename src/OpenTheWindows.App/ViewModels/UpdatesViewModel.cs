@@ -12,29 +12,31 @@ namespace OpenTheWindows.App.ViewModels;
 /// The Updates page: the current release and its end-of-servicing, the pause
 /// state, quick pause presets, an extended pause behind a warning, and resume.
 /// When updates are managed by organisation policy the controls are read-only.
-/// The status loads when the page is shown.
+/// Reading the status probes the machine, so it never runs on its own — the user
+/// loads it with the refresh button.
 /// </summary>
-internal sealed partial class UpdatesViewModel : ObservableObject, IPageViewModel, IActivatable
+internal sealed partial class UpdatesViewModel : ObservableObject, IPageViewModel
 {
     private const int SupportedMaxPauseDays = 35;
+    private const string NotLoaded = "Not loaded — select “Refresh status”.";
 
     private readonly IUpdateCoordinator _coordinator;
     private readonly IDialogService _dialog;
 
     [ObservableProperty]
-    private string _currentVersion = string.Empty;
+    private string _currentVersion = NotLoaded;
 
     [ObservableProperty]
-    private string _endOfService = string.Empty;
+    private string _endOfService = "—";
 
     [ObservableProperty]
     private bool _endOfServiceWarning;
 
     [ObservableProperty]
-    private string _pauseState = string.Empty;
+    private string _pauseState = "—";
 
     [ObservableProperty]
-    private string _targetRelease = string.Empty;
+    private string _targetRelease = "—";
 
     [ObservableProperty]
     private bool _isPaused;
@@ -75,10 +77,7 @@ internal sealed partial class UpdatesViewModel : ObservableObject, IPageViewMode
     /// <summary>Whether Resume is available (currently paused and controllable).</summary>
     public bool CanResume => IsPaused && CanControl;
 
-    /// <inheritdoc />
-    public void OnActivated() => Refresh();
-
-    /// <summary>Reloads the update status.</summary>
+    /// <summary>Reads and shows the update status. User-initiated only.</summary>
     [RelayCommand]
     private void Refresh()
     {

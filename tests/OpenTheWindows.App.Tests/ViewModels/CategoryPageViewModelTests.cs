@@ -89,6 +89,23 @@ public sealed class CategoryPageViewModelTests
     }
 
     [Fact]
+    public void An_all_draft_section_shows_a_hint_instead_of_an_empty_list()
+    {
+        // Every Shell entry ships as Draft, so the section is empty until drafts are shown.
+        CategoryPageViewModel page = Build(Category.Shell);
+
+        Assert.Empty(page.Items);
+        Assert.True(page.IsEmpty);
+        Assert.Contains("draft", page.EmptyMessage, StringComparison.OrdinalIgnoreCase);
+
+        page.IncludeDraft = true;
+
+        Assert.NotEmpty(page.Items);
+        Assert.False(page.IsEmpty);
+        Assert.Equal(string.Empty, page.EmptyMessage);
+    }
+
+    [Fact]
     public void The_risk_filter_narrows_the_visible_list()
     {
         CategoryPageViewModel page = Build();
