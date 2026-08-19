@@ -9,6 +9,19 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M8 (audit, part 2 — report exporters and signing): an audit report exports to
+  four formats — JSON, CSV, HTML and SARIF (`IAuditReportWriter`). The JSON export
+  wraps the report in a `SignedAuditReport` carrying a SHA-256 integrity hash over
+  the canonical JSON and, when a signing key is supplied, an ES256 signature
+  (reusing the profile-signing infrastructure); `AuditReportIntegrity.Verify`
+  checks the hash and optional signature so a fleet collector can detect tampering.
+  The SARIF export uses the baseline rule ids as SARIF rule ids and reports each
+  failing rule with a severity-derived level; the HTML export is a single
+  self-contained file with an executive summary (score and outcome counts) and one
+  table per severity. The CSV and SARIF plumbing (RFC 4180 escaping, the SARIF
+  document envelope) is factored into `CsvWriting` / `SarifEnvelope`, shared with
+  the M2 scan writers.
+
 - M8 (audit, part 1 — baselines and the audit engine): security baselines are a
   new kind of catalogue data under `catalog/baselines/*.json`, validated against
   `catalog/schema/baseline.schema.json`. Each baseline maps an external framework's
