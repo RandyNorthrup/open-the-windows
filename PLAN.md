@@ -337,7 +337,7 @@ or the agent instruction files disagree.
 | M2 | [docs/milestones/M2-scan.md](docs/milestones/M2-scan.md) — detection engine, health checks, reports | DONE 2026-08-16 | `docs/certification/M2.md` |
 | M3 | [docs/milestones/M3-apply.md](docs/milestones/M3-apply.md) — apply/verify/revert, journal, restore points, Event Log | DONE 2026-08-17 | `docs/certification/M3.md` |
 | M4 | [docs/milestones/M4-catalogue-population.md](docs/milestones/M4-catalogue-population.md) — ≥ 300 entries + VM verification + WU guardrails | in progress | pending |
-| M5 | [docs/milestones/M5-profiles-enterprise.md](docs/milestones/M5-profiles-enterprise.md) — profiles, all-users, MDM/GPO awareness, drift task | in progress | pending |
+| M5 | [docs/milestones/M5-profiles-enterprise.md](docs/milestones/M5-profiles-enterprise.md) — profiles, all-users, MDM/GPO awareness, drift task | DONE 2026-08-19 | `docs/certification/M5.md` |
 | M6 | [docs/milestones/M6-gui.md](docs/milestones/M6-gui.md) — WPF GUI | not started | pending |
 | M7 | [docs/milestones/M7-packaging.md](docs/milestones/M7-packaging.md) — MSI, ZIP, winget, release workflow | not started | pending |
 | M8 | [docs/milestones/M8-audit.md](docs/milestones/M8-audit.md) — baseline audit mode and reports | not started | pending |
@@ -524,7 +524,7 @@ Remaining for M4: a console-session verification pass for the 150 deferred entri
 is M5 work (the interactive-user resolver returns null over headless SSH, and the
 network/auth entries need a session that is not the one being reconfigured).
 
-### M5 — Profiles and enterprise (in progress)
+### M5 — Profiles and enterprise (done)
 
 Landed so far (branch `feature/m5-profiles-enterprise`, stacked on the M4 branch,
 committed locally):
