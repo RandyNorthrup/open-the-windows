@@ -154,8 +154,10 @@ what was planned (plans live in `PLAN.md`).
   compliant (another user's hive may differ), and each hive is decided independently
   by reading it (compliant hives skipped, drifted ones applied and revertible per
   hive). `ApplyServices` gains the enumerator and loader, wired in
-  `WindowsApplyEngineFactory`. Active Setup for logged-off users at next sign-in is
-  a follow-up.
+  `WindowsApplyEngineFactory`. VM-verified on 26200.9168: a real `scope: AllUsers`
+  apply through the production factory writes a user-scoped value to the current
+  user's hive and reverts it. Active Setup for logged-off users at next sign-in, and
+  an end-to-end apply that loads a genuinely offline hive, are follow-ups.
 - M4 (Windows Update guardrails): the safe, reversible update controls
   (`OpenTheWindows.Core.Updates`). `PauseCalculator` computes the six Settings-app
   pause values (`PauseUpdatesStartTime`/`ExpiryTime`,

@@ -182,6 +182,46 @@ public sealed class VmIntegrationTests
         Assert.Null(after); // unloaded
     }
 
+    [Fact]
+    public void All_users_apply_writes_and_reverts_a_user_scope_value_in_the_current_hive()
+    {
+        RequireIntegration();
+
+        // A real scope: AllUsers run through the production factory: the enumerator lists
+        // the real users, and the current (logged-on) user's hive is written directly. It
+        // exercises the enumerator + engine expansion + per-user-hive writer end to end.
+        const string UserPath = @"Software\OpenTheWindows\IntegrationTestUser";
+        string sid = WindowsIdentity.GetCurrent().User!.Value;
+        string journalDir = Path.Combine(Path.GetTempPath(), "otw-int-" + Guid.NewGuid().ToString("N"));
+        var reader = new WindowsRegistryReader();
+        try
+        {
+            ApplyEngine engine = RealEngine(journalDir);
+            TweakDefinition entry = UserRegistryEntry(UserPath, "Sample");
+
+            ApplyResult applied = engine.Apply([entry], new ApplyOptions(
+                WhatIf: false, CreateRestorePoint: false, BreakGlass: false, AllowAdvanced: true, AllowBreaking: true,
+                "integration", RestartExplorer: false, Scope.AllUsers));
+            Assert.Equal(RunState.Completed, applied.State);
+            Assert.Equal(1, reader.Read(RegistryHive.User, sid, UserPath, "Sample").Data!.Value.GetInt32());
+
+            RevertResult reverted = engine.Revert(applied.RunId, new RevertOptions(WhatIf: false, RestartExplorer: false));
+            Assert.Equal(RunState.Completed, reverted.State);
+            Assert.False(reader.Read(RegistryHive.User, sid, UserPath, "Sample").Exists);
+        }
+        finally
+        {
+            using var users =
+                Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.Users, Microsoft.Win32.RegistryView.Registry64);
+            using var owt = users.OpenSubKey(sid + @"\Software\OpenTheWindows", writable: true);
+            owt?.DeleteSubKeyTree("IntegrationTestUser", throwOnMissingSubKey: false);
+            if (Directory.Exists(journalDir))
+            {
+                Directory.Delete(journalDir, recursive: true);
+            }
+        }
+    }
+
     private static void RunGpupdate()
     {
         using var process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
@@ -212,6 +252,34 @@ public sealed class VmIntegrationTests
             Level.Basic,
             RiskTier.Safe,
             Scope.Machine,
+            TweakStatus.Verified,
+            Applicability.Any,
+            [action],
+            RestartRequirement.None,
+            [],
+            [],
+            null,
+            [],
+            [new Uri("https://github.com/RandyNorthrup/open-the-windows")],
+            [],
+            []);
+    }
+
+    private static TweakDefinition UserRegistryEntry(string path, string name)
+    {
+        var action = new RegistryAction(
+            RegistryHive.User, path, name, RegistryValueType.Dword,
+            JsonSerializer.SerializeToElement(1), JsonSerializer.SerializeToElement(0), RegistryValueKind.Preference);
+
+        return new TweakDefinition(
+            new TweakId("integration.registry.user"),
+            "Integration user sample",
+            "A per-user registry preference used only by the all-users integration test.",
+            "Verifies an all-users apply/revert against a real user hive.",
+            Category.Privacy,
+            Level.Basic,
+            RiskTier.Safe,
+            Scope.User,
             TweakStatus.Verified,
             Applicability.Any,
             [action],

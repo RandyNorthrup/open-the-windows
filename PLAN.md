@@ -641,9 +641,11 @@ committed locally):
   applied and revertible per hive). `ApplyServices` gains the enumerator + loader
   (wired in `WindowsApplyEngineFactory`); `apply`/`remediate` pass `profile.Scope`
   via `ApplyReporting.BuildOptions`. Comprehensive engine unit tests (expansion,
-  offline-hive load/unload, per-user drift, unload-failure audit). Still pending for
-  M5: Active Setup for logged-off users at next sign-in; VM end-to-end of a real
-  multi-hive apply; then `docs/certification/M5.md`.
+  offline-hive load/unload, per-user drift, unload-failure audit). VM-verified on
+  26200.9168: a real `scope: AllUsers` apply through the production factory writes a
+  user-scoped value to the current user's hive and reverts it. Still pending for M5:
+  Active Setup for logged-off users at next sign-in; a VM end-to-end that loads a
+  genuinely offline second-user hive; then `docs/certification/M5.md`.
 
 ### M6 — GUI (not started)
 
