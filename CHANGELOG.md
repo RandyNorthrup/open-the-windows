@@ -186,6 +186,23 @@ what was planned (plans live in `PLAN.md`).
   a revert reloads and restores it to absent. Also VM-verified this milestone: a
   Group-Policy-managed value (owned by the Local GPO's Registry.pol) is reported
   Managed and left untouched by apply — the product never fights Group Policy.
+- M5 (profiles, part 17 — profiles never resolve to a conflict): fixed a defect
+  where five of the seven built-in profiles could not apply at all (`apply` /
+  `remediate --profile <id>` exited 4) because mutually-exclusive update presets
+  (`defer-30-days` / `defer-90-days` / `pin-to-25h2`, and the Delivery Optimization
+  modes) were all tagged `level: Balanced`, so any profile dialing Updates to
+  Balanced selected all of them and the engine rejected the run. `ProfileResolver`
+  now resolves conflicts within the selected set deterministically — an explicitly
+  included entry wins, else the higher level (the more aggressive choice the dial
+  reached), else the earlier in catalogue order — so every profile, built-in or
+  custom, always yields an applicable plan. The catalogue was re-levelled so the
+  single feature-update default at Balanced is a 30-day deferral (the 90-day defer
+  and the 25H2 pin are opt-in at Strict), and the Delivery Optimization mode is
+  chosen per-profile by an explicit `include` (LAN-only for enterprise-workstation
+  and kiosk-shared, HTTP-only for privacy-max, developer and power-user). New tests
+  assert no built-in resolves to a conflicting pair and that the Balanced profiles
+  get exactly these defaults. VM-verified on 26200.9168: all seven built-in
+  profiles now plan cleanly (`apply --what-if` exit 0).
 - M4 (Windows Update guardrails): the safe, reversible update controls
   (`OpenTheWindows.Core.Updates`). `PauseCalculator` computes the six Settings-app
   pause values (`PauseUpdatesStartTime`/`ExpiryTime`,

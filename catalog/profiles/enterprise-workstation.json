@@ -5,7 +5,7 @@
   "name": "Enterprise Workstation",
   "description": "Managed corporate device. Strict privacy and security hardening, updates kept controllable but not aggressive, applied to every user on the machine.",
   "levels": { "Privacy": "Strict", "Updates": "Balanced", "Security": "Strict", "Performance": "Basic", "Debloat": "Balanced", "Shell": "Basic" },
-  "include": [],
+  "include": ["updates.delivery-optimization.lan-only"],
   "exclude": [],
   "includeDraft": false,
   "scope": "AllUsers",

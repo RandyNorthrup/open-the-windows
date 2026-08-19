@@ -5,7 +5,7 @@
   "name": "Developer",
   "description": "Developer workstation. Balanced privacy and security that will not interfere with tooling, with performance tuned up and the shell kept usable.",
   "levels": { "Privacy": "Balanced", "Updates": "Balanced", "Security": "Balanced", "Performance": "Strict", "Debloat": "Balanced", "Shell": "Balanced" },
-  "include": [],
+  "include": ["updates.delivery-optimization.http-only"],
   "exclude": [],
   "includeDraft": false,
   "scope": "User",

@@ -5,7 +5,7 @@
   "name": "Kiosk / Shared",
   "description": "Locked-down shared or single-purpose device. Strict privacy, security and debloat with a minimal shell, applied to every user including future ones.",
   "levels": { "Privacy": "Strict", "Updates": "Balanced", "Security": "Strict", "Performance": "Balanced", "Debloat": "Strict", "Shell": "Strict" },
-  "include": [],
+  "include": ["updates.delivery-optimization.lan-only"],
   "exclude": [],
   "includeDraft": false,
   "scope": "AllUsers",

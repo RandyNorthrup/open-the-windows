@@ -130,9 +130,25 @@ The process is deterministic and side-effect free:
 3. **Exclude.** Remove every `exclude` id. Exclude always wins, even over an
    include of the same id.
 4. **Applicability.** Keep only entries whose own `appliesTo` matches the
-   machine, returned in catalogue load order.
+   machine.
+5. **Conflict resolution.** Drop mutually-conflicting entries (an entry's
+   `conflictsWith`, in either direction) so the result is always applicable — the
+   engine rejects a run whose plan still contains a conflict. Within a conflict
+   group the survivor is chosen deterministically: an explicitly `include`d entry
+   wins; otherwise the higher level (the more aggressive choice the dial reached
+   for); otherwise the earlier in catalogue order. To pick a specific member of a
+   mutually-exclusive set — for example one feature-update deferral or one Delivery
+   Optimization mode — `include` it: the include beats whatever the dial selected.
 
-The result is the set `scan` reports drift for and `apply` would change.
+The result, in catalogue load order, is the set `scan` reports drift for and
+`apply` would change.
+
+Because mutually-exclusive presets cannot both be defaults, the catalogue keeps at
+most one member of each such set at a level a dial reaches by default. For updates
+that means a single Balanced default (a 30-day feature-update deferral; the longer
+defers and the release pin are opt-in at `Strict`), and no default Delivery
+Optimization mode — a profile chooses its mode with an `include` (the built-ins use
+LAN-only for the managed and shared-machine profiles, HTTP-only otherwise).
 
 ### Options
 

@@ -5,7 +5,7 @@
   "name": "Privacy Max",
   "description": "Privacy above convenience. Every non-breaking telemetry, cloud and tracking control on, with strong security and debloat; expect some cloud features to stop working.",
   "levels": { "Privacy": "Paranoid", "Updates": "Balanced", "Security": "Strict", "Performance": "Balanced", "Debloat": "Strict", "Shell": "Balanced" },
-  "include": [],
+  "include": ["updates.delivery-optimization.http-only"],
   "exclude": [],
   "includeDraft": false,
   "scope": "User",

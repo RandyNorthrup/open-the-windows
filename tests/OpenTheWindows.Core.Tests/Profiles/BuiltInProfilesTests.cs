@@ -80,6 +80,61 @@ public sealed class BuiltInProfilesTests
     }
 
     [Fact]
+    public void No_built_in_profile_resolves_to_a_conflicting_pair()
+    {
+        // The resolver's conflict backstop must leave every built-in profile with an applicable
+        // plan; two selected entries that conflict would make the engine reject the whole run.
+        TweakCatalog catalog = Catalog();
+
+        foreach (ProfileLoadResult result in ProfileLoader.LoadBuiltIns())
+        {
+            IReadOnlyList<TweakDefinition> entries = ProfileResolver.Resolve(result.Profile!, catalog, ProfileTestData.ProFacts);
+            HashSet<TweakId> present = [.. entries.Select(e => e.Id)];
+            foreach (TweakDefinition entry in entries)
+            {
+                foreach (TweakId conflict in entry.ConflictsWith)
+                {
+                    Assert.False(
+                        present.Contains(conflict),
+                        $"{result.Profile!.Id}: {entry.Id.Value} conflicts with also-selected {conflict.Value}");
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void Balanced_profiles_resolve_to_the_intended_update_defaults()
+    {
+        // defer-30-days is the single Balanced feature-update default; the Delivery Optimization
+        // mode is per-profile (LAN-only for the managed/shared machines, HTTP-only otherwise),
+        // and the conflicting alternatives never come along.
+        TweakCatalog catalog = Catalog();
+        (string Profile, string DeliveryOptimization)[] expected =
+        [
+            ("enterprise-workstation", "updates.delivery-optimization.lan-only"),
+            ("kiosk-shared", "updates.delivery-optimization.lan-only"),
+            ("privacy-max", "updates.delivery-optimization.http-only"),
+            ("developer", "updates.delivery-optimization.http-only"),
+            ("power-user", "updates.delivery-optimization.http-only"),
+        ];
+
+        foreach ((string id, string deliveryOptimization) in expected)
+        {
+            Profile profile = ProfileLoader.TryLoadBuiltIn(id)!.Profile!;
+            HashSet<string> ids = [.. ProfileResolver.Resolve(profile, catalog, ProfileTestData.ProFacts).Select(e => e.Id.Value)];
+
+            Assert.Contains("updates.feature-updates.defer-30-days", ids);
+            Assert.Contains(deliveryOptimization, ids);
+            Assert.DoesNotContain("updates.feature-updates.defer-90-days", ids);
+            Assert.DoesNotContain("updates.feature-release.pin-to-25h2", ids);
+            string otherMode = deliveryOptimization.EndsWith("lan-only", StringComparison.Ordinal)
+                ? "updates.delivery-optimization.http-only"
+                : "updates.delivery-optimization.lan-only";
+            Assert.DoesNotContain(otherMode, ids);
+        }
+    }
+
+    [Fact]
     public void TryLoadBuiltIn_finds_by_id_and_returns_null_for_unknown()
     {
         Assert.Equal("home", ProfileLoader.TryLoadBuiltIn("home")?.Profile?.Id);

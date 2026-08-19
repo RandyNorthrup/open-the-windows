@@ -668,8 +668,19 @@ committed locally):
   all-users apply reaches a genuinely offline profile (a synthetic ProfileList
   entry over a copy of the Default hive), writes it, and revert reloads and
   restores it; and a Group-Policy-managed value (owned by the Local GPO
-  Registry.pol) is reported Managed and left untouched by apply. Still pending for
-  M5: `docs/certification/M5.md` (+ evidence subfiles like M4's).
+  Registry.pol) is reported Managed and left untouched by apply.
+- **Profiles never resolve to a conflict** (`ProfileResolver`): fixed a defect where
+  five of seven built-in profiles could not apply (exit 4) because mutually-exclusive
+  update presets shared `level: Balanced`. The resolver now drops conflicting entries
+  from the selected set deterministically (an explicit `include` wins, else the higher
+  level, else catalogue order), so every profile always yields an applicable plan; the
+  catalogue was re-levelled to a single Balanced feature-update default (30-day defer;
+  90-day and the 25H2 pin are opt-in at Strict) and the Delivery Optimization mode is
+  chosen per-profile via `include` (LAN-only for enterprise-workstation/kiosk-shared,
+  HTTP-only for privacy-max/developer/power-user). Tests assert no built-in resolves to
+  a conflict and that the Balanced defaults are exactly these; VM-verified on 26200.9168
+  (all seven built-ins `apply --what-if` exit 0). Still pending for M5:
+  `docs/certification/M5.md` (+ evidence subfiles like M4's).
 
 ### M6 — GUI (not started)
 

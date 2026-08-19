@@ -5,7 +5,7 @@
   "name": "Power User",
   "description": "Enthusiast single-user desktop. Strong privacy, aggressive performance and a decluttered shell, accepting minor, well-understood trade-offs.",
   "levels": { "Privacy": "Strict", "Updates": "Balanced", "Security": "Balanced", "Performance": "Strict", "Debloat": "Balanced", "Shell": "Balanced" },
-  "include": [],
+  "include": ["updates.delivery-optimization.http-only"],
   "exclude": [],
   "includeDraft": false,
   "scope": "User",

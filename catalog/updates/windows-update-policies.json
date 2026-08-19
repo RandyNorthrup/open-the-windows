@@ -122,7 +122,7 @@
       "description": "Sets Delivery Optimization download mode to LAN (1) so update content is shared with devices on the same local network but never uploaded to the internet.",
       "rationale": "Stops upstream bandwidth use and internet peer connections while keeping the LAN caching benefit; Windows Update itself is unaffected.",
       "category": "Updates",
-      "level": "Balanced",
+      "level": "Strict",
       "risk": "Safe",
       "scope": "Machine",
       "status": "Verified",
