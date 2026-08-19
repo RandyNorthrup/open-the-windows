@@ -15,9 +15,11 @@ public static class FakeApplyEngine
     /// <param name="at">Fixed clock instant.</param>
     /// <param name="trace">Optional shared list the journal store and machine append their operations to.</param>
     /// <param name="time">Optional clock; when given it overrides <paramref name="at"/> (use a <see cref="MutableTimeProvider"/> to give successive runs distinct timestamps).</param>
+    /// <param name="userHives">Optional user-hive enumerator for all-users apply (defaults to an empty enumerator).</param>
+    /// <param name="hiveLoader">Optional user-hive loader for all-users apply (defaults to a recording no-op loader).</param>
     public static ApplyHarness Create(
         FakeMachine machine, OperatingSystemFacts? os = null, DateTimeOffset? at = null, IList<string>? trace = null,
-        TimeProvider? time = null)
+        TimeProvider? time = null, IUserHiveEnumerator? userHives = null, IUserHiveLoader? hiveLoader = null)
     {
         ArgumentNullException.ThrowIfNull(machine);
 
@@ -33,7 +35,9 @@ public static class FakeApplyEngine
         var explorer = new FakeExplorerRestarter();
         var preflight = new FakePreflight();
         var elevation = new FakeElevationContext(isElevated: true);
-        var services = new ApplyServices(journal, restore, explorer, preflight, audit, elevation, machine);
+        var services = new ApplyServices(
+            journal, restore, explorer, preflight, audit, elevation, machine,
+            userHives ?? new FakeUserHiveEnumerator(), hiveLoader ?? new FakeUserHiveLoader());
         var engine = new ApplyEngine(scan, applier, services, osInfo, clock);
 
         return new ApplyHarness(engine, scan, machine, journal, audit, restore, explorer, preflight, elevation);

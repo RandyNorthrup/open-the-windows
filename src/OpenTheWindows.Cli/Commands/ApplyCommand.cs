@@ -67,7 +67,8 @@ internal static class ApplyCommand
             parseResult.GetValue(options.AllowBreaking),
             parseResult.GetValue(options.RestartExplorer),
             profileName,
-            selectedProfile?.Options);
+            selectedProfile?.Options,
+            selectedProfile?.Scope ?? Scope.Machine);
 
         ApplyEngine engine = services.CreateApplyEngine();
 

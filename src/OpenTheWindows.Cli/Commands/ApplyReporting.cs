@@ -32,7 +32,8 @@ internal static class ApplyReporting
         bool allowBreaking,
         bool restartExplorer,
         string profileName,
-        ProfileOptions? po)
+        ProfileOptions? po,
+        Scope scope = Scope.Machine)
         => new(
             whatIf,
             !noRestorePoint && (po?.RestorePoint ?? true),
@@ -40,7 +41,8 @@ internal static class ApplyReporting
             allowAdvanced || (po?.AllowAdvanced ?? false),
             allowBreaking || (po?.AllowBreaking ?? false),
             profileName,
-            restartExplorer || (po?.RestartExplorer ?? false));
+            restartExplorer || (po?.RestartExplorer ?? false),
+            scope);
 
     /// <summary>
     /// Maps an apply/revert-style result to a process exit code: 4 on plan errors,

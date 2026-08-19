@@ -15,6 +15,8 @@ namespace OpenTheWindows.Core.Engine;
 /// <param name="Audit">Audit sink (Event Log + JSONL).</param>
 /// <param name="Elevation">Elevation context (operator identity, elevated token).</param>
 /// <param name="InteractiveUser">Resolver for the interactive user's SID.</param>
+/// <param name="UserHives">Enumerator of the real user profiles an all-users apply targets.</param>
+/// <param name="HiveLoader">Loads/unloads the hive of a user who is not logged on (all-users apply).</param>
 public sealed record ApplyServices(
     IJournalStore Journal,
     IRestorePointService RestorePoint,
@@ -22,4 +24,6 @@ public sealed record ApplyServices(
     IPreflight Preflight,
     IAuditSink Audit,
     IElevationContext Elevation,
-    IInteractiveUserResolver InteractiveUser);
+    IInteractiveUserResolver InteractiveUser,
+    IUserHiveEnumerator UserHives,
+    IUserHiveLoader HiveLoader);

@@ -50,7 +50,9 @@ public static class WindowsApplyEngineFactory
             new WindowsPreflight(elevation, os),
             auditDirectory is null ? new WindowsAuditSink() : new WindowsAuditSink(auditDirectory),
             elevation,
-            interactiveUser);
+            interactiveUser,
+            new WindowsUserHiveEnumerator(),
+            new WindowsUserHiveLoader());
 
         var scan = new ScanEngine(
             readers.Registry, readers.Services, readers.Tasks, readers.Appx, readers.Features, readers.Defender,

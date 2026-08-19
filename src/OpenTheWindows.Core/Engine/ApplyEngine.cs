@@ -93,9 +93,29 @@ public sealed class ApplyEngine
             ? _services.RestorePoint.Create(RestoreDescription(options.ProfileName))
             : NoRestorePoint;
 
-        InteractiveUser? user = _services.InteractiveUser.Resolve();
         var runId = Guid.NewGuid();
-        JournalRecord record = BuildJournalRecord(run, options, restorePoint, runId, user);
+
+        // For an all-users run, load the hives of users who are not logged on so their
+        // prior state can be captured and written; unload them again in the finally.
+        IReadOnlyList<UserProfile> targetUsers = options.Scope == Scope.AllUsers ? _services.UserHives.Enumerate() : [];
+        List<UserProfile> loadedHives = [];
+        try
+        {
+            LoadHives(targetUsers, loadedHives, runId);
+            return RunApply(run, options, restorePoint, runId, targetUsers, plan, preflight);
+        }
+        finally
+        {
+            UnloadHives(loadedHives, runId);
+        }
+    }
+
+    private ApplyResult RunApply(
+        PlannedRun run, ApplyOptions options, RestorePointResult restorePoint, Guid runId,
+        IReadOnlyList<UserProfile> targetUsers, PlanResult plan, PreflightReport preflight)
+    {
+        InteractiveUser? user = _services.InteractiveUser.Resolve();
+        JournalRecord record = BuildJournalRecord(run, options, restorePoint, runId, user, targetUsers);
 
         _services.Journal.Begin(record);
         Audit(AuditEventId.ApplyStarted,
@@ -113,6 +133,35 @@ public sealed class ApplyEngine
         }
 
         return new ApplyResult(runId, state, record.Requires, restorePoint, preflight, plan, Outcomes(run, record));
+    }
+
+    private void LoadHives(IReadOnlyList<UserProfile> targetUsers, List<UserProfile> loaded, Guid runId)
+    {
+        foreach (UserProfile profile in targetUsers.Where(u => !u.HiveLoaded))
+        {
+            _services.HiveLoader.Load(profile.Sid, Path.Combine(profile.ProfilePath, "NTUSER.DAT"));
+            loaded.Add(profile);
+            Audit(AuditEventId.ApplyStarted, string.Create(CultureInfo.InvariantCulture, $"Loaded user hive {profile.Sid}."), runId, null);
+        }
+    }
+
+    private void UnloadHives(List<UserProfile> loaded, Guid runId)
+    {
+        foreach (UserProfile profile in loaded)
+        {
+            UnloadHive(profile, runId);
+        }
+    }
+
+    private void UnloadHive(UserProfile profile, Guid runId)
+    {
+        // A failed unload leaks a mounted hive but must not mask the run's outcome,
+        // so it is audited rather than thrown from the unload finally.
+        Exception? failure = Capture(() => _services.HiveLoader.Unload(profile.Sid));
+        if (failure is not null)
+        {
+            Audit(AuditEventId.Error, string.Create(CultureInfo.InvariantCulture, $"Failed to unload user hive {profile.Sid}: {failure.Message}"), runId, null);
+        }
     }
 
     /// <summary>Reverts a prior run, restoring each applied action's captured prior state in reverse order.</summary>
@@ -206,9 +255,17 @@ public sealed class ApplyEngine
                 : (PlanDisposition.Managed, "managed by MDM/Group Policy");
         }
 
-        return observation.State == ComplianceState.Compliant
-            ? (PlanDisposition.AlreadyCompliant, null)
-            : (PlanDisposition.Apply, null);
+        if (observation.State == ComplianceState.Compliant)
+        {
+            // Under all-users scope a user-scoped entry that is compliant for the
+            // interactive user the scan saw may still be non-compliant in other users'
+            // hives, so it must still be planned; the per-user expansion in the journal
+            // skips whichever hives are already compliant.
+            bool otherHivesMayDiffer = options.Scope == Scope.AllUsers && entry.Actions.Any(ActionApplier.IsUserScoped);
+            return otherHivesMayDiffer ? (PlanDisposition.Apply, null) : (PlanDisposition.AlreadyCompliant, null);
+        }
+
+        return (PlanDisposition.Apply, null);
     }
 
     private static List<PlannedItem> OrderByDependency(List<PlannedItem> items, List<string> errors)
@@ -286,7 +343,9 @@ public sealed class ApplyEngine
         return new PlanResult(run.ProfileName, entries, run.Errors);
     }
 
-    private JournalRecord BuildJournalRecord(PlannedRun run, ApplyOptions options, RestorePointResult restorePoint, Guid runId, InteractiveUser? user)
+    private JournalRecord BuildJournalRecord(
+        PlannedRun run, ApplyOptions options, RestorePointResult restorePoint, Guid runId, InteractiveUser? user,
+        IReadOnlyList<UserProfile> targetUsers)
     {
         OperatingSystemFacts facts = _os.GetFacts();
         List<JournalEntry> entries = [];
@@ -294,22 +353,27 @@ public sealed class ApplyEngine
         foreach (PlannedItem item in run.Items.Where(i => i.Disposition is PlanDisposition.Apply or PlanDisposition.ManagedBreakGlass))
         {
             List<JournalAction> actions = [];
+            int index = 0;
             for (int i = 0; i < item.Entry.Actions.Count; i++)
             {
                 ITweakAction action = item.Entry.Actions[i];
-                ComplianceState current = i < item.Observation.Actions.Count ? item.Observation.Actions[i].State : ComplianceState.Unknown;
-                (ApplyState initial, bool willWrite) = InitialActionState(current);
-                actions.Add(new JournalAction
+                ComplianceState scanned = i < item.Observation.Actions.Count ? item.Observation.Actions[i].State : ComplianceState.Unknown;
+
+                foreach (string? sid in TargetSids(action, run.UserSid, options.Scope, targetUsers))
                 {
-                    Index = i,
-                    Kind = action.Kind,
-                    Target = ActionTarget.Describe(action, run.UserSid),
-                    Action = action,
-                    Sid = ActionApplier.EffectiveSid(action, run.UserSid),
-                    Prior = willWrite ? _applier.CapturePrior(action, run.UserSid) : null,
-                    Desired = ActionApplier.DescribeDesired(action),
-                    Result = initial,
-                });
+                    (ApplyState initial, bool willWrite) = ActionState(action, sid, scanned, options.Scope);
+                    actions.Add(new JournalAction
+                    {
+                        Index = index++,
+                        Kind = action.Kind,
+                        Target = ActionTarget.Describe(action, sid),
+                        Action = action,
+                        Sid = sid,
+                        Prior = willWrite ? _applier.CapturePrior(action, sid) : null,
+                        Desired = ActionApplier.DescribeDesired(action),
+                        Result = initial,
+                    });
+                }
             }
 
             entries.Add(new JournalEntry
@@ -559,6 +623,37 @@ public sealed class ApplyEngine
         ComplianceState.Compliant => (ApplyState.Skipped, false),
         _ => (ApplyState.Pending, true),
     };
+
+    /// <summary>
+    /// The SIDs an action is journaled and applied under: every target user hive for a
+    /// user-scoped action under all-users scope, otherwise the single effective SID
+    /// (the interactive user for a user-scoped action, or <see langword="null"/> for a
+    /// machine-scope action).
+    /// </summary>
+    private static IEnumerable<string?> TargetSids(ITweakAction action, string? interactiveSid, Scope scope, IReadOnlyList<UserProfile> targetUsers)
+    {
+        if (scope == Scope.AllUsers && ActionApplier.IsUserScoped(action))
+        {
+            return targetUsers.Select(profile => (string?)profile.Sid);
+        }
+
+        return [ActionApplier.EffectiveSid(action, interactiveSid)];
+    }
+
+    /// <summary>
+    /// The initial state and whether the action writes for one target SID. A user-scoped
+    /// action under all-users scope is decided by reading that specific hive (the scan
+    /// only saw the interactive user); everything else uses the scan's compliance.
+    /// </summary>
+    private (ApplyState Initial, bool WillWrite) ActionState(ITweakAction action, string? sid, ComplianceState scanned, Scope scope)
+    {
+        if (scope == Scope.AllUsers && ActionApplier.IsUserScoped(action))
+        {
+            return _applier.Verify(action, sid) ? (ApplyState.Skipped, false) : (ApplyState.Pending, true);
+        }
+
+        return InitialActionState(scanned);
+    }
 
     private static ApplyState EntryAggregate(JournalEntry entry)
     {

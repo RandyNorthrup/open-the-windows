@@ -143,6 +143,19 @@ what was planned (plans live in `PLAN.md`).
   explicit (the caller unloads in a `finally`) rather than `IDisposable`, so unload
   failure surfaces to the engine's audit rather than a throwing `Dispose`.
   VM-verified on 26200.9168: loads and unloads the Default profile hive.
+- M5 (profiles, part 14 — all-users apply): a profile with `scope: AllUsers` now
+  applies each user-scoped entry to every real user hive on the machine, not just
+  the interactive user. `ApplyOptions` gains `Scope` (default `Machine`, so all
+  existing runs are unchanged); `apply` and `remediate` pass the resolved profile's
+  scope. The engine enumerates the target users, loads the hives of any who are not
+  logged on (unloading them in a `finally`, auditing an unload failure rather than
+  failing the run), and — building on the per-action SID — journals one action per
+  hive. A user-scoped entry is planned even when the interactive user is already
+  compliant (another user's hive may differ), and each hive is decided independently
+  by reading it (compliant hives skipped, drifted ones applied and revertible per
+  hive). `ApplyServices` gains the enumerator and loader, wired in
+  `WindowsApplyEngineFactory`. Active Setup for logged-off users at next sign-in is
+  a follow-up.
 - M4 (Windows Update guardrails): the safe, reversible update controls
   (`OpenTheWindows.Core.Updates`). `PauseCalculator` computes the six Settings-app
   pause values (`PauseUpdatesStartTime`/`ExpiryTime`,

@@ -86,21 +86,24 @@ public sealed class ActionApplier
     }
 
     /// <summary>
-    /// The user SID an action actually writes under: the target user's SID for a
-    /// user-hive registry action or a per-user Appx removal, and <see langword="null"/>
-    /// for a machine-scope action that ignores the SID. Journaled per action so
-    /// revert and rollback restore the same hive the action wrote.
+    /// Whether an action writes to a user's hive (a user-hive registry action or a
+    /// per-user Appx removal) rather than machine-wide state. Such actions are the
+    /// ones an all-users apply repeats across every user hive.
     /// </summary>
-    public static string? EffectiveSid(ITweakAction action, string? userSid)
+    public static bool IsUserScoped(ITweakAction action)
     {
         ArgumentNullException.ThrowIfNull(action);
-        return action switch
-        {
-            RegistryAction { Hive: RegistryHive.User } => userSid,
-            AppxAction => userSid,
-            _ => null,
-        };
+        return action is RegistryAction { Hive: RegistryHive.User } or AppxAction;
     }
+
+    /// <summary>
+    /// The user SID an action actually writes under: the target user's SID for a
+    /// user-scoped action, and <see langword="null"/> for a machine-scope action
+    /// that ignores the SID. Journaled per action so revert and rollback restore
+    /// the same hive the action wrote.
+    /// </summary>
+    public static string? EffectiveSid(ITweakAction action, string? userSid)
+        => IsUserScoped(action) ? userSid : null;
 
     /// <summary>Applies the action's desired state; throws <see cref="RefusedOperationException"/> on a refusal and on writer failure.</summary>
     public void Apply(ITweakAction action, string? userSid)

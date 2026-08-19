@@ -630,11 +630,20 @@ committed locally):
   `AdjustTokenPrivileges`; mounts under `HKEY_USERS\<sid>` so the existing per-user
   writer targets it unchanged. Explicit `Load`/`Unload` (not `IDisposable`) so unload
   failure surfaces to the engine, not a throwing `Dispose`. VM-verified on 26200.9168
-  (loads + unloads the Default profile hive; no `GC.Collect` needed). Still pending
-  for M5: expanding User-scope actions across every hive under `scope: AllUsers` (the
-  engine consumes the enumerator + loader with the load/unload lifecycle and per-hive
-  rollback, driven by `profile.Scope`), Active Setup fallback, then
-  `docs/certification/M5.md`.
+  (loads + unloads the Default profile hive; no `GC.Collect` needed).
+- **All-users apply** (`ApplyOptions.Scope`, `ApplyEngine`): a `scope: AllUsers`
+  profile applies each user-scoped entry to every real user hive. The engine
+  enumerates the target users, loads the hives of any not logged on (unload in a
+  `finally`; an unload failure is audited, not fatal), and — on the per-action SID
+  groundwork — journals one action per hive. `Classify` plans a user-scoped entry
+  even when the interactive user is compliant (`ActionApplier.IsUserScoped`), and
+  each hive is decided independently by reading it (compliant skipped, drifted
+  applied and revertible per hive). `ApplyServices` gains the enumerator + loader
+  (wired in `WindowsApplyEngineFactory`); `apply`/`remediate` pass `profile.Scope`
+  via `ApplyReporting.BuildOptions`. Comprehensive engine unit tests (expansion,
+  offline-hive load/unload, per-user drift, unload-failure audit). Still pending for
+  M5: Active Setup for logged-off users at next sign-in; VM end-to-end of a real
+  multi-hive apply; then `docs/certification/M5.md`.
 
 ### M6 — GUI (not started)
 

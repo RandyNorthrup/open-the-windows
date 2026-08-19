@@ -21,8 +21,16 @@ public sealed class ApplyEngineTests
 
     private static ApplyOptions Opts(
         bool whatIf = false, bool restore = false, bool breakGlass = false,
-        bool allowAdvanced = true, bool allowBreaking = true, bool restartExplorer = false)
-        => new(whatIf, restore, breakGlass, allowAdvanced, allowBreaking, "balanced", restartExplorer);
+        bool allowAdvanced = true, bool allowBreaking = true, bool restartExplorer = false, Scope scope = Scope.Machine)
+        => new(whatIf, restore, breakGlass, allowAdvanced, allowBreaking, "balanced", restartExplorer, scope);
+
+    private static UserProfile UserHive(string sid, bool loaded = true) => new(sid, @"C:\Users\" + sid, loaded);
+
+    private static void SeedUserDword(FakeMachine machine, string sid, string name, int value)
+        => machine.SetRegistry(RegistryHive.User, sid, Path, name, RegistryValueType.Dword, Number(value));
+
+    private static int ReadUserDword(FakeMachine machine, string sid, string name)
+        => ((IRegistryReader)machine).Read(RegistryHive.User, sid, Path, name).Data!.Value.GetInt32();
 
     private static RegistryAction Reg(string name, int desired,
         RegistryValueKind kind = RegistryValueKind.Preference, RegistryHive hive = RegistryHive.LocalMachine)
@@ -207,6 +215,70 @@ public sealed class ApplyEngineTests
 
         Assert.Equal(RunState.Completed, reverted.State);
         Assert.False(UserValueExists(machine, "S-1-5-21-99", "U"));
+    }
+
+    [Fact]
+    public void All_users_applies_a_user_scope_entry_to_every_hive()
+    {
+        var machine = new FakeMachine();
+        var loader = new FakeUserHiveLoader();
+        ApplyHarness h = FakeApplyEngine.Create(
+            machine, userHives: new FakeUserHiveEnumerator(UserHive("S-1-5-21-A"), UserHive("S-1-5-21-B")), hiveLoader: loader);
+
+        ApplyResult result = h.Engine.Apply([Entry("test.user", [Reg("U", 1, hive: RegistryHive.User)])], Opts(scope: Scope.AllUsers));
+
+        Assert.Equal(RunState.Completed, result.State);
+        Assert.Equal(1, ReadUserDword(machine, "S-1-5-21-A", "U"));
+        Assert.Equal(1, ReadUserDword(machine, "S-1-5-21-B", "U"));
+        Assert.Equal(2, Assert.Single(h.Journal.Records).Entries[0].Actions.Count);
+        Assert.Empty(loader.Loaded); // both hives already loaded
+    }
+
+    [Fact]
+    public void All_users_loads_and_unloads_an_offline_hive()
+    {
+        var machine = new FakeMachine();
+        var loader = new FakeUserHiveLoader();
+        ApplyHarness h = FakeApplyEngine.Create(
+            machine, userHives: new FakeUserHiveEnumerator(UserHive("S-1-5-21-A"), UserHive("S-1-5-21-OFF", loaded: false)), hiveLoader: loader);
+
+        h.Engine.Apply([Entry("test.user", [Reg("U", 1, hive: RegistryHive.User)])], Opts(scope: Scope.AllUsers));
+
+        Assert.Equal("S-1-5-21-OFF", Assert.Single(loader.Loaded));
+        Assert.Equal("S-1-5-21-OFF", Assert.Single(loader.Unloaded));
+        Assert.Equal(1, ReadUserDword(machine, "S-1-5-21-OFF", "U"));
+    }
+
+    [Fact]
+    public void All_users_plans_a_user_entry_the_interactive_user_is_compliant_with_and_applies_only_the_drifted_hive()
+    {
+        var machine = new FakeMachine { User = new InteractiveUser("S-1-5-21-A", @"TEST\a", true) };
+        SeedUserDword(machine, "S-1-5-21-A", "U", 1); // the interactive user A is already compliant (what the scan sees)
+        ApplyHarness h = FakeApplyEngine.Create(
+            machine, userHives: new FakeUserHiveEnumerator(UserHive("S-1-5-21-A"), UserHive("S-1-5-21-B")), hiveLoader: new FakeUserHiveLoader());
+
+        ApplyResult result = h.Engine.Apply([Entry("test.user", [Reg("U", 1, hive: RegistryHive.User)])], Opts(scope: Scope.AllUsers));
+
+        Assert.Equal(RunState.Completed, result.State);
+        IReadOnlyList<JournalAction> actions = h.Journal.Records[0].Entries[0].Actions;
+        Assert.Equal(ApplyState.Skipped, actions.Single(a => string.Equals(a.Sid, "S-1-5-21-A", StringComparison.Ordinal)).Result);
+        Assert.Equal(ApplyState.Applied, actions.Single(a => string.Equals(a.Sid, "S-1-5-21-B", StringComparison.Ordinal)).Result);
+        Assert.Equal(1, ReadUserDword(machine, "S-1-5-21-B", "U"));
+    }
+
+    [Fact]
+    public void All_users_audits_but_does_not_fail_the_run_on_an_unload_error()
+    {
+        var machine = new FakeMachine();
+        var loader = new FakeUserHiveLoader { FailUnload = true };
+        ApplyHarness h = FakeApplyEngine.Create(
+            machine, userHives: new FakeUserHiveEnumerator(UserHive("S-1-5-21-OFF", loaded: false)), hiveLoader: loader);
+
+        ApplyResult result = h.Engine.Apply([Entry("test.user", [Reg("U", 1, hive: RegistryHive.User)])], Opts(scope: Scope.AllUsers));
+
+        Assert.Equal(RunState.Completed, result.State); // unload failure is audited, not fatal
+        Assert.True(h.Audit.Has(AuditEventId.Error));
+        Assert.Equal(1, ReadUserDword(machine, "S-1-5-21-OFF", "U"));
     }
 
     [Fact]

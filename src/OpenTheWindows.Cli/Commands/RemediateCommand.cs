@@ -6,6 +6,7 @@ using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Journal;
+using OpenTheWindows.Core.Model;
 using OpenTheWindows.Core.Profiles;
 
 namespace OpenTheWindows.Cli.Commands;
@@ -96,7 +97,8 @@ internal static class RemediateCommand
             parseResult.GetValue(options.AllowBreaking),
             parseResult.GetValue(options.RestartExplorer),
             profileName,
-            selectedProfile?.Options);
+            selectedProfile?.Options,
+            selectedProfile?.Scope ?? Scope.Machine);
 
         ApplyResult result = services.CreateApplyEngine().Apply(entries, applyOptions);
         WriteReport(result, whatIf, parseResult.GetValue(options.Out), parseResult.GetValue(options.Json), stdout, stderr);

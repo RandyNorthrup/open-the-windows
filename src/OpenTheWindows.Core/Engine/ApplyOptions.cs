@@ -1,3 +1,5 @@
+using OpenTheWindows.Core.Model;
+
 namespace OpenTheWindows.Core.Engine;
 
 /// <summary>Options controlling one apply run.</summary>
@@ -8,6 +10,12 @@ namespace OpenTheWindows.Core.Engine;
 /// <param name="AllowBreaking">Permit entries with <see cref="Model.RiskTier.Breaking"/> risk.</param>
 /// <param name="ProfileName">The profile name recorded in the journal.</param>
 /// <param name="RestartExplorer">Restart Explorer for entries that require it.</param>
+/// <param name="Scope">
+/// Whose per-user settings the run targets: <see cref="Model.Scope.Machine"/> or
+/// <see cref="Model.Scope.User"/> (the interactive user only, the default), or
+/// <see cref="Model.Scope.AllUsers"/> to apply each user-scope entry to every real
+/// user hive on the machine (loading the hives of users who are not logged on).
+/// </param>
 public sealed record ApplyOptions(
     bool WhatIf,
     bool CreateRestorePoint,
@@ -15,4 +23,5 @@ public sealed record ApplyOptions(
     bool AllowAdvanced,
     bool AllowBreaking,
     string ProfileName,
-    bool RestartExplorer);
+    bool RestartExplorer,
+    Scope Scope = Scope.Machine);
