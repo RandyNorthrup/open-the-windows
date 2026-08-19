@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Open the Windows — per-machine MSI.
+
+  Installs the WPF app and the otw.exe CLI under
+  %ProgramFiles%\Open the Windows\{app,cli}, adds a Start-menu shortcut, an
+  optional PATH entry for the CLI, and registers the Event Log source by running
+  the installed CLI. A major upgrade replaces any earlier version in place (one
+  Add/Remove Programs entry). Silent install: msiexec /i <msi> /qn. The audit
+  trail under %ProgramData%\OpenTheWindows is preserved across uninstall unless
+  REMOVEDATA=1 is passed.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+
+  <Package Name="Open the Windows"
+           Manufacturer="Open The Windows contributors"
+           Version="$(var.ProductVersion)"
+           UpgradeCode="59B1BF85-52D9-4A78-ACC1-896912A90E02"
+           Scope="perMachine"
+           Compressed="yes"
+           InstallerVersion="500">
+
+    <SummaryInformation
+        Description="Open the Windows — Windows 11 privacy, update, security and performance control."
+        Manufacturer="Open The Windows contributors" />
+
+    <!-- Replace any older version in place; block downgrades with a clear message.
+         afterInstallInitialize removes the old files before laying down the new. -->
+    <MajorUpgrade Schedule="afterInstallInitialize"
+                  DowngradeErrorMessage="A newer version of [ProductName] is already installed. Setup will now exit." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Per-machine only; never silently fall back to a per-user install.
+         Scope="perMachine" already forces ALLUSERS=1. -->
+    <Property Id="MSIINSTALLPERUSER" Secure="yes" Value="0" />
+
+    <!-- Add/Remove Programs metadata (publisher is the Manufacturer above). -->
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/RandyNorthrup/open-the-windows" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/RandyNorthrup/open-the-windows" />
+    <Property Id="ARPURLUPDATEINFO" Value="https://github.com/RandyNorthrup/open-the-windows/releases" />
+
+    <!-- REMOVEDATA=1 purges %ProgramData%\OpenTheWindows (journals + audit) on
+         uninstall. Default 0: the audit trail is kept so an uninstall/reinstall
+         does not lose history. -->
+    <Property Id="REMOVEDATA" Secure="yes" Value="0" />
+
+    <Feature Id="Product" Title="Open the Windows" Level="1" AllowAbsent="no"
+             Description="The Open the Windows application and command-line tool.">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentGroupRef Id="CliComponents" />
+      <ComponentGroupRef Id="StartMenu" />
+      <ComponentGroupRef Id="ProgramData" />
+    </Feature>
+
+    <Feature Id="PathEntry" Title="Add otw to PATH" Level="1"
+             Description="Add the command-line tool (otw.exe) to the system PATH.">
+      <ComponentGroupRef Id="CliPath" />
+    </Feature>
+
+    <!-- Register / remove the Event Log source by running the installed CLI.
+         Deferred, non-impersonated (runs as SYSTEM, which is elevated) so the
+         write succeeds during a silent install. Return='ignore': the app also
+         self-registers the source on its first elevated run, so a custom-action
+         hiccup must never fail the installation. -->
+    <CustomAction Id="InstallEventLog" FileRef="otwExe" ExeCommand="eventlog install"
+                  Execute="deferred" Impersonate="no" Return="ignore" />
+    <CustomAction Id="UninstallEventLog" FileRef="otwExe" ExeCommand="eventlog uninstall"
+                  Execute="deferred" Impersonate="no" Return="ignore" />
+
+    <InstallExecuteSequence>
+      <Custom Action="InstallEventLog" After="InstallFiles" Condition="NOT Installed" />
+      <Custom Action="UninstallEventLog" Before="RemoveFiles" Condition="REMOVE=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
+    </InstallExecuteSequence>
+
+  </Package>
+</Wix>

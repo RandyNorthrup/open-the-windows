@@ -7,8 +7,13 @@
         pwsh build/publish.ps1 -Runtime win-x64      # one runtime
         pwsh build/publish.ps1 -Version 0.2.0        # stamp a release version
 
-    Output: artifacts/publish/<runtime>/cli/otw.exe (single-file, self-contained, partially trimmed: ~13 MB)
+    Output: artifacts/publish/<runtime>/cli/otw.exe (single-file, self-contained, NOT trimmed: ~100 MB)
             artifacts/publish/<runtime>/app/OpenTheWindows.exe (+ files; WPF cannot single-file trim)
+
+    The CLI is not trimmed: its Windows interop (WMI, TaskScheduler, WinRT/Appx)
+    uses reflection the trimmer cannot prove safe (IL2104), so trimming could
+    remove members the tool needs at runtime. build/package.ps1 is the full
+    release packager (ZIPs + MSI + SBOM); this script is the CI publish smoke.
             artifacts/publish/OpenTheWindows-<version>-<runtime>.zip (portable bundle)
             artifacts/publish/SHA256SUMS.txt
 
@@ -47,7 +52,7 @@ foreach ($rid in $Runtime) {
     Write-Host "==> publish CLI ($rid)" -ForegroundColor Cyan
     & $dotnetExe publish src/OpenTheWindows.Cli/OpenTheWindows.Cli.csproj -c Release -r $rid `
         --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
-        -p:PublishTrimmed=true -p:TrimMode=partial `
+        -p:PublishTrimmed=false `
         -o (Join-Path $publishRoot "$rid/cli") @versionArgs
     if ($LASTEXITCODE -ne 0) { throw "CLI publish failed for $rid" }
 

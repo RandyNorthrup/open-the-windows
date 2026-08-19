@@ -9,6 +9,20 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M7 (packaging, parts 2-3 — MSI and release packager): a WiX 5 installer under
+  `installer/` builds a per-machine MSI that lays the app down under
+  `%ProgramFiles%\Open the Windows\{app,cli}`, adds a Start-menu shortcut and an
+  optional PATH entry for `otw.exe`, registers the Event Log source by running the
+  installed CLI (`otw eventlog install`, non-fatal), and keeps the audit trail
+  under `%ProgramData%\OpenTheWindows` across uninstall unless `REMOVEDATA=1`. A
+  major upgrade replaces any earlier version in place (one Add/Remove Programs
+  entry); silent install is `msiexec /i <msi> /qn`. A new `build/package.ps1`
+  produces the full release set: self-contained portable ZIPs (x64 + arm64), the
+  per-machine MSI(s), a framework-dependent x64 ZIP (needs the .NET 10 Desktop
+  Runtime), a CycloneDX SBOM and a `SHA256SUMS.txt`. WiX 5 is used deliberately:
+  WiX 6/7 require accepting FireGiant's paid Open Source Maintenance Fee EULA
+  (error WIX7015), and the project stays fee-free and MIT-compatible (ADR 0003).
+
 - M7 (packaging, part 1 — Event Log source command): a new
   `otw eventlog install|uninstall|status` command registers or removes the Open
   the Windows Event Log source (log `OpenTheWindows`, source `OTW`) that audit
@@ -610,6 +624,15 @@ what was planned (plans live in `PLAN.md`).
 
 ### Fixed
 
+- Publishing the CLI single-file with trimming was broken (IL2104 → NETSDK1144):
+  the tool's Windows interop (WMI via `System.Management`, `TaskScheduler`,
+  WinRT/Appx) reaches members through reflection the trimmer cannot prove
+  reachable, so `PublishTrimmed=true` failed the build under warnings-as-errors —
+  and, had it linked, could have removed members the tool needs at runtime. The
+  CLI now publishes single-file self-contained but **untrimmed** (~100 MB); the
+  framework-dependent ZIP stays small for those who have the runtime.
+  `build/publish.ps1` (the CI publish smoke) is updated to match. Found while
+  building the M7 release packager.
 - `otw scan --only <id>` and `otw apply --only <id>` no longer require
   `--profile`. `--only` is the per-entry verification selector (M4 acceptance #2)
   and ignores the profile, but the parser still marked `--profile` required, so

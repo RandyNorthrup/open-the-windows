@@ -1,0 +1,10 @@
+<!--
+  Isolation stub. The repository-root Directory.Build.props turns on the C#
+  analyzer gate (Nullable, TreatWarningsAsErrors, AnalysisLevel latest-all,
+  ReferenceTrimmer, artifacts output layout). None of that applies to a WiX
+  installer project, and several settings would fail its build. MSBuild stops
+  walking up the tree at the first Directory.Build.props it finds, so this empty
+  file keeps the installer project out of the C# gate machinery.
+-->
+<Project>
+</Project>

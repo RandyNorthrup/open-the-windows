@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+
+  <!-- Install layout: %ProgramFiles%\Open the Windows\{app,cli},
+       a Start-menu folder, and the %ProgramData% data folder. -->
+  <Fragment>
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="Open the Windows">
+        <Directory Id="APPFOLDER" Name="app" />
+        <Directory Id="CLIFOLDER" Name="cli" />
+      </Directory>
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="AppShortcutFolder" Name="Open the Windows" />
+    </StandardDirectory>
+    <StandardDirectory Id="CommonAppDataFolder">
+      <Directory Id="DATAFOLDER" Name="OpenTheWindows" />
+    </StandardDirectory>
+  </Fragment>
+
+  <!-- The self-contained WPF app: many files, harvested from the publish output.
+       WiX generates one component per file, each keyed on its own path. -->
+  <Fragment>
+    <ComponentGroup Id="AppFiles" Directory="APPFOLDER">
+      <Files Include="$(var.AppPublishDir)\**" />
+    </ComponentGroup>
+  </Fragment>
+
+  <!-- The single-file self-contained CLI, declared explicitly (not harvested) so
+       the Event Log custom action can reference it by id (otwExe). -->
+  <Fragment>
+    <ComponentGroup Id="CliComponents" Directory="CLIFOLDER">
+      <Component Id="OtwExe" Guid="*">
+        <File Id="otwExe" Name="otw.exe" Source="$(var.CliPublishDir)\otw.exe" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+  <!-- Optional PATH entry (its own feature): add the cli folder to the system
+       PATH so `otw` resolves in a new shell. Removed on uninstall. -->
+  <Fragment>
+    <ComponentGroup Id="CliPath" Directory="CLIFOLDER">
+      <Component Id="OtwPath" Guid="*">
+        <Environment Id="OtwPathVar" Name="PATH" Value="[CLIFOLDER]"
+                     Part="last" Action="set" System="yes" Permanent="no" />
+        <RegistryValue Root="HKLM" Key="Software\Open The Windows" Name="PathEntry"
+                       Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+  <!-- Start-menu shortcut to the GUI. -->
+  <Fragment>
+    <ComponentGroup Id="StartMenu" Directory="AppShortcutFolder">
+      <Component Id="AppShortcut" Guid="*">
+        <Shortcut Id="OtwShortcut" Name="Open the Windows"
+                  Description="Windows 11 privacy, update, security and performance control."
+                  Target="[APPFOLDER]OpenTheWindows.exe" WorkingDirectory="APPFOLDER" />
+        <RemoveFolder Id="RemoveAppShortcutFolder" On="uninstall" />
+        <!-- A non-advertised shortcut in the (per-machine) Start-menu folder must key
+             on HKCU per ICE38/ICE43; this is the canonical WiX shortcut idiom. -->
+        <RegistryValue Root="HKCU" Key="Software\Open The Windows" Name="StartMenu"
+                       Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+  <!-- %ProgramData%\OpenTheWindows: the folder the app writes journals and audit
+       logs into. Created here so it exists with the standard inherited ProgramData
+       ACL (Administrators/SYSTEM full, Users read) before the first run. The
+       component is not permanent, but because the folder holds journals the tool
+       wrote (files the MSI did not install) it is not empty at uninstall and so
+       is left in place — the audit trail survives. REMOVEDATA=1 opts into a full
+       recursive purge instead. -->
+  <Fragment>
+    <Property Id="OTWDATAFOLDER">
+      <RegistrySearch Id="OtwDataFolderSearch" Root="HKLM"
+                      Key="Software\Open The Windows" Name="DataFolder" Type="raw" />
+    </Property>
+    <ComponentGroup Id="ProgramData" Directory="DATAFOLDER">
+      <Component Id="DataFolder" Guid="*">
+        <CreateFolder />
+        <RegistryValue Root="HKLM" Key="Software\Open The Windows" Name="DataFolder"
+                       Type="string" Value="[DATAFOLDER]" KeyPath="yes" />
+      </Component>
+      <Component Id="PurgeData" Guid="*" Condition="REMOVEDATA=&quot;1&quot;">
+        <RegistryValue Root="HKLM" Key="Software\Open The Windows" Name="PurgeData"
+                       Type="integer" Value="1" KeyPath="yes" />
+        <util:RemoveFolderEx On="uninstall" Property="OTWDATAFOLDER" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+</Wix>

@@ -1,0 +1,12 @@
+<!--
+  Isolation stub. The repository uses Central Package Management (versions live
+  in the root Directory.Packages.props). The WiX installer project pins its one
+  extension (WixToolset.Util.wixext) inline instead, so CPM is turned off for
+  this directory. MSBuild stops at the first Directory.Packages.props found
+  walking up, so this file shadows the root one for the installer.
+-->
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+</Project>

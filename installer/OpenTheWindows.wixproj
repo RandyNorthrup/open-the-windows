@@ -1,0 +1,32 @@
+<Project Sdk="WixToolset.Sdk/5.0.2">
+
+  <!--
+    The Open the Windows MSI (WiX 5). Built by build/package.ps1, NOT by the
+    solution: it harvests a published App + CLI, so it needs the publish output
+    to exist first and is therefore kept out of OpenTheWindows.slnx.
+
+    WiX 6/7 require accepting FireGiant's Open Source Maintenance Fee EULA
+    (error WIX7015). This project stays on the last fee-free line, WiX 5, to keep
+    the toolchain free and MIT-compatible (ADR 0003). The output MSI is identical
+    in capability.
+
+    Required properties (supplied by package.ps1):
+      AppPublishDir   folder with the self-contained WPF App publish
+      CliPublishDir   folder containing the single-file otw.exe
+      ProductVersion  numeric MSI version (major.minor.build)
+      Platform        x64 | arm64
+  -->
+  <PropertyGroup>
+    <OutputName>OpenTheWindows-$(ProductVersion)-win-$(Platform)</OutputName>
+    <OutputType>Package</OutputType>
+    <Platform Condition="'$(Platform)' == ''">x64</Platform>
+    <ProductVersion Condition="'$(ProductVersion)' == ''">0.1.0</ProductVersion>
+    <!-- Platform, Configuration, etc. are declared by the WiX SDK already; only add ours. -->
+    <DefineConstants>AppPublishDir=$(AppPublishDir);CliPublishDir=$(CliPublishDir);ProductVersion=$(ProductVersion)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Util.wixext" Version="5.0.2" />
+  </ItemGroup>
+
+</Project>
