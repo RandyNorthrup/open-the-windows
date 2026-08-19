@@ -9,6 +9,19 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M7 (packaging, part 5 — release workflow): `.github/workflows/release.yml` runs
+  on a `v*` tag (or manual dispatch). It re-runs the correctness gates (restore,
+  build, test, coverage thresholds) on the tagged commit, packages the release
+  (`build/package.ps1`), regenerates the winget manifest, produces
+  `actions/attest-build-provenance` attestations for every asset (the compensating
+  control for unsigned binaries, ADR 0003), publishes a GitHub Release with the
+  CHANGELOG section as notes and the ZIPs/MSIs/SBOM/SHA256SUMS attached, and prints
+  winget submission instructions in the job summary. Every action is pinned to a
+  commit SHA; untrusted trigger context is read through `env:` to avoid run-step
+  injection. `ci.yml`'s coverage class/file filters were synced to `quality.ps1`
+  (M6 App-boundary and M7 Event-Log-installer exclusions) so CI coverage matches
+  the local gate.
+
 - M7 (packaging, part 4 — winget manifest): `build/winget-manifest.ps1` generates
   the winget multi-file manifest (`packaging/winget/`, schema 1.6.0) from the built
   MSIs — reading each `InstallerSha256` and `ProductCode` and templating the GitHub
