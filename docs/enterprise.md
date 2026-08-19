@@ -266,3 +266,26 @@ Every apply and revert is journaled under
 changed, and each remediation run also writes `last-remediate.json` under
 `%ProgramData%\OpenTheWindows\reports\`. Collect these with your existing log
 pipeline to prove fleet state over time.
+
+## Baseline compliance audits
+
+`otw audit` scores a machine against a security baseline (`disa-stig-v2r7`,
+`cis-win11-ent-v4.0`, `ms-baseline-25h2`) read-only — no elevation needed, no
+change made. See [audit.md](audit.md) for the baselines, outcomes and scoring.
+
+For a fleet, register a scheduled audit that drops a signed JSON report to a
+collection share:
+
+```powershell
+# Weekly SYSTEM task that audits against the Microsoft baseline and drops the report.
+otw task install --audit ms-baseline-25h2 --weekly --out \\fileserver\audits\%COMPUTERNAME%.json
+```
+
+The task (`\OpenTheWindows\Audit`, SYSTEM, hidden) runs `otw audit run --baseline
+ms-baseline-25h2 --json --out <path>`. To make the drop tamper-evident, run a
+signed audit from your own tooling with `--sign <org-key.pem>` (the same ES256 key
+model as signed profiles, see *Profiles and signing* above): the JSON carries a
+SHA-256 integrity `hash` and a `{ alg, keyId, signature }` envelope your collector
+verifies against the org public key before trusting the score. For SARIF ingestion
+(the rule ids are the baseline control ids), use `otw audit run --baseline <id>
+--sarif --out <path>`.

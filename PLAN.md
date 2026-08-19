@@ -321,6 +321,7 @@ shipped `core-6.1.0-windows` profile.
 | `build/quality.ps1` coverage `classfilters` | `OpenTheWindows.App.Services.DialogService`, `WpfDispatcherService`, `ApplyFlowLauncher` excluded | thin WPF wrappers that only show `MessageBox`/`Dispatcher`/`Window` chrome, with no branch logic; not unit-testable without a live UI thread, matching the existing Windows UI/OS-wrapper exclusions | never |
 | `build/quality.ps1` coverage `classfilters` | `OpenTheWindows.Windows.WindowsEventLogInstaller` excluded | registers/removes the Event Log source through `EventLog.CreateEventSource`/`DeleteEventSource`, which write machine state and need elevation (and even probing throws non-elevated); an OS side-effecting adapter in the same category as `WindowsRestorePointService`. Its behaviour is exercised through the `IEventLogInstaller` fake in the `otw eventlog` command tests | never |
 | `ApplyFlowViewModel.Start`, `ApplyFlowViewModel.ApplyAsync` (`SuppressMessage CA1031`) | catch general exception | the review-and-apply UI boundary must land any engine/read fault in a Failed state with the message rather than crash the window; operational failures are already journaled and rolled back by the engine (same rationale as `ApplyEngine.Capture`) | never |
+| `DashboardViewModel.LoadScoresAsync` (`SuppressMessage CA1031`) | catch general exception | the dashboard's baseline-scoring boundary must land any read fault in a status message rather than crash the window; the audit is read-only (same UI-boundary rationale as `ApplyFlowViewModel`) | never |
 | `build/quality.ps1` coverage `filefilters` | `-*.xaml.cs` (WPF code-behind) | code-behind is `InitializeComponent` constructors and event plumbing with no testable logic; the DI graph in `DesktopApp.xaml.cs` stays verified by `ServiceGraphTests` (test gate), just not measured by the coverage gate | never |
 | `.jscpd.json` duplication `ignore` | `.github/workflows/**` excluded | GitHub requires each workflow to be a standalone file; the SHA-pinned .NET setup and the build/test/coverage-threshold steps are necessarily identical between the CI-gate workflow (`ci.yml`) and the release workflow (`release.yml`), and pinning both to the same action SHAs is the intent, not a copy-paste smell — the same standalone-file rationale as the existing `docs/enterprise/*.ps1` exclusion | never |
 
@@ -346,7 +347,7 @@ or the agent instruction files disagree.
 | M5 | [docs/milestones/M5-profiles-enterprise.md](docs/milestones/M5-profiles-enterprise.md) — profiles, all-users, MDM/GPO awareness, drift task | DONE 2026-08-19 | `docs/certification/M5.md` |
 | M6 | [docs/milestones/M6-gui.md](docs/milestones/M6-gui.md) — WPF GUI | DONE 2026-08-19 | `docs/certification/M6.md` |
 | M7 | [docs/milestones/M7-packaging.md](docs/milestones/M7-packaging.md) — MSI, ZIP, winget, release workflow | DONE 2026-08-19 | `docs/certification/M7.md` |
-| M8 | [docs/milestones/M8-audit.md](docs/milestones/M8-audit.md) — baseline audit mode and reports | not started | pending |
+| M8 | [docs/milestones/M8-audit.md](docs/milestones/M8-audit.md) — baseline audit mode and reports | DONE 2026-08-19 | `docs/certification/M8.md` |
 
 Milestone headings below exist for the `plan` gate (`### Mx ...`; "DONE" in
 the heading requires `docs/certification/Mx.md`, except M0).
@@ -731,7 +732,31 @@ attestations as provenance. Install/upgrade/uninstall verified on the Win 11 Pro
 `REMOVEDATA` removed, Home image untested, and the CI-run parts (attestations, a
 green tag) authored but not executed until the project is pushed.
 
-### M8 — Audit (not started)
+### M8 — Audit (done)
+
+`otw audit` scores the machine against a security baseline — a mapping from an
+external framework's control ids to the catalogue tweaks and read-only health
+checks that satisfy them (`catalog/baselines/*.json`, schema
+`catalog/schema/baseline.schema.json`, validated against the catalogue tweak ids
+and the health-check ids). Three baselines ship, each verified against its source:
+`disa-stig-v2r7`, `cis-win11-ent-v4.0` and `ms-baseline-25h2` (named for the
+framework releases whose exact ids were verified — V2R8/v5.1 could not be, see the
+deviation). `AuditEngine` is read-only, over the existing `ScanEngine` and health
+probe; each rule resolves to Pass / Fail / NotApplicable / Manual / Unknown with the
+observed value as evidence, and a managed setting is scored by its value (policy at
+the desired value is a Pass). The report carries a 0–100 score weighted by severity
+and exports to JSON (with a SHA-256 integrity hash and optional ES256 signature),
+CSV, HTML and SARIF. `otw audit run|list|validate`; `otw task install --audit <id>
+--out <path>` drops a JSON report on a schedule (e.g. a fleet UNC share). The GUI
+Dashboard shows the score per baseline and the Security page gains a baseline
+filter. Certified in
+[docs/certification/M8.md](docs/certification/M8.md); feature docs in
+[docs/audit.md](docs/audit.md). Verified on the Win 11 Pro 25H2 VM: all four
+formats produced; the score rose 33 → 40 on apply and returned to 33 on revert;
+ten-plus rules spot-checked against independent OS reads. Honest deviations: the
+STIG/CIS versions are V2R7/v4.0.0 not v2R8/v5.1 (the newer ids could not be
+verified), and the baselines are a curated 16-rule mapping per framework, not a
+full reproduction (ADR 0002).
 
 Backlog (post-M8): PowerShell module wrapping the CLI, WinUI 3 front-end
 experiment, ARM64 device smoke, Sysmon helper (Q5), localisation packs.

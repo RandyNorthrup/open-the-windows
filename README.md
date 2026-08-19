@@ -9,7 +9,8 @@ reversibility, drift detection and remediation, and an audit trail. GUI
 > Status: **M0–M3 complete; M4 (catalogue population) finishing.** The engine is
 > built milestone by milestone — see [PLAN.md](PLAN.md). The catalogue ships
 > **435 entries** (`otw catalog validate` green); the CLI can scan, apply, revert
-> and inspect history, and pause/resume Windows Update. 144 Basic/Balanced
+> and inspect history, audit against security baselines, and pause/resume Windows
+> Update. 144 Basic/Balanced
 > machine-scope entries are `Verified` on Windows 11 25H2 (evidence under
 > [docs/certification/M4/](docs/certification/M4/)); the rest ship as `Draft`
 > until verified. Only `Verified` entries apply unless you pass `--include-draft`.
@@ -160,6 +161,18 @@ TPM, Defender, BitLocker, firewall, and more — research 04 §5). It only reads
 checks whose source needs elevation report `Unknown`. Exit 0 unless the command
 itself errors.
 
+`otw audit run --baseline <id|file>` scores the machine against a **security
+baseline** (read-only, no elevation needed): `disa-stig-v2r7`,
+`cis-win11-ent-v4.0` or `ms-baseline-25h2` (see `otw audit list`), or a path to a
+baseline `.json`. Each rule maps a framework control id to the catalogue tweaks and
+health checks that satisfy it, resolving to Pass / Fail / NotApplicable / Manual /
+Unknown; the report carries a 0–100 score weighted by severity. `--json` (with a
+SHA-256 integrity hash, plus `--sign <key.pem>` for an ES256 signature), `--csv`,
+`--html` or `--sarif` (with optional `--out`) write the report; otherwise a text
+summary prints. Exit 0 = nothing failed, 1 = failures found. `otw audit validate`
+validates the baselines against the catalogue and the health-check ids. Baselines
+and scoring are documented in [docs/audit.md](docs/audit.md).
+
 `otw apply --profile <value>` **applies** a profile transactionally (elevated),
 where `--profile` accepts the same three forms as `scan` (a level, a built-in
 profile id, or a profile `.json` file). It journals every prior state before
@@ -200,7 +213,10 @@ that runs `remediate --if-build-changed`, re-applying only after a feature
 update) — and writes its report to
 `%ProgramData%\OpenTheWindows\reports\last-remediate.json`. `otw task remove`
 deletes it. Both need elevation. Exit 0 on success, 4 for an unknown profile or
-conflicting schedule flags, 5 when not elevated.
+conflicting schedule flags, 5 when not elevated. `otw task install --audit <id>
+--out <path>` instead registers a `\OpenTheWindows\Audit` task that runs `otw audit
+run` for a baseline and drops the JSON report to `--out` (for example a fleet UNC
+share); `--profile` and `--audit` are mutually exclusive.
 
 When an **all-users** profile (`scope: AllUsers`) is applied, `apply` and
 `remediate` also register a per-user **Active Setup logon fallback**
