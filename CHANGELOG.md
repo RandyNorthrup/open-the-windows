@@ -9,6 +9,20 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M7 (packaging, part 6 — install docs and VM verification): new
+  [`docs/install.md`](docs/install.md) covers every channel (MSI, winget, portable
+  and framework-dependent ZIPs), verifying SHA-256 sums and build-provenance
+  attestations, silent install, upgrade, uninstall and data locations;
+  [`docs/enterprise.md`](docs/enterprise.md) gains a **Re-sign and allow-list**
+  section (signtool re-signing, AppLocker hash/publisher rules, and packaging the
+  MSI as an Intune Win32 app with a version-based `otw.exe` detection rule); the
+  README installation section is rewritten around the real channels. The MSI's
+  install, in-place upgrade and uninstall were verified on the Windows 11 Pro 25H2
+  VM: silent install, the Event Log source registered and removed by the custom
+  action, PATH entry and Start-menu shortcut added and removed, a single Add/Remove
+  Programs entry across the upgrade, and the audit trail preserved across
+  uninstall.
+
 - M7 (packaging, part 5 — release workflow): `.github/workflows/release.yml` runs
   on a `v*` tag (or manual dispatch). It re-runs the correctness gates (restore,
   build, test, coverage thresholds) on the tagged commit, packages the release
@@ -34,8 +48,8 @@ what was planned (plans live in `PLAN.md`).
   `installer/` builds a per-machine MSI that lays the app down under
   `%ProgramFiles%\Open the Windows\{app,cli}`, adds a Start-menu shortcut and an
   optional PATH entry for `otw.exe`, registers the Event Log source by running the
-  installed CLI (`otw eventlog install`, non-fatal), and keeps the audit trail
-  under `%ProgramData%\OpenTheWindows` across uninstall unless `REMOVEDATA=1`. A
+  installed CLI (`otw eventlog install`, non-fatal), and always preserves the
+  audit trail under `%ProgramData%\OpenTheWindows` across uninstall (see part 6). A
   major upgrade replaces any earlier version in place (one Add/Remove Programs
   entry); silent install is `msiexec /i <msi> /qn`. A new `build/package.ps1`
   produces the full release set: self-contained portable ZIPs (x64 + arm64), the
@@ -620,6 +634,14 @@ what was planned (plans live in `PLAN.md`).
 
 ### Changed
 
+- M7: the MSI now **always** preserves `%ProgramData%\OpenTheWindows` (journals and
+  audit) on uninstall; the `REMOVEDATA=1` purge switch was removed. Component
+  install-state cannot be driven by an uninstall-time property, so the switch never
+  purged in testing — and, more importantly, an installer flag that silently wipes
+  the audit trail of an elevated security tool (`msiexec /x … REMOVEDATA=1 /qn`) is
+  a liability, not a feature. Removing the data is now a deliberate manual step
+  (documented in `docs/install.md`). This also drops the unused
+  `WixToolset.Util.wixext` dependency.
 - M4 acceptance #2 — machine-scope VM verification. 144 Basic/Balanced entries
   are now `Verified` on Windows 11 Pro 25H2 (26200.9168): each was applied alone
   (`otw apply --only <id>`), confirmed by an independent native read (registry /

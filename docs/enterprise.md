@@ -178,18 +178,86 @@ it. Two options:
   `otw.exe` you deploy:
 
   ```text
-  New-CIPolicyRule -Level Hash -DriverFilePath 'C:\Program Files\OpenTheWindows\otw.exe'
+  New-CIPolicyRule -Level Hash -DriverFilePath 'C:\Program Files\Open the Windows\cli\otw.exe'
   ```
 
   Merge the rule into your base policy. A hash rule pins one build, so you must
   refresh it every time you update `otw.exe`.
 
 - **Signer rule (re-signed binary).** If you re-sign `otw.exe` with your own
-  certificate (see [Re-signing](#re-signing)), author a publisher/signer rule
-  instead so the allow rule survives version updates.
+  certificate (see [Re-sign with your certificate](#re-sign-with-your-certificate)),
+  author a publisher/signer rule instead so the allow rule survives version
+  updates.
 
 Whichever you choose, the scheduled task and the Intune remediation invoke the
 same `otw.exe`, so a single allow rule covers both delivery paths.
+
+## Re-sign and allow-list
+
+The published MSI and binaries are unsigned (ADR 0003). An organisation that
+deploys them internally has two ways to satisfy application control: **re-sign**
+with its own certificate, or **allow-list by hash**. The MSI lays files down at:
+
+- `%ProgramFiles%\Open the Windows\cli\otw.exe` — the CLI
+- `%ProgramFiles%\Open the Windows\app\OpenTheWindows.exe` — the GUI
+
+### Re-sign with your certificate
+
+Re-sign the two executables (and, if you redistribute it, the MSI) with an
+internal code-signing certificate before deployment, then author signer-based
+WDAC/AppLocker rules that survive version updates:
+
+```powershell
+$cert = 'Cert:\CurrentUser\My\<thumbprint>'   # your code-signing cert
+$ts   = 'http://timestamp.digicert.com'
+signtool sign /fd SHA256 /a /tr $ts /td SHA256 `
+  "C:\Program Files\Open the Windows\cli\otw.exe" `
+  "C:\Program Files\Open the Windows\app\OpenTheWindows.exe"
+# Re-sign the installer itself if you host it internally:
+signtool sign /fd SHA256 /a /tr $ts /td SHA256 OpenTheWindows-<version>-win-x64.msi
+```
+
+Re-signing does not change behaviour; it only adds your Authenticode signature so
+SmartScreen and publisher allow-lists recognise the binaries.
+
+### AppLocker rules
+
+For environments on AppLocker rather than (or alongside) WDAC:
+
+- **Publisher rule (after re-signing).** Create an *Executable* rule scoped to
+  your signer and the product name `Open the Windows`; it keeps working across
+  version updates. Do the same as a *Windows Installer* rule for the MSI.
+- **File-hash rule (unsigned).** If you deploy the unsigned binaries, generate a
+  hash rule for the exact `otw.exe` and `OpenTheWindows.exe` you ship. As with the
+  WDAC hash rule above, a hash pins one build, so refresh it on every update.
+
+```powershell
+Get-AppLockerFileInformation "C:\Program Files\Open the Windows\cli\otw.exe" |
+  New-AppLockerPolicy -RuleType Hash -User Everyone -RuleNamePrefix OTW -Xml |
+  Out-File otw-applocker.xml
+```
+
+### Package the MSI as an Intune Win32 app
+
+Wrap the MSI with the Microsoft Win32 Content Prep Tool and upload it as a Win32
+app (this delivers the GUI + CLI to user devices; the drift-remediation delivery
+of `otw.exe` alone is covered under [Deploying otw.exe](#deploying-otwexe)).
+
+```text
+IntuneWinAppUtil.exe -c <folder-with-msi> -s OpenTheWindows-<version>-win-x64.msi -o <out>
+```
+
+- **Install command:** `msiexec /i OpenTheWindows-<version>-win-x64.msi /qn`
+- **Uninstall command:** `msiexec /x {ProductCode} /qn` (read the ProductCode
+  from the MSI, or use `winget` metadata)
+- **Install behaviour:** System · **Device restart:** No (a reboot is only needed
+  when a specific tweak requires it, surfaced by the exit-code contract)
+- **Detection rule (recommended):** *File* — path
+  `%ProgramFiles%\Open the Windows\cli`, file `otw.exe`, detection method
+  **version**, operator *greater than or equal to*, value `<version>`. Keying the
+  detection on the `otw.exe` file version makes upgrades detect correctly. (An MSI
+  product-code detection also works but must be updated when the code changes
+  between versions.)
 
 ## Auditing
 

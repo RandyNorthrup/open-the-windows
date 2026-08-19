@@ -57,10 +57,24 @@ See [docs/adr/](docs/adr/).
 
 ## Installation (end users)
 
-Releases are planned for M7 (portable ZIP, MSI, winget). Binaries are not
-code-signed (see [ADR 0003](docs/adr/0003-unsigned-distribution.md)); every
-release will carry SHA-256 sums, a CycloneDX SBOM and GitHub build-provenance
-attestations. Until then, build from source.
+Each `v*` release publishes three channels — a per-machine **MSI**, the
+**winget** package `RandyNorthrup.OpenTheWindows`, and a **portable ZIP** (plus a
+smaller framework-dependent ZIP). All are self-contained except the `-fdd` ZIP.
+
+```powershell
+winget install RandyNorthrup.OpenTheWindows          # or download the MSI / ZIP
+msiexec /i OpenTheWindows-<version>-win-x64.msi /qn  # silent, per-machine
+```
+
+Binaries are not code-signed (see
+[ADR 0003](docs/adr/0003-unsigned-distribution.md)); every release carries
+SHA-256 sums, a CycloneDX SBOM and GitHub build-provenance attestations you can
+verify with `gh attestation verify`. First run of an unsigned download shows a
+SmartScreen prompt (**More info → Run anyway**). Full instructions — silent
+install, upgrade, uninstall, verifying hashes and attestations, and where data
+lives — are in **[docs/install.md](docs/install.md)**; enterprise re-signing and
+allow-listing are in **[docs/enterprise.md](docs/enterprise.md)**. To build from
+source instead, see [Development](#development).
 
 ## Development
 

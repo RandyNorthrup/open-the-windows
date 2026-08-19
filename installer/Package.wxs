@@ -10,8 +10,7 @@
   trail under %ProgramData%\OpenTheWindows is preserved across uninstall unless
   REMOVEDATA=1 is passed.
 -->
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
-     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
 
   <Package Name="Open the Windows"
            Manufacturer="Open The Windows contributors"
@@ -41,10 +40,11 @@
     <Property Id="ARPHELPLINK" Value="https://github.com/RandyNorthrup/open-the-windows" />
     <Property Id="ARPURLUPDATEINFO" Value="https://github.com/RandyNorthrup/open-the-windows/releases" />
 
-    <!-- REMOVEDATA=1 purges %ProgramData%\OpenTheWindows (journals + audit) on
-         uninstall. Default 0: the audit trail is kept so an uninstall/reinstall
-         does not lose history. -->
-    <Property Id="REMOVEDATA" Secure="yes" Value="0" />
+    <!-- Uninstall always preserves %ProgramData%\OpenTheWindows (journals + audit).
+         This is deliberate: the audit trail of an elevated system tool is forensic
+         evidence, so the installer never offers a switch to wipe it silently
+         (msiexec /x ... /qn). Removing the data is an explicit manual step, see
+         docs/install.md. -->
 
     <Feature Id="Product" Title="Open the Windows" Level="1" AllowAbsent="no"
              Description="The Open the Windows application and command-line tool.">

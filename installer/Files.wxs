@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
-     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
 
   <!-- Install layout: %ProgramFiles%\Open the Windows\{app,cli},
        a Start-menu folder, and the %ProgramData% data folder. -->
@@ -70,24 +69,15 @@
        logs into. Created here so it exists with the standard inherited ProgramData
        ACL (Administrators/SYSTEM full, Users read) before the first run. The
        component is not permanent, but because the folder holds journals the tool
-       wrote (files the MSI did not install) it is not empty at uninstall and so
-       is left in place — the audit trail survives. REMOVEDATA=1 opts into a full
-       recursive purge instead. -->
+       wrote (files the MSI did not install) it is not empty at uninstall, so
+       Windows Installer leaves it in place — the audit trail survives uninstall by
+       design. -->
   <Fragment>
-    <Property Id="OTWDATAFOLDER">
-      <RegistrySearch Id="OtwDataFolderSearch" Root="HKLM"
-                      Key="Software\Open The Windows" Name="DataFolder" Type="raw" />
-    </Property>
     <ComponentGroup Id="ProgramData" Directory="DATAFOLDER">
       <Component Id="DataFolder" Guid="*">
         <CreateFolder />
         <RegistryValue Root="HKLM" Key="Software\Open The Windows" Name="DataFolder"
                        Type="string" Value="[DATAFOLDER]" KeyPath="yes" />
-      </Component>
-      <Component Id="PurgeData" Guid="*" Condition="REMOVEDATA=&quot;1&quot;">
-        <RegistryValue Root="HKLM" Key="Software\Open The Windows" Name="PurgeData"
-                       Type="integer" Value="1" KeyPath="yes" />
-        <util:RemoveFolderEx On="uninstall" Property="OTWDATAFOLDER" />
       </Component>
     </ComponentGroup>
   </Fragment>

@@ -25,8 +25,4 @@
     <DefineConstants>AppPublishDir=$(AppPublishDir);CliPublishDir=$(CliPublishDir);ProductVersion=$(ProductVersion)</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="WixToolset.Util.wixext" Version="5.0.2" />
-  </ItemGroup>
-
 </Project>
