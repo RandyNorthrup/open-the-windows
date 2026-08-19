@@ -100,18 +100,24 @@ public sealed class ScanEngine
             action.Hive, action.Hive == RegistryHive.User ? userSid : null, action.Path, action.Name);
         string actual = snapshot is { Exists: true, Data: { } data } ? DescribeRegistry(snapshot.Type, data) : "(absent)";
 
+        bool matchesDesired = snapshot is { Exists: true, Type: { } actualType, Data: { } actualData }
+            && actualType == action.Type
+            && StateComparison.RegistryEquals(actualData, action.Value, action.Type);
+
+        // A value that does not hold the desired data is drift, whether or not a policy owns it.
+        // A managed value that is absent or different in the live hive — for example a policy write
+        // whose revert did not complete, leaving the value in Registry.pol but not in effect — must
+        // not be reported as compliant merely because it is policy-owned. Only a value that actually
+        // matches counts as Managed (owned and satisfied) or Compliant (unmanaged and satisfied); the
+        // ManagedState is still reported separately so planning keeps deferring to Group Policy / MDM.
         ComplianceState state;
-        if (managed != ManagedState.NotManaged)
-        {
-            state = ComplianceState.Managed;
-        }
-        else if (!snapshot.Exists || snapshot.Data is not { } actualData || snapshot.Type != action.Type)
+        if (!matchesDesired)
         {
             state = ComplianceState.Drift;
         }
         else
         {
-            state = StateComparison.RegistryEquals(actualData, action.Value, action.Type) ? ComplianceState.Compliant : ComplianceState.Drift;
+            state = managed != ManagedState.NotManaged ? ComplianceState.Managed : ComplianceState.Compliant;
         }
 
         return new ActionObservation(action, state, actual, desired, managed);

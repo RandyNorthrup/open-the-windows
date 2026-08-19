@@ -28,26 +28,32 @@ internal static class LocalGroupPolicy
     private const uint GpoSectionMachine = 2;
 
     /// <summary>Writes one machine-policy value into the Local GPO and saves it.</summary>
+    /// <remarks>Retried on a brief <c>Registry.pol</c> sharing violation (see <see cref="LocalGroupPolicyRetry"/>).</remarks>
     public static void Write(string path, string name, object value, RegistryValueKind kind)
-        => RunSta(() =>
-        {
-            IGroupPolicyObject gpo = Open();
-            using RegistryKey root = MachineRoot(gpo);
-            using RegistryKey key = root.CreateSubKey(path, writable: true);
-            key.SetValue(name, value, kind);
-            Save(gpo);
-        });
+        => LocalGroupPolicyRetry.Run(
+            () => RunSta(() =>
+            {
+                IGroupPolicyObject gpo = Open();
+                using RegistryKey root = MachineRoot(gpo);
+                using RegistryKey key = root.CreateSubKey(path, writable: true);
+                key.SetValue(name, value, kind);
+                Save(gpo);
+            }),
+            Thread.Sleep);
 
     /// <summary>Deletes one machine-policy value from the Local GPO and saves it.</summary>
+    /// <remarks>Retried on a brief <c>Registry.pol</c> sharing violation (see <see cref="LocalGroupPolicyRetry"/>).</remarks>
     public static void Delete(string path, string name)
-        => RunSta(() =>
-        {
-            IGroupPolicyObject gpo = Open();
-            using RegistryKey root = MachineRoot(gpo);
-            using RegistryKey? key = root.OpenSubKey(path, writable: true);
-            key?.DeleteValue(name, throwOnMissingValue: false);
-            Save(gpo);
-        });
+        => LocalGroupPolicyRetry.Run(
+            () => RunSta(() =>
+            {
+                IGroupPolicyObject gpo = Open();
+                using RegistryKey root = MachineRoot(gpo);
+                using RegistryKey? key = root.OpenSubKey(path, writable: true);
+                key?.DeleteValue(name, throwOnMissingValue: false);
+                Save(gpo);
+            }),
+            Thread.Sleep);
 
     [UnconditionalSuppressMessage(
         "Trimming",

@@ -722,6 +722,29 @@ what was planned (plans live in `PLAN.md`).
 
 ### Fixed
 
+- M4 (catalogue verification): `otw scan` no longer reports a policy-managed
+  registry value as compliant when the effective value does not match the desired
+  data. A value recorded in the Local GPO `Registry.pol` but absent or different in
+  the live hive — the inconsistent state a policy write whose revert did not finish
+  leaves behind — was short-circuited to "managed" and counted as satisfied, so a
+  half-reverted policy value could read as "in the desired state". A managed value
+  is now compliant only when the live value actually matches; otherwise it is drift,
+  while still recording that Group Policy owns it so planning keeps deferring to
+  policy. Reproduced and confirmed fixed on the Windows 11 Pro 25H2 VM by driving a
+  policy value into that split state and re-scanning; resolves the
+  `security.media.dma-disable-under-lock` scan discrepancy noted during M4
+  verification.
+
+- M4 (Local Group Policy writes): a machine policy write or delete now retries a
+  brief `Registry.pol` sharing violation (`0x80070020`, `ERROR_SHARING_VIOLATION`)
+  with a short backoff instead of failing the whole run. Two elevated writers
+  touching the policy file at the same moment — a concurrent `gpupdate`, the
+  registry policy client-side extension, or another Open the Windows invocation —
+  lock it only briefly; only a persistent lock, or any non-sharing failure, now
+  propagates. This removes the Local-GPO revert-contention failures seen during the
+  M4 batch verification, which were the source of the split policy/live states the
+  scan fix above now also reports honestly.
+
 - M8 (audit): a policy-managed setting is now scored by its value, not treated as
   a blanket "Manual". A control enforced by Group Policy at the desired value is a
   **Pass** (the control is satisfied); enforced at a different value it is a

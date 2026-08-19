@@ -86,6 +86,35 @@ public sealed class ScanEngineTests
     }
 
     [Fact]
+    public void Registry_managed_setting_not_at_the_desired_value_is_drift_not_compliant()
+    {
+        // Policy-owned (present in Registry.pol) but the live value does not match the desired data —
+        // the inconsistent state a policy write whose revert did not complete leaves behind. Both the
+        // absent case and the different-value case must read as drift, never silently "managed and
+        // therefore fine", while still recording that Group Policy owns the value.
+        AssertManagedButNotDesiredIsDrift(new RegistryValueSnapshot(false, null, null), "(absent)");
+        AssertManagedButNotDesiredIsDrift(new RegistryValueSnapshot(true, RegistryValueType.Dword, Number(0)), expectedActual: null);
+    }
+
+    private static void AssertManagedButNotDesiredIsDrift(RegistryValueSnapshot live, string? expectedActual)
+    {
+        var readers = new FakeReaders
+        {
+            OnRegistry = (_, _, _, _) => live,
+            OnManaged = (_, _, _) => ManagedState.GroupPolicy,
+        };
+
+        TweakObservation result = ScanOne(readers, WithActions(Registry(RegistryValueType.Dword, Number(1))));
+
+        Assert.Equal(ComplianceState.Drift, result.State);
+        Assert.Equal(ManagedState.GroupPolicy, result.Actions[0].Managed);
+        if (expectedActual is not null)
+        {
+            Assert.Equal(expectedActual, result.Actions[0].Actual);
+        }
+    }
+
+    [Fact]
     public void Registry_multi_sz_sequence_is_compared()
     {
         JsonElement desired = JsonSerializer.SerializeToElement(new[] { "a", "b" });
