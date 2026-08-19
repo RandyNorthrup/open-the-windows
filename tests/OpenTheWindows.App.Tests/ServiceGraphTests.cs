@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
+using OpenTheWindows.App.Navigation;
 using OpenTheWindows.App.ViewModels;
 using OpenTheWindows.Core;
-using OpenTheWindows.Core.Diagnostics;
 
 namespace OpenTheWindows.App.Tests;
 
@@ -14,19 +14,31 @@ namespace OpenTheWindows.App.Tests;
 public sealed class ServiceGraphTests
 {
     [Fact]
-    public void Configured_services_resolve_view_models()
+    public void Configured_services_resolve_the_shell_and_navigate_to_the_dashboard()
     {
         using ServiceProvider provider = DesktopApp.ConfigureServices(new ServiceCollection())
             .BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = false, ValidateScopes = true });
 
-        MainWindowViewModel main = provider.GetRequiredService<MainWindowViewModel>();
-        DoctorViewModel doctor = provider.GetRequiredService<DoctorViewModel>();
-        DoctorService service = provider.GetRequiredService<DoctorService>();
+        MainWindowViewModel shell = provider.GetRequiredService<MainWindowViewModel>();
 
-        Assert.Same(doctor, main.Doctor);
-        Assert.NotNull(service);
+        Assert.NotEmpty(shell.NavigationItems);
+        Assert.Equal(ShellNavigation.Pages.Count, shell.NavigationItems.Count);
+        Assert.IsType<DashboardViewModel>(shell.CurrentPage);
         Assert.Equal(AppInfo.Title, MainWindowViewModel.Title);
         Assert.StartsWith(AppInfo.Title, MainWindowViewModel.WindowTitle, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Every_navigation_page_resolves_by_key()
+    {
+        using ServiceProvider provider = DesktopApp.ConfigureServices(new ServiceCollection())
+            .BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = false, ValidateScopes = true });
+
+        foreach (NavigationItem page in ShellNavigation.Pages)
+        {
+            IPageViewModel resolved = provider.GetRequiredKeyedService<IPageViewModel>(page.Key);
+            Assert.Equal(page.Key, resolved.Key);
+        }
     }
 
     [Fact]

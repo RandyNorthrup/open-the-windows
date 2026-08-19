@@ -317,6 +317,9 @@ shipped `core-6.1.0-windows` profile.
 | `LocalGroupPolicy.Open` (`UnconditionalSuppressMessage IL2072`) | trimmer reflection pattern | activates a fixed in-box COM server (GPClass) by CLSID; the OS COM class is not managed code the trimmer can remove | never |
 | `LocalGroupPolicy.MachineRoot` (`SuppressMessage CA2000`, `IDISP001`) | dispose created object | `RegistryKey.FromHandle` takes ownership of the `SafeRegistryHandle`; the caller's `using` disposes both | never |
 | `WindowsAppxWriter.Await` (`#pragma VSTHRD002`) | synchronous wait on async | `IAppxWriter` is a synchronous contract; the WinRT deployment operation is awaited to completion on a console/service thread with no synchronization context, so it cannot deadlock | never |
+| `WpfDispatcherService.cs` (`SuppressMessage VSTHRD001`) | VS-threading legacy thread-switching API | this type is the single sanctioned UI-thread marshalling boundary for the GUI; `JoinableTaskFactory.SwitchToMainThreadAsync` would add the VS-Threading package with no benefit for a standalone WPF process, and every view model marshals through this one class | never |
+| `build/quality.ps1` coverage `classfilters` | `OpenTheWindows.App.Services.DialogService`, `WpfDispatcherService` excluded | thin WPF `MessageBox`/`Dispatcher` wrappers with no branch logic; not unit-testable without a live UI thread, matching the existing Windows UI/OS-wrapper exclusions | never |
+| `build/quality.ps1` coverage `filefilters` | `-*.xaml.cs` (WPF code-behind) | code-behind is `InitializeComponent` constructors and event plumbing with no testable logic; the DI graph in `DesktopApp.xaml.cs` stays verified by `ServiceGraphTests` (test gate), just not measured by the coverage gate | never |
 
 ## 8. Milestones
 

@@ -1,0 +1,89 @@
+<UserControl x:Class="OpenTheWindows.App.Views.DashboardView"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OpenTheWindows.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:DashboardViewModel}"
+             d:DesignWidth="640">
+    <StackPanel>
+        <TextBlock Text="System check"
+                   FontSize="18"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,8" />
+
+        <Border Padding="16"
+                CornerRadius="8"
+                BorderThickness="1"
+                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                DataContext="{Binding Doctor}"
+                HorizontalAlignment="Stretch">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Operating system" Margin="0,0,16,6" Opacity="0.75" />
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding OperatingSystemSummary}" AutomationProperties.AutomationId="Dashboard_OsText" />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Edition" Margin="0,0,16,6" Opacity="0.75" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding EditionSummary}" AutomationProperties.AutomationId="Dashboard_EditionText" />
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Running as" Margin="0,0,16,6" Opacity="0.75" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding UserSummary}" AutomationProperties.AutomationId="Dashboard_UserText" />
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Status" Margin="0,0,16,6" Opacity="0.75" />
+                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Status}" AutomationProperties.AutomationId="Dashboard_StatusText" />
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="Can apply changes" Margin="0,0,16,6" Opacity="0.75" />
+                <TextBlock Grid.Row="4" Grid.Column="1"
+                           Text="{Binding CanApply, Converter={StaticResource BoolToYesNo}}"
+                           AutomationProperties.AutomationId="Dashboard_CanApplyText" />
+
+                <ItemsControl Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
+                              ItemsSource="{Binding Notes}"
+                              Margin="0,8,0,0"
+                              AutomationProperties.AutomationId="Dashboard_NotesList">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,0,0,4" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
+                        Content="Re-check"
+                        Command="{Binding RefreshCommand}"
+                        HorizontalAlignment="Left"
+                        Margin="0,12,0,0"
+                        Padding="16,6"
+                        AutomationProperties.AutomationId="Dashboard_RefreshButton" />
+            </Grid>
+        </Border>
+
+        <TextBlock Text="Quick actions"
+                   FontSize="18"
+                   FontWeight="SemiBold"
+                   Margin="0,24,0,8" />
+        <WrapPanel>
+            <Button Content="About"
+                    Command="{Binding OpenCommand}"
+                    CommandParameter="About"
+                    Padding="16,6"
+                    Margin="0,0,8,0"
+                    AutomationProperties.AutomationId="Dashboard_OpenAboutButton" />
+        </WrapPanel>
+    </StackPanel>
+</UserControl>

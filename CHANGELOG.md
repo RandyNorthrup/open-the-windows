@@ -9,6 +9,18 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M6 (GUI, part 1 — shell, navigation and service layer): the WPF app is now a
+  multi-page shell instead of the single doctor window. A left navigation list
+  drives a content host through an `INavigationService` that resolves page view
+  models from the container by key; `IDialogService` (message / confirm / typed
+  confirmation, the last for Breaking tweaks) and `IDispatcherService` (UI-thread
+  marshalling) complete the App service layer, each with a fake for view-model
+  tests. The shell ships the **Dashboard** (system health, reusing the doctor
+  report, plus quick actions) and **About** (identity, licence, non-affiliation
+  notice) pages; further pages are added in later parts. A `Strings.resx`
+  localisation baseline (en-US) backs shared display text, and a
+  `BoolToYesNoConverter` fixes the M0 defect where `CanApply` surfaced as
+  "True"/"False".
 - M5 (profiles, part 1 — the profile format): named, data-defined profiles in
   `OpenTheWindows.Core.Profiles`. A `Profile` is a level dial per category plus
   explicit `include`/`exclude` overrides, an application `Scope`, apply

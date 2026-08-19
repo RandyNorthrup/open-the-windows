@@ -5,100 +5,81 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:OpenTheWindows.App.ViewModels"
+        xmlns:views="clr-namespace:OpenTheWindows.App.Views"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}"
-        Title="{Binding WindowTitle, Mode=OneTime}"
+        Title="{x:Static vm:MainWindowViewModel.WindowTitle}"
         Width="960"
         Height="640"
         MinWidth="720"
         MinHeight="480"
         WindowStartupLocation="CenterScreen">
-    <Grid Margin="24">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+            <views:DashboardView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AboutViewModel}">
+            <views:AboutView />
+        </DataTemplate>
+    </Window.Resources>
 
-        <!-- Header -->
-        <TextBlock Grid.Row="0"
-                   Text="{Binding Title, Mode=OneTime}"
-                   FontSize="28"
-                   FontWeight="SemiBold"
-                   AutomationProperties.AutomationId="TitleText" />
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="240" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
-        <!-- Section heading -->
-        <TextBlock Grid.Row="1"
-                   Text="System check"
-                   FontSize="18"
-                   FontWeight="SemiBold"
-                   Margin="0,24,0,8" />
+        <!-- Navigation rail -->
+        <Border Grid.Column="0"
+                Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Margin="16,16,16,8">
+                    <TextBlock Text="{x:Static vm:MainWindowViewModel.Title}"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               TextWrapping="Wrap"
+                               AutomationProperties.AutomationId="Shell_ProductTitle" />
+                </StackPanel>
 
-        <!-- Doctor report -->
-        <Border Grid.Row="2"
-                Padding="16"
-                CornerRadius="8"
-                BorderThickness="1"
-                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                DataContext="{Binding Doctor}"
-                VerticalAlignment="Top">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+                <TextBlock DockPanel.Dock="Bottom"
+                           Text="{x:Static vm:MainWindowViewModel.Version}"
+                           Opacity="0.6"
+                           Margin="16,8,16,16"
+                           AutomationProperties.AutomationId="Shell_Version" />
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Operating system" Margin="0,0,16,6" Opacity="0.75" />
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding OperatingSystemSummary}" AutomationProperties.AutomationId="OsText" />
-
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Edition" Margin="0,0,16,6" Opacity="0.75" />
-                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding EditionSummary}" AutomationProperties.AutomationId="EditionText" />
-
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Running as" Margin="0,0,16,6" Opacity="0.75" />
-                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding UserSummary}" AutomationProperties.AutomationId="UserText" />
-
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Status" Margin="0,0,16,6" Opacity="0.75" />
-                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Status}" AutomationProperties.AutomationId="StatusText" />
-
-                <TextBlock Grid.Row="4" Grid.Column="0" Text="Can apply changes" Margin="0,0,16,6" Opacity="0.75" />
-                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding CanApply}" AutomationProperties.AutomationId="CanApplyText" />
-
-                <ItemsControl Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
-                              ItemsSource="{Binding Notes}"
-                              Margin="0,8,0,0"
-                              AutomationProperties.AutomationId="NotesList">
-                    <ItemsControl.ItemTemplate>
+                <ListBox ItemsSource="{Binding NavigationItems}"
+                         SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         Margin="8,0"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         AutomationProperties.Name="Pages"
+                         AutomationProperties.AutomationId="Shell_Navigation">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="12,8" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="AutomationProperties.Name" Value="{Binding Title}" />
+                            <Setter Property="AutomationProperties.AutomationId" Value="{Binding Key, StringFormat=Nav_{0}}" />
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,0,0,4" />
+                            <TextBlock Text="{Binding Title}" />
                         </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
-                <Button Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
-                        Content="Re-check"
-                        Command="{Binding RefreshCommand}"
-                        HorizontalAlignment="Left"
-                        Margin="0,12,0,0"
-                        Padding="16,6"
-                        AutomationProperties.AutomationId="RefreshButton" />
-            </Grid>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
         </Border>
 
-        <!-- Footer -->
-        <TextBlock Grid.Row="3"
-                   Text="{Binding Version, Mode=OneTime, StringFormat=Version {0}}"
-                   Opacity="0.6"
-                   Margin="0,16,0,0"
-                   AutomationProperties.AutomationId="VersionText" />
+        <!-- Page host -->
+        <ScrollViewer Grid.Column="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <ContentControl Content="{Binding CurrentPage}"
+                            Margin="24"
+                            AutomationProperties.Name="Current page"
+                            AutomationProperties.AutomationId="Shell_Content" />
+        </ScrollViewer>
     </Grid>
 </Window>

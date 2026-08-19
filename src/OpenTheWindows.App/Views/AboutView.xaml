@@ -1,0 +1,53 @@
+<UserControl x:Class="OpenTheWindows.App.Views.AboutView"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OpenTheWindows.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:AboutViewModel}"
+             d:DesignWidth="640">
+    <StackPanel>
+        <TextBlock Text="{Binding ProductName, Mode=OneTime}"
+                   FontSize="24"
+                   FontWeight="SemiBold"
+                   AutomationProperties.AutomationId="About_ProductName" />
+
+        <Grid Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Version" Margin="0,0,16,6" Opacity="0.75" />
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Version, Mode=OneTime}"
+                       AutomationProperties.AutomationId="About_Version" />
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Licence" Margin="0,0,16,6" Opacity="0.75" />
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding License, Mode=OneTime}"
+                       AutomationProperties.AutomationId="About_License" />
+
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Homepage" Margin="0,0,16,6" Opacity="0.75" />
+            <TextBox Grid.Row="2" Grid.Column="1"
+                     Text="{Binding Homepage, Mode=OneWay}"
+                     IsReadOnly="True"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     Padding="0"
+                     AutomationProperties.Name="Homepage URL"
+                     AutomationProperties.AutomationId="About_Homepage" />
+        </Grid>
+
+        <TextBlock Text="{Binding Disclaimer, Mode=OneTime}"
+                   TextWrapping="Wrap"
+                   Margin="0,24,0,0"
+                   Opacity="0.75"
+                   AutomationProperties.AutomationId="About_Disclaimer" />
+    </StackPanel>
+</UserControl>
