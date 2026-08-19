@@ -45,6 +45,7 @@ internal sealed partial class DesktopApp : Application, IDisposable
         services.AddTransient<ApplyFlowViewModel>();
         services.AddSingleton<Func<ApplyFlowViewModel>>(sp => sp.GetRequiredService<ApplyFlowViewModel>);
         services.AddSingleton<IApplyFlowLauncher, ApplyFlowLauncher>();
+        services.AddSingleton<IFileDialogService, FileDialogService>();
 
         // Shell services.
         services.AddSingleton<IDispatcherService>(_ => new WpfDispatcherService(Dispatcher.CurrentDispatcher));
@@ -62,6 +63,7 @@ internal sealed partial class DesktopApp : Application, IDisposable
                 (sp, _) => ActivatorUtilities.CreateInstance<CategoryPageViewModel>(sp, category));
         }
 
+        services.AddKeyedSingleton<IPageViewModel, ProfilesViewModel>(PageKeys.Profiles);
         services.AddKeyedSingleton<IPageViewModel, HistoryViewModel>(PageKeys.History);
         services.AddKeyedSingleton<IPageViewModel, AboutViewModel>(PageKeys.About);
 

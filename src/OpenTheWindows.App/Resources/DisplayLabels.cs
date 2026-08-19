@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using OpenTheWindows.App.ViewModels;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Journal;
@@ -90,6 +91,26 @@ internal static class DisplayLabels
         RunState.RolledBack => "Rolled back",
         RunState.Failed => "Failed",
         _ => state.ToString(),
+    };
+
+    /// <summary>A human-readable label for an apply scope.</summary>
+    public static string For(Scope scope) => scope switch
+    {
+        Scope.Machine => "Machine",
+        Scope.User => "Current user",
+        Scope.AllUsers => "All users",
+        _ => scope.ToString(),
+    };
+
+    /// <summary>A human-readable label for a profile's signing state.</summary>
+    public static string For(ProfileSignatureStatus status) => status switch
+    {
+        ProfileSignatureStatus.BuiltIn => "Built-in",
+        ProfileSignatureStatus.Unsigned => "Unsigned",
+        ProfileSignatureStatus.Untrusted => "Signed (untrusted key)",
+        ProfileSignatureStatus.Trusted => "Signed (trusted)",
+        ProfileSignatureStatus.Invalid => "Invalid signature",
+        _ => status.ToString(),
     };
 
     /// <summary>The "n of m selected" summary for a category page.</summary>

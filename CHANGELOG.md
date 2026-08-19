@@ -9,6 +9,14 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M6 (GUI, part 5 — profiles): a new **Profiles** page lists the built-in
+  profiles, each with its scope, signing state and the number of entries it
+  resolves to on this machine. **Review & apply…** resolves the selected profile
+  and opens the same review-and-apply flow as the category pages. **Export…**
+  writes a profile to a `.json` file, and **Import…** loads a profile file,
+  validates it against the schema and the catalogue, and reports its signing
+  state — unsigned, signed by an untrusted key, signed by a trusted key, or an
+  invalid signature — before it can be applied.
 - M6 (GUI, part 4 — history and revert): a new **History** page lists the prior
   runs (newest first) with their time, profile, result and entry count, and
   reverts a selected completed run — restoring the values it changed — through

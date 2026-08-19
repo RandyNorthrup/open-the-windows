@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OpenTheWindows.App.Navigation;
@@ -8,7 +7,6 @@ using OpenTheWindows.App.Resources;
 using OpenTheWindows.App.Services;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
-using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Model;
 
 namespace OpenTheWindows.App.ViewModels;
@@ -114,16 +112,7 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
             return;
         }
 
-        ApplyOptions options = new(
-            WhatIf: false,
-            CreateRestorePoint: true,
-            BreakGlass: false,
-            AllowAdvanced: true,
-            AllowBreaking: true,
-            ProfileName: string.Create(CultureInfo.InvariantCulture, $"GUI {Title}"),
-            RestartExplorer: false,
-            Scope: Scope.Machine);
-        _applyFlow.Launch(Title, entries, options);
+        GuiApply.Launch(_applyFlow, Title, entries, $"GUI {Title}", Scope.Machine);
     }
 
     partial void OnLevelChanged(Level value) => ApplyLevelSelection();
