@@ -22,6 +22,7 @@ internal static class ShellNavigation
         new(PageKeys.Shell, Strings.Nav_Shell),
         new(PageKeys.Profiles, Strings.Nav_Profiles),
         new(PageKeys.History, Strings.Nav_History),
+        new(PageKeys.Settings, Strings.Nav_Settings),
         new(PageKeys.About, Strings.Nav_About),
     ];
 }

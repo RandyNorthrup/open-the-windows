@@ -24,6 +24,7 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
     private readonly Category _category;
     private readonly TweakCatalog _catalog;
     private readonly IApplyFlowLauncher _applyFlow;
+    private readonly AppSettings _settings;
     private bool _updatingSelection;
 
     [ObservableProperty]
@@ -44,15 +45,17 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
     [ObservableProperty]
     private string _selectionSummary = string.Empty;
 
-    /// <summary>Builds the page for one category over the catalogue, machine facts and the apply launcher.</summary>
-    public CategoryPageViewModel(Category category, TweakCatalog catalog, OperatingSystemFacts facts, IApplyFlowLauncher applyFlow)
+    /// <summary>Builds the page for one category over the catalogue, machine facts, the apply launcher and settings.</summary>
+    public CategoryPageViewModel(Category category, TweakCatalog catalog, OperatingSystemFacts facts, IApplyFlowLauncher applyFlow, AppSettings settings)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(facts);
         ArgumentNullException.ThrowIfNull(applyFlow);
+        ArgumentNullException.ThrowIfNull(settings);
         _category = category;
         _catalog = catalog;
         _applyFlow = applyFlow;
+        _settings = settings;
 
         AllItems = [.. catalog.InCategory(category)
             .Where(e => e.Status != TweakStatus.Deprecated && e.AppliesTo.Matches(facts))
@@ -74,6 +77,7 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
         ];
 
         Items = [];
+        _includeDraft = settings.IncludeDraft;
         RebuildItems();
         UpdateSelectionSummary();
     }
@@ -112,7 +116,7 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
             return;
         }
 
-        GuiApply.Launch(_applyFlow, Title, entries, $"GUI {Title}", Scope.Machine);
+        GuiApply.Launch(_applyFlow, Title, entries, $"GUI {Title}", Scope.Machine, _settings.CreateRestorePoint);
     }
 
     partial void OnLevelChanged(Level value) => ApplyLevelSelection();

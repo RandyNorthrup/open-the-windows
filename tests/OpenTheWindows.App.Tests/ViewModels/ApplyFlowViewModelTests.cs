@@ -17,7 +17,7 @@ public sealed class ApplyFlowViewModelTests
     private readonly FakeApplyCoordinator _coordinator = new();
     private readonly FakeDialogService _dialog = new();
 
-    private ApplyFlowViewModel Build() => new(_coordinator, _dialog);
+    private ApplyFlowViewModel Build() => new(_coordinator, _dialog, new AppSettings());
 
     private static PlannedEntry Planned(string id, PlanDisposition disposition, RiskTier risk = RiskTier.Safe, RestartRequirement requires = RestartRequirement.None) => new(new TweakId(id), disposition, risk, requires, [], null);
 
@@ -154,9 +154,18 @@ public sealed class ApplyFlowViewModelTests
     }
 
     [Fact]
+    public void The_restart_explorer_default_comes_from_settings()
+    {
+        ApplyFlowViewModel flow = new(_coordinator, _dialog, new AppSettings { RestartExplorerAutomatically = true });
+
+        Assert.True(flow.RestartExplorer);
+    }
+
+    [Fact]
     public void Rejects_null_dependencies()
     {
-        Assert.Throws<ArgumentNullException>(() => new ApplyFlowViewModel(null!, _dialog));
-        Assert.Throws<ArgumentNullException>(() => new ApplyFlowViewModel(_coordinator, null!));
+        Assert.Throws<ArgumentNullException>(() => new ApplyFlowViewModel(null!, _dialog, new AppSettings()));
+        Assert.Throws<ArgumentNullException>(() => new ApplyFlowViewModel(_coordinator, null!, new AppSettings()));
+        Assert.Throws<ArgumentNullException>(() => new ApplyFlowViewModel(_coordinator, _dialog, null!));
     }
 }

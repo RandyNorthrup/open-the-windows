@@ -169,7 +169,7 @@ Invoke-Gate 'coverage' {
         "-targetdir:$coverageDir/report" `
         '-reporttypes:TextSummary;Cobertura;MarkdownSummaryGithub;HtmlInline' `
         '-assemblyfilters:-*.Tests;-OpenTheWindows.TestSupport' `
-        '-classfilters:-OpenTheWindows.Windows.Writers.*;-OpenTheWindows.Windows.Interop.*;-OpenTheWindows.Windows.WindowsRestorePointService;-OpenTheWindows.Windows.WindowsExplorerRestarter;-OpenTheWindows.Windows.Readers.WindowsMachineHealthProbe;-OpenTheWindows.App.Services.DialogService;-OpenTheWindows.App.Services.WpfDispatcherService;-OpenTheWindows.App.Services.ApplyFlowLauncher;-OpenTheWindows.App.Services.FileDialogService' `
+        '-classfilters:-OpenTheWindows.Windows.Writers.*;-OpenTheWindows.Windows.Interop.*;-OpenTheWindows.Windows.WindowsRestorePointService;-OpenTheWindows.Windows.WindowsExplorerRestarter;-OpenTheWindows.Windows.Readers.WindowsMachineHealthProbe;-OpenTheWindows.App.Services.DialogService;-OpenTheWindows.App.Services.WpfDispatcherService;-OpenTheWindows.App.Services.ApplyFlowLauncher;-OpenTheWindows.App.Services.FileDialogService;-OpenTheWindows.App.Services.ThemeService' `
         '-filefilters:-*.g.cs;-*.g.i.cs;-*.xaml.cs' `
         '-verbosity:Warning' `
         "minimumCoverageThresholds:lineCoverage=$minimumLineCoverage" `

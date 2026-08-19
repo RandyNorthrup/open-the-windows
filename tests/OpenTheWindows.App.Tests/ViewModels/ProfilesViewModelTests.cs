@@ -19,8 +19,9 @@ public sealed class ProfilesViewModelTests
 
     private readonly FakeApplyFlowLauncher _launcher = new();
     private readonly FakeFileDialogService _fileDialog = new();
+    private readonly AppSettings _settings = new();
 
-    private ProfilesViewModel Build() => new(Catalog, Facts, _launcher, _fileDialog);
+    private ProfilesViewModel Build() => new(Catalog, Facts, _launcher, _fileDialog, _settings);
 
     private static string TempPath() => Path.Combine(Path.GetTempPath(), $"otw-{Guid.NewGuid():N}.json");
 
@@ -133,11 +134,25 @@ public sealed class ProfilesViewModelTests
     }
 
     [Fact]
+    public void Enterprise_mode_hides_the_consumer_profiles()
+    {
+        ProfilesViewModel page = Build();
+        int all = page.Profiles.Count;
+
+        _settings.EnterpriseMode = true;
+        page.OnActivated();
+
+        Assert.True(page.Profiles.Count < all);
+        Assert.DoesNotContain(page.Profiles, p => string.Equals(p.Profile.Id, "home", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void Rejects_null_dependencies()
     {
-        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(null!, Facts, _launcher, _fileDialog));
-        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, null!, _fileDialog));
-        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, _launcher, null!));
+        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(null!, Facts, _launcher, _fileDialog, _settings));
+        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, null!, _fileDialog, _settings));
+        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, _launcher, null!, _settings));
+        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, _launcher, _fileDialog, null!));
     }
 
     private void ExportFirstProfile(string path)

@@ -21,7 +21,9 @@ public sealed class CategoryPageViewModelTests
 
     private static CategoryPageViewModel Build(Category category = Category.Privacy) => Build(category, new FakeApplyFlowLauncher());
 
-    private static CategoryPageViewModel Build(Category category, IApplyFlowLauncher launcher) => new(category, Catalog, Facts, launcher);
+    private static CategoryPageViewModel Build(Category category, IApplyFlowLauncher launcher) => Build(category, launcher, new AppSettings());
+
+    private static CategoryPageViewModel Build(Category category, IApplyFlowLauncher launcher, AppSettings settings) => new(category, Catalog, Facts, launcher, settings);
 
     [Fact]
     public void Is_the_matching_page_with_applicable_entries()
@@ -158,6 +160,26 @@ public sealed class CategoryPageViewModelTests
         Assert.Equal(2, launcher.LastEntries!.Count);
         Assert.Equal(Scope.Machine, launcher.LastOptions!.Scope);
         Assert.True(launcher.LastOptions.CreateRestorePoint);
+    }
+
+    [Fact]
+    public void The_draft_setting_shows_drafts_from_the_start()
+    {
+        CategoryPageViewModel page = Build(Category.Privacy, new FakeApplyFlowLauncher(), new AppSettings { IncludeDraft = true });
+
+        Assert.True(page.IncludeDraft);
+    }
+
+    [Fact]
+    public void The_restore_point_setting_flows_into_the_apply_options()
+    {
+        FakeApplyFlowLauncher launcher = new();
+        CategoryPageViewModel page = Build(Category.Privacy, launcher, new AppSettings { CreateRestorePoint = false });
+        page.AllItems[0].IsSelected = true;
+
+        page.ReviewAndApplyCommand.Execute(null);
+
+        Assert.False(launcher.LastOptions!.CreateRestorePoint);
     }
 
     [Fact]

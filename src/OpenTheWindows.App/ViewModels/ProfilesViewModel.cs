@@ -19,12 +19,17 @@ namespace OpenTheWindows.App.ViewModels;
 /// apply flow, export of a profile to a file, and import of a profile file with
 /// its validation result and signing state.
 /// </summary>
-internal sealed partial class ProfilesViewModel : ObservableObject, IPageViewModel
+internal sealed partial class ProfilesViewModel : ObservableObject, IPageViewModel, IActivatable
 {
+    // Consumer-only built-in profiles, hidden when enterprise mode is on.
+    private static readonly string[] ConsumerProfileIds = ["home", "gamer"];
+
     private readonly TweakCatalog _catalog;
     private readonly OperatingSystemFacts _facts;
     private readonly IApplyFlowLauncher _applyFlow;
     private readonly IFileDialogService _fileDialog;
+    private readonly AppSettings _settings;
+    private readonly List<ProfileItemViewModel> _imported = [];
 
     [ObservableProperty]
     private ProfileItemViewModel? _selectedProfile;
@@ -33,20 +38,39 @@ internal sealed partial class ProfilesViewModel : ObservableObject, IPageViewMod
     private string _status = string.Empty;
 
     /// <summary>Creates the page and loads the built-in profiles.</summary>
-    public ProfilesViewModel(TweakCatalog catalog, OperatingSystemFacts facts, IApplyFlowLauncher applyFlow, IFileDialogService fileDialog)
+    public ProfilesViewModel(TweakCatalog catalog, OperatingSystemFacts facts, IApplyFlowLauncher applyFlow, IFileDialogService fileDialog, AppSettings settings)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(facts);
         ArgumentNullException.ThrowIfNull(applyFlow);
         ArgumentNullException.ThrowIfNull(fileDialog);
+        ArgumentNullException.ThrowIfNull(settings);
         _catalog = catalog;
         _facts = facts;
         _applyFlow = applyFlow;
         _fileDialog = fileDialog;
+        _settings = settings;
 
-        foreach (ProfileLoadResult result in ProfileLoader.LoadBuiltIns().Where(r => r.Profile is not null))
+        LoadProfiles();
+    }
+
+    /// <inheritdoc />
+    public void OnActivated() => LoadProfiles();
+
+    private void LoadProfiles()
+    {
+        Profiles.Clear();
+        IEnumerable<ProfileLoadResult> builtIns = ProfileLoader.LoadBuiltIns().Where(r =>
+            r.Profile is not null
+            && !(_settings.EnterpriseMode && ConsumerProfileIds.Contains(r.Profile.Id, StringComparer.Ordinal)));
+        foreach (ProfileLoadResult result in builtIns)
         {
-            Profiles.Add(new ProfileItemViewModel(result.Profile!, catalog, facts, ProfileSignatureStatus.BuiltIn, isBuiltIn: true, []));
+            Profiles.Add(new ProfileItemViewModel(result.Profile!, _catalog, _facts, ProfileSignatureStatus.BuiltIn, isBuiltIn: true, []));
+        }
+
+        foreach (ProfileItemViewModel imported in _imported)
+        {
+            Profiles.Add(imported);
         }
     }
 
@@ -74,7 +98,7 @@ internal sealed partial class ProfilesViewModel : ObservableObject, IPageViewMod
             return;
         }
 
-        GuiApply.Launch(_applyFlow, item.Name, item.ResolvedEntries, $"profile {item.Profile.Id}", item.Profile.Scope);
+        GuiApply.Launch(_applyFlow, item.Name, item.ResolvedEntries, $"profile {item.Profile.Id}", item.Profile.Scope, _settings.CreateRestorePoint);
     }
 
     /// <summary>Exports the selected profile to a file.</summary>
@@ -127,6 +151,7 @@ internal sealed partial class ProfilesViewModel : ObservableObject, IPageViewMod
             .Select(i => i.Message));
 
         ProfileItemViewModel item = new(loaded.Profile, _catalog, _facts, InspectSignature(path), isBuiltIn: false, errors);
+        _imported.Add(item);
         Profiles.Add(item);
         SelectedProfile = item;
         Status = string.Create(CultureInfo.CurrentCulture, $"Imported “{item.Name}” — {item.SignatureLabel}.");

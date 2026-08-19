@@ -36,7 +36,7 @@ internal sealed partial class ApplyFlowViewModel : ObservableObject
     private string _title = string.Empty;
 
     [ObservableProperty]
-    private bool _restartExplorer = true;
+    private bool _restartExplorer;
 
     [ObservableProperty]
     private bool _explorerRestartWouldBeNeeded;
@@ -50,13 +50,15 @@ internal sealed partial class ApplyFlowViewModel : ObservableObject
     [ObservableProperty]
     private string _restartRequirementLabel = string.Empty;
 
-    /// <summary>Creates the flow over the apply coordinator and the dialog service.</summary>
-    public ApplyFlowViewModel(IApplyCoordinator coordinator, IDialogService dialog)
+    /// <summary>Creates the flow over the apply coordinator, the dialog service and settings.</summary>
+    public ApplyFlowViewModel(IApplyCoordinator coordinator, IDialogService dialog, AppSettings settings)
     {
         ArgumentNullException.ThrowIfNull(coordinator);
         ArgumentNullException.ThrowIfNull(dialog);
+        ArgumentNullException.ThrowIfNull(settings);
         _coordinator = coordinator;
         _dialog = dialog;
+        _restartExplorer = settings.RestartExplorerAutomatically;
     }
 
     /// <summary>The what-if plan rows.</summary>

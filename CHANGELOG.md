@@ -9,6 +9,15 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M6 (GUI, part 7 — settings): a new **Settings** page, the last of the eleven
+  shell pages. Its toggles are wired to real behaviour, not decoration: the
+  restore-point and automatic-Explorer-restart choices flow into every apply,
+  "show draft entries" seeds the category pages, and enterprise mode hides the
+  consumer-only built-in profiles (`home`, `gamer`). The theme choice
+  (System / Light / Dark) applies immediately via the WPF Fluent `ThemeMode`.
+  Language is en-US only in M6 over the existing resx infrastructure. Settings
+  are shared through an `AppSettings` singleton and are session-scoped
+  (persistence is a follow-up).
 - M6 (GUI, part 6 — updates page): a new **Updates** page shows the running
   release and how close it is to end-of-servicing (flagging the 90-day warning
   window), whether updates are paused and until when, and any pinned release. It

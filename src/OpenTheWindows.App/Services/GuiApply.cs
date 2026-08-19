@@ -18,13 +18,14 @@ internal static class GuiApply
         string title,
         IReadOnlyList<TweakDefinition> entries,
         string profileName,
-        Scope scope)
+        Scope scope,
+        bool createRestorePoint)
     {
         ArgumentNullException.ThrowIfNull(launcher);
         ArgumentNullException.ThrowIfNull(entries);
         ApplyOptions options = new(
             WhatIf: false,
-            CreateRestorePoint: true,
+            CreateRestorePoint: createRestorePoint,
             BreakGlass: false,
             AllowAdvanced: true,
             AllowBreaking: true,

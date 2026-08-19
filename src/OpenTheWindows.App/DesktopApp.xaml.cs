@@ -51,6 +51,8 @@ internal sealed partial class DesktopApp : Application, IDisposable
         services.AddSingleton<IUpdateCoordinator, UpdateCoordinator>();
 
         // Shell services.
+        services.AddSingleton<AppSettings>();
+        services.AddSingleton<IThemeService, ThemeService>();
         services.AddSingleton<IDispatcherService>(_ => new WpfDispatcherService(Dispatcher.CurrentDispatcher));
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<INavigationService, NavigationService>();
@@ -69,6 +71,7 @@ internal sealed partial class DesktopApp : Application, IDisposable
 
         services.AddKeyedSingleton<IPageViewModel, ProfilesViewModel>(PageKeys.Profiles);
         services.AddKeyedSingleton<IPageViewModel, HistoryViewModel>(PageKeys.History);
+        services.AddKeyedSingleton<IPageViewModel, SettingsViewModel>(PageKeys.Settings);
         services.AddKeyedSingleton<IPageViewModel, AboutViewModel>(PageKeys.About);
 
         // Shell.
