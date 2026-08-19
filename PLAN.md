@@ -659,9 +659,17 @@ committed locally):
   admin token, so `IPreflight.Run` is now scope-aware (elevation required for
   `Machine`/`AllUsers`, exempt for `Scope.User`). `otw task remove` also clears the
   logon fallback (`RemoveAll`). Engine/CLI/pure unit tests plus a VM check on
-  26200.9168 (register → verify values → bump → remove). Still pending for M5: a VM
-  end-to-end that loads a genuinely offline second-user hive and a managed-value
-  report-and-untouched check; then `docs/certification/M5.md`.
+  26200.9168 (register → verify values → bump → remove).
+- **All-users revert reloads offline hives + managed-value acceptance**
+  (`ApplyEngine.Revert`): reverting an all-users apply now reloads the hives of
+  users who have logged off since the run (the SIDs on the journalled actions,
+  matched to the enumerator's offline profiles) so it restores and unloads each —
+  the apply stays reversible after a user signs out. VM-verified on 26200.9168: an
+  all-users apply reaches a genuinely offline profile (a synthetic ProfileList
+  entry over a copy of the Default hive), writes it, and revert reloads and
+  restores it; and a Group-Policy-managed value (owned by the Local GPO
+  Registry.pol) is reported Managed and left untouched by apply. Still pending for
+  M5: `docs/certification/M5.md` (+ evidence subfiles like M4's).
 
 ### M6 — GUI (not started)
 

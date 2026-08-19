@@ -153,6 +153,32 @@ public sealed class ApplyEngine
         }
     }
 
+    /// <summary>
+    /// Loads the offline hives a revert needs: the profiles whose SID appears on a
+    /// journalled action but whose hive is not currently loaded (their owner logged
+    /// off since the apply). Machine actions (no SID) and hives already loaded need
+    /// nothing. The caller unloads whatever this loads.
+    /// </summary>
+    private void LoadHivesForRevert(JournalRecord record, List<UserProfile> loaded, Guid runId)
+    {
+        HashSet<string> sids = [.. record.Entries
+            .SelectMany(e => e.Actions)
+            .Select(a => a.Sid)
+            .Where(s => s is not null)
+            .Select(s => s!)];
+        if (sids.Count == 0)
+        {
+            return;
+        }
+
+        foreach (UserProfile profile in _services.UserHives.Enumerate().Where(p => !p.HiveLoaded && sids.Contains(p.Sid)))
+        {
+            _services.HiveLoader.Load(profile.Sid, Path.Combine(profile.ProfilePath, "NTUSER.DAT"));
+            loaded.Add(profile);
+            Audit(AuditEventId.RevertStarted, string.Create(CultureInfo.InvariantCulture, $"Loaded user hive {profile.Sid} for revert."), runId, null);
+        }
+    }
+
     private void UnloadHive(UserProfile profile, Guid runId)
     {
         // A failed unload leaks a mounted hive but must not mask the run's outcome,
@@ -189,7 +215,20 @@ public sealed class ApplyEngine
         _services.Journal.Begin(record);
         Audit(AuditEventId.RevertStarted, string.Create(CultureInfo.InvariantCulture, $"Revert of {runId} started."), newRunId, null);
 
-        RunState state = ExecuteRevert(record, newRunId);
+        // An all-users apply may have written user hives whose owners have since logged off.
+        // Load those offline hives so their prior state can be restored, then unload them.
+        List<UserProfile> loadedHives = [];
+        RunState state;
+        try
+        {
+            LoadHivesForRevert(record, loadedHives, newRunId);
+            state = ExecuteRevert(record, newRunId);
+        }
+        finally
+        {
+            UnloadHives(loadedHives, newRunId);
+        }
+
         record.Result = state;
         _services.Journal.Update(record);
 

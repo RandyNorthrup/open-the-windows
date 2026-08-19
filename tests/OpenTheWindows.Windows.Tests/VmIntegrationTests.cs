@@ -309,6 +309,127 @@ public sealed class VmIntegrationTests
         }
     }
 
+    [Fact]
+    public void All_users_apply_reaches_a_logged_off_user_and_reverts_the_offline_hive()
+    {
+        RequireIntegration();
+
+        // A genuinely offline user: a copy of the Default hive under a synthetic ProfileList SID
+        // that is not mounted (no HKU\<sid>). The real enumerator lists it, so an all-users apply
+        // must load it (RegLoadKey), write the user-scope value, and unload it — reaching a user
+        // who is signed out — and revert must reload it to restore it (M5: "reaches a logged-off user").
+        const string ProfileListKey = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList";
+        const string UserPath = @"Software\OpenTheWindows\OfflineUserTest";
+        const string Sid = "S-1-5-21-3141592653-2718281828-1618033988-4242";
+        string systemDrive = Environment.GetEnvironmentVariable("SystemDrive") ?? "C:";
+        string defaultHive = Path.Combine(systemDrive + @"\", "Users", "Default", "NTUSER.DAT");
+        string profileDir = Path.Combine(systemDrive + @"\", "otw-test", "offline-" + Guid.NewGuid().ToString("N"));
+        string journalDir = Path.Combine(Path.GetTempPath(), "otw-int-" + Guid.NewGuid().ToString("N"));
+        string currentSid = WindowsIdentity.GetCurrent().User!.Value;
+        var loader = new WindowsUserHiveLoader();
+
+        RegisterOfflineProfile(ProfileListKey, Sid, profileDir, defaultHive);
+
+        try
+        {
+            Assert.False(UsersSubKeyExists(Sid)); // not mounted before the run
+
+            ApplyEngine engine = RealEngine(journalDir);
+            ApplyResult applied = engine.Apply([UserRegistryEntry(UserPath, "Sample")], new ApplyOptions(
+                WhatIf: false, CreateRestorePoint: false, BreakGlass: false, AllowAdvanced: true, AllowBreaking: true,
+                "integration", RestartExplorer: false, Scope.AllUsers));
+            Assert.Equal(RunState.Completed, applied.State);
+
+            // The engine loaded the offline hive, wrote it, and unloaded it: the value is in the
+            // file (read back under a fresh mount) and HKU\<sid> is not left mounted.
+            Assert.Equal(1, ReadOfflineValue(loader, profileDir, "Sample"));
+            Assert.False(UsersSubKeyExists(Sid)); // engine unloaded it
+
+            // Revert must reload the now-offline hive and restore it to absent.
+            RevertResult reverted = engine.Revert(applied.RunId, new RevertOptions(WhatIf: false, RestartExplorer: false));
+            Assert.Equal(RunState.Completed, reverted.State);
+            Assert.Null(ReadOfflineValue(loader, profileDir, "Sample"));
+        }
+        finally
+        {
+            RemoveOfflineProfile(ProfileListKey, Sid, currentSid, profileDir, journalDir);
+        }
+    }
+
+    /// <summary>
+    /// Registers a synthetic offline profile: a copy of the Default hive under
+    /// <paramref name="profileDir"/> and a ProfileList entry for <paramref name="sid"/>
+    /// pointing at it. The hive is not mounted, so the enumerator reports it offline.
+    /// </summary>
+    private static void RegisterOfflineProfile(string profileListKey, string sid, string profileDir, string defaultHive)
+    {
+        Directory.CreateDirectory(profileDir);
+        File.Copy(defaultHive, Path.Combine(profileDir, "NTUSER.DAT"), overwrite: true);
+        using Microsoft.Win32.RegistryKey list =
+            Microsoft.Win32.Registry.LocalMachine.CreateSubKey(profileListKey + @"\" + sid, writable: true);
+        list.SetValue("ProfileImagePath", profileDir, Microsoft.Win32.RegistryValueKind.ExpandString);
+    }
+
+    /// <summary>
+    /// Removes the synthetic profile and the test's leftovers: the value the all-users run
+    /// also wrote to the current admin's hive (revert restored it, this is defensive), the
+    /// ProfileList entry, and the profile and journal directories.
+    /// </summary>
+    private static void RemoveOfflineProfile(string profileListKey, string sid, string currentSid, string profileDir, string journalDir)
+    {
+        using (var users = Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.Users, Microsoft.Win32.RegistryView.Registry64))
+        using (Microsoft.Win32.RegistryKey? owt = users.OpenSubKey(currentSid + @"\Software\OpenTheWindows", writable: true))
+        {
+            owt?.DeleteSubKeyTree("OfflineUserTest", throwOnMissingSubKey: false);
+        }
+
+        using (Microsoft.Win32.RegistryKey? list = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(profileListKey, writable: true))
+        {
+            list?.DeleteSubKeyTree(sid, throwOnMissingSubKey: false);
+        }
+
+        if (Directory.Exists(profileDir))
+        {
+            Directory.Delete(profileDir, recursive: true);
+        }
+
+        if (Directory.Exists(journalDir))
+        {
+            Directory.Delete(journalDir, recursive: true);
+        }
+    }
+
+    /// <summary>Whether a subkey exists under HKEY_USERS (64-bit view) — i.e. whether that hive is mounted.</summary>
+    private static bool UsersSubKeyExists(string subKey)
+    {
+        using var users =
+            Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.Users, Microsoft.Win32.RegistryView.Registry64);
+        using Microsoft.Win32.RegistryKey? key = users.OpenSubKey(subKey);
+        return key is not null;
+    }
+
+    /// <summary>
+    /// Loads the offline profile's hive under a throwaway mount, reads
+    /// <c>Software\OpenTheWindows\OfflineUserTest\&lt;name&gt;</c>, and unloads. Returns the
+    /// value as an <see cref="int"/>, or <see langword="null"/> when the value is absent.
+    /// </summary>
+    private static int? ReadOfflineValue(WindowsUserHiveLoader loader, string profileDir, string name)
+    {
+        string mount = "OTW-Verify-" + Guid.NewGuid().ToString("N");
+        loader.Load(mount, Path.Combine(profileDir, "NTUSER.DAT"));
+        try
+        {
+            using var users =
+                Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.Users, Microsoft.Win32.RegistryView.Registry64);
+            using Microsoft.Win32.RegistryKey? key = users.OpenSubKey(mount + @"\Software\OpenTheWindows\OfflineUserTest");
+            return key?.GetValue(name) is int value ? value : null;
+        }
+        finally
+        {
+            loader.Unload(mount);
+        }
+    }
+
     private static void RunGpupdate()
     {
         using var process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo

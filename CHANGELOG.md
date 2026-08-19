@@ -176,6 +176,16 @@ what was planned (plans live in `PLAN.md`).
   fallback so removing a profile's re-enforcement footprint is one command.
   VM-verified on 26200.9168: the registrar writes the component, bumps its version
   on a second apply, and `RemoveAll` deletes it.
+- M5 (profiles, part 16 — all-users revert reloads offline hives): reverting an
+  all-users apply now reloads the hives of users who logged off since the run
+  (the SIDs recorded on the journalled actions, matched to the enumerator's
+  offline profiles), restores each, and unloads them again — so an all-users
+  apply stays reversible even after a user signs out, symmetric with the apply
+  path. VM-verified on 26200.9168 end to end: an all-users apply reaches a
+  genuinely offline user's hive (a synthetic ProfileList profile), writes it, and
+  a revert reloads and restores it to absent. Also VM-verified this milestone: a
+  Group-Policy-managed value (owned by the Local GPO's Registry.pol) is reported
+  Managed and left untouched by apply — the product never fights Group Policy.
 - M4 (Windows Update guardrails): the safe, reversible update controls
   (`OpenTheWindows.Core.Updates`). `PauseCalculator` computes the six Settings-app
   pause values (`PauseUpdatesStartTime`/`ExpiryTime`,

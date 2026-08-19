@@ -250,6 +250,28 @@ public sealed class ApplyEngineTests
     }
 
     [Fact]
+    public void All_users_revert_reloads_an_offline_hive_to_restore_it()
+    {
+        // A logged-off user's hive must be loaded again for the revert, or the value the apply
+        // wrote could never be undone — reversibility must survive the user signing out.
+        var machine = new FakeMachine();
+        var loader = new FakeUserHiveLoader();
+        ApplyHarness h = FakeApplyEngine.Create(
+            machine, userHives: new FakeUserHiveEnumerator(UserHive("S-1-5-21-OFF", loaded: false)), hiveLoader: loader);
+
+        ApplyResult applied = h.Engine.Apply([Entry("test.user", [Reg("U", 1, hive: RegistryHive.User)])], Opts(scope: Scope.AllUsers));
+        Assert.Equal(1, ReadUserDword(machine, "S-1-5-21-OFF", "U"));
+
+        RevertResult reverted = h.Engine.Revert(applied.RunId, new RevertOptions(false, false));
+
+        Assert.Equal(RunState.Completed, reverted.State);
+        Assert.Equal(2, loader.Loaded.Count);   // loaded once for the apply, once for the revert
+        Assert.Equal(2, loader.Unloaded.Count);
+        Assert.All(loader.Loaded, s => Assert.Equal("S-1-5-21-OFF", s));
+        Assert.False(((IRegistryReader)machine).Read(RegistryHive.User, "S-1-5-21-OFF", Path, "U").Exists); // restored to absent
+    }
+
+    [Fact]
     public void All_users_plans_a_user_entry_the_interactive_user_is_compliant_with_and_applies_only_the_drifted_hive()
     {
         var machine = new FakeMachine { User = new InteractiveUser("S-1-5-21-A", @"TEST\a", true) };
