@@ -722,6 +722,32 @@ what was planned (plans live in `PLAN.md`).
 
 ### Fixed
 
+- M4 (Defender ASR under Tamper Protection): the 18 Attack Surface Reduction rules
+  now apply through the Local Group Policy registry
+  (`SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules\<GUID>`,
+  the per-rule value carrying the block/audit action) instead of `Set-MpPreference`.
+  Tamper Protection blocks the `Set-MpPreference` ASR channel — the write is rolled
+  back — but the Group Policy ASR surface is honoured even with Tamper Protection
+  on, so the rules are now applicable on a default machine rather than failing. Each
+  entry is a single Registry Policy action (the per-GUID rule value is sufficient;
+  no shared `ExploitGuard_ASR_Rules` enabler, so reverting one rule never disturbs
+  another). VM-verified on Windows 11 Pro 25H2 with Tamper Protection ON: each rule
+  applies, becomes effective in `Get-MpPreference` with its action preserved, and
+  reverts cleanly.
+
+- M4 (Defender preferences typed correctly): the Microsoft Defender boolean
+  preferences (`DisableRealtimeMonitoring`, `DisableBehaviorMonitoring`,
+  `DisableIOAVProtection`, `DisableScriptScanning`, `DisableBlockAtFirstSeen`,
+  `DisableRemovableDriveScanning`, `DisableArchiveScanning`, `DisableEmailScanning`,
+  `CheckForSignaturesBeforeRunningScan`) now carry JSON boolean values instead of
+  `0`/`1`. `MSFT_MpPreference` exposes these as CIM booleans, so the WMI read
+  returns `true`/`false`; comparing that against an integer desired value reported
+  false drift, and the integer then failed the WMI `Set` (wrong type) so the apply
+  rolled back. With the values typed as booleans,
+  `security.defender.real-time-protection` reads compliant when protection is
+  already on, and `cloud-protection` / `scan-options` apply and revert cleanly under
+  Tamper Protection. VM-verified on 25H2.
+
 - M4 (catalogue verification): `otw scan` no longer reports a policy-managed
   registry value as compliant when the effective value does not match the desired
   data. A value recorded in the Local GPO `Registry.pol` but absent or different in

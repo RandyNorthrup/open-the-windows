@@ -21,26 +21,26 @@
         {
           "kind": "DefenderPreference",
           "property": "DisableRealtimeMonitoring",
-          "value": 0,
-          "default": 0
+          "value": false,
+          "default": false
         },
         {
           "kind": "DefenderPreference",
           "property": "DisableBehaviorMonitoring",
-          "value": 0,
-          "default": 0
+          "value": false,
+          "default": false
         },
         {
           "kind": "DefenderPreference",
           "property": "DisableIOAVProtection",
-          "value": 0,
-          "default": 0
+          "value": false,
+          "default": false
         },
         {
           "kind": "DefenderPreference",
           "property": "DisableScriptScanning",
-          "value": 0,
-          "default": 0
+          "value": false,
+          "default": false
         }
       ],
       "requires": "None",
@@ -91,8 +91,8 @@
         {
           "kind": "DefenderPreference",
           "property": "DisableBlockAtFirstSeen",
-          "value": 0,
-          "default": 0
+          "value": false,
+          "default": false
         },
         {
           "kind": "DefenderPreference",
@@ -519,26 +519,26 @@
         {
           "kind": "DefenderPreference",
           "property": "DisableRemovableDriveScanning",
-          "value": 0,
-          "default": 1
+          "value": false,
+          "default": true
         },
         {
           "kind": "DefenderPreference",
           "property": "DisableArchiveScanning",
-          "value": 0,
-          "default": 0
+          "value": false,
+          "default": false
         },
         {
           "kind": "DefenderPreference",
           "property": "DisableEmailScanning",
-          "value": 0,
-          "default": 1
+          "value": false,
+          "default": true
         },
         {
           "kind": "DefenderPreference",
           "property": "CheckForSignaturesBeforeRunningScan",
-          "value": 1,
-          "default": 0
+          "value": true,
+          "default": false
         }
       ],
       "requires": "None",
@@ -581,20 +581,14 @@
       },
       "actions": [
         {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Ids",
-          "value": [
-            "56a863a9-875e-4185-98a7-b882c64b5ce5"
-          ],
-          "default": []
-        },
-        {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Actions",
-          "value": [
-            1
-          ],
-          "default": []
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+          "name": "56a863a9-875e-4185-98a7-b882c64b5ce5",
+          "type": "Sz",
+          "value": "1",
+          "default": null,
+          "valueKind": "Policy"
         }
       ],
       "requires": "None",
@@ -636,20 +630,14 @@
       },
       "actions": [
         {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Ids",
-          "value": [
-            "9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2"
-          ],
-          "default": []
-        },
-        {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Actions",
-          "value": [
-            1
-          ],
-          "default": []
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+          "name": "9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2",
+          "type": "Sz",
+          "value": "1",
+          "default": null,
+          "valueKind": "Policy"
         }
       ],
       "requires": "None",
@@ -692,20 +680,14 @@
       },
       "actions": [
         {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Ids",
-          "value": [
-            "e6db77e5-3df2-4cf1-b95a-636979351e5b"
-          ],
-          "default": []
-        },
-        {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Actions",
-          "value": [
-            2
-          ],
-          "default": []
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+          "name": "e6db77e5-3df2-4cf1-b95a-636979351e5b",
+          "type": "Sz",
+          "value": "2",
+          "default": null,
+          "valueKind": "Policy"
         }
       ],
       "requires": "None",
@@ -747,20 +729,14 @@
       },
       "actions": [
         {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Ids",
-          "value": [
-            "7674ba52-37eb-4a4f-a9a1-f0f9a1619a2c"
-          ],
-          "default": []
-        },
-        {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Actions",
-          "value": [
-            1
-          ],
-          "default": []
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+          "name": "7674ba52-37eb-4a4f-a9a1-f0f9a1619a2c",
+          "type": "Sz",
+          "value": "1",
+          "default": null,
+          "valueKind": "Policy"
         }
       ],
       "requires": "None",
@@ -802,20 +778,14 @@
       },
       "actions": [
         {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Ids",
-          "value": [
-            "d4f940ab-401b-4efc-aadc-ad5f3c50688a"
-          ],
-          "default": []
-        },
-        {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Actions",
-          "value": [
-            1
-          ],
-          "default": []
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+          "name": "d4f940ab-401b-4efc-aadc-ad5f3c50688a",
+          "type": "Sz",
+          "value": "1",
+          "default": null,
+          "valueKind": "Policy"
         }
       ],
       "requires": "None",
@@ -857,20 +827,14 @@
       },
       "actions": [
         {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Ids",
-          "value": [
-            "be9ba2d9-53ea-4cdc-84e5-9b1eeee46550"
-          ],
-          "default": []
-        },
-        {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Actions",
-          "value": [
-            1
-          ],
-          "default": []
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+          "name": "be9ba2d9-53ea-4cdc-84e5-9b1eeee46550",
+          "type": "Sz",
+          "value": "1",
+          "default": null,
+          "valueKind": "Policy"
         }
       ],
       "requires": "None",
@@ -912,20 +876,14 @@
       },
       "actions": [
         {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Ids",
-          "value": [
-            "01443614-cd74-433a-b99e-2ecdc07bfc25"
-          ],
-          "default": []
-        },
-        {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Actions",
-          "value": [
-            2
-          ],
-          "default": []
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+          "name": "01443614-cd74-433a-b99e-2ecdc07bfc25",
+          "type": "Sz",
+          "value": "2",
+          "default": null,
+          "valueKind": "Policy"
         }
       ],
       "requires": "None",
@@ -967,20 +925,14 @@
       },
       "actions": [
         {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Ids",
-          "value": [
-            "5beb7efe-fd9a-4556-801d-275e5ffc04cc"
-          ],
-          "default": []
-        },
-        {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Actions",
-          "value": [
-            1
-          ],
-          "default": []
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+          "name": "5beb7efe-fd9a-4556-801d-275e5ffc04cc",
+          "type": "Sz",
+          "value": "1",
+          "default": null,
+          "valueKind": "Policy"
         }
       ],
       "requires": "None",
@@ -1024,20 +976,14 @@
       },
       "actions": [
         {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Ids",
-          "value": [
-            "d3e037e1-3eb8-44c8-a917-57927947596d"
-          ],
-          "default": []
-        },
-        {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Actions",
-          "value": [
-            1
-          ],
-          "default": []
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+          "name": "d3e037e1-3eb8-44c8-a917-57927947596d",
+          "type": "Sz",
+          "value": "1",
+          "default": null,
+          "valueKind": "Policy"
         }
       ],
       "requires": "None",
@@ -1079,20 +1025,14 @@
       },
       "actions": [
         {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Ids",
-          "value": [
-            "3b576869-a4ec-4529-8536-b80a7769e899"
-          ],
-          "default": []
-        },
-        {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Actions",
-          "value": [
-            1
-          ],
-          "default": []
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+          "name": "3b576869-a4ec-4529-8536-b80a7769e899",
+          "type": "Sz",
+          "value": "1",
+          "default": null,
+          "valueKind": "Policy"
         }
       ],
       "requires": "None",
@@ -1134,20 +1074,14 @@
       },
       "actions": [
         {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Ids",
-          "value": [
-            "75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84"
-          ],
-          "default": []
-        },
-        {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Actions",
-          "value": [
-            1
-          ],
-          "default": []
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+          "name": "75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84",
+          "type": "Sz",
+          "value": "1",
+          "default": null,
+          "valueKind": "Policy"
         }
       ],
       "requires": "None",
@@ -1189,20 +1123,14 @@
       },
       "actions": [
         {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Ids",
-          "value": [
-            "26190899-1602-49e8-8b27-eb1d0a1ce869"
-          ],
-          "default": []
-        },
-        {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Actions",
-          "value": [
-            1
-          ],
-          "default": []
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+          "name": "26190899-1602-49e8-8b27-eb1d0a1ce869",
+          "type": "Sz",
+          "value": "1",
+          "default": null,
+          "valueKind": "Policy"
         }
       ],
       "requires": "None",
@@ -1244,20 +1172,14 @@
       },
       "actions": [
         {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Ids",
-          "value": [
-            "d1e49aac-8f56-4280-b9ba-993a6d77406c"
-          ],
-          "default": []
-        },
-        {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Actions",
-          "value": [
-            2
-          ],
-          "default": []
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+          "name": "d1e49aac-8f56-4280-b9ba-993a6d77406c",
+          "type": "Sz",
+          "value": "2",
+          "default": null,
+          "valueKind": "Policy"
         }
       ],
       "requires": "None",
@@ -1299,20 +1221,14 @@
       },
       "actions": [
         {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Ids",
-          "value": [
-            "33ddedf1-c6e0-47cb-833e-de6133960387"
-          ],
-          "default": []
-        },
-        {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Actions",
-          "value": [
-            1
-          ],
-          "default": []
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+          "name": "33ddedf1-c6e0-47cb-833e-de6133960387",
+          "type": "Sz",
+          "value": "1",
+          "default": null,
+          "valueKind": "Policy"
         }
       ],
       "requires": "None",
@@ -1352,20 +1268,14 @@
       },
       "actions": [
         {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Ids",
-          "value": [
-            "b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4"
-          ],
-          "default": []
-        },
-        {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Actions",
-          "value": [
-            1
-          ],
-          "default": []
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+          "name": "b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4",
+          "type": "Sz",
+          "value": "1",
+          "default": null,
+          "valueKind": "Policy"
         }
       ],
       "requires": "None",
@@ -1407,20 +1317,14 @@
       },
       "actions": [
         {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Ids",
-          "value": [
-            "c0033c00-d16d-4114-a5a0-dc9b3a7d2ceb"
-          ],
-          "default": []
-        },
-        {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Actions",
-          "value": [
-            1
-          ],
-          "default": []
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+          "name": "c0033c00-d16d-4114-a5a0-dc9b3a7d2ceb",
+          "type": "Sz",
+          "value": "1",
+          "default": null,
+          "valueKind": "Policy"
         }
       ],
       "requires": "None",
@@ -1460,20 +1364,14 @@
       },
       "actions": [
         {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Ids",
-          "value": [
-            "92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b"
-          ],
-          "default": []
-        },
-        {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Actions",
-          "value": [
-            1
-          ],
-          "default": []
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+          "name": "92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b",
+          "type": "Sz",
+          "value": "1",
+          "default": null,
+          "valueKind": "Policy"
         }
       ],
       "requires": "None",
@@ -1515,20 +1413,14 @@
       },
       "actions": [
         {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Ids",
-          "value": [
-            "c1db55ab-c21a-4637-bb3f-a12568109d35"
-          ],
-          "default": []
-        },
-        {
-          "kind": "DefenderPreference",
-          "property": "AttackSurfaceReductionRules_Actions",
-          "value": [
-            1
-          ],
-          "default": []
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR\\Rules",
+          "name": "c1db55ab-c21a-4637-bb3f-a12568109d35",
+          "type": "Sz",
+          "value": "1",
+          "default": null,
+          "valueKind": "Policy"
         }
       ],
       "requires": "None",
