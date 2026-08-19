@@ -27,6 +27,9 @@
         <DataTemplate DataType="{x:Type vm:ProfilesViewModel}">
             <views:ProfilesView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:UpdatesViewModel}">
+            <views:UpdatesView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:AboutViewModel}">
             <views:AboutView />
         </DataTemplate>

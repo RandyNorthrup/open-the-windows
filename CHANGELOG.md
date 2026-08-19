@@ -9,6 +9,14 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M6 (GUI, part 6 — updates page): a new **Updates** page shows the running
+  release and how close it is to end-of-servicing (flagging the 90-day warning
+  window), whether updates are paused and until when, and any pinned release. It
+  offers quick pause presets within the Windows-supported 35-day maximum, an
+  extended pause beyond it behind an explicit warning, and a resume action — all
+  run on a background thread over the existing `UpdateControlService`. When the
+  pause is owned by organisation policy (a what-if pause plans as Managed) the
+  controls switch to a read-only banner, never fighting Group Policy.
 - M6 (GUI, part 5 — profiles): a new **Profiles** page lists the built-in
   profiles, each with its scope, signing state and the number of entries it
   resolves to on this machine. **Review & apply…** resolves the selected profile

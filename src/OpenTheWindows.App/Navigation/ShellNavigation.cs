@@ -15,6 +15,7 @@ internal static class ShellNavigation
     [
         new(PageKeys.Dashboard, Strings.Nav_Dashboard),
         new(PageKeys.Privacy, Strings.Nav_Privacy),
+        new(PageKeys.Updates, Strings.Nav_Updates),
         new(PageKeys.Security, Strings.Nav_Security),
         new(PageKeys.Performance, Strings.Nav_Performance),
         new(PageKeys.Debloat, Strings.Nav_Debloat),

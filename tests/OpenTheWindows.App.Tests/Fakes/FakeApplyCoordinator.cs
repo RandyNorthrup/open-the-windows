@@ -1,9 +1,7 @@
 using OpenTheWindows.App.Services;
-using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Journal;
-using OpenTheWindows.Core.Model;
 
 namespace OpenTheWindows.App.Tests.Fakes;
 
@@ -14,7 +12,7 @@ internal sealed class FakeApplyCoordinator : IApplyCoordinator
     public PlanResult PlanToReturn { get; set; } = new("test", [], []);
 
     /// <summary>The result <see cref="ApplyAsync"/> returns.</summary>
-    public ApplyResult ResultToReturn { get; set; } = Empty();
+    public ApplyResult ResultToReturn { get; set; } = TestResults.EmptyApplyResult();
 
     /// <summary>How many times <see cref="Preview"/> was called.</summary>
     public int PreviewCount { get; private set; }
@@ -78,13 +76,4 @@ internal sealed class FakeApplyCoordinator : IApplyCoordinator
         LastRevertRunId = runId;
         return Task.FromResult(RevertResultToReturn);
     }
-
-    private static ApplyResult Empty() => new(
-        Guid.Empty,
-        RunState.Completed,
-        RestartRequirement.None,
-        new RestorePointResult(RestorePointStatus.NotRequested, null, "test"),
-        new PreflightReport([]),
-        new PlanResult("test", [], []),
-        []);
 }

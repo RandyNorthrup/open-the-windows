@@ -9,6 +9,7 @@ using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Model;
+using OpenTheWindows.Core.Updates;
 using OpenTheWindows.Windows;
 using OpenTheWindows.Windows.Readers;
 
@@ -46,6 +47,8 @@ internal sealed partial class DesktopApp : Application, IDisposable
         services.AddSingleton<Func<ApplyFlowViewModel>>(sp => sp.GetRequiredService<ApplyFlowViewModel>);
         services.AddSingleton<IApplyFlowLauncher, ApplyFlowLauncher>();
         services.AddSingleton<IFileDialogService, FileDialogService>();
+        services.AddSingleton<Func<UpdateControlService>>(_ => static () => WindowsUpdateControlFactory.Create());
+        services.AddSingleton<IUpdateCoordinator, UpdateCoordinator>();
 
         // Shell services.
         services.AddSingleton<IDispatcherService>(_ => new WpfDispatcherService(Dispatcher.CurrentDispatcher));
@@ -56,6 +59,7 @@ internal sealed partial class DesktopApp : Application, IDisposable
         // Page view models (keyed by page so the navigation service resolves them).
         services.AddSingleton<DoctorViewModel>();
         services.AddKeyedSingleton<IPageViewModel, DashboardViewModel>(PageKeys.Dashboard);
+        services.AddKeyedSingleton<IPageViewModel, UpdatesViewModel>(PageKeys.Updates);
         foreach (Category category in new[] { Category.Privacy, Category.Security, Category.Performance, Category.Debloat, Category.Shell })
         {
             services.AddKeyedSingleton<IPageViewModel>(
