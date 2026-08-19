@@ -399,6 +399,15 @@ internal class Strings
         }
     }
 
+    /// <summary>Looks up a localized string similar to All baselines.</summary>
+    internal static string Filter_AllBaselines
+    {
+        get
+        {
+            return ResourceManager.GetString("Filter_AllBaselines", resourceCulture);
+        }
+    }
+
     /// <summary>Looks up a localized string similar to Include draft entries.</summary>
     internal static string Category_IncludeDraft
     {

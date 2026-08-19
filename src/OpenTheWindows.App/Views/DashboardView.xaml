@@ -73,6 +73,54 @@
             </Grid>
         </Border>
 
+        <TextBlock Text="Security baselines"
+                   FontSize="18"
+                   FontWeight="SemiBold"
+                   Margin="0,24,0,8" />
+        <Border Padding="16"
+                CornerRadius="8"
+                BorderThickness="1"
+                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                HorizontalAlignment="Stretch">
+            <StackPanel>
+                <TextBlock Text="{Binding AuditStatus}"
+                           Opacity="0.75"
+                           Margin="0,0,0,8"
+                           TextWrapping="Wrap"
+                           AutomationProperties.AutomationId="Dashboard_AuditStatus" />
+                <ItemsControl ItemsSource="{Binding BaselineScores}"
+                              AutomationProperties.AutomationId="Dashboard_BaselineScores">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                    <ProgressBar Minimum="0" Maximum="100" Value="{Binding Score, Mode=OneWay}"
+                                                 Height="8" Margin="0,4" />
+                                    <TextBlock Text="{Binding Summary}" FontSize="12" Opacity="0.7" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding ScoreLabel}"
+                                           FontSize="20"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Button Content="Re-score"
+                        Command="{Binding RefreshScoresCommand}"
+                        HorizontalAlignment="Left"
+                        Margin="0,4,0,0"
+                        Padding="16,6"
+                        AutomationProperties.AutomationId="Dashboard_ReScoreButton" />
+            </StackPanel>
+        </Border>
+
         <TextBlock Text="Quick actions"
                    FontSize="18"
                    FontWeight="SemiBold"

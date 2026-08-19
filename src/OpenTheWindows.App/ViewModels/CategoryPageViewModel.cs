@@ -6,6 +6,7 @@ using OpenTheWindows.App.Navigation;
 using OpenTheWindows.App.Resources;
 using OpenTheWindows.App.Services;
 using OpenTheWindows.Core.Abstractions;
+using OpenTheWindows.Core.Audit;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Model;
 
@@ -26,6 +27,7 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
     private readonly IApplyFlowLauncher _applyFlow;
     private readonly AppSettings _settings;
     private bool _updatingSelection;
+    private HashSet<TweakId> _baselineTweakIds = [];
 
     [ObservableProperty]
     private Level _level = Level.Off;
@@ -37,6 +39,9 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
     private RiskTier? _riskFilter;
 
     [ObservableProperty]
+    private Baseline? _baselineFilter;
+
+    [ObservableProperty]
     private bool _includeDraft;
 
     [ObservableProperty]
@@ -45,11 +50,12 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
     [ObservableProperty]
     private string _selectionSummary = string.Empty;
 
-    /// <summary>Builds the page for one category over the catalogue, machine facts, the apply launcher and settings.</summary>
-    public CategoryPageViewModel(Category category, TweakCatalog catalog, OperatingSystemFacts facts, IApplyFlowLauncher applyFlow, AppSettings settings)
+    /// <summary>Builds the page for one category over the catalogue, machine facts, the baselines, the apply launcher and settings.</summary>
+    public CategoryPageViewModel(Category category, TweakCatalog catalog, OperatingSystemFacts facts, IReadOnlyList<Baseline> baselines, IApplyFlowLauncher applyFlow, AppSettings settings)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(facts);
+        ArgumentNullException.ThrowIfNull(baselines);
         ArgumentNullException.ThrowIfNull(applyFlow);
         ArgumentNullException.ThrowIfNull(settings);
         _category = category;
@@ -76,6 +82,12 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
             new LabeledOption(RiskTier.Breaking, DisplayLabels.For(RiskTier.Breaking)),
         ];
 
+        // Baselines map almost entirely to security controls, so the baseline filter is
+        // offered on the Security page only; other categories get no options and hide it.
+        BaselineFilterOptions = category == Category.Security
+            ? [new LabeledOption(null, Strings.Filter_AllBaselines), .. baselines.Select(b => new LabeledOption(b, b.Title))]
+            : [];
+
         Items = [];
         _includeDraft = settings.IncludeDraft;
         RebuildItems();
@@ -99,6 +111,12 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
 
     /// <summary>The risk-filter options (including "all").</summary>
     public IReadOnlyList<LabeledOption> RiskFilterOptions { get; }
+
+    /// <summary>The baseline-filter options (an "all" entry plus each baseline); empty except on the Security page.</summary>
+    public IReadOnlyList<LabeledOption> BaselineFilterOptions { get; }
+
+    /// <summary>Whether the baseline filter is offered on this page (Security only).</summary>
+    public bool ShowBaselineFilter => _category == Category.Security;
 
     /// <summary>The entries currently selected for apply.</summary>
     public IReadOnlyList<TweakItemViewModel> SelectedItems => [.. AllItems.Where(i => i.IsSelected)];
@@ -131,6 +149,12 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
 
     partial void OnRiskFilterChanged(RiskTier? value) => RebuildItems();
 
+    partial void OnBaselineFilterChanged(Baseline? value)
+    {
+        _baselineTweakIds = value is null ? [] : [.. value.Rules.SelectMany(r => r.TweakIds)];
+        RebuildItems();
+    }
+
     private void ApplyLevelSelection()
     {
         HashSet<TweakId> selectedIds = [.. _catalog.Select(_category, Level, IncludeDraft).Select(e => e.Id)];
@@ -162,6 +186,11 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
             }
 
             if (RiskFilter is RiskTier risk && item.Risk != risk)
+            {
+                continue;
+            }
+
+            if (BaselineFilter is not null && !_baselineTweakIds.Contains(item.Id))
             {
                 continue;
             }

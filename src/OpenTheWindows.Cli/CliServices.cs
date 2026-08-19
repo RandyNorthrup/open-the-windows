@@ -59,19 +59,7 @@ internal sealed record CliServices(
             new WindowsMachineHealthProbe(),
             new WindowsElevationContext());
 
-    private static ScanEngine CreateDefaultScanEngine()
-        => new(
-            new WindowsRegistryReader(),
-            new WindowsServiceReader(),
-            new WindowsScheduledTaskReader(),
-            new WindowsAppxReader(),
-            new WindowsOptionalFeatureReader(),
-            new WindowsDefenderPreferenceReader(),
-            new WindowsPowerSettingReader(),
-            new WindowsInteractiveUserResolver(),
-            new WindowsManagedSettingDetector(),
-            new WindowsOperatingSystemInfo(),
-            TimeProvider.System);
+    private static ScanEngine CreateDefaultScanEngine() => WindowsScanEngineFactory.Create();
 
     private static ApplyEngine CreateDefaultApplyEngine() => WindowsApplyEngineFactory.Create();
 }

@@ -9,6 +9,17 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M8 (audit, part 4 — GUI hooks): the Dashboard gains a **Security baselines** card
+  that scores the machine against each built-in baseline (read-only, off the UI
+  thread, on first activation) with a per-baseline progress bar, score and outcome
+  summary, plus a **Re-score** action. The Security page gains a **Baseline** filter
+  that narrows the list to the tweaks a selected baseline references (offered on the
+  Security page only, since baselines map almost entirely to security controls). A
+  new app-side `IAuditCoordinator` builds the `AuditEngine` lazily off the
+  DI-validation path (mirroring the apply/update coordinators); the read-only
+  `ScanEngine` wiring is now a shared `WindowsScanEngineFactory` used by both the
+  CLI and the GUI.
+
 - M8 (audit, part 3 — the `otw audit` command and fleet drop): `otw audit run
   --baseline <id|file> [--json|--csv|--html|--sarif] [--out] [--sign <pem>]` audits
   the machine against a baseline (read-only; no elevation required) and writes the

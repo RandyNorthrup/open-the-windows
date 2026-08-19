@@ -182,6 +182,9 @@
   <data name="Filter_AllRisks" xml:space="preserve">
     <value>All risks</value>
   </data>
+  <data name="Filter_AllBaselines" xml:space="preserve">
+    <value>All baselines</value>
+  </data>
   <data name="Category_IncludeDraft" xml:space="preserve">
     <value>Include draft entries</value>
   </data>

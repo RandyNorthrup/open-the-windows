@@ -5,6 +5,7 @@ using OpenTheWindows.App.Navigation;
 using OpenTheWindows.App.Services;
 using OpenTheWindows.App.ViewModels;
 using OpenTheWindows.Core.Abstractions;
+using OpenTheWindows.Core.Audit;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.Core.Engine;
@@ -49,6 +50,7 @@ internal sealed partial class DesktopApp : Application, IDisposable
         services.AddSingleton<IFileDialogService, FileDialogService>();
         services.AddSingleton<Func<UpdateControlService>>(_ => static () => WindowsUpdateControlFactory.Create());
         services.AddSingleton<IUpdateCoordinator, UpdateCoordinator>();
+        RegisterAudit(services);
 
         // Shell services.
         services.AddSingleton<AppSettings>();
@@ -78,6 +80,17 @@ internal sealed partial class DesktopApp : Application, IDisposable
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<MainWindow>();
         return services;
+    }
+
+    // Audit (read-only): the built-in baselines, the health probe, and the audit
+    // engine built lazily by the coordinator off the DI-validation path.
+    private static void RegisterAudit(IServiceCollection services)
+    {
+        services.AddSingleton<IMachineHealthProbe, WindowsMachineHealthProbe>();
+        services.AddSingleton<IReadOnlyList<Baseline>>(_ => BaselineLoader.LoadBuiltIn().Baselines);
+        services.AddSingleton<Func<AuditEngine>>(sp => () => new AuditEngine(
+            WindowsScanEngineFactory.Create(), sp.GetRequiredService<IMachineHealthProbe>(), sp.GetRequiredService<TweakCatalog>()));
+        services.AddSingleton<IAuditCoordinator, AuditCoordinator>();
     }
 
     /// <inheritdoc />

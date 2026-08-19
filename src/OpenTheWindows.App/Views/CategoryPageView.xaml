@@ -33,6 +33,7 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Column="0" Text="Level" VerticalAlignment="Center" Margin="0,0,8,0" />
@@ -62,7 +63,18 @@
                       AutomationProperties.Name="Filter by risk"
                       AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_RiskFilter}" />
 
-            <CheckBox Grid.Column="4"
+            <ComboBox Grid.Column="4"
+                      MinWidth="150"
+                      Margin="0,0,12,0"
+                      Visibility="{Binding ShowBaselineFilter, Converter={StaticResource BoolToVisibility}}"
+                      ItemsSource="{Binding BaselineFilterOptions}"
+                      DisplayMemberPath="Label"
+                      SelectedValuePath="Value"
+                      SelectedValue="{Binding BaselineFilter, Mode=TwoWay}"
+                      AutomationProperties.Name="Filter by baseline"
+                      AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_BaselineFilter}" />
+
+            <CheckBox Grid.Column="5"
                       VerticalAlignment="Center"
                       Margin="0,0,12,0"
                       Content="Drafts"
@@ -70,14 +82,14 @@
                       AutomationProperties.Name="Include draft entries"
                       AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_IncludeDraft}" />
 
-            <TextBlock Grid.Column="5"
+            <TextBlock Grid.Column="6"
                        VerticalAlignment="Center"
                        Opacity="0.75"
                        Margin="0,0,12,0"
                        Text="{Binding SelectionSummary}"
                        AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_SelectionSummary}" />
 
-            <Button Grid.Column="6"
+            <Button Grid.Column="7"
                     Content="Review &amp; apply…"
                     Padding="14,5"
                     Command="{Binding ReviewAndApplyCommand}"

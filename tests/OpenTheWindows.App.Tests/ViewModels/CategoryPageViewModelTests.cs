@@ -3,6 +3,7 @@ using OpenTheWindows.App.Services;
 using OpenTheWindows.App.Tests.Fakes;
 using OpenTheWindows.App.ViewModels;
 using OpenTheWindows.Core.Abstractions;
+using OpenTheWindows.Core.Audit;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Model;
 using OpenTheWindows.TestSupport.Fakes;
@@ -18,12 +19,13 @@ public sealed class CategoryPageViewModelTests
 {
     private static readonly TweakCatalog Catalog = CatalogLoader.LoadBuiltIn().Catalog!;
     private static readonly OperatingSystemFacts Facts = FakeOperatingSystemInfo.Windows11Pro24H2();
+    private static readonly IReadOnlyList<Baseline> Baselines = BaselineLoader.LoadBuiltIn().Baselines;
 
     private static CategoryPageViewModel Build(Category category = Category.Privacy) => Build(category, new FakeApplyFlowLauncher());
 
     private static CategoryPageViewModel Build(Category category, IApplyFlowLauncher launcher) => Build(category, launcher, new AppSettings());
 
-    private static CategoryPageViewModel Build(Category category, IApplyFlowLauncher launcher, AppSettings settings) => new(category, Catalog, Facts, launcher, settings);
+    private static CategoryPageViewModel Build(Category category, IApplyFlowLauncher launcher, AppSettings settings) => new(category, Catalog, Facts, Baselines, launcher, settings);
 
     [Fact]
     public void Is_the_matching_page_with_applicable_entries()
@@ -191,5 +193,32 @@ public sealed class CategoryPageViewModelTests
         Assert.Equal(Level.Off, page.LevelOptions[0].Value);
         Assert.Equal(5, page.RiskFilterOptions.Count);
         Assert.Null(page.RiskFilterOptions[0].Value);
+    }
+
+    [Fact]
+    public void The_baseline_filter_is_offered_only_on_the_security_page()
+    {
+        Assert.False(Build(Category.Privacy).ShowBaselineFilter);
+        Assert.Empty(Build(Category.Privacy).BaselineFilterOptions);
+
+        CategoryPageViewModel security = Build(Category.Security);
+        Assert.True(security.ShowBaselineFilter);
+        // "All baselines" plus one option per built-in baseline.
+        Assert.Equal(Baselines.Count + 1, security.BaselineFilterOptions.Count);
+        Assert.Null(security.BaselineFilterOptions[0].Value);
+    }
+
+    [Fact]
+    public void The_baseline_filter_narrows_the_list_to_the_baseline_tweaks()
+    {
+        CategoryPageViewModel page = Build(Category.Security);
+        page.IncludeDraft = true;
+        Baseline baseline = Baselines.First(b => string.Equals(b.Id, "disa-stig-v2r7", StringComparison.Ordinal));
+        HashSet<TweakId> baselineIds = [.. baseline.Rules.SelectMany(r => r.TweakIds)];
+
+        page.BaselineFilter = baseline;
+
+        Assert.NotEmpty(page.Items);
+        Assert.All(page.Items, item => Assert.Contains(item.Id, baselineIds));
     }
 }
