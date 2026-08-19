@@ -203,7 +203,7 @@ internal static class ProfileCommand
             return ExitCodes.InvalidInput;
         }
 
-        using ECDsa? key = LoadKey(parseResult.GetValue(keyOption) ?? string.Empty, stderr);
+        using ECDsa? key = CommandSupport.LoadEcKey(parseResult.GetValue(keyOption) ?? string.Empty, stderr);
         if (key is null)
         {
             return ExitCodes.InvalidInput;
@@ -290,7 +290,7 @@ internal static class ProfileCommand
         verified = false;
         if (keyPath is not null)
         {
-            using ECDsa? key = LoadKey(keyPath, stderr);
+            using ECDsa? key = CommandSupport.LoadEcKey(keyPath, stderr);
             if (key is null)
             {
                 return false;
@@ -321,30 +321,6 @@ internal static class ProfileCommand
 
         stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Signature file '{path}' is not a valid signature document."));
         return false;
-    }
-
-    /// <summary>Loads an EC key (public or private) from a PEM file, or reports why it could not and returns null.</summary>
-    private static ECDsa? LoadKey(string pemPath, TextWriter stderr)
-    {
-        if (!File.Exists(pemPath))
-        {
-            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Key file '{pemPath}' does not exist."));
-            return null;
-        }
-
-        var created = ECDsa.Create();
-        try
-        {
-            created.ImportFromPem(File.ReadAllText(pemPath));
-        }
-        catch (Exception ex) when (ex is ArgumentException or CryptographicException)
-        {
-            created.Dispose();
-            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Could not read an EC key from '{pemPath}': {ex.Message}"));
-            return null;
-        }
-
-        return created;
     }
 
     /// <summary>

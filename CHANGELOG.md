@@ -9,6 +9,19 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M8 (audit, part 3 — the `otw audit` command and fleet drop): `otw audit run
+  --baseline <id|file> [--json|--csv|--html|--sarif] [--out] [--sign <pem>]` audits
+  the machine against a baseline (read-only; no elevation required) and writes the
+  report in the chosen format, defaulting to a text summary (score, counts and the
+  failing rules) on stdout. `--sign` signs the JSON report with an ES256 PEM key
+  and is refused for the non-JSON formats. `otw audit list` lists the built-in
+  baselines. `otw task install --audit <id> --out <path> [--weekly|…]` registers a
+  SYSTEM, hidden scheduled task (`\OpenTheWindows\Audit`) that runs the audit and
+  drops the JSON report to `--out` (for example a fleet UNC share);
+  `--profile` and `--audit` are mutually exclusive. The shared report-emit,
+  EC-key-load and scheduled-task shape are factored into `CommandSupport` /
+  `ScheduledTasks` and reused by the scan, profile and remediation paths.
+
 - M8 (audit, part 2 — report exporters and signing): an audit report exports to
   four formats — JSON, CSV, HTML and SARIF (`IAuditReportWriter`). The JSON export
   wraps the report in a `SignedAuditReport` carrying a SHA-256 integrity hash over

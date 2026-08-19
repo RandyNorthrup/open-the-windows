@@ -102,6 +102,58 @@ public sealed class TaskCommandTests
     }
 
     [Fact]
+    public void Install_audit_registers_the_audit_task()
+    {
+        var installer = new FakeScheduledTaskInstaller();
+        var (root, stdout, stderr) = Build(installer);
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "task", "install", "--audit", "disa-stig-v2r7", "--out", @"\\srv\audits\host.json", "--weekly");
+
+        Assert.Equal(ExitCodes.Success, code);
+        ScheduledTaskSpec spec = Assert.Single(installer.Installed);
+        Assert.Equal(AuditReportTask.TaskPath, spec.TaskPath);
+        Assert.Equal(TaskTrigger.Weekly, spec.Trigger);
+        Assert.Contains("audit run --baseline \"disa-stig-v2r7\"", spec.Arguments, StringComparison.Ordinal);
+        Assert.Contains(@"--out ""\\srv\audits\host.json""", spec.Arguments, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Install_audit_without_out_exits_4()
+    {
+        var installer = new FakeScheduledTaskInstaller();
+        var (root, stdout, stderr) = Build(installer);
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "task", "install", "--audit", "disa-stig-v2r7", "--weekly");
+
+        Assert.Equal(ExitCodes.InvalidInput, code);
+        Assert.Empty(installer.Installed);
+    }
+
+    [Fact]
+    public void Install_audit_unknown_baseline_exits_4()
+    {
+        var installer = new FakeScheduledTaskInstaller();
+        var (root, stdout, stderr) = Build(installer);
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "task", "install", "--audit", "no-such-baseline", "--out", @"C:\a.json");
+
+        Assert.Equal(ExitCodes.InvalidInput, code);
+        Assert.Empty(installer.Installed);
+    }
+
+    [Fact]
+    public void Install_profile_and_audit_together_exits_4()
+    {
+        var installer = new FakeScheduledTaskInstaller();
+        var (root, stdout, stderr) = Build(installer);
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "task", "install", "--profile", "home", "--audit", "disa-stig-v2r7", "--out", @"C:\a.json");
+
+        Assert.Equal(ExitCodes.InvalidInput, code);
+        Assert.Empty(installer.Installed);
+    }
+
+    [Fact]
     public void Remove_deletes_the_task()
     {
         var installer = new FakeScheduledTaskInstaller();

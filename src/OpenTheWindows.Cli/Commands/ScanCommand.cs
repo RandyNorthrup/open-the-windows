@@ -1,6 +1,5 @@
 using System.CommandLine;
 using System.Globalization;
-using System.Text;
 using OpenTheWindows.Core;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
@@ -64,7 +63,7 @@ internal static class ScanCommand
 
         if (writer is not null)
         {
-            WriteReport(writer, report, outPath, stdout);
+            CommandSupport.EmitReport(writer.Extension, outPath, stdout, stream => writer.Write(report, stream));
         }
         else
         {
@@ -72,22 +71,6 @@ internal static class ScanCommand
         }
 
         return report.IsCompliant ? ExitCodes.Success : ExitCodes.Drift;
-    }
-
-    private static void WriteReport(IReportWriter writer, ScanReport report, string? outPath, TextWriter stdout)
-    {
-        if (outPath is not null)
-        {
-            using FileStream file = File.Create(outPath);
-            writer.Write(report, file);
-            stdout.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Wrote {writer.Extension} report to {outPath}"));
-            return;
-        }
-
-        using var buffer = new MemoryStream();
-        writer.Write(report, buffer);
-        stdout.Write(Encoding.UTF8.GetString(buffer.ToArray()));
-        stdout.WriteLine();
     }
 
     private static void WriteSummary(TextWriter stdout, ScanReport report)

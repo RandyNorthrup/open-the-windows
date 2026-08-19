@@ -20,4 +20,5 @@ namespace OpenTheWindows.Core.Audit;
 [JsonSerializable(typeof(Baseline))]
 [JsonSerializable(typeof(IReadOnlyList<Baseline>))]
 [JsonSerializable(typeof(BaselineValidationReport))]
+[JsonSerializable(typeof(IReadOnlyList<BaselineSummary>))]
 public sealed partial class BaselineJsonContext : JsonSerializerContext;

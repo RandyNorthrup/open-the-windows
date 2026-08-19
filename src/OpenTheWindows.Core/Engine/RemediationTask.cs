@@ -42,14 +42,6 @@ public static class RemediationTask
             CultureInfo.InvariantCulture,
             $"Open the Windows: re-enforce profile '{profile}' (drift remediation).");
 
-        return new ScheduledTaskSpec(
-            TaskPath,
-            description,
-            executablePath,
-            arguments,
-            trigger,
-            RunAsSystem: true,
-            HighestPrivileges: true,
-            Hidden: true);
+        return ScheduledTasks.System(TaskPath, description, executablePath, arguments, trigger);
     }
 }

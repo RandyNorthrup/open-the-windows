@@ -1,5 +1,7 @@
 using System.CommandLine;
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using OpenTheWindows.Core;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
@@ -54,6 +56,52 @@ internal static class CommandSupport
         catalog = loaded.Catalog;
         exitCode = ExitCodes.Success;
         return true;
+    }
+
+    /// <summary>
+    /// Emits a report: to <paramref name="outPath"/> (printing a "Wrote … to …"
+    /// line) when given, otherwise to <paramref name="stdout"/> as UTF-8 text.
+    /// <paramref name="write"/> renders the report to the supplied stream.
+    /// </summary>
+    public static void EmitReport(string extension, string? outPath, TextWriter stdout, Action<Stream> write)
+    {
+        ArgumentNullException.ThrowIfNull(write);
+        if (outPath is not null)
+        {
+            using FileStream file = File.Create(outPath);
+            write(file);
+            stdout.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Wrote {extension} report to {outPath}"));
+            return;
+        }
+
+        using var buffer = new MemoryStream();
+        write(buffer);
+        stdout.Write(Encoding.UTF8.GetString(buffer.ToArray()));
+        stdout.WriteLine();
+    }
+
+    /// <summary>Loads an EC key (public or private) from a PEM file, or reports why it could not and returns null.</summary>
+    public static ECDsa? LoadEcKey(string pemPath, TextWriter stderr)
+    {
+        if (!File.Exists(pemPath))
+        {
+            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Key file '{pemPath}' does not exist."));
+            return null;
+        }
+
+        var created = ECDsa.Create();
+        try
+        {
+            created.ImportFromPem(File.ReadAllText(pemPath));
+        }
+        catch (Exception ex) when (ex is ArgumentException or CryptographicException)
+        {
+            created.Dispose();
+            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Could not read an EC key from '{pemPath}': {ex.Message}"));
+            return null;
+        }
+
+        return created;
     }
 
     /// <summary>

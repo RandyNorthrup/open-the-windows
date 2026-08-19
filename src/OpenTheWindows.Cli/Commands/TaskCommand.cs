@@ -2,6 +2,7 @@ using System.CommandLine;
 using System.Globalization;
 using OpenTheWindows.Core;
 using OpenTheWindows.Core.Abstractions;
+using OpenTheWindows.Core.Audit;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Profiles;
 
@@ -30,18 +31,22 @@ internal static class TaskCommand
     private static Command CreateInstall(CliServices services)
     {
         var profile = CommandSupport.ProfileOption();
+        var audit = new Option<string?>("--audit") { Description = "Install an audit task for this baseline id (see 'otw audit list') instead of a remediation task; requires --out." };
+        var outOption = new Option<string?>("--out") { Description = "For an audit task: the path the JSON report is written to (for example a fleet UNC share)." };
         var daily = new Option<bool>("--daily") { Description = "Run once a day (the default schedule)." };
         var weekly = new Option<bool>("--weekly") { Description = "Run once a week." };
         var onLogon = new Option<bool>("--on-logon") { Description = "Run at every user logon." };
         var onBuildChange = new Option<bool>("--on-build-change") { Description = "Run at system start, re-applying only after a feature update (an OS build/UBR change)." };
 
-        var command = new Command("install", "Register the remediation task for a profile (replacing any existing one).");
+        var command = new Command("install", "Register a remediation task for a profile, or an audit task for a baseline (replacing any existing one).");
         command.Options.Add(profile);
+        command.Options.Add(audit);
+        command.Options.Add(outOption);
         command.Options.Add(daily);
         command.Options.Add(weekly);
         command.Options.Add(onLogon);
         command.Options.Add(onBuildChange);
-        command.SetAction(parseResult => ExecuteInstall(parseResult, services, profile, daily, weekly, onLogon, onBuildChange));
+        command.SetAction(parseResult => ExecuteInstall(parseResult, services, profile, audit, outOption, daily, weekly, onLogon, onBuildChange));
         return command;
     }
 
@@ -53,20 +58,19 @@ internal static class TaskCommand
     }
 
     private static int ExecuteInstall(
-        ParseResult parseResult, CliServices services, Option<string> profileOption,
+        ParseResult parseResult, CliServices services, Option<string> profileOption, Option<string?> auditOption, Option<string?> outOption,
         Option<bool> dailyOption, Option<bool> weeklyOption, Option<bool> onLogonOption, Option<bool> onBuildChangeOption)
     {
-        if (!CommandSupport.TryBeginElevated(services, parseResult, "Installing the remediation task", out TextWriter stdout, out TextWriter stderr, out int exitCode))
+        if (!CommandSupport.TryBeginElevated(services, parseResult, "Installing the scheduled task", out TextWriter stdout, out TextWriter stderr, out int exitCode))
         {
             return exitCode;
         }
 
         string profile = parseResult.GetValue(profileOption) ?? string.Empty;
-        if (!IsKnownProfile(profile))
+        string? auditBaseline = parseResult.GetValue(auditOption);
+        if (auditBaseline is not null && profile.Length > 0)
         {
-            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture,
-                $"Unknown profile '{profile}'. Use a level ({string.Join(", ", NamedProfile.Names)}), a built-in profile id " +
-                $"({string.Join(", ", ProfileLoader.BuiltInIds)}), or a path to a profile .json file."));
+            stderr.WriteLine("Choose either --profile (a remediation task) or --audit (an audit task), not both.");
             return ExitCodes.InvalidInput;
         }
 
@@ -83,10 +87,47 @@ internal static class TaskCommand
             return ExitCodes.Error;
         }
 
+        return auditBaseline is not null
+            ? InstallAuditTask(services, auditBaseline, parseResult.GetValue(outOption), trigger, executable, stdout, stderr)
+            : InstallRemediationTask(services, profile, trigger, executable, stdout, stderr);
+    }
+
+    private static int InstallRemediationTask(CliServices services, string profile, TaskTrigger trigger, string executable, TextWriter stdout, TextWriter stderr)
+    {
+        if (!IsKnownProfile(profile))
+        {
+            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture,
+                $"Unknown profile '{profile}'. Use a level ({string.Join(", ", NamedProfile.Names)}), a built-in profile id " +
+                $"({string.Join(", ", ProfileLoader.BuiltInIds)}), or a path to a profile .json file."));
+            return ExitCodes.InvalidInput;
+        }
+
         ScheduledTaskSpec spec = RemediationTask.Build(profile, trigger, executable, RemediationTask.DefaultReportPath);
         services.CreateTaskInstaller().Install(spec);
         stdout.WriteLine(string.Create(CultureInfo.InvariantCulture,
             $"Installed task '{spec.TaskPath}' ({trigger}) for profile '{profile}'. Reports: {RemediationTask.DefaultReportPath}"));
+        return ExitCodes.Success;
+    }
+
+    private static int InstallAuditTask(CliServices services, string baselineId, string? outPath, TaskTrigger trigger, string executable, TextWriter stdout, TextWriter stderr)
+    {
+        if (BaselineLoader.TryLoadBuiltIn(baselineId) is null)
+        {
+            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture,
+                $"Unknown baseline '{baselineId}'. Use a built-in id ({string.Join(", ", BaselineLoader.BuiltInIds)})."));
+            return ExitCodes.InvalidInput;
+        }
+
+        if (string.IsNullOrEmpty(outPath))
+        {
+            stderr.WriteLine("--audit requires --out (the path the report is written to, for example a fleet UNC share).");
+            return ExitCodes.InvalidInput;
+        }
+
+        ScheduledTaskSpec spec = AuditReportTask.Build(baselineId, trigger, executable, outPath);
+        services.CreateTaskInstaller().Install(spec);
+        stdout.WriteLine(string.Create(CultureInfo.InvariantCulture,
+            $"Installed task '{spec.TaskPath}' ({trigger}) auditing baseline '{baselineId}'. Report: {outPath}"));
         return ExitCodes.Success;
     }
 
