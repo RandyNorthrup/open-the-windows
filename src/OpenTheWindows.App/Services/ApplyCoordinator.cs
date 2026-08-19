@@ -1,6 +1,7 @@
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Engine;
+using OpenTheWindows.Core.Journal;
 
 namespace OpenTheWindows.App.Services;
 
@@ -51,4 +52,14 @@ internal sealed class ApplyCoordinator : IApplyCoordinator
             _explorer.RestartForSession(user.Sid);
         }
     });
+
+    /// <inheritdoc />
+    public IReadOnlyList<JournalSummary> History() => _engine.Value.History();
+
+    /// <inheritdoc />
+    public Task<RevertResult> RevertAsync(Guid runId, RevertOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        return Task.Run(() => _engine.Value.Revert(runId, options));
+    }
 }

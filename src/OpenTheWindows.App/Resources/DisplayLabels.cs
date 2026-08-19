@@ -82,6 +82,16 @@ internal static class DisplayLabels
         _ => state.ToString(),
     };
 
+    /// <summary>A human-readable label for the state of a whole run.</summary>
+    public static string For(RunState state) => state switch
+    {
+        RunState.InProgress => "In progress",
+        RunState.Completed => "Completed",
+        RunState.RolledBack => "Rolled back",
+        RunState.Failed => "Failed",
+        _ => state.ToString(),
+    };
+
     /// <summary>The "n of m selected" summary for a category page.</summary>
     public static string SelectedCount(int selected, int total) => string.Format(CultureInfo.CurrentCulture, SelectedCountFormat, selected, total);
 

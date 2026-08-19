@@ -37,8 +37,10 @@ internal sealed class NavigationService : INavigationService
             return;
         }
 
-        CurrentPage = _provider.GetRequiredKeyedService<IPageViewModel>(pageKey);
+        IPageViewModel page = _provider.GetRequiredKeyedService<IPageViewModel>(pageKey);
+        CurrentPage = page;
         CurrentPageKey = pageKey;
+        (page as IActivatable)?.OnActivated();
         CurrentPageChanged?.Invoke(this, EventArgs.Empty);
     }
 }

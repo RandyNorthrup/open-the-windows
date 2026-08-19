@@ -62,6 +62,7 @@ internal sealed partial class DesktopApp : Application, IDisposable
                 (sp, _) => ActivatorUtilities.CreateInstance<CategoryPageViewModel>(sp, category));
         }
 
+        services.AddKeyedSingleton<IPageViewModel, HistoryViewModel>(PageKeys.History);
         services.AddKeyedSingleton<IPageViewModel, AboutViewModel>(PageKeys.About);
 
         // Shell.

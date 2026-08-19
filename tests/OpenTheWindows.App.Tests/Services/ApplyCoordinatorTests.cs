@@ -48,6 +48,12 @@ public sealed class ApplyCoordinatorTests
     }
 
     [Fact]
+    public void History_is_empty_before_any_run()
+    {
+        Assert.Empty(Build().History());
+    }
+
+    [Fact]
     public void Rejects_null_dependencies()
     {
         Assert.Throws<ArgumentNullException>(() => new ApplyCoordinator(null!, _explorer, _machine));

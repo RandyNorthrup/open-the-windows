@@ -1,5 +1,6 @@
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Engine;
+using OpenTheWindows.Core.Journal;
 
 namespace OpenTheWindows.App.Services;
 
@@ -18,4 +19,10 @@ internal interface IApplyCoordinator
 
     /// <summary>Restarts Explorer for the interactive user's session, off the UI thread.</summary>
     Task RestartExplorerAsync();
+
+    /// <summary>The prior runs, newest first.</summary>
+    IReadOnlyList<JournalSummary> History();
+
+    /// <summary>Reverts a prior run, restoring its captured prior state, on a background thread.</summary>
+    Task<RevertResult> RevertAsync(Guid runId, RevertOptions options);
 }

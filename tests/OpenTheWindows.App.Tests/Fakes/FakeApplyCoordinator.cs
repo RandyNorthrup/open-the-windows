@@ -34,6 +34,18 @@ internal sealed class FakeApplyCoordinator : IApplyCoordinator
     /// <summary>When set, <see cref="ApplyAsync"/> throws to exercise the flow's fault handling.</summary>
     public bool ThrowOnApply { get; set; }
 
+    /// <summary>The runs <see cref="History"/> returns.</summary>
+    public IReadOnlyList<JournalSummary> HistoryToReturn { get; set; } = [];
+
+    /// <summary>The result <see cref="RevertAsync"/> returns.</summary>
+    public RevertResult RevertResultToReturn { get; set; } = new(Guid.Empty, Guid.Empty, RunState.Completed, []);
+
+    /// <summary>How many times <see cref="RevertAsync"/> was called.</summary>
+    public int RevertCount { get; private set; }
+
+    /// <summary>The run id of the last <see cref="RevertAsync"/> call.</summary>
+    public Guid LastRevertRunId { get; private set; }
+
     /// <inheritdoc />
     public PlanResult Preview(IReadOnlyList<TweakDefinition> entries, ApplyOptions options)
     {
@@ -54,6 +66,17 @@ internal sealed class FakeApplyCoordinator : IApplyCoordinator
     {
         RestartExplorerCount++;
         return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public IReadOnlyList<JournalSummary> History() => HistoryToReturn;
+
+    /// <inheritdoc />
+    public Task<RevertResult> RevertAsync(Guid runId, RevertOptions options)
+    {
+        RevertCount++;
+        LastRevertRunId = runId;
+        return Task.FromResult(RevertResultToReturn);
     }
 
     private static ApplyResult Empty() => new(

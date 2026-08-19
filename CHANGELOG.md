@@ -9,6 +9,13 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M6 (GUI, part 4 — history and revert): a new **History** page lists the prior
+  runs (newest first) with their time, profile, result and entry count, and
+  reverts a selected completed run — restoring the values it changed — through
+  the engine's transactional revert, on a background thread and behind a
+  confirmation. Runs load when the page is shown (a new `IActivatable` hook the
+  navigation service calls), so nothing reads the journal until the page is
+  opened. This completes the apply→revert round trip from the GUI.
 - M6 (GUI, part 3 — review and apply): every category page now has a
   **Review & apply…** action that opens a modal flow over the existing apply
   engine. The flow previews the run as a what-if plan (per entry: what the run

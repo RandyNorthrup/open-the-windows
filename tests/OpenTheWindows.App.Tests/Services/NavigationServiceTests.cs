@@ -8,10 +8,12 @@ namespace OpenTheWindows.App.Tests.Services;
 /// <summary>Resolution, current-page tracking and change notification of the real navigation service.</summary>
 public sealed class NavigationServiceTests
 {
-    private sealed class StubPage(string key) : IPageViewModel
+    private sealed class StubPage(string key) : IPageViewModel, IActivatable
     {
         public string Key { get; } = key;
         public string Title => Key;
+        public int ActivatedCount { get; private set; }
+        public void OnActivated() => ActivatedCount++;
     }
 
     private static (NavigationService Navigation, ServiceProvider Provider) Build()
@@ -54,6 +56,19 @@ public sealed class NavigationServiceTests
             navigation.NavigateTo(PageKeys.Dashboard);
 
             Assert.Equal(0, raised);
+        }
+    }
+
+    [Fact]
+    public void NavigateTo_activates_the_page()
+    {
+        (NavigationService navigation, ServiceProvider provider) = Build();
+        using (provider)
+        {
+            navigation.NavigateTo(PageKeys.About);
+
+            StubPage page = Assert.IsType<StubPage>(navigation.CurrentPage);
+            Assert.Equal(1, page.ActivatedCount);
         }
     }
 
