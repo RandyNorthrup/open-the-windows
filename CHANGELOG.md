@@ -722,6 +722,13 @@ what was planned (plans live in `PLAN.md`).
 
 ### Fixed
 
+- M8 (audit): a policy-managed setting is now scored by its value, not treated as
+  a blanket "Manual". A control enforced by Group Policy at the desired value is a
+  **Pass** (the control is satisfied); enforced at a different value it is a
+  **Fail** (a policy is enforcing a non-compliant value). Previously any managed
+  setting mapped to Manual, so applying a policy-backed hardening tweak did not
+  show as Pass in the audit. Found during the Windows 11 Pro 25H2 VM verification.
+
 - Publishing the CLI single-file with trimming was broken (IL2104 → NETSDK1144):
   the tool's Windows interop (WMI via `System.Management`, `TaskScheduler`,
   WinRT/Appx) reaches members through reflection the trimmer cannot prove

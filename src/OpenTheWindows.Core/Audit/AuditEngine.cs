@@ -95,14 +95,14 @@ public sealed class AuditEngine
                 continue;
             }
 
-            outcomes.Add(FromComplianceState(observation.State));
+            outcomes.Add(TweakOutcome(observation));
             string actual = observation.Actions.Count == 0
                 ? observation.State.ToString()
                 : string.Join(", ", observation.Actions.Select(a => a.Actual));
             evidence.Add($"{id}: {actual}");
         }
 
-        return new AuditRuleResult(rule.RuleId, rule.Title, rule.Severity, AggregateTweakOutcomes(outcomes), rule.TweakIds,
+        return new AuditRuleResult(rule.RuleId, rule.Title, rule.Severity, Aggregate(outcomes), rule.TweakIds,
             string.Join("; ", evidence));
     }
 
@@ -117,7 +117,28 @@ public sealed class AuditEngine
         return new AuditRuleResult(rule.RuleId, rule.Title, rule.Severity, FromHealthStatus(result.Status), rule.TweakIds, result.Detail);
     }
 
-    private static AuditOutcome FromComplianceState(ComplianceState state)
+    // A tweak's outcome is the worst-wins aggregate of its actions. An action passes when it is at its
+    // desired value — whether set as a preference (Compliant) or enforced by policy (Managed with the
+    // observed value equal to the desired value). A managed action at a different value is a real
+    // failure (a policy is enforcing a non-compliant value), not a "manual" note.
+    private static AuditOutcome TweakOutcome(TweakObservation observation)
+        => observation.Actions.Count == 0
+            ? FromState(observation.State)
+            : Aggregate([.. observation.Actions.Select(FromAction)]);
+
+    private static AuditOutcome FromAction(ActionObservation action)
+        => action.State switch
+        {
+            ComplianceState.Compliant => AuditOutcome.Pass,
+            ComplianceState.Drift => AuditOutcome.Fail,
+            ComplianceState.Managed => string.Equals(action.Actual, action.Desired, StringComparison.Ordinal)
+                ? AuditOutcome.Pass
+                : AuditOutcome.Fail,
+            ComplianceState.NotApplicable => AuditOutcome.NotApplicable,
+            _ => AuditOutcome.Unknown,
+        };
+
+    private static AuditOutcome FromState(ComplianceState state)
         => state switch
         {
             ComplianceState.Compliant => AuditOutcome.Pass,
@@ -137,8 +158,8 @@ public sealed class AuditEngine
             _ => AuditOutcome.Unknown,
         };
 
-    // Worst-wins across a rule's tweaks: NotApplicable is ignored unless every tweak is NotApplicable.
-    private static AuditOutcome AggregateTweakOutcomes(IReadOnlyList<AuditOutcome> outcomes)
+    // Worst-wins: NotApplicable is ignored unless everything is NotApplicable.
+    private static AuditOutcome Aggregate(IReadOnlyList<AuditOutcome> outcomes)
     {
         var applicable = outcomes.Where(o => o != AuditOutcome.NotApplicable).ToList();
         if (applicable.Count == 0)

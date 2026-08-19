@@ -1,3 +1,4 @@
+using System.Text.Json;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Audit;
 using OpenTheWindows.Core.Catalog;
@@ -102,31 +103,59 @@ public sealed class AuditEngineTests
         Assert.Equal(1, report.Summary.Manual);
     }
 
+    // The single-registry advertising-id tweak, wrapped in a one-rule baseline, plus its action.
+    private static (Baseline Baseline, RegistryAction Registry) AdvertisingId()
+    {
+        const string TweakId = "privacy.advertising-id.disable";
+        RegistryAction registry = Catalog().Get(new TweakId(TweakId)).Actions.OfType<RegistryAction>().First();
+        Baseline baseline = new(null, 1, "unit", "Unit Baseline",
+            [new BaselineRule("ADV", "Disable the advertising id", BaselineSeverity.CatII, [new TweakId(TweakId)], null, [Source])]);
+        return (baseline, registry);
+    }
+
+    // Fake readers that return <paramref name="whenMatched"/> for the tweak's registry value and "absent" otherwise.
+    private static FakeReaders Readers(RegistryAction registry, RegistryValueSnapshot whenMatched, ManagedState managed = ManagedState.NotManaged)
+        => new()
+        {
+            OnInteractiveUser = () => new InteractiveUser("S-1-5-21-1", "Tester", true),
+            OnManaged = (_, _, _) => managed,
+            OnRegistry = (_, _, path, name) =>
+                string.Equals(path, registry.Path, StringComparison.Ordinal) && string.Equals(name, registry.Name, StringComparison.Ordinal)
+                    ? whenMatched
+                    : new RegistryValueSnapshot(false, null, null),
+        };
+
     [Fact]
     public void A_compliant_tweak_passes_and_a_drifting_tweak_fails()
     {
-        const string TweakId = "privacy.advertising-id.disable";
-        TweakCatalog catalog = Catalog();
-        RegistryAction registry = catalog.Get(new TweakId(TweakId)).Actions.OfType<RegistryAction>().First();
-        Baseline baseline = new(null, 1, "unit", "Unit Baseline",
-            [new BaselineRule("ADV", "Disable the advertising id", BaselineSeverity.CatII, [new TweakId(TweakId)], null, [Source])]);
+        (Baseline baseline, RegistryAction registry) = AdvertisingId();
 
-        var compliant = new FakeReaders
-        {
-            OnInteractiveUser = () => new InteractiveUser("S-1-5-21-1", "Tester", true),
-            OnRegistry = (_, _, path, name) =>
-                string.Equals(path, registry.Path, StringComparison.Ordinal) && string.Equals(name, registry.Name, StringComparison.Ordinal)
-                    ? new RegistryValueSnapshot(true, registry.Type, registry.Value)
-                    : new RegistryValueSnapshot(false, null, null),
-        };
-        AuditReport pass = Engine(compliant, new FakeHealthProbe([])).Audit(baseline);
+        AuditReport pass = Engine(Readers(registry, new RegistryValueSnapshot(true, registry.Type, registry.Value)), new FakeHealthProbe([])).Audit(baseline);
         Assert.Equal(AuditOutcome.Pass, Outcome(pass, "ADV"));
         Assert.Equal(100, pass.Score);
 
-        var drift = new FakeReaders { OnInteractiveUser = () => new InteractiveUser("S-1-5-21-1", "Tester", true) };
-        AuditReport fail = Engine(drift, new FakeHealthProbe([])).Audit(baseline);
+        AuditReport fail = Engine(Readers(registry, new RegistryValueSnapshot(false, null, null)), new FakeHealthProbe([])).Audit(baseline);
         Assert.Equal(AuditOutcome.Fail, Outcome(fail, "ADV"));
         Assert.Equal(0, fail.Score);
-        Assert.Contains(TweakId, fail.Results.Single(r => string.Equals(r.RuleId, "ADV", StringComparison.Ordinal)).Evidence, StringComparison.Ordinal);
+        Assert.Contains("privacy.advertising-id.disable", fail.Results.Single(r => string.Equals(r.RuleId, "ADV", StringComparison.Ordinal)).Evidence, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_policy_managed_tweak_passes_at_the_desired_value_and_fails_at_a_different_value()
+    {
+        (Baseline baseline, RegistryAction registry) = AdvertisingId();
+
+        // Managed by group policy, at the desired value → the control is satisfied.
+        AuditReport atDesired = Engine(
+            Readers(registry, new RegistryValueSnapshot(true, registry.Type, registry.Value), ManagedState.GroupPolicy),
+            new FakeHealthProbe([])).Audit(baseline);
+        Assert.Equal(AuditOutcome.Pass, Outcome(atDesired, "ADV"));
+
+        // Managed by group policy, at a different value → a real failure.
+        using var otherValue = JsonDocument.Parse("1");
+        AuditReport mismatch = Engine(
+            Readers(registry, new RegistryValueSnapshot(true, registry.Type, otherValue.RootElement), ManagedState.GroupPolicy),
+            new FakeHealthProbe([])).Audit(baseline);
+        Assert.Equal(AuditOutcome.Fail, Outcome(mismatch, "ADV"));
     }
 }
