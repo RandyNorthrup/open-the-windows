@@ -3,14 +3,16 @@ using System.Runtime.Versioning;
 using System.ServiceProcess;
 using Microsoft.Win32;
 using OpenTheWindows.Core.Abstractions;
+using OpenTheWindows.Core.Model;
 
 namespace OpenTheWindows.Windows;
 
 /// <summary>
 /// Read-only pre-flight for an apply run: elevation, supported OS, pending
-/// reboot, servicing in progress, out-of-box experience and Safe Mode. Elevation,
-/// supported OS, pending reboot, OOBE and Safe Mode are blocking; an in-progress
-/// servicing session is a non-blocking warning.
+/// reboot, servicing in progress, out-of-box experience and Safe Mode. Supported
+/// OS, pending reboot, OOBE and Safe Mode are always blocking; elevation is
+/// blocking only for a machine or all-users run (a user-scope run writes just the
+/// caller's own hive); an in-progress servicing session is a non-blocking warning.
 /// </summary>
 [SupportedOSPlatform("windows")]
 public sealed partial class WindowsPreflight : IPreflight
@@ -28,11 +30,13 @@ public sealed partial class WindowsPreflight : IPreflight
     }
 
     /// <inheritdoc />
-    public PreflightReport Run()
+    public PreflightReport Run(Scope scope)
     {
         List<PreflightIssue> issues = [];
 
-        if (!_elevation.IsElevated)
+        // A user-scope run writes only the caller's own hive (HKU\<own SID>), which the
+        // user already owns, so it needs no administrator token; every other scope does.
+        if (scope != Scope.User && !_elevation.IsElevated)
         {
             issues.Add(new PreflightIssue(PreflightCheck.Elevation, Blocking: true, "The process does not hold an elevated administrator token."));
         }

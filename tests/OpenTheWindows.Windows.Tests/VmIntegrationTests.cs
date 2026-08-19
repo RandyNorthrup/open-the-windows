@@ -222,6 +222,46 @@ public sealed class VmIntegrationTests
         }
     }
 
+    [Fact]
+    public void Active_setup_registrar_writes_bumps_and_removes_a_component()
+    {
+        RequireIntegration();
+
+        // Writes a uniquely-named {OTW-…} component, confirms the values, bumps the version on
+        // a second register, then removes it — the per-user logon fallback's real registry path.
+        var registrar = new WindowsActiveSetupRegistrar();
+        string id = "otw-integration-" + Guid.NewGuid().ToString("N");
+        ActiveSetupComponent component = ActiveSetupFallback.For(id, "OTW Integration Test", @"C:\otw-test\otw.exe");
+        string keyPath = ActiveSetupFallback.InstalledComponentsKey + @"\" + component.ComponentKey;
+        using var hklm =
+            Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.LocalMachine, Microsoft.Win32.RegistryView.Registry64);
+        try
+        {
+            ActiveSetupResult first = registrar.Register(component);
+            Assert.Equal(ActiveSetupOutcome.Registered, first.Outcome);
+            Assert.Equal("1", first.Version);
+
+            using (var written = hklm.OpenSubKey(keyPath))
+            {
+                Assert.NotNull(written);
+                Assert.Equal(component.StubPath, (string?)written.GetValue("StubPath"));
+                Assert.Equal("OTW Integration Test", (string?)written.GetValue(null));
+                Assert.Equal("1", (string?)written.GetValue("Version"));
+            }
+
+            // A second register bumps the version so Windows re-runs the stub at next sign-in.
+            Assert.Equal("2", registrar.Register(component).Version);
+
+            Assert.True(registrar.RemoveAll() >= 1);
+            using var afterRemoval = hklm.OpenSubKey(keyPath);
+            Assert.Null(afterRemoval);
+        }
+        finally
+        {
+            hklm.DeleteSubKeyTree(keyPath, throwOnMissingSubKey: false);
+        }
+    }
+
     private static void RunGpupdate()
     {
         using var process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo

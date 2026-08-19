@@ -1,6 +1,7 @@
 using System.CommandLine;
 using System.Text.Json;
 using OpenTheWindows.Core;
+using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Journal;
 using OpenTheWindows.TestSupport.Fakes;
@@ -140,6 +141,58 @@ public sealed class RemediateCommandTests
         Assert.DoesNotContain("unchanged", stdout.ToString(), StringComparison.Ordinal);
         using var document = JsonDocument.Parse(stdout.ToString());
         Assert.Equal("Completed", document.RootElement.GetProperty("state").GetString());
+    }
+
+    [Fact]
+    public void User_scope_remediate_runs_unelevated_and_skips_the_logon_fallback()
+    {
+        // The Active Setup stub runs as the signing-in user (no admin token) and touches only
+        // that user's own hive, so --user-scope must not be rejected for elevation and must not
+        // itself try to register the machine-wide fallback.
+        string path = WriteTempProfile(ProfileFixtures.AllUsersProfile());
+        try
+        {
+            var registrar = new FakeActiveSetupRegistrar();
+            var (root, stdout, stderr) = TestCli.ApplyHost(elevated: false, activeSetupRegistrar: registrar);
+
+            int code = CliTestHost.Invoke(root, stdout, stderr, "remediate", "--profile", path, "--user-scope", "--json");
+
+            Assert.NotEqual(ExitCodes.ElevationRequired, code);
+            Assert.True(code is ExitCodes.Success or ExitCodes.RebootRequired);
+            Assert.Empty(registrar.Registered);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void All_users_remediate_registers_the_per_user_logon_fallback()
+    {
+        string path = WriteTempProfile(ProfileFixtures.AllUsersProfile());
+        try
+        {
+            var registrar = new FakeActiveSetupRegistrar();
+            var (root, stdout, stderr) = TestCli.ApplyHost(activeSetupRegistrar: registrar);
+
+            int code = CliTestHost.Invoke(root, stdout, stderr, "remediate", "--profile", path, "--no-restore-point", "--json");
+
+            Assert.True(code is ExitCodes.Success or ExitCodes.RebootRequired);
+            ActiveSetupComponent component = Assert.Single(registrar.Registered);
+            Assert.Equal("{OTW-custom-all-users}", component.ComponentKey);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    private static string WriteTempProfile(string json)
+    {
+        string path = Path.Combine(Path.GetTempPath(), "otw-profile-" + Guid.NewGuid().ToString("N") + ".json");
+        File.WriteAllText(path, json);
+        return path;
     }
 
     [Fact]

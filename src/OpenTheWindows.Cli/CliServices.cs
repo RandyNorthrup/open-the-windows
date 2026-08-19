@@ -23,6 +23,7 @@ namespace OpenTheWindows.Cli;
 /// <param name="CreateTaskInstaller">Builds the scheduled-task installer (drift remediation task).</param>
 /// <param name="CreateJournalStore">Builds a journal store (read to compare the last-run OS build against the live one).</param>
 /// <param name="CreateUserHiveEnumerator">Builds the user-hive enumerator (real user profiles an all-users apply targets).</param>
+/// <param name="CreateActiveSetupRegistrar">Builds the Active Setup registrar (per-user logon fallback for an all-users apply).</param>
 /// <param name="Health">The read-only machine health probe.</param>
 /// <param name="Elevation">The process elevation context.</param>
 internal sealed record CliServices(
@@ -35,6 +36,7 @@ internal sealed record CliServices(
     Func<IScheduledTaskInstaller> CreateTaskInstaller,
     Func<IJournalStore> CreateJournalStore,
     Func<IUserHiveEnumerator> CreateUserHiveEnumerator,
+    Func<IActiveSetupRegistrar> CreateActiveSetupRegistrar,
     IMachineHealthProbe Health,
     IElevationContext Elevation)
 {
@@ -50,6 +52,7 @@ internal sealed record CliServices(
             static () => new WindowsScheduledTaskInstaller(),
             static () => new WindowsJournalStore(),
             static () => new WindowsUserHiveEnumerator(),
+            static () => new WindowsActiveSetupRegistrar(),
             new WindowsMachineHealthProbe(),
             new WindowsElevationContext());
 

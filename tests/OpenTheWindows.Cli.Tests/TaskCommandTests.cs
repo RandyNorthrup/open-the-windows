@@ -115,6 +115,21 @@ public sealed class TaskCommandTests
     }
 
     [Fact]
+    public void Remove_also_clears_the_per_user_logon_fallback()
+    {
+        var installer = new FakeScheduledTaskInstaller();
+        var registrar = new FakeActiveSetupRegistrar();
+        registrar.Register(ActiveSetupFallback.For("enterprise-workstation", "OTW Enterprise", @"C:\otw.exe"));
+        var (root, stdout, stderr) = TestCli.ApplyHost(taskInstaller: installer, activeSetupRegistrar: registrar);
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "task", "remove");
+
+        Assert.Equal(ExitCodes.Success, code);
+        Assert.Equal(1, registrar.RemoveAllCalls);
+        Assert.Contains("logon fallback", stdout.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Remove_reports_when_no_task_exists()
     {
         var installer = new FakeScheduledTaskInstaller { RemoveResult = false };

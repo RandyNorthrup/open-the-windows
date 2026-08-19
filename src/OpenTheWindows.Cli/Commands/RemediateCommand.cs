@@ -40,6 +40,7 @@ internal static class RemediateCommand
             new Option<bool>("--allow-advanced") { Description = "Permit Advanced-risk entries (a profile's own option also enables these)." },
             new Option<bool>("--allow-breaking") { Description = "Permit Breaking-risk entries (a profile's own option also enables these)." },
             new Option<bool>("--restart-explorer") { Description = "Restart Explorer for entries that require it." },
+            new Option<bool>("--user-scope") { Description = "Apply only this profile's user-scope entries to the calling user's own hive, without elevation. This is the mode the Active Setup logon fallback runs per user at sign-in." },
             new Option<bool>("--if-build-changed") { Description = "Only re-apply when the OS build/UBR differs from the last journaled run (else exit 0 without changes)." },
             new Option<bool>("--json") { Description = "Emit the result as JSON on stdout (implied when --out is given)." },
             new Option<string?>("--out") { Description = "Write the JSON report to this file (e.g. the drift task's last-remediate.json)." });
@@ -63,7 +64,10 @@ internal static class RemediateCommand
         }
 
         bool whatIf = parseResult.GetValue(options.WhatIf);
-        if (!whatIf && !services.Elevation.IsElevated)
+        bool userScope = parseResult.GetValue(options.UserScope);
+
+        // A user-scope run writes only the caller's own hive and so needs no admin token.
+        if (!whatIf && !userScope && !services.Elevation.IsElevated)
         {
             stderr.WriteLine("Remediate needs an elevated token. Run it from an elevated prompt or a SYSTEM scheduled task.");
             return ExitCodes.ElevationRequired;
@@ -88,22 +92,45 @@ internal static class RemediateCommand
             }
         }
 
-        // Unattended: a profile's own options seed the run and never break-glass a managed setting.
-        ApplyOptions applyOptions = ApplyReporting.BuildOptions(
+        if (userScope)
+        {
+            entries = UserScopeOnly(entries);
+        }
+
+        ApplyOptions applyOptions = RemediateOptions(parseResult, options, profileName, selectedProfile, whatIf, userScope);
+        ApplyResult result = services.CreateApplyEngine().Apply(entries, applyOptions);
+        ApplyReporting.RegisterLogonFallback(services, selectedProfile, applyOptions, result, whatIf, stderr);
+        WriteReport(result, whatIf, parseResult.GetValue(options.Out), parseResult.GetValue(options.Json), stdout, stderr);
+        return ApplyReporting.ExitCode(result, whatIf);
+    }
+
+    /// <summary>
+    /// Builds the run options. A profile's own options seed the run and it never
+    /// break-glasses a managed setting (it is unattended). A user-scope run is forced
+    /// to the interactive user and skips the restore point, which an unelevated caller
+    /// cannot create; every other flag still applies.
+    /// </summary>
+    private static ApplyOptions RemediateOptions(
+        ParseResult parseResult, Options options, string profileName, Profile? selectedProfile, bool whatIf, bool userScope)
+        => ApplyReporting.BuildOptions(
             whatIf,
-            parseResult.GetValue(options.NoRestorePoint),
+            userScope || parseResult.GetValue(options.NoRestorePoint),
             breakGlass: false,
             parseResult.GetValue(options.AllowAdvanced),
             parseResult.GetValue(options.AllowBreaking),
             parseResult.GetValue(options.RestartExplorer),
             profileName,
             selectedProfile?.Options,
-            selectedProfile?.Scope ?? Scope.Machine);
+            userScope ? Scope.User : selectedProfile?.Scope ?? Scope.Machine);
 
-        ApplyResult result = services.CreateApplyEngine().Apply(entries, applyOptions);
-        WriteReport(result, whatIf, parseResult.GetValue(options.Out), parseResult.GetValue(options.Json), stdout, stderr);
-        return ApplyReporting.ExitCode(result, whatIf);
-    }
+    /// <summary>
+    /// The user-scope subset of <paramref name="entries"/>: only entries whose every
+    /// action writes the calling user's own hive (a user-hive registry value or a
+    /// per-user Appx change). Filtering here guarantees a non-elevated user-scope run
+    /// never attempts a machine write.
+    /// </summary>
+    private static IReadOnlyList<TweakDefinition> UserScopeOnly(IReadOnlyList<TweakDefinition> entries)
+        => [.. entries.Where(ActionApplier.IsUserScoped)];
 
     /// <summary>
     /// The OS recorded in the most recent journal, or <see langword="null"/> when
@@ -164,6 +191,7 @@ internal static class RemediateCommand
         Option<bool> AllowAdvanced,
         Option<bool> AllowBreaking,
         Option<bool> RestartExplorer,
+        Option<bool> UserScope,
         Option<bool> IfBuildChanged,
         Option<bool> Json,
         Option<string?> Out)
@@ -179,6 +207,7 @@ internal static class RemediateCommand
             command.Options.Add(AllowAdvanced);
             command.Options.Add(AllowBreaking);
             command.Options.Add(RestartExplorer);
+            command.Options.Add(UserScope);
             command.Options.Add(IfBuildChanged);
             command.Options.Add(Json);
             command.Options.Add(Out);

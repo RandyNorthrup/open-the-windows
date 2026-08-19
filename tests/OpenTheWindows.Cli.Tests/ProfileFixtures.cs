@@ -39,4 +39,20 @@ internal static class ProfileFixtures
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] }
     }
     """;
+
+    /// <summary>
+    /// A valid all-users profile (id <c>custom-all-users</c>) whose levels are all Off, so
+    /// it resolves to no entries and an apply of it completes trivially — used to exercise
+    /// the per-user logon fallback registration without depending on any catalogue entry
+    /// applying cleanly against a fake machine. Derived from <see cref="ValidProfile"/> so
+    /// only one profile document is hand-authored (the duplication gate flags a second copy).
+    /// </summary>
+    public static string AllUsersProfile()
+        => ValidProfile
+            .Replace("\"id\": \"custom-file\"", "\"id\": \"custom-all-users\"", StringComparison.Ordinal)
+            .Replace("\"scope\": \"User\"", "\"scope\": \"AllUsers\"", StringComparison.Ordinal)
+            .Replace(
+                "\"Privacy\": \"Basic\", \"Updates\": \"Basic\", \"Security\": \"Basic\", \"Performance\": \"Basic\", \"Debloat\": \"Basic\", \"Shell\": \"Basic\"",
+                "\"Privacy\": \"Off\", \"Updates\": \"Off\", \"Security\": \"Off\", \"Performance\": \"Off\", \"Debloat\": \"Off\", \"Shell\": \"Off\"",
+                StringComparison.Ordinal);
 }

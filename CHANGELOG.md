@@ -156,8 +156,26 @@ what was planned (plans live in `PLAN.md`).
   hive). `ApplyServices` gains the enumerator and loader, wired in
   `WindowsApplyEngineFactory`. VM-verified on 26200.9168: a real `scope: AllUsers`
   apply through the production factory writes a user-scoped value to the current
-  user's hive and reverts it. Active Setup for logged-off users at next sign-in, and
-  an end-to-end apply that loads a genuinely offline hive, are follow-ups.
+  user's hive and reverts it.
+- M5 (profiles, part 15 — Active Setup logon fallback + `remediate --user-scope`):
+  an all-users apply now also registers an Active Setup component
+  (`HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components\{OTW-<profileId>}`)
+  whose `StubPath` is `otw remediate --user-scope --profile <id>` and whose
+  `Version` is bumped per apply, so users who were logged off — or created later —
+  are re-enforced in their own session at their next sign-in (the standard per-user
+  provisioning mechanism, skipped while OOBE is in progress). The new
+  `remediate --user-scope` mode applies only a profile's user-scope entries to the
+  calling user's own hive **without elevation**: writing your own `HKU\<SID>` needs
+  no administrator token, so pre-flight now treats elevation as required by scope
+  (`Scope.User` is exempt, `Machine`/`AllUsers` still require it) and the run is
+  filtered to entries whose every action is user-scoped, so a non-elevated run can
+  never attempt a machine write. The profile id is validated to kebab-case before it
+  is placed in the registry key, so an untrusted id cannot inject a key path. New
+  `IActiveSetupRegistrar` / `WindowsActiveSetupRegistrar` and the pure
+  `ActiveSetupFallback` builder; `otw task remove` now also clears the logon
+  fallback so removing a profile's re-enforcement footprint is one command.
+  VM-verified on 26200.9168: the registrar writes the component, bumps its version
+  on a second apply, and `RemoveAll` deletes it.
 - M4 (Windows Update guardrails): the safe, reversible update controls
   (`OpenTheWindows.Core.Updates`). `PauseCalculator` computes the six Settings-app
   pause values (`PauseUpdatesStartTime`/`ExpiryTime`,

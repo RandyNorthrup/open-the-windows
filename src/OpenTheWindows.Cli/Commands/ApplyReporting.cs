@@ -45,6 +45,52 @@ internal static class ApplyReporting
             scope);
 
     /// <summary>
+    /// After a completed all-users apply, registers the per-user logon fallback so
+    /// users who were logged off (or created later) are re-enforced at their next
+    /// sign-in. A no-op for any other scope, a <paramref name="whatIf"/> preview, a
+    /// run that did not complete, or a level/<c>--only</c> selection with no profile.
+    /// Notices and any registration failure go to <paramref name="notices"/> (stderr)
+    /// so a <c>--json</c> report on stdout stays parseable; a failure here never
+    /// changes the run's exit code — the machine state was already decided.
+    /// </summary>
+    public static void RegisterLogonFallback(
+        CliServices services, Profile? profile, ApplyOptions options, ApplyResult result, bool whatIf, TextWriter notices)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(result);
+        ArgumentNullException.ThrowIfNull(notices);
+
+        if (whatIf || profile is null || options.Scope != Scope.AllUsers || result.State != RunState.Completed)
+        {
+            return;
+        }
+
+        string? executable = Environment.ProcessPath;
+        if (string.IsNullOrEmpty(executable))
+        {
+            notices.WriteLine("Applied, but could not register the per-user logon fallback: this executable's path is unknown.");
+            return;
+        }
+
+        ActiveSetupComponent component = ActiveSetupFallback.For(
+            profile.Id, string.Create(CultureInfo.InvariantCulture, $"{AppInfo.Title} - {profile.Name}"), executable);
+        try
+        {
+            ActiveSetupResult registration = services.CreateActiveSetupRegistrar().Register(component);
+            notices.WriteLine(registration.Outcome == ActiveSetupOutcome.SkippedDuringOobe
+                ? string.Create(CultureInfo.InvariantCulture, $"Skipped the per-user logon fallback {registration.ComponentKey} (Windows setup / OOBE in progress).")
+                : string.Create(CultureInfo.InvariantCulture,
+                    $"Registered the per-user logon fallback {registration.ComponentKey} (version {registration.Version}); logged-off and new users are re-enforced at next sign-in."));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException)
+        {
+            notices.WriteLine(string.Create(CultureInfo.InvariantCulture,
+                $"Applied, but the per-user logon fallback could not be registered: {ex.Message}"));
+        }
+    }
+
+    /// <summary>
     /// Maps an apply/revert-style result to a process exit code: 4 on plan errors,
     /// 5/2 on failure (elevation vs other), 2 on rollback, 3010 when a real (not
     /// <paramref name="whatIf"/>) run needs a reboot, else 0.

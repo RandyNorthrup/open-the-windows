@@ -47,7 +47,7 @@ internal static class TaskCommand
 
     private static Command CreateRemove(CliServices services)
     {
-        var command = new Command("remove", "Remove the remediation task.");
+        var command = new Command("remove", "Remove the remediation task and any per-user logon fallback components.");
         command.SetAction(parseResult => ExecuteRemove(parseResult, services));
         return command;
     }
@@ -101,6 +101,16 @@ internal static class TaskCommand
         stdout.WriteLine(removed
             ? string.Create(CultureInfo.InvariantCulture, $"Removed task '{RemediationTask.TaskPath}'.")
             : string.Create(CultureInfo.InvariantCulture, $"No task '{RemediationTask.TaskPath}' to remove."));
+
+        // The Active Setup logon fallback is the other half of a profile's re-enforcement
+        // footprint; clearing the task without it would leave users re-enforced at sign-in.
+        int fallbacks = services.CreateActiveSetupRegistrar().RemoveAll();
+        if (fallbacks > 0)
+        {
+            stdout.WriteLine(string.Create(CultureInfo.InvariantCulture,
+                $"Removed {fallbacks} per-user logon fallback component(s)."));
+        }
+
         return ExitCodes.Success;
     }
 

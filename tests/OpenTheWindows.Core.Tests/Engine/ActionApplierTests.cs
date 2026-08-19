@@ -4,6 +4,7 @@ using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Catalog.Actions;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Journal;
+using OpenTheWindows.Core.Tests.Catalog;
 using OpenTheWindows.TestSupport.Fakes;
 
 namespace OpenTheWindows.Core.Tests.Engine;
@@ -158,4 +159,27 @@ public sealed class ActionApplierTests
 
         Assert.NotNull(applier.CheckRefusal(new ServiceAction("Ppl", ServiceStartType.Disabled, ServiceStartType.Automatic, false)));
     }
+
+    [Fact]
+    public void IsUserScoped_action_is_true_only_for_a_user_hive_or_appx_action()
+    {
+        Assert.True(ActionApplier.IsUserScoped(UserReg()));
+        Assert.True(ActionApplier.IsUserScoped(Appx()));
+        Assert.False(ActionApplier.IsUserScoped(Reg()));    // HKLM registry value
+        Assert.False(ActionApplier.IsUserScoped(Svc()));
+        Assert.False(ActionApplier.IsUserScoped(Task()));
+    }
+
+    [Fact]
+    public void IsUserScoped_entry_requires_every_action_to_be_user_scoped()
+    {
+        // The predicate a --user-scope remediation filters on: an entry only qualifies when
+        // it writes nothing outside the user's own hive, so a non-elevated run is safe.
+        Assert.True(ActionApplier.IsUserScoped(CatalogTestData.ValidEntry("u") with { Actions = [UserReg(), Appx()] }));
+        Assert.False(ActionApplier.IsUserScoped(CatalogTestData.ValidEntry("mixed") with { Actions = [UserReg(), Reg()] }));
+        Assert.False(ActionApplier.IsUserScoped(CatalogTestData.ValidEntry("machine") with { Actions = [Reg()] }));
+        Assert.False(ActionApplier.IsUserScoped(CatalogTestData.ValidEntry("empty") with { Actions = [] }));
+    }
+
+    private static RegistryAction UserReg() => new(RegistryHive.User, Path, "V", RegistryValueType.Dword, Num(1), Num(0), RegistryValueKind.Preference);
 }

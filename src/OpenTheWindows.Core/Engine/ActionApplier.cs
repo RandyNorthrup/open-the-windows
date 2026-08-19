@@ -97,6 +97,19 @@ public sealed class ActionApplier
     }
 
     /// <summary>
+    /// Whether every one of <paramref name="entry"/>'s actions writes only a user's
+    /// hive, so the entry can be applied without elevation to the calling user's own
+    /// hive. An entry with no actions, or with any machine-scope action, is not
+    /// user-scoped. This is the filter a <c>remediate --user-scope</c> run applies so
+    /// a non-elevated caller never attempts a machine write.
+    /// </summary>
+    public static bool IsUserScoped(TweakDefinition entry)
+    {
+        ArgumentNullException.ThrowIfNull(entry);
+        return entry.Actions.Count > 0 && entry.Actions.All(IsUserScoped);
+    }
+
+    /// <summary>
     /// The user SID an action actually writes under: the target user's SID for a
     /// user-scoped action, and <see langword="null"/> for a machine-scope action
     /// that ignores the SID. Journaled per action so revert and rollback restore

@@ -97,6 +97,30 @@ The task is registered at `\OpenTheWindows\Remediate` (SYSTEM, highest
 privileges, hidden) and writes the same `last-remediate.json` report. See the
 CLI reference in `README.md` for the full option list.
 
+## All-users profiles and the per-user logon fallback
+
+A profile with `scope: AllUsers` applies its user-scope entries to every real
+user hive on the machine, loading the hives of users who are not logged on. To
+also reach users who are logged off at apply time — and users created later — a
+completed all-users `apply`/`remediate` registers a standard **Active Setup**
+component:
+
+```text
+HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components\{OTW-<profileId>}
+    (Default)   = Open the Windows - <profile name>
+    StubPath    = "…\otw.exe" remediate --user-scope --profile <profileId>
+    Version     = <bumped each apply>
+```
+
+At each user's next sign-in Windows runs the stub in that user's own session,
+non-elevated, and it applies only the profile's user-scope entries to that
+user's hive (writing one's own `HKU\<SID>` needs no administrator token).
+Registration is skipped while the machine is in OOBE
+(`HKLM\SYSTEM\Setup\OOBEInProgress`), so it is safe to run during image build
+without baking the component into a generalised image. `otw task remove` clears
+the fallback (every `{OTW-…}` component) along with the drift task, so removing a
+profile's re-enforcement footprint is a single command.
+
 ## Profiles and signing
 
 A profile is a JSON document selecting the tweaks and levels a device should

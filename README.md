@@ -172,6 +172,19 @@ update) — and writes its report to
 deletes it. Both need elevation. Exit 0 on success, 4 for an unknown profile or
 conflicting schedule flags, 5 when not elevated.
 
+When an **all-users** profile (`scope: AllUsers`) is applied, `apply` and
+`remediate` also register a per-user **Active Setup logon fallback**
+(`HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components\{OTW-<profileId>}`)
+whose stub runs `otw remediate --user-scope --profile <id>` in each user's own
+session at their next sign-in — the standard provisioning mechanism that reaches
+users who were logged off, or created after the apply, and which needs no
+elevation (writing one's own hive is not an administrator action). `--user-scope`
+applies only the profile's user-scope entries to the calling user's own hive;
+elevation is required by what a run writes, so a user-scope run is exempt while
+machine and all-users runs still need it. Registration bumps the component's
+version each apply (so the stub re-runs), is skipped during OOBE, and `otw task
+remove` clears the fallback along with the drift task.
+
 For a managed fleet, [docs/enterprise.md](docs/enterprise.md) is the deployment
 guide: the paired Intune Remediations scripts
 [docs/enterprise/intune-detect.ps1](docs/enterprise/intune-detect.ps1) and

@@ -82,7 +82,7 @@ public sealed class ApplyEngine
             return new ApplyResult(Guid.Empty, RunState.Completed, RestartRequirement.None, NoRestorePoint, PassingPreflight, plan, Outcomes(run, null));
         }
 
-        PreflightReport preflight = _services.Preflight.Run();
+        PreflightReport preflight = _services.Preflight.Run(options.Scope);
         if (!preflight.CanProceed)
         {
             Audit(AuditEventId.Error, "Pre-flight blocked the apply run.", null, null);

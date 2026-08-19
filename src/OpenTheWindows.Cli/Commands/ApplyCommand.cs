@@ -78,6 +78,7 @@ internal static class ApplyCommand
         }
 
         ApplyResult result = engine.Apply(entries, applyOptions);
+        ApplyReporting.RegisterLogonFallback(services, selectedProfile, applyOptions, result, whatIf, stderr);
         return Report(result, whatIf, parseResult.GetValue(options.Json), stdout);
     }
 

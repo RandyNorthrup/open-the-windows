@@ -212,6 +212,51 @@ public sealed class ApplyCommandTests
         Assert.DoesNotContain("allow-advanced", allowedNote, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void All_users_profile_apply_registers_the_per_user_logon_fallback()
+    {
+        string path = WriteTempProfile(ProfileFixtures.AllUsersProfile());
+        try
+        {
+            var registrar = new FakeActiveSetupRegistrar();
+            var (root, stdout, stderr) = TestCli.ApplyHost(
+                engine: FakeApplyEngine.Create(new FakeMachine()).Engine, activeSetupRegistrar: registrar);
+
+            int code = CliTestHost.Invoke(root, stdout, stderr, "apply", "--profile", path, "--no-restore-point", "--json");
+
+            Assert.True(code is ExitCodes.Success or ExitCodes.RebootRequired);
+            ActiveSetupComponent component = Assert.Single(registrar.Registered);
+            Assert.Equal("{OTW-custom-all-users}", component.ComponentKey);
+            Assert.Contains("remediate --user-scope --profile custom-all-users", component.StubPath, StringComparison.Ordinal);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void User_scope_profile_apply_does_not_register_a_logon_fallback()
+    {
+        // The home profile is User scope, so there is no logged-off / new-user gap to fill.
+        var registrar = new FakeActiveSetupRegistrar();
+        var (root, stdout, stderr) = TestCli.ApplyHost(
+            engine: FakeApplyEngine.Create(new FakeMachine()).Engine, activeSetupRegistrar: registrar);
+
+        int code = CliTestHost.Invoke(
+            root, stdout, stderr, "apply", "--profile", "home", "--include-draft", "--no-restore-point", "--json");
+
+        Assert.True(code is ExitCodes.Success or ExitCodes.RebootRequired);
+        Assert.Empty(registrar.Registered);
+    }
+
+    private static string WriteTempProfile(string json)
+    {
+        string path = Path.Combine(Path.GetTempPath(), "otw-profile-" + Guid.NewGuid().ToString("N") + ".json");
+        File.WriteAllText(path, json);
+        return path;
+    }
+
     /// <summary>Runs <c>apply --what-if --json</c> for a profile file and returns the (risk, result, note) of one planned entry.</summary>
     private static (string Risk, string Result, string Note) WhatIfEntry(string profileJson, string id)
     {

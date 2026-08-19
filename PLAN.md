@@ -643,9 +643,25 @@ committed locally):
   via `ApplyReporting.BuildOptions`. Comprehensive engine unit tests (expansion,
   offline-hive load/unload, per-user drift, unload-failure audit). VM-verified on
   26200.9168: a real `scope: AllUsers` apply through the production factory writes a
-  user-scoped value to the current user's hive and reverts it. Still pending for M5:
-  Active Setup for logged-off users at next sign-in; a VM end-to-end that loads a
-  genuinely offline second-user hive; then `docs/certification/M5.md`.
+  user-scoped value to the current user's hive and reverts it.
+- **Active Setup logon fallback** (`Core.Abstractions.IActiveSetupRegistrar` +
+  `ActiveSetupComponent`/`ActiveSetupResult`, `Core.Engine.ActiveSetupFallback`,
+  `Windows.Writers.WindowsActiveSetupRegistrar`, `otw remediate --user-scope`): an
+  all-users `apply`/`remediate` that completes now also registers an Active Setup
+  component (`HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components\{OTW-<id>}`,
+  `StubPath = otw remediate --user-scope --profile <id>`, `Version` bumped per
+  apply), so logged-off and future users are re-enforced in their own session at
+  next sign-in; registration is skipped while OOBE is in progress
+  (`HKLM\SYSTEM\Setup\OOBEInProgress`) and the profile id is validated to kebab-case
+  before it forms the key path. `remediate --user-scope` is the stub's mode: it
+  applies only a profile's user-scope entries (every action user-scoped) to the
+  caller's own hive **without elevation** — writing one's own `HKU\<SID>` needs no
+  admin token, so `IPreflight.Run` is now scope-aware (elevation required for
+  `Machine`/`AllUsers`, exempt for `Scope.User`). `otw task remove` also clears the
+  logon fallback (`RemoveAll`). Engine/CLI/pure unit tests plus a VM check on
+  26200.9168 (register → verify values → bump → remove). Still pending for M5: a VM
+  end-to-end that loads a genuinely offline second-user hive and a managed-value
+  report-and-untouched check; then `docs/certification/M5.md`.
 
 ### M6 — GUI (not started)
 
