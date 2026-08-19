@@ -1,10 +1,14 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using OpenTheWindows.App.Navigation;
 using OpenTheWindows.App.Resources;
+using OpenTheWindows.App.Services;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
+using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Model;
 
 namespace OpenTheWindows.App.ViewModels;
@@ -21,6 +25,7 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
 {
     private readonly Category _category;
     private readonly TweakCatalog _catalog;
+    private readonly IApplyFlowLauncher _applyFlow;
     private bool _updatingSelection;
 
     [ObservableProperty]
@@ -41,13 +46,15 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
     [ObservableProperty]
     private string _selectionSummary = string.Empty;
 
-    /// <summary>Builds the page for one category over the catalogue and machine facts.</summary>
-    public CategoryPageViewModel(Category category, TweakCatalog catalog, OperatingSystemFacts facts)
+    /// <summary>Builds the page for one category over the catalogue, machine facts and the apply launcher.</summary>
+    public CategoryPageViewModel(Category category, TweakCatalog catalog, OperatingSystemFacts facts, IApplyFlowLauncher applyFlow)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(facts);
+        ArgumentNullException.ThrowIfNull(applyFlow);
         _category = category;
         _catalog = catalog;
+        _applyFlow = applyFlow;
 
         AllItems = [.. catalog.InCategory(category)
             .Where(e => e.Status != TweakStatus.Deprecated && e.AppliesTo.Matches(facts))
@@ -93,6 +100,31 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
 
     /// <summary>The entries currently selected for apply.</summary>
     public IReadOnlyList<TweakItemViewModel> SelectedItems => [.. AllItems.Where(i => i.IsSelected)];
+
+    /// <summary>True when at least one entry is selected.</summary>
+    public bool HasSelection => AllItems.Any(i => i.IsSelected);
+
+    /// <summary>Opens the review-and-apply dialog for the selected entries.</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void ReviewAndApply()
+    {
+        IReadOnlyList<TweakDefinition> entries = [.. SelectedItems.Select(i => i.Definition)];
+        if (entries.Count == 0)
+        {
+            return;
+        }
+
+        ApplyOptions options = new(
+            WhatIf: false,
+            CreateRestorePoint: true,
+            BreakGlass: false,
+            AllowAdvanced: true,
+            AllowBreaking: true,
+            ProfileName: string.Create(CultureInfo.InvariantCulture, $"GUI {Title}"),
+            RestartExplorer: false,
+            Scope: Scope.Machine);
+        _applyFlow.Launch(Title, entries, options);
+    }
 
     partial void OnLevelChanged(Level value) => ApplyLevelSelection();
 
@@ -161,5 +193,7 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
     private void UpdateSelectionSummary()
     {
         SelectionSummary = DisplayLabels.SelectedCount(AllItems.Count(i => i.IsSelected), AllItems.Count);
+        OnPropertyChanged(nameof(HasSelection));
+        ReviewAndApplyCommand.NotifyCanExecuteChanged();
     }
 }

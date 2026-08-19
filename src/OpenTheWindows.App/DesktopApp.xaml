@@ -11,6 +11,7 @@
         <conv:BoolToYesNoConverter x:Key="BoolToYesNo" />
         <conv:RiskToBrushConverter x:Key="RiskToBrush" />
         <conv:NullToVisibilityConverter x:Key="NullToVisibility" />
+        <conv:EnumToVisibilityConverter x:Key="EnumToVisibility" />
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
     </Application.Resources>
 </Application>

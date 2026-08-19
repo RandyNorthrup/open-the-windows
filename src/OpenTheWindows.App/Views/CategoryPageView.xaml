@@ -32,6 +32,7 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Column="0" Text="Level" VerticalAlignment="Center" Margin="0,0,8,0" />
@@ -72,8 +73,15 @@
             <TextBlock Grid.Column="5"
                        VerticalAlignment="Center"
                        Opacity="0.75"
+                       Margin="0,0,12,0"
                        Text="{Binding SelectionSummary}"
                        AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_SelectionSummary}" />
+
+            <Button Grid.Column="6"
+                    Content="Review &amp; apply…"
+                    Padding="14,5"
+                    Command="{Binding ReviewAndApplyCommand}"
+                    AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_Apply}" />
         </Grid>
 
         <!-- Body: entry list + detail pane -->

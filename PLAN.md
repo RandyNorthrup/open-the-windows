@@ -302,7 +302,7 @@ shipped `core-6.1.0-windows` profile.
 | `.editorconfig` | `CA1303` none | user-facing strings will use resx at M6; logs are English | M6 |
 | `.editorconfig` | `CA1848` suggestion | LoggerMessage delegates only for hot paths | M6 |
 | `.editorconfig` | `CA1812` suggestion | DI-created types | never |
-| `.editorconfig` `[tests/**]` | CA1707, CA2007, CA1515, CA1861, CA1062, CA1812, CA1822 none | test conventions | never |
+| `.editorconfig` `[tests/**]` | CA1707, CA2007, CA1515, CA1861, CA1062, CA1812, CA1822 none; `async_methods_suffixed` naming rule none | test conventions (async test methods use descriptive sentence names, not the `Async` suffix) | never |
 | `PSScriptAnalyzerSettings.psd1` | `PSUseShouldProcessForStateChangingFunctions`, `PSAvoidUsingWriteHost`, `PSAvoidUsingPositionalParameters` excluded | imperative build scripts calling native tools | never |
 | `.markdownlint-cli2.jsonc` | `docs/research/**` ignored | generated reference reports with wide tables/raw URLs | never |
 | `.jscpd.json` | markdown excluded from `format`; `catalog/**` and `docs/enterprise/*.ps1` ignored | the Linux tokenizer reports ```` ```text ```` code fences as clones across unrelated docs; catalogue entries are declarative data with intentionally uniform action blocks (not copy-pasted logic); Intune uploads each detection/remediation script standalone, so their otw.exe bootstrap is duplicated per file rather than shared through a module | never |
@@ -318,7 +318,8 @@ shipped `core-6.1.0-windows` profile.
 | `LocalGroupPolicy.MachineRoot` (`SuppressMessage CA2000`, `IDISP001`) | dispose created object | `RegistryKey.FromHandle` takes ownership of the `SafeRegistryHandle`; the caller's `using` disposes both | never |
 | `WindowsAppxWriter.Await` (`#pragma VSTHRD002`) | synchronous wait on async | `IAppxWriter` is a synchronous contract; the WinRT deployment operation is awaited to completion on a console/service thread with no synchronization context, so it cannot deadlock | never |
 | `WpfDispatcherService.cs` (`SuppressMessage VSTHRD001`) | VS-threading legacy thread-switching API | this type is the single sanctioned UI-thread marshalling boundary for the GUI; `JoinableTaskFactory.SwitchToMainThreadAsync` would add the VS-Threading package with no benefit for a standalone WPF process, and every view model marshals through this one class | never |
-| `build/quality.ps1` coverage `classfilters` | `OpenTheWindows.App.Services.DialogService`, `WpfDispatcherService` excluded | thin WPF `MessageBox`/`Dispatcher` wrappers with no branch logic; not unit-testable without a live UI thread, matching the existing Windows UI/OS-wrapper exclusions | never |
+| `build/quality.ps1` coverage `classfilters` | `OpenTheWindows.App.Services.DialogService`, `WpfDispatcherService`, `ApplyFlowLauncher` excluded | thin WPF wrappers that only show `MessageBox`/`Dispatcher`/`Window` chrome, with no branch logic; not unit-testable without a live UI thread, matching the existing Windows UI/OS-wrapper exclusions | never |
+| `ApplyFlowViewModel.Start`, `ApplyFlowViewModel.ApplyAsync` (`SuppressMessage CA1031`) | catch general exception | the review-and-apply UI boundary must land any engine/read fault in a Failed state with the message rather than crash the window; operational failures are already journaled and rolled back by the engine (same rationale as `ApplyEngine.Capture`) | never |
 | `build/quality.ps1` coverage `filefilters` | `-*.xaml.cs` (WPF code-behind) | code-behind is `InitializeComponent` constructors and event plumbing with no testable logic; the DI graph in `DesktopApp.xaml.cs` stays verified by `ServiceGraphTests` (test gate), just not measured by the coverage gate | never |
 
 ## 8. Milestones

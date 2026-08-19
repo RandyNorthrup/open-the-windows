@@ -305,6 +305,7 @@ dotnet_diagnostic.CA1861.severity = none    # constant arrays in test data
 dotnet_diagnostic.CA1062.severity = none    # arg validation in tests
 dotnet_diagnostic.CA1812.severity = none    # DI/test fixtures
 dotnet_diagnostic.CA1822.severity = none    # instance test methods
+dotnet_naming_rule.async_methods_suffixed.severity = none    # async test methods use descriptive names, not the Async suffix
 
 # ──────────────────────────────────────────────────────────────────────────
 # Generated code

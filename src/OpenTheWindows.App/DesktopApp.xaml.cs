@@ -7,8 +7,10 @@ using OpenTheWindows.App.ViewModels;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
+using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Model;
 using OpenTheWindows.Windows;
+using OpenTheWindows.Windows.Readers;
 
 namespace OpenTheWindows.App;
 
@@ -34,6 +36,15 @@ internal sealed partial class DesktopApp : Application, IDisposable
         services.AddSingleton<TweakCatalog>(_ => CatalogLoader.LoadBuiltIn().Catalog
             ?? throw new InvalidOperationException("The built-in catalogue failed to load."));
         services.AddSingleton<OperatingSystemFacts>(sp => sp.GetRequiredService<DoctorService>().Run().OperatingSystem);
+
+        // Apply pipeline (the engine is built lazily by the coordinator, off the DI-validation path).
+        services.AddSingleton<IExplorerRestarter, WindowsExplorerRestarter>();
+        services.AddSingleton<IInteractiveUserResolver, WindowsInteractiveUserResolver>();
+        services.AddSingleton<Func<ApplyEngine>>(_ => static () => WindowsApplyEngineFactory.Create());
+        services.AddSingleton<IApplyCoordinator, ApplyCoordinator>();
+        services.AddTransient<ApplyFlowViewModel>();
+        services.AddSingleton<Func<ApplyFlowViewModel>>(sp => sp.GetRequiredService<ApplyFlowViewModel>);
+        services.AddSingleton<IApplyFlowLauncher, ApplyFlowLauncher>();
 
         // Shell services.
         services.AddSingleton<IDispatcherService>(_ => new WpfDispatcherService(Dispatcher.CurrentDispatcher));

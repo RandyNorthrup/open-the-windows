@@ -9,6 +9,17 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M6 (GUI, part 3 — review and apply): every category page now has a
+  **Review & apply…** action that opens a modal flow over the existing apply
+  engine. The flow previews the run as a what-if plan (per entry: what the run
+  would do, its risk, and each action with its current compliance), gates every
+  Breaking entry behind typing its id to confirm, then applies the run
+  transactionally **on a background thread** so the UI never freezes, and shows
+  the per-entry outcome with the aggregate restart requirement. If the run
+  fails the engine rolls it back and the flow reports that the machine is
+  unchanged. When a change needs Explorer restarted the flow offers to do it
+  (during the run or afterwards). The atomic apply is not interrupted
+  mid-transaction; cancellation is available before it starts.
 - M6 (GUI, part 2 — category pages): a shared `CategoryPageViewModel` now backs
   the **Privacy**, **Security**, **Performance**, **Debloat** and **Shell** pages.
   Each has a level dial (Off / Basic / Balanced / Strict / Paranoid) that

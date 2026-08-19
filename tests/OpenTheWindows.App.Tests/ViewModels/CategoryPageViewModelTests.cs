@@ -1,4 +1,6 @@
 using OpenTheWindows.App.Navigation;
+using OpenTheWindows.App.Services;
+using OpenTheWindows.App.Tests.Fakes;
 using OpenTheWindows.App.ViewModels;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
@@ -17,7 +19,9 @@ public sealed class CategoryPageViewModelTests
     private static readonly TweakCatalog Catalog = CatalogLoader.LoadBuiltIn().Catalog!;
     private static readonly OperatingSystemFacts Facts = FakeOperatingSystemInfo.Windows11Pro24H2();
 
-    private static CategoryPageViewModel Build(Category category = Category.Privacy) => new(category, Catalog, Facts);
+    private static CategoryPageViewModel Build(Category category = Category.Privacy) => Build(category, new FakeApplyFlowLauncher());
+
+    private static CategoryPageViewModel Build(Category category, IApplyFlowLauncher launcher) => new(category, Catalog, Facts, launcher);
 
     [Fact]
     public void Is_the_matching_page_with_applicable_entries()
@@ -128,6 +132,32 @@ public sealed class CategoryPageViewModelTests
         page.AllItems[0].IsSelected = true;
 
         Assert.Contains("1", page.SelectionSummary, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Review_and_apply_is_disabled_until_something_is_selected()
+    {
+        CategoryPageViewModel page = Build();
+
+        Assert.False(page.ReviewAndApplyCommand.CanExecute(null));
+        page.AllItems[0].IsSelected = true;
+        Assert.True(page.ReviewAndApplyCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public void Review_and_apply_launches_the_flow_with_the_selected_entries()
+    {
+        FakeApplyFlowLauncher launcher = new();
+        CategoryPageViewModel page = Build(Category.Privacy, launcher);
+        page.AllItems[0].IsSelected = true;
+        page.AllItems[1].IsSelected = true;
+
+        page.ReviewAndApplyCommand.Execute(null);
+
+        Assert.Equal(1, launcher.LaunchCount);
+        Assert.Equal(2, launcher.LastEntries!.Count);
+        Assert.Equal(Scope.Machine, launcher.LastOptions!.Scope);
+        Assert.True(launcher.LastOptions.CreateRestorePoint);
     }
 
     [Fact]

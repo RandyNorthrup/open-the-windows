@@ -1,6 +1,8 @@
 using System.Globalization;
 using System.Text;
 using OpenTheWindows.Core.Catalog;
+using OpenTheWindows.Core.Engine;
+using OpenTheWindows.Core.Journal;
 using OpenTheWindows.Core.Model;
 
 namespace OpenTheWindows.App.Resources;
@@ -50,6 +52,34 @@ internal static class DisplayLabels
         TweakStatus.Verified => Strings.Status_Verified,
         TweakStatus.Deprecated => Strings.Status_Deprecated,
         _ => status.ToString(),
+    };
+
+    /// <summary>A human-readable label for a plan disposition (what the run would do to an entry).</summary>
+    public static string For(PlanDisposition disposition) => disposition switch
+    {
+        PlanDisposition.Apply => "Will apply",
+        PlanDisposition.AlreadyCompliant => "Already set",
+        PlanDisposition.Managed => "Managed by policy",
+        PlanDisposition.ManagedBreakGlass => "Override managed (break-glass)",
+        PlanDisposition.NotApplicable => "Not applicable",
+        PlanDisposition.Blocked => "Blocked",
+        PlanDisposition.Refused => "Refused",
+        PlanDisposition.Conflict => "Conflicts with another entry",
+        _ => disposition.ToString(),
+    };
+
+    /// <summary>A human-readable label for the outcome of an applied (or reverted) entry.</summary>
+    public static string For(ApplyState state) => state switch
+    {
+        ApplyState.Pending => "Pending",
+        ApplyState.Applied => "Applied",
+        ApplyState.Failed => "Failed",
+        ApplyState.RolledBack => "Rolled back",
+        ApplyState.Skipped => "Skipped",
+        ApplyState.Managed => "Managed",
+        ApplyState.Refused => "Refused",
+        ApplyState.NotApplicable => "Not applicable",
+        _ => state.ToString(),
     };
 
     /// <summary>The "n of m selected" summary for a category page.</summary>
