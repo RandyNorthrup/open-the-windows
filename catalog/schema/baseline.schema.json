@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/RandyNorthrup/open-the-windows/catalog/schema/baseline.schema.json",
+  "title": "Open the Windows security baseline",
+  "description": "A named baseline mapping an external framework's control ids (Microsoft Security Baseline settings, DISA STIG rule ids, CIS section ids) to the catalogue tweaks and read-only health checks that satisfy them. Rules the schema cannot express (referenced tweak ids must exist, health-check ids must be known, rule ids unique) are enforced by BaselineValidator. CIS rules carry only the section id and a paraphrased title; there is no field for verbatim benchmark text (ADR 0002).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "title", "rules"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "type": "integer", "minimum": 1 },
+    "id": { "$ref": "#/$defs/baselineId" },
+    "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/rule" }
+    }
+  },
+  "$defs": {
+    "baselineId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*$"
+    },
+    "ruleId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "tweakId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 96,
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(\\.[a-z0-9]+(-[a-z0-9]+)*)*$"
+    },
+    "severity": {
+      "enum": ["CAT I", "CAT II", "CAT III", "L1", "L2", "BL", "NG", "Baseline"]
+    },
+    "source": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ruleId", "title", "severity", "tweakIds", "sources"],
+      "properties": {
+        "ruleId": { "$ref": "#/$defs/ruleId" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "severity": { "$ref": "#/$defs/severity" },
+        "tweakIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/tweakId" }
+        },
+        "checkOnly": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["healthCheckId"],
+          "properties": {
+            "healthCheckId": { "type": "string", "minLength": 1, "maxLength": 64 }
+          }
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/source" }
+        }
+      }
+    }
+  }
+}

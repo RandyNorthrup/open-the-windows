@@ -208,6 +208,24 @@ Invoke-Gate 'catalog' {
     }
     if ($rejection -eq 0) { throw "The catalog gate did not reject the broken fixture at $bad." }
     Write-Host "Catalogue valid; broken fixture rejected (otw catalog validate exit $rejection)."
+
+    # 3) The built-in baselines (M8) must validate against the catalogue tweak ids
+    #    and the health-check ids, and the gate must reject a baseline that
+    #    references an unknown tweak id (proven against tests/fixtures/baselines-bad).
+    & $dotnetExe $cli audit validate
+    if ($LASTEXITCODE -ne 0) { throw 'The built-in baselines failed validation.' }
+
+    $badBaselines = Join-Path $repoRoot 'tests/fixtures/baselines-bad'
+    $baselineRejection = 0
+    try {
+        & $dotnetExe $cli audit validate --baseline-dir $badBaselines *> $null
+        $baselineRejection = $LASTEXITCODE
+    }
+    catch {
+        $baselineRejection = if ($LASTEXITCODE -ne 0) { $LASTEXITCODE } else { 1 }
+    }
+    if ($baselineRejection -eq 0) { throw "The catalog gate did not reject the broken baseline fixture at $badBaselines." }
+    Write-Host "Baselines valid; broken baseline fixture rejected (otw audit validate exit $baselineRejection)."
     $global:LASTEXITCODE = 0
 }
 

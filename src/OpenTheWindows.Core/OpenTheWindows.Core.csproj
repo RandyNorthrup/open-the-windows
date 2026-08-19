@@ -23,14 +23,16 @@
        Logical names use forward slashes: catalog/<category>/<file>.json.
        eos.json is reference data, not a tweak document, so it is embedded under a
        separate logical name and excluded from the catalogue glob that the loader
-       parses against the tweak schema. Profiles are configuration documents, not
-       tweak documents, so they are embedded under a separate "profiles/" logical
-       prefix and excluded from the catalogue glob; the profile schema stays under
-       catalog/schema/ where the catalogue loader already skips it. -->
+       parses against the tweak schema. Profiles and baselines are configuration
+       documents, not tweak documents, so they are embedded under separate
+       "profiles/" and "baselines/" logical prefixes and excluded from the
+       catalogue glob; their schemas stay under catalog/schema/ where the
+       catalogue loader already skips them. -->
   <ItemGroup>
-    <EmbeddedResource Include="..\..\catalog\**\*.json" Exclude="..\..\catalog\updates\eos.json;..\..\catalog\profiles\**\*.json" LogicalName="catalog/%(RecursiveDir)%(Filename)%(Extension)" />
+    <EmbeddedResource Include="..\..\catalog\**\*.json" Exclude="..\..\catalog\updates\eos.json;..\..\catalog\profiles\**\*.json;..\..\catalog\baselines\**\*.json" LogicalName="catalog/%(RecursiveDir)%(Filename)%(Extension)" />
     <EmbeddedResource Include="..\..\catalog\updates\eos.json" LogicalName="data/eos.json" />
     <EmbeddedResource Include="..\..\catalog\profiles\*.json" LogicalName="profiles/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="..\..\catalog\baselines\*.json" LogicalName="baselines/%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

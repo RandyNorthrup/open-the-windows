@@ -1,0 +1,24 @@
+{
+  "$schema": "https://github.com/RandyNorthrup/open-the-windows/catalog/schema/baseline.schema.json",
+  "schemaVersion": 1,
+  "id": "cis-win11-ent-v4.0",
+  "title": "CIS Microsoft Windows 11 Enterprise Benchmark v4.0.0",
+  "rules": [
+    { "ruleId": "18.4.3", "title": "Disable the SMB v1 server to remove the legacy protocol's server component.", "severity": "L1", "tweakIds": ["security.network.remove-smbv1"], "sources": ["https://www.cisecurity.org/benchmark/microsoft_windows_desktop"] },
+    { "ruleId": "2.3.9.2", "title": "Configure the network server to always digitally sign SMB communications.", "severity": "L1", "tweakIds": ["security.network.require-smb-signing"], "sources": ["https://www.cisecurity.org/benchmark/microsoft_windows_desktop"] },
+    { "ruleId": "18.9.26.2", "title": "Configure LSASS to run as a protected process (PPL) to block credential theft.", "severity": "L1", "tweakIds": ["security.credentials.lsa-protection"], "sources": ["https://www.cisecurity.org/benchmark/microsoft_windows_desktop"] },
+    { "ruleId": "18.9.5.1", "title": "Turn on virtualization-based security.", "severity": "L1", "tweakIds": ["security.credentials.virtualization-based-security"], "sources": ["https://www.cisecurity.org/benchmark/microsoft_windows_desktop"] },
+    { "ruleId": "18.9.5.5", "title": "Enable Credential Guard through the virtualization-based security configuration.", "severity": "L1", "tweakIds": ["security.credentials.credential-guard"], "sources": ["https://www.cisecurity.org/benchmark/microsoft_windows_desktop"] },
+    { "ruleId": "18.9.5.3", "title": "Enable virtualization-based protection of code integrity (memory integrity / HVCI).", "severity": "L1", "tweakIds": ["security.credentials.memory-integrity"], "sources": ["https://www.cisecurity.org/benchmark/microsoft_windows_desktop"] },
+    { "ruleId": "18.4.7", "title": "Disable WDigest authentication to stop plaintext credential caching.", "severity": "L1", "tweakIds": ["security.credentials.wdigest-cleartext"], "sources": ["https://www.cisecurity.org/benchmark/microsoft_windows_desktop"] },
+    { "ruleId": "2.3.11.7", "title": "Set LAN Manager authentication level to NTLMv2 only, refusing LM and NTLM.", "severity": "L1", "tweakIds": ["security.credentials.lan-manager-auth-level"], "sources": ["https://www.cisecurity.org/benchmark/microsoft_windows_desktop"] },
+    { "ruleId": "2.3.11.5", "title": "Do not store the LAN Manager hash value on the next password change.", "severity": "L1", "tweakIds": ["security.credentials.no-lm-hash"], "sources": ["https://www.cisecurity.org/benchmark/microsoft_windows_desktop"] },
+    { "ruleId": "2.3.17.6", "title": "Run all administrators in Admin Approval Mode (UAC enforced).", "severity": "L1", "tweakIds": ["security.uac.enable-admin-approval-mode"], "sources": ["https://www.cisecurity.org/benchmark/microsoft_windows_desktop"] },
+    { "ruleId": "18.10.8.3", "title": "Turn off Autoplay for all drives.", "severity": "L1", "tweakIds": ["security.autoplay.disable-autorun"], "sources": ["https://www.cisecurity.org/benchmark/microsoft_windows_desktop"] },
+    { "ruleId": "18.10.87.1", "title": "Enable PowerShell script block logging.", "severity": "L2", "tweakIds": ["security.powershell.script-block-logging"], "sources": ["https://www.cisecurity.org/benchmark/microsoft_windows_desktop"] },
+    { "ruleId": "18.10.43.6.1.1", "title": "Enable Microsoft Defender Attack Surface Reduction rules.", "severity": "L1", "tweakIds": ["security.asr.lsass", "security.asr.office-child-process", "security.asr.office-macro-win32", "security.asr.email-executable", "security.asr.obfuscated-scripts", "security.asr.ransomware", "security.asr.vulnerable-drivers"], "sources": ["https://www.cisecurity.org/benchmark/microsoft_windows_desktop"] },
+    { "ruleId": "18.10.43.10.3", "title": "Keep Microsoft Defender real-time protection enabled.", "severity": "L1", "tweakIds": ["security.defender.real-time-protection"], "sources": ["https://www.cisecurity.org/benchmark/microsoft_windows_desktop"] },
+    { "ruleId": "9.1.1", "title": "Turn the Windows Defender Firewall on for the Domain profile.", "severity": "L1", "tweakIds": ["security.firewall.enable-all-profiles"], "sources": ["https://www.cisecurity.org/benchmark/microsoft_windows_desktop"] },
+    { "ruleId": "18.10.57.3.9.4", "title": "Require Network Level Authentication for incoming Remote Desktop connections.", "severity": "L1", "tweakIds": ["security.remote.harden-rdp"], "sources": ["https://www.cisecurity.org/benchmark/microsoft_windows_desktop"] }
+  ]
+}

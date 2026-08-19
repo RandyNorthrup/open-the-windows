@@ -9,7 +9,25 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
-- M7 (packaging, part 6 — install docs and VM verification): new
+- M8 (audit, part 1 — baselines and the audit engine): security baselines are a
+  new kind of catalogue data under `catalog/baselines/*.json`, validated against
+  `catalog/schema/baseline.schema.json`. Each baseline maps an external framework's
+  control ids to the catalogue tweaks and read-only health checks that satisfy
+  them. Three built-ins ship — **DISA Microsoft Windows 11 STIG V2R7**
+  (`disa-stig-v2r7`), the **CIS Microsoft Windows 11 Enterprise Benchmark v4.0.0**
+  (`cis-win11-ent-v4.0`), and the **Microsoft Windows 11 Security Baseline (25H2)**
+  (`ms-baseline-25h2`); every rule's framework id and source URL was verified
+  against the official DISA XCCDF, the CIS benchmark and Microsoft Learn, and every
+  referenced tweak id and health-check id is validated to exist. `AuditEngine`
+  scores the live machine against a baseline (read-only, over the existing
+  `ScanEngine` and `IMachineHealthProbe`): each rule resolves to Pass / Fail /
+  NotApplicable / Manual / Unknown with the actual observed evidence, and the report
+  carries a 0–100 score weighted by severity (`AuditScoring`). The set of
+  health-check ids now lives in Core (`HealthCheckIds`) as one vocabulary shared by
+  the Windows probe and the baseline `checkOnly` rules. `otw audit validate`
+  (`--baseline-dir`, `--json`) validates the baselines against the catalogue and the
+  health-check ids; the catalog quality gate runs it and rejects a baseline that
+  references an unknown tweak id (`tests/fixtures/baselines-bad`).
   [`docs/install.md`](docs/install.md) covers every channel (MSI, winget, portable
   and framework-dependent ZIPs), verifying SHA-256 sums and build-provenance
   attestations, silent install, upgrade, uninstall and data locations;

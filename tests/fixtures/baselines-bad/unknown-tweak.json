@@ -1,0 +1,15 @@
+{
+  "$schema": "https://github.com/RandyNorthrup/open-the-windows/catalog/schema/baseline.schema.json",
+  "schemaVersion": 1,
+  "id": "bad-baseline",
+  "title": "Deliberately broken baseline (test fixture)",
+  "rules": [
+    {
+      "ruleId": "BAD-1",
+      "title": "References a catalogue tweak id that does not exist",
+      "severity": "CAT I",
+      "tweakIds": ["security.network.no-such-tweak-xyz"],
+      "sources": ["https://example.test/bad"]
+    }
+  ]
+}
