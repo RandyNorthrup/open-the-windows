@@ -30,13 +30,15 @@ internal static class TestCli
         IScheduledTaskInstaller? taskInstaller = null,
         IJournalStore? journalStore = null,
         IUserHiveEnumerator? userHiveEnumerator = null,
-        IActiveSetupRegistrar? activeSetupRegistrar = null)
+        IActiveSetupRegistrar? activeSetupRegistrar = null,
+        IEventLogInstaller? eventLogInstaller = null)
     {
         FakeReaders scanReaders = readers ?? new FakeReaders();
         FakeScheduledTaskInstaller defaultInstaller = new();
         FakeJournalStore defaultJournal = new();
         FakeUserHiveEnumerator defaultUsers = new();
         FakeActiveSetupRegistrar defaultRegistrar = new();
+        FakeEventLogInstaller defaultEventLog = new();
         return new CliServices(
             doctor,
             loadCatalog,
@@ -48,6 +50,7 @@ internal static class TestCli
             () => journalStore ?? defaultJournal,
             () => userHiveEnumerator ?? defaultUsers,
             () => activeSetupRegistrar ?? defaultRegistrar,
+            () => eventLogInstaller ?? defaultEventLog,
             health ?? new FakeHealthProbe([]),
             elevation ?? new FakeElevationContext(isElevated: true));
     }
@@ -61,7 +64,7 @@ internal static class TestCli
     public static (RootCommand Root, StringWriter Out, StringWriter Err) ApplyHost(
         bool supported = true, bool elevated = true, ApplyEngine? engine = null, FakeReaders? readers = null,
         IScheduledTaskInstaller? taskInstaller = null, IJournalStore? journalStore = null,
-        IActiveSetupRegistrar? activeSetupRegistrar = null)
+        IActiveSetupRegistrar? activeSetupRegistrar = null, IEventLogInstaller? eventLogInstaller = null)
     {
         var doctor = new DoctorService(
             new FakeOperatingSystemInfo(supported ? FakeOperatingSystemInfo.Windows11Pro24H2() : FakeOperatingSystemInfo.WindowsServer2025()),
@@ -74,7 +77,8 @@ internal static class TestCli
             elevation: new FakeElevationContext(elevated),
             taskInstaller: taskInstaller,
             journalStore: journalStore,
-            activeSetupRegistrar: activeSetupRegistrar));
+            activeSetupRegistrar: activeSetupRegistrar,
+            eventLogInstaller: eventLogInstaller));
     }
 
     /// <summary>A command host wired with a specific user-hive enumerator for <c>otw users</c> tests.</summary>

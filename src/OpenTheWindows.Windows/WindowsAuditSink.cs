@@ -19,8 +19,8 @@ namespace OpenTheWindows.Windows;
 [SupportedOSPlatform("windows")]
 public sealed class WindowsAuditSink : IAuditSink
 {
-    private const string LogName = "OpenTheWindows";
-    private const string SourceName = "OTW";
+    private const string LogName = WindowsEventLogInstaller.DefaultLogName;
+    private const string SourceName = WindowsEventLogInstaller.DefaultSourceName;
 
     private readonly string _auditDirectory;
 
@@ -35,7 +35,7 @@ public sealed class WindowsAuditSink : IAuditSink
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(auditDirectory);
         _auditDirectory = auditDirectory;
-        EventLogAvailable = EnsureEventSource();
+        EventLogAvailable = new WindowsEventLogInstaller().TryEnsureRegistered();
     }
 
     /// <summary><see langword="true"/> when the Event Log source is available for writing.</summary>
@@ -74,24 +74,6 @@ public sealed class WindowsAuditSink : IAuditSink
         string file = Path.Combine(_auditDirectory, string.Create(CultureInfo.InvariantCulture, $"otw-{month}.jsonl"));
         string line = JsonSerializer.Serialize(auditEvent, AuditJsonContext.Default.AuditEvent);
         File.AppendAllText(file, line + "\n", Encoding.UTF8);
-    }
-
-    private static bool EnsureEventSource()
-    {
-        try
-        {
-            if (!EventLog.SourceExists(SourceName))
-            {
-                EventLog.CreateEventSource(new EventSourceCreationData(SourceName, LogName));
-            }
-
-            return true;
-        }
-        catch (Exception ex) when (ex is SecurityException or InvalidOperationException or Win32Exception or UnauthorizedAccessException)
-        {
-            // Creating the source needs elevation the first time; degrade to JSONL only.
-            return false;
-        }
     }
 
     private static EventLogEntryType EntryType(AuditEventId id) => id switch

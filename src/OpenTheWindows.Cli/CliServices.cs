@@ -24,6 +24,7 @@ namespace OpenTheWindows.Cli;
 /// <param name="CreateJournalStore">Builds a journal store (read to compare the last-run OS build against the live one).</param>
 /// <param name="CreateUserHiveEnumerator">Builds the user-hive enumerator (real user profiles an all-users apply targets).</param>
 /// <param name="CreateActiveSetupRegistrar">Builds the Active Setup registrar (per-user logon fallback for an all-users apply).</param>
+/// <param name="CreateEventLogInstaller">Builds the Event Log source installer (the <c>otw eventlog</c> command and MSI custom action).</param>
 /// <param name="Health">The read-only machine health probe.</param>
 /// <param name="Elevation">The process elevation context.</param>
 internal sealed record CliServices(
@@ -37,6 +38,7 @@ internal sealed record CliServices(
     Func<IJournalStore> CreateJournalStore,
     Func<IUserHiveEnumerator> CreateUserHiveEnumerator,
     Func<IActiveSetupRegistrar> CreateActiveSetupRegistrar,
+    Func<IEventLogInstaller> CreateEventLogInstaller,
     IMachineHealthProbe Health,
     IElevationContext Elevation)
 {
@@ -53,6 +55,7 @@ internal sealed record CliServices(
             static () => new WindowsJournalStore(),
             static () => new WindowsUserHiveEnumerator(),
             static () => new WindowsActiveSetupRegistrar(),
+            static () => new WindowsEventLogInstaller(),
             new WindowsMachineHealthProbe(),
             new WindowsElevationContext());
 

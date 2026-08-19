@@ -9,6 +9,16 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M7 (packaging, part 1 — Event Log source command): a new
+  `otw eventlog install|uninstall|status` command registers or removes the Open
+  the Windows Event Log source (log `OpenTheWindows`, source `OTW`) that audit
+  events are written under, so the source can be created at install time (the MSI
+  runs `otw eventlog install` as a deferred custom action) rather than only on the
+  first elevated operation. `install` and `uninstall` need elevation; `status` is
+  a read. The command and the audit sink now share one `IEventLogInstaller`
+  implementation (`WindowsEventLogInstaller`), removing the duplicated log/source
+  names and registration logic that previously lived in the audit sink.
+
 - M6 (GUI, part 7 — settings): a new **Settings** page, the last of the eleven
   shell pages. Its toggles are wired to real behaviour, not decoration: the
   restore-point and automatic-Explorer-restart choices flow into every apply,

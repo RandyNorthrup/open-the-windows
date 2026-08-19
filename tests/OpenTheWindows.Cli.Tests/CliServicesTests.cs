@@ -19,5 +19,6 @@ public sealed class CliServicesTests
         Assert.NotNull(services.CreateTaskInstaller());
         Assert.NotNull(services.CreateUserHiveEnumerator());
         Assert.NotNull(services.CreateActiveSetupRegistrar());
+        Assert.NotNull(services.CreateEventLogInstaller());
     }
 }

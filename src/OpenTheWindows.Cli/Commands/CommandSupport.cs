@@ -207,6 +207,38 @@ internal static class CommandSupport
         return false;
     }
 
+    /// <summary>
+    /// Shared preamble for an elevated command: yields the output and error writers, then
+    /// checks the platform is supported and the process holds an elevated token. On failure
+    /// writes the reason and yields the exit code (unsupported platform or elevation required).
+    /// <paramref name="action"/> is the full phrase naming the operation, e.g.
+    /// "Registering the Event Log source".
+    /// </summary>
+    public static bool TryBeginElevated(
+        CliServices services, ParseResult parseResult, string action,
+        out TextWriter stdout, out TextWriter stderr, out int exitCode)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(parseResult);
+
+        stdout = parseResult.InvocationConfiguration.Output;
+        stderr = parseResult.InvocationConfiguration.Error;
+
+        if (!IsSupported(services.Doctor, stderr, out exitCode))
+        {
+            return false;
+        }
+
+        if (!services.Elevation.IsElevated)
+        {
+            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"{action} needs an elevated token. Re-run from an elevated prompt."));
+            exitCode = ExitCodes.ElevationRequired;
+            return false;
+        }
+
+        return true;
+    }
+
     /// <summary>Returns whether the platform is supported; on failure writes the reason and yields the exit code.</summary>
     public static bool IsSupported(DoctorService doctor, TextWriter stderr, out int exitCode)
         => IsSupported(doctor, stderr, out exitCode, out _);

@@ -56,7 +56,7 @@ internal static class TaskCommand
         ParseResult parseResult, CliServices services, Option<string> profileOption,
         Option<bool> dailyOption, Option<bool> weeklyOption, Option<bool> onLogonOption, Option<bool> onBuildChangeOption)
     {
-        if (!TryBeginElevated(parseResult, services, "Installing", out TextWriter stdout, out TextWriter stderr, out int exitCode))
+        if (!CommandSupport.TryBeginElevated(services, parseResult, "Installing the remediation task", out TextWriter stdout, out TextWriter stderr, out int exitCode))
         {
             return exitCode;
         }
@@ -92,7 +92,7 @@ internal static class TaskCommand
 
     private static int ExecuteRemove(ParseResult parseResult, CliServices services)
     {
-        if (!TryBeginElevated(parseResult, services, "Removing", out TextWriter stdout, out _, out int exitCode))
+        if (!CommandSupport.TryBeginElevated(services, parseResult, "Removing the remediation task", out TextWriter stdout, out _, out int exitCode))
         {
             return exitCode;
         }
@@ -112,27 +112,6 @@ internal static class TaskCommand
         }
 
         return ExitCodes.Success;
-    }
-
-    private static bool TryBeginElevated(
-        ParseResult parseResult, CliServices services, string action, out TextWriter stdout, out TextWriter stderr, out int exitCode)
-    {
-        stdout = parseResult.InvocationConfiguration.Output;
-        stderr = parseResult.InvocationConfiguration.Error;
-
-        if (!CommandSupport.IsSupported(services.Doctor, stderr, out exitCode))
-        {
-            return false;
-        }
-
-        if (!services.Elevation.IsElevated)
-        {
-            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"{action} the remediation task needs an elevated token. Re-run from an elevated prompt."));
-            exitCode = ExitCodes.ElevationRequired;
-            return false;
-        }
-
-        return true;
     }
 
     private static bool TryResolveTrigger(
