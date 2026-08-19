@@ -262,6 +262,53 @@ public sealed class VmIntegrationTests
         }
     }
 
+    [Fact]
+    public void A_group_policy_managed_value_is_reported_and_left_untouched()
+    {
+        RequireIntegration();
+
+        // Simulate an organisation GPO already governing a value: write it through the Local
+        // GPO so it is recorded in Registry.pol (what the detector reads) and applied live,
+        // then confirm scan reports it Managed and apply refuses to overwrite it — the product
+        // never fights Group Policy (M5 acceptance: managed value reported and not overwritten).
+        const string PolicyPath = @"SOFTWARE\Policies\OpenTheWindows\ManagedTest";
+        string journalDir = Path.Combine(Path.GetTempPath(), "otw-int-" + Guid.NewGuid().ToString("N"));
+        var reader = new WindowsRegistryReader();
+        try
+        {
+            LocalGroupPolicy.Write(PolicyPath, "Sample", 0, Microsoft.Win32.RegistryValueKind.DWord);
+            RunGpupdate();
+
+            // Reported: the detector sees the value the Local GPO owns in Registry.pol, and the
+            // live value the CSE applied is the policy's 0.
+            Assert.Equal(
+                ManagedState.GroupPolicy,
+                new WindowsManagedSettingDetector().Detect(RegistryHive.LocalMachine, PolicyPath, "Sample"));
+            Assert.Equal(0, reader.Read(RegistryHive.LocalMachine, null, PolicyPath, "Sample").Data!.Value.GetInt32());
+
+            // Untouched: an entry that would set it to 1 is planned Managed and skipped, not applied.
+            ApplyEngine engine = RealEngine(journalDir);
+            TweakDefinition entry = RegistryEntry(PolicyPath, "Sample", RegistryValueKind.Policy);
+            ApplyResult applied = engine.Apply([entry], new ApplyOptions(
+                WhatIf: false, CreateRestorePoint: false, BreakGlass: false, AllowAdvanced: true, AllowBreaking: true, "integration", RestartExplorer: false));
+
+            Assert.Equal(RunState.Completed, applied.State);
+            Assert.Equal(ApplyState.Managed, Assert.Single(applied.Entries).Result);
+            Assert.Equal(0, reader.Read(RegistryHive.LocalMachine, null, PolicyPath, "Sample").Data!.Value.GetInt32()); // still the GP value, not 1
+        }
+        finally
+        {
+            LocalGroupPolicy.Delete(PolicyPath, "Sample");
+            RunGpupdate();
+            using Microsoft.Win32.RegistryKey? policies = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Policies\OpenTheWindows", writable: true);
+            policies?.DeleteSubKeyTree("ManagedTest", throwOnMissingSubKey: false);
+            if (Directory.Exists(journalDir))
+            {
+                Directory.Delete(journalDir, recursive: true);
+            }
+        }
+    }
+
     private static void RunGpupdate()
     {
         using var process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
