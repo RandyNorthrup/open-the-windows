@@ -9,6 +9,14 @@ what was planned (plans live in `PLAN.md`).
 
 ### Added
 
+- M7 (packaging, part 4 — winget manifest): `build/winget-manifest.ps1` generates
+  the winget multi-file manifest (`packaging/winget/`, schema 1.6.0) from the built
+  MSIs — reading each `InstallerSha256` and `ProductCode` and templating the GitHub
+  release `InstallerUrl` — with `InstallerType: wix`, `Scope: machine`, and silent
+  install switches. `winget validate --manifest packaging/winget` passes. The
+  committed manifest is a template; the release workflow regenerates it against the
+  real release assets.
+
 - M7 (packaging, parts 2-3 — MSI and release packager): a WiX 5 installer under
   `installer/` builds a per-machine MSI that lays the app down under
   `%ProgramFiles%\Open the Windows\{app,cli}`, adds a Start-menu shortcut and an

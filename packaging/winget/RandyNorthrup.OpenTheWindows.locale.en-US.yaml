@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+PackageIdentifier: RandyNorthrup.OpenTheWindows
+PackageVersion: 0.1.0
+PackageLocale: en-US
+Publisher: Open The Windows contributors
+PublisherUrl: https://github.com/RandyNorthrup/open-the-windows
+PublisherSupportUrl: https://github.com/RandyNorthrup/open-the-windows/issues
+PackageName: Open the Windows
+PackageUrl: https://github.com/RandyNorthrup/open-the-windows
+License: MIT
+LicenseUrl: https://github.com/RandyNorthrup/open-the-windows/blob/main/LICENSE
+ShortDescription: Windows 11 privacy, update, security and performance control.
+Description: >-
+  Open the Windows is an elevated Windows 11 utility that applies reversible,
+  catalogue-driven tweaks for privacy, security, performance and debloat, controls
+  Windows Update pausing, and works from a WPF app or the otw command-line tool.
+  Every change is transactional and can be reverted; nothing self-defeating (no
+  breaking Windows Update, Defender or update servicing) is offered.
+Moniker: open-the-windows
+Tags:
+  - windows
+  - windows-11
+  - privacy
+  - security
+  - performance
+  - debloat
+  - telemetry
+  - hardening
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
