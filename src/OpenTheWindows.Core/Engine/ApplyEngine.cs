@@ -389,6 +389,11 @@ public sealed class ApplyEngine
         OperatingSystemFacts facts = _os.GetFacts();
         List<JournalEntry> entries = [];
 
+        // SIDs whose hive we force-load (they were not logged on): a force-loaded NTUSER.DAT
+        // does not carry Software\Classes (that lives in UsrClass.dat), so those actions are
+        // not applicable there — see ActionState.
+        HashSet<string> offlineSids = [.. targetUsers.Where(p => !p.HiveLoaded).Select(p => p.Sid)];
+
         foreach (PlannedItem item in run.Items.Where(i => i.Disposition is PlanDisposition.Apply or PlanDisposition.ManagedBreakGlass))
         {
             List<JournalAction> actions = [];
@@ -400,7 +405,7 @@ public sealed class ApplyEngine
 
                 foreach (string? sid in TargetSids(action, run.UserSid, options.Scope, targetUsers))
                 {
-                    (ApplyState initial, bool willWrite) = ActionState(action, sid, scanned, options.Scope);
+                    (ApplyState initial, bool willWrite) = ActionState(action, sid, scanned, options.Scope, offlineSids);
                     actions.Add(new JournalAction
                     {
                         Index = index++,
@@ -684,15 +689,34 @@ public sealed class ApplyEngine
     /// action under all-users scope is decided by reading that specific hive (the scan
     /// only saw the interactive user); everything else uses the scan's compliance.
     /// </summary>
-    private (ApplyState Initial, bool WillWrite) ActionState(ITweakAction action, string? sid, ComplianceState scanned, Scope scope)
+    private (ApplyState Initial, bool WillWrite) ActionState(
+        ITweakAction action, string? sid, ComplianceState scanned, Scope scope, HashSet<string> offlineSids)
     {
         if (scope == Scope.AllUsers && ActionApplier.IsUserScoped(action))
         {
+            // A user's Software Classes subtree lives in UsrClass.dat, which a force-loaded
+            // NTUSER.DAT does not carry, so writing it into that hive would not take effect at
+            // the user's next logon. Mark it not-applicable for an offline user rather than
+            // falsely report success. Logged-on users apply it normally. Full offline
+            // UsrClass.dat support is a follow-up.
+            if (sid is not null && offlineSids.Contains(sid) && IsUserClassesWrite(action))
+            {
+                return (ApplyState.NotApplicable, false);
+            }
+
             return _applier.Verify(action, sid) ? (ApplyState.Skipped, false) : (ApplyState.Pending, true);
         }
 
         return InitialActionState(scanned);
     }
+
+    /// <summary>
+    /// Whether the action writes a value under the user's <c>Software\Classes</c> subtree,
+    /// which is backed by UsrClass.dat rather than NTUSER.DAT.
+    /// </summary>
+    private static bool IsUserClassesWrite(ITweakAction action)
+        => action is RegistryAction { Hive: RegistryHive.User } registry
+            && registry.Path.StartsWith(@"Software\Classes", StringComparison.OrdinalIgnoreCase);
 
     private static ApplyState EntryAggregate(JournalEntry entry)
     {

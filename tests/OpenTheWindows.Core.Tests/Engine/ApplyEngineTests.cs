@@ -272,6 +272,27 @@ public sealed class ApplyEngineTests
     }
 
     [Fact]
+    public void All_users_marks_a_software_classes_user_entry_not_applicable_for_an_offline_hive()
+    {
+        // Software\Classes lives in UsrClass.dat, which a force-loaded NTUSER.DAT does not carry,
+        // so an offline user must be reported not-applicable, never falsely applied; a logged-on
+        // user (whose Software\Classes is live) applies it normally.
+        var machine = new FakeMachine();
+        var classesAction = new RegistryAction(
+            RegistryHive.User, @"Software\Classes\CLSID\{TEST}", "V", RegistryValueType.Dword, Number(0), Number(1), RegistryValueKind.Preference);
+        ApplyHarness h = FakeApplyEngine.Create(
+            machine,
+            userHives: new FakeUserHiveEnumerator(UserHive("S-1-5-21-ON"), UserHive("S-1-5-21-OFF", loaded: false)),
+            hiveLoader: new FakeUserHiveLoader());
+
+        h.Engine.Apply([Entry("test.classes", [classesAction])], Opts(scope: Scope.AllUsers));
+
+        IReadOnlyList<JournalAction> actions = h.Journal.Records[0].Entries[0].Actions;
+        Assert.Equal(ApplyState.NotApplicable, actions.Single(a => string.Equals(a.Sid, "S-1-5-21-OFF", StringComparison.Ordinal)).Result);
+        Assert.Equal(ApplyState.Applied, actions.Single(a => string.Equals(a.Sid, "S-1-5-21-ON", StringComparison.Ordinal)).Result);
+    }
+
+    [Fact]
     public void All_users_plans_a_user_entry_the_interactive_user_is_compliant_with_and_applies_only_the_drifted_hive()
     {
         var machine = new FakeMachine { User = new InteractiveUser("S-1-5-21-A", @"TEST\a", true) };
