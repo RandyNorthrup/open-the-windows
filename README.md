@@ -42,20 +42,24 @@ Windows Server is refused. x64 and ARM64.
 
 ## Install
 
-Each `v*` release publishes three channels — a per-machine **MSI**, the
-**winget** package `RandyNorthrup.OpenTheWindows`, and a **portable ZIP** (plus a
-smaller framework-dependent ZIP). All are self-contained except the `-fdd` ZIP.
+No public release is published yet — until the first `v*` tag is cut, build from
+source (see [CONTRIBUTING.md](CONTRIBUTING.md)).
+
+Each tagged release publishes to the GitHub **Releases** page: a per-machine
+**MSI**, a self-contained **portable ZIP**, and a smaller framework-dependent
+`-fdd` ZIP (which needs the .NET 10 Desktop Runtime installed). A **winget**
+manifest for `RandyNorthrup.OpenTheWindows` is generated with each release;
+`winget install RandyNorthrup.OpenTheWindows` works once that manifest is
+accepted into the winget community repository.
 
 ```powershell
-winget install RandyNorthrup.OpenTheWindows          # or download the MSI / ZIP
-msiexec /i OpenTheWindows-<version>-win-x64.msi /qn  # silent, per-machine
+msiexec /i OpenTheWindows-<version>-win-x64.msi /qn   # silent, per-machine
 ```
 
 Binaries are not code-signed; every release carries SHA-256 sums, a CycloneDX
 SBOM and GitHub build-provenance attestations you can verify with
-`gh attestation verify` (see [SECURITY.md](SECURITY.md)). First run of an
-unsigned download shows a SmartScreen prompt (**More info → Run anyway**). To
-build from source, see [CONTRIBUTING.md](CONTRIBUTING.md).
+`gh attestation verify` (see [SECURITY.md](SECURITY.md)). The first run of an
+unsigned download shows a SmartScreen prompt (**More info → Run anyway**).
 
 ## The app
 
