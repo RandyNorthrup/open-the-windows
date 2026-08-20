@@ -82,7 +82,7 @@ All notable changes to this project are documented here. The format follows
   (`--baseline-dir`, `--json`) validates the baselines against the catalogue and the
   health-check ids; the catalog quality gate runs it and rejects a baseline that
   references an unknown tweak id (`tests/fixtures/baselines-bad`).
-  [`docs/install.md`](docs/install.md) covers every channel (MSI, winget, portable
+  [`docs/install.md`](docs/install.md) covers every channel (MSI, portable
   and framework-dependent ZIPs), verifying SHA-256 sums and build-provenance
   attestations, silent install, upgrade, uninstall and data locations;
   [`docs/enterprise.md`](docs/enterprise.md) gains a **Re-sign and allow-list**
@@ -98,23 +98,14 @@ All notable changes to this project are documented here. The format follows
 - M7 (packaging, part 5 — release workflow): `.github/workflows/release.yml` runs
   on a `v*` tag (or manual dispatch). It re-runs the correctness gates (restore,
   build, test, coverage thresholds) on the tagged commit, packages the release
-  (`build/package.ps1`), regenerates the winget manifest, produces
-  `actions/attest-build-provenance` attestations for every asset (the compensating
-  control for unsigned binaries, ADR 0003), publishes a GitHub Release with the
-  CHANGELOG section as notes and the ZIPs/MSIs/SBOM/SHA256SUMS attached, and prints
-  winget submission instructions in the job summary. Every action is pinned to a
-  commit SHA; untrusted trigger context is read through `env:` to avoid run-step
-  injection. `ci.yml`'s coverage class/file filters were synced to `quality.ps1`
-  (M6 App-boundary and M7 Event-Log-installer exclusions) so CI coverage matches
-  the local gate.
-
-- M7 (packaging, part 4 — winget manifest): `build/winget-manifest.ps1` generates
-  the winget multi-file manifest (`packaging/winget/`, schema 1.6.0) from the built
-  MSIs — reading each `InstallerSha256` and `ProductCode` and templating the GitHub
-  release `InstallerUrl` — with `InstallerType: wix`, `Scope: machine`, and silent
-  install switches. `winget validate --manifest packaging/winget` passes. The
-  committed manifest is a template; the release workflow regenerates it against the
-  real release assets.
+  (`build/package.ps1`), produces `actions/attest-build-provenance` attestations
+  for every asset (the compensating control for unsigned binaries, ADR 0003), and
+  publishes a GitHub Release with the CHANGELOG section as notes and the
+  ZIPs/MSIs/SBOM/SHA256SUMS attached. Every action is pinned to a commit SHA;
+  untrusted trigger context is read through `env:` to avoid run-step injection.
+  `ci.yml`'s coverage class/file filters were synced to `quality.ps1` (M6
+  App-boundary and M7 Event-Log-installer exclusions) so CI coverage matches the
+  local gate.
 
 - M7 (packaging, parts 2-3 — MSI and release packager): a WiX 5 installer under
   `installer/` builds a per-machine MSI that lays the app down under
@@ -801,6 +792,10 @@ All notable changes to this project are documented here. The format follows
   milestone apparatus. `.claude/settings.json` no longer wires those hooks.
 - Removed the Intune Remediations scripts; scheduled enforcement remains
   available through `otw task install`.
+- Removed winget packaging entirely — `build/winget-manifest.ps1`, the
+  `packaging/winget/` manifests, and the release workflow's winget-manifest and
+  submission steps. The app is not submitted to winget; it is distributed as the
+  MSI and the portable/framework-dependent ZIPs on the GitHub Releases page.
 
 ### Fixed
 
@@ -816,9 +811,7 @@ All notable changes to this project are documented here. The format follows
   speed and instrumentation, and still catching an O(n^2) regression.
 - README install section rewritten around the v0.1.0 release: the per-machine
   MSI and the self-contained portable ZIP (x64 / ARM64) from the GitHub Releases
-  page, with the exact `0.1.0` MSI command, plus a note that `winget install
-  RandyNorthrup.OpenTheWindows` works once the generated manifest is accepted
-  into the winget community repository. The catalogue “440 entries” figure was
+  page, with the exact `0.1.0` MSI command. The catalogue “440 entries” figure was
   verified against `otw catalog list`.
 - CI was red on every push because the report-writer feature was silently
   missing from git. The `.gitignore` rule `reports/` (meant for a top-level

@@ -51,10 +51,6 @@ already have the .NET 10 Desktop Runtime.
 msiexec /i OpenTheWindows-0.1.0-win-x64.msi /qn   # silent, per-machine
 ```
 
-A **winget** manifest for `RandyNorthrup.OpenTheWindows` ships with each release;
-`winget install RandyNorthrup.OpenTheWindows` works once it is accepted into the
-winget community repository.
-
 Binaries are not code-signed; every release carries SHA-256 sums, a CycloneDX
 SBOM and GitHub build-provenance attestations you can verify with
 `gh attestation verify` (see [SECURITY.md](SECURITY.md)). The first run of an

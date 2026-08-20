@@ -5,8 +5,7 @@
 # thresholds) on the tagged commit — the full SAST/secret/lint suite already ran
 # on that commit in ci.yml — then packages the release, generates build-provenance
 # attestations for every asset (the compensating control for not code-signing,
-# ADR 0003), publishes a GitHub Release with the CHANGELOG section as notes, and
-# prints winget submission instructions in the job summary.
+# ADR 0003), and publishes a GitHub Release with the CHANGELOG section as notes.
 #
 # Binaries are NOT code-signed. The SHA-256 sums, the SBOM and these attestations
 # are the provenance. All third-party actions are pinned to a commit SHA.
@@ -102,9 +101,6 @@ jobs:
       - name: Package (ZIPs + MSIs + SBOM + SHA256SUMS)
         run: pwsh build/package.ps1 -Version ${{ steps.ver.outputs.version }}
 
-      - name: Generate winget manifest
-        run: pwsh build/winget-manifest.ps1 -Version ${{ steps.ver.outputs.version }}
-
       - name: Attest build provenance
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
@@ -150,25 +146,3 @@ jobs:
           else {
             gh release create $tag @assets --title "Open the Windows $version" --notes-file release-notes.md
           }
-
-      - name: winget submission instructions
-        shell: pwsh
-        run: |
-          $version = '${{ steps.ver.outputs.version }}'
-          $summary = @"
-          ## winget submission (manual)
-
-          The manifest for ``RandyNorthrup.OpenTheWindows`` $version is in
-          ``packaging/winget`` (regenerated against the release assets). To submit it
-          to the community repository:
-
-          ``````
-          winget validate --manifest packaging/winget
-          wingetcreate submit --token <PAT> packaging/winget
-          ``````
-
-          Or open a pull request adding ``packaging/winget`` under
-          ``manifests/r/RandyNorthrup/OpenTheWindows/$version`` in
-          microsoft/winget-pkgs.
-          "@
-          $summary | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append

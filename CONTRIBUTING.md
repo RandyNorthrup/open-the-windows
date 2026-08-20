@@ -123,7 +123,6 @@ catalog/                     tweak catalogue (JSON) + schema + profiles + baseli
 admx/                        Group Policy ADMX/ADML templates
 build/                       quality.ps1, publish.ps1, vm.ps1, smoke harnesses
 installer/                   WiX MSI project
-packaging/                   winget manifests
 ```
 
 Build output goes to `artifacts/` (gitignored) via `UseArtifactsOutput`.
