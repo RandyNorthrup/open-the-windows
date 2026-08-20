@@ -8,10 +8,9 @@ namespace OpenTheWindows.App.ViewModels;
 
 /// <summary>
 /// One catalogue entry as shown in a category list and detail pane: its
-/// selection checkbox, risk / restart / status badges, the "verified on" chip
-/// and the detail fields (rationale, side effects, human-readable actions,
-/// sources). Read-only over the <see cref="TweakDefinition"/>; only
-/// <see cref="IsSelected"/> is mutable.
+/// selection checkbox, risk / restart badges and the detail fields (rationale,
+/// side effects, human-readable actions, sources). Read-only over the
+/// <see cref="TweakDefinition"/>; only <see cref="IsSelected"/> is mutable.
 /// </summary>
 internal sealed partial class TweakItemViewModel : ObservableObject
 {
@@ -25,10 +24,6 @@ internal sealed partial class TweakItemViewModel : ObservableObject
         Definition = entry;
         ActionSummaries = [.. entry.Actions.Select(a => string.Create(CultureInfo.InvariantCulture, $"{a.Kind}: {a}"))];
         Sources = [.. entry.Sources.Select(u => u.ToString())];
-        VerifiedOnLabel = entry.VerifiedOn.Count == 0
-            ? Strings.Category_NotVerified
-            : string.Join("; ", entry.VerifiedOn.Select(v =>
-                string.Create(CultureInfo.InvariantCulture, $"{v.Build} {v.Edition} {v.Date:yyyy-MM-dd}")));
     }
 
     /// <summary>The entry this item wraps (for the apply/plan engine).</summary>
@@ -85,19 +80,8 @@ internal sealed partial class TweakItemViewModel : ObservableObject
     /// <summary>The source URLs as display strings.</summary>
     public IReadOnlyList<string> Sources { get; }
 
-    /// <summary>The "verified on" chip text (builds and dates, or "not yet verified").</summary>
-    public string VerifiedOnLabel { get; }
-
-    /// <summary>Whether the entry has been verified on at least one build.</summary>
-    public bool IsVerified => Definition.VerifiedOn.Count > 0;
-
     /// <summary>True when the entry is still a Draft (not yet verified for release).</summary>
     public bool IsDraft => Definition.Status == TweakStatus.Draft;
-
-    /// <summary>A compact "verified on" chip label for the list row.</summary>
-    public string VerifiedShort => Definition.VerifiedOn.Count == 0
-        ? Strings.Category_NotVerified
-        : string.Create(CultureInfo.InvariantCulture, $"✓ {Definition.VerifiedOn.Max(v => v.Build)}");
 
     /// <summary>True when <paramref name="term"/> matches the id, title, description, rationale or a tag.</summary>
     public bool Matches(string term) => IdText.Contains(term, StringComparison.OrdinalIgnoreCase)

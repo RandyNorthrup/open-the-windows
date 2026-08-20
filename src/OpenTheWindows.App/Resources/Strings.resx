@@ -188,9 +188,6 @@
   <data name="Category_IncludeDraft" xml:space="preserve">
     <value>Include draft entries</value>
   </data>
-  <data name="Category_NotVerified" xml:space="preserve">
-    <value>Not yet verified</value>
-  </data>
   <data name="Category_SelectedCount" xml:space="preserve">
     <value>{0} of {1} selected</value>
   </data>

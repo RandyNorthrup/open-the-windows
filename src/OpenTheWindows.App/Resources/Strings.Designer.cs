@@ -417,15 +417,6 @@ internal class Strings
         }
     }
 
-    /// <summary>Looks up a localized string similar to Not yet verified.</summary>
-    internal static string Category_NotVerified
-    {
-        get
-        {
-            return ResourceManager.GetString("Category_NotVerified", resourceCulture);
-        }
-    }
-
     /// <summary>Looks up a localized string similar to {0} of {1} selected.</summary>
     internal static string Category_SelectedCount
     {

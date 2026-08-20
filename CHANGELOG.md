@@ -745,6 +745,11 @@ All notable changes to this project are documented here. The format follows
   - **A shared visual language** (`Resources/Styles.xaml`): page titles, section
     headers, cards, field labels and muted text are defined once so the pages read
     as one product.
+- M6 (GUI): removed the per-entry verification-status display from the Security/
+  category pages — the `✓ <build>` chip on each list row and the “Verified on”
+  build/edition/date block in the detail pane. That is internal QA/certification
+  provenance (raw Windows build numbers and test dates), not information a user
+  acts on; the catalogue still records `verifiedOn` and the gates still enforce it.
 - M6 (GUI): the Profiles detail pane no longer repeats the list row. The list row
   carries the name, signing badge, scope and change count; the detail pane now leads
   with the description and breaks the profile down into a **What it changes** list (the
