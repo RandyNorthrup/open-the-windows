@@ -7,54 +7,67 @@ namespace OpenTheWindows.Core.Tests.Catalog;
 
 public sealed class CatalogPerformanceTests
 {
+    private const int BaselineCount = 100;
     private const int EntryCount = 1000;
 
-    // Measured ~0.65 s locally (including coverage instrumentation) for 1000
-    // entries after the loader's pass/fail-first schema evaluation. The budget
-    // is deliberately generous so slower CI runners never flake, while still
-    // catching an order-of-magnitude regression (e.g. accidental O(n^2) loading,
-    // or reverting the fast schema path, which doubled the time). The shipped
-    // catalogue is ~30 entries, i.e. tens of milliseconds; 1000 is a stress case.
-    // The one-time schema compile is excluded by a warm-up load.
-    private const int BudgetMilliseconds = 3000;
-
     // A single wall-clock sample flakes when the gate machine is under load (a
-    // background build, other test runners). We take the fastest of several runs:
-    // the minimum reflects the algorithmic cost and is immune to a transient
-    // scheduling stall, while a genuine regression is slow on every run and still
-    // fails. This is a load-independent gate, not a best-case cherry-pick.
+    // background build, other test runners, coverage instrumentation). Each size
+    // is timed several times and the fastest kept: the minimum reflects the
+    // algorithmic cost and is immune to a transient scheduling stall, while a
+    // genuine regression is slow on every run and still fails.
     private const int MeasuredRuns = 5;
 
+    // Loading is O(n) in the entry count, so loading EntryCount entries should
+    // take about EntryCount / BaselineCount (10x) the time of the baseline, plus
+    // fixed overhead — nowhere near the ~100x an accidental O(n^2) load (or a
+    // per-entry schema recompile) would show. Asserting the RATIO of two loads
+    // measured back-to-back is immune to machine speed and to coverage
+    // instrumentation, which scale both loads equally; an absolute wall-clock
+    // budget is not, and flaked under coverage on shared CI runners. The bound is
+    // generous (well above 10x linear, well below 100x quadratic) so a healthy
+    // loader never flakes while a regression fails.
+    private const double MaxRatio = 30.0;
+
     [Fact]
-    public void Loading_a_thousand_entries_stays_within_budget()
+    public void Loading_scales_linearly_with_entry_count()
     {
-        string[] bodies = new string[EntryCount];
-        for (int i = 0; i < EntryCount; i++)
+        // Warm up: compile the schema and JIT the load path once, so neither
+        // measurement pays the one-time cost.
+        _ = CatalogLoader.Load([new CatalogSource("warmup.json", DocumentJson(EntryJson("perf.warmup.entry")), CatalogOrigin.BuiltIn)]);
+
+        double baselineMs = BestLoadMilliseconds(BaselineCount, out _);
+        double fullMs = BestLoadMilliseconds(EntryCount, out CatalogLoadResult fullResult);
+
+        Assert.True(fullResult.IsValid, string.Join(Environment.NewLine, fullResult.Errors.Select(e => e.ToString())));
+        Assert.Equal(EntryCount, fullResult.Catalog!.Count);
+
+        double ratio = fullMs / baselineMs;
+        Assert.True(
+            ratio <= MaxRatio,
+            string.Create(CultureInfo.InvariantCulture,
+                $"Loading {EntryCount} entries took {ratio:F1}x the time of {BaselineCount} ({fullMs:F1} ms vs {baselineMs:F1} ms); linear is ~{EntryCount / BaselineCount}x, budget {MaxRatio}x."));
+    }
+
+    private static double BestLoadMilliseconds(int entryCount, out CatalogLoadResult result)
+    {
+        string[] bodies = new string[entryCount];
+        for (int i = 0; i < entryCount; i++)
         {
             bodies[i] = EntryJson(string.Create(CultureInfo.InvariantCulture, $"perf.entry.n{i}"));
         }
 
-        string document = DocumentJson(bodies);
-        CatalogSource[] sources = [new CatalogSource("perf.json", document, CatalogOrigin.BuiltIn)];
+        CatalogSource[] sources = [new CatalogSource("perf.json", DocumentJson(bodies), CatalogOrigin.BuiltIn)];
 
-        // Warm up: compile the schema and JIT the load path once.
-        _ = CatalogLoader.Load([new CatalogSource("warmup.json", DocumentJson(EntryJson("perf.warmup.entry")), CatalogOrigin.BuiltIn)]);
-
-        long bestMilliseconds = long.MaxValue;
-        CatalogLoadResult result = null!;
+        double best = double.MaxValue;
+        result = null!;
         for (int run = 0; run < MeasuredRuns; run++)
         {
             var stopwatch = Stopwatch.StartNew();
             result = CatalogLoader.Load(sources);
             stopwatch.Stop();
-            bestMilliseconds = Math.Min(bestMilliseconds, stopwatch.ElapsedMilliseconds);
+            best = Math.Min(best, stopwatch.Elapsed.TotalMilliseconds);
         }
 
-        Assert.True(result.IsValid, string.Join(Environment.NewLine, result.Errors.Select(e => e.ToString())));
-        Assert.Equal(EntryCount, result.Catalog!.Count);
-        Assert.True(
-            bestMilliseconds <= BudgetMilliseconds,
-            string.Create(CultureInfo.InvariantCulture,
-                $"Fastest of {MeasuredRuns} loads of {EntryCount} entries was {bestMilliseconds} ms (budget {BudgetMilliseconds} ms)."));
+        return best;
     }
 }

@@ -804,6 +804,16 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- Two environment-sensitive tests failed on the Windows Server CI runner (they
+  had only ever run on a Windows 11 client, because CI was build-broken before
+  and never reached the test step). The Appx reader's positive test assumed the
+  Microsoft Store is installed for the current user, which is true on Windows 11
+  but not on the Server runner; it now discovers a package actually installed for
+  the current user and skips only when the host has none. The catalogue-load test
+  asserted an absolute wall-clock budget that coverage instrumentation on a
+  shared runner blew past; it now asserts linear scaling (loading 1000 entries
+  stays within 30x the time of 100) instead of absolute time — immune to machine
+  speed and instrumentation, and still catching an O(n^2) regression.
 - README install section rewritten around the v0.1.0 release: the per-machine
   MSI and the self-contained portable ZIP (x64 / ARM64) from the GitHub Releases
   page, with the exact `0.1.0` MSI command, plus a note that `winget install
