@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-08-19
+
 ### Added
 
 - M4 (security-policy action kind): a new `SecurityPolicy` catalogue action applies
@@ -802,12 +804,12 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
-- README install section corrected: it presented `winget install`, an MSI and a
-  ZIP download as if available now, but no release has been cut (zero tags/zero
-  GitHub Releases) and the winget package is not in the community repository. It
-  now says to build from source until the first `v*` tag, describes what each
-  tagged release publishes, and notes `winget install` works only once the
-  generated manifest is accepted upstream.
+- README install section rewritten around the v0.1.0 release: the per-machine
+  MSI and the self-contained portable ZIP (x64 / ARM64) from the GitHub Releases
+  page, with the exact `0.1.0` MSI command, plus a note that `winget install
+  RandyNorthrup.OpenTheWindows` works once the generated manifest is accepted
+  into the winget community repository. The catalogue “440 entries” figure was
+  verified against `otw catalog list`.
 - CI was red on every push because the report-writer feature was silently
   missing from git. The `.gitignore` rule `reports/` (meant for a top-level
   tool-output directory) also matched the source directory

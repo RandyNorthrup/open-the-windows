@@ -42,24 +42,24 @@ Windows Server is refused. x64 and ARM64.
 
 ## Install
 
-No public release is published yet — until the first `v*` tag is cut, build from
-source (see [CONTRIBUTING.md](CONTRIBUTING.md)).
-
-Each tagged release publishes to the GitHub **Releases** page: a per-machine
-**MSI**, a self-contained **portable ZIP**, and a smaller framework-dependent
-`-fdd` ZIP (which needs the .NET 10 Desktop Runtime installed). A **winget**
-manifest for `RandyNorthrup.OpenTheWindows` is generated with each release;
-`winget install RandyNorthrup.OpenTheWindows` works once that manifest is
-accepted into the winget community repository.
+Current release: **v0.1.0**, on the GitHub **Releases** page. Download the
+per-machine **MSI** or a self-contained **portable ZIP** (x64 or ARM64); a
+smaller framework-dependent `-fdd` ZIP is also published for machines that
+already have the .NET 10 Desktop Runtime.
 
 ```powershell
-msiexec /i OpenTheWindows-<version>-win-x64.msi /qn   # silent, per-machine
+msiexec /i OpenTheWindows-0.1.0-win-x64.msi /qn   # silent, per-machine
 ```
+
+A **winget** manifest for `RandyNorthrup.OpenTheWindows` ships with each release;
+`winget install RandyNorthrup.OpenTheWindows` works once it is accepted into the
+winget community repository.
 
 Binaries are not code-signed; every release carries SHA-256 sums, a CycloneDX
 SBOM and GitHub build-provenance attestations you can verify with
 `gh attestation verify` (see [SECURITY.md](SECURITY.md)). The first run of an
-unsigned download shows a SmartScreen prompt (**More info → Run anyway**).
+unsigned download shows a SmartScreen prompt (**More info → Run anyway**). To
+build from source, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## The app
 
