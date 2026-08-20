@@ -1,28 +1,8 @@
 # Agent instructions — Open the Windows
 
 These rules apply to any AI coding agent working in this repository. They
-restate the project's standards; the authoritative details are in
-`PLAN.md`, `CONTRIBUTING.md`, `docs/adr/` and `docs/research/`.
-
-## Mandatory sequence (enforced by hooks and gates)
-
-1. Read this file and `docs/milestones/README.md` (the runbook).
-2. Run `pwsh build/start-milestone.ps1 -Milestone <Mx>` for the milestone you
-   are working on (PLAN.md section 8 says which is in progress). It prints the
-   milestone specification `docs/milestones/<Mx>-*.md` into your context and
-   records an acknowledgement. Until then, the Claude Code PreToolUse hook
-   (`.claude/settings.json` -> `build/hooks/pre-edit.ps1`) **blocks** Edit/Write
-   under `src/`, `tests/`, `catalog/`, `build/`, `.github/` and the root build
-   files. Documentation edits are always allowed.
-3. Follow the spec's implementation steps in order; do not invent scope.
-4. `pwsh build/quality.ps1` must be green before you start and before you
-   finish; the `plan` gate (`build/check-plan.ps1`) fails if PLAN.md, specs,
-   certification records and these instruction files disagree.
-5. Commits: git pre-commit hook (`pwsh build/setup-dev.ps1` once) runs
-   format/build/test/plan and requires a `CHANGELOG.md` change whenever
-   `src/`, `tests/`, `catalog/` or `build/` change.
-6. A milestone is done only with `docs/certification/<Mx>.md` filled from the
-   template in the runbook and PLAN.md updated. Never mark DONE without it.
+restate the project's standards; build, run and gate commands are in
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## What this project is
 
@@ -40,8 +20,7 @@ correctness and reversibility are the product.
   ownership/ACL hacks on `WaaSMedicSvc`/`UsoSvc` (WaaSMedic reverts them and
   they break Store/Defender), disabling Defender, UAC, or protected services
   (`TrustedInstaller`, `SecurityHealthService`, `WinDefend`, `wscsvc`,
-  `EventLog`), hosts-blocking Microsoft endpoints, removing Edge/WebView2
-  (`docs/research/03`, `05` §7, PLAN.md D21).
+  `EventLog`), hosts-blocking Microsoft endpoints, removing Edge/WebView2.
 - Per-user settings target the **interactive user's** `HKU\<SID>`, never
   `Registry.CurrentUser` (banned API in `src/`).
 - Policy keys are written through the Local GPO path and mirrored; managed
@@ -50,14 +29,17 @@ correctness and reversibility are the product.
 - Tweaks are catalogue **data** with sources, revert path, risk tier, level,
   `appliesTo` and `verifiedOn`; only the closed set of action kinds executes.
 - No telemetry, no network access unless the user opts into the update check.
+- Never remove or disable existing app functionality to make a build or a gate
+  pass; fix the cause instead.
 
 ## Code standards (enforced by the build)
 
 - `TreatWarningsAsErrors`, `AnalysisLevel latest-all`, `EnforceCodeStyleInBuild`,
   Roslynator/Sonar/Meziantou/IDisposable/VS-Threading analyzers, banned APIs,
-  ReferenceTrimmer, nullable everywhere. Fix the finding; do not suppress it.
-  If a suppression is genuinely right: name the rule, state why inline, add a
-  row to `PLAN.md` §7.3.
+  ReferenceTrimmer, nullable everywhere. Fix the finding. **Never add a
+  suppression** (`[SuppressMessage]`, `#pragma warning`, `NoWarn`, an
+  `.editorconfig` severity downgrade) without explicitly asking the maintainer
+  first.
 - No magic numbers/strings/timeouts: constants, enums, or schema-validated
   configuration. `0`, `1`, `-1`, empty collections and direct booleans are fine.
 - No dead code, commented-out code, unused files/exports/packages.
@@ -107,25 +89,23 @@ correctness and reversibility are the product.
   writes runs on the lab VM behind `OTW_INTEGRATION=1` and elevation.
 - Every test has a case that would fail without the behaviour; assertions
   target the behaviour, not a downstream symptom.
-- Coverage thresholds (line 85 / branch 75, rising) are gates; do not lower them.
+- Coverage thresholds (line 90 / branch 80) are gates; do not lower them.
 
 ## Quality gates
 
 Run `pwsh build/quality.ps1` before finishing any task. It must be green. Gates:
-restore (NuGetAudit), format, build, test, coverage, secrets (gitleaks), sast
-(semgrep), duplication (jscpd), markdown, powershell (PSScriptAnalyzer). New
-gates must be shown to fail on a broken input and logged in `PLAN.md` §7.2.
+restore (NuGetAudit), format, build, test, coverage, catalog, secrets (gitleaks),
+sast (semgrep), duplication (jscpd), markdown, powershell (PSScriptAnalyzer). A
+new gate must be shown to fail on a deliberately broken input before it is trusted.
 
-## Documentation, changelog, planning discipline
+## Documentation and changelog discipline
 
-- `README.md` only contains commands that have been run successfully.
+- `README.md` is product/user-facing and only contains commands that have been
+  run successfully. Developer, build and gate detail lives in `CONTRIBUTING.md`.
 - `CHANGELOG.md` (Keep a Changelog) gets an entry for every meaningful change.
-- `PLAN.md` holds decisions, open questions, escape hatches, milestone status;
-  a milestone is complete only when its certification checklist passes.
-- Shaping decisions get an ADR in `docs/adr/`.
 - Package versions are pinned in `Directory.Packages.props`; verify
-  compatibility (peer/transitive) before adding anything, and record the
-  source in `PLAN.md` §7.1. Nothing is added without purpose.
+  compatibility (peer/transitive) before adding anything. Nothing is added
+  without purpose.
 
 ## Security rules
 

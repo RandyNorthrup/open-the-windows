@@ -754,7 +754,7 @@ public sealed class ApplyEngine
         "Design",
         "CA1031:Do not catch general exception types",
         Justification = "Transactional apply/revert boundary: any writer failure (Win32/COM/WMI/IO) must be caught so the run " +
-            "can journal it and roll back, rather than propagate a partially-applied run. Recorded in PLAN.md §7.3.")]
+            "can journal it and roll back, rather than propagate a partially-applied run.")]
     private static Exception? Capture(Action operation)
     {
         try

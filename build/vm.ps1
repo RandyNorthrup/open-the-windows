@@ -16,8 +16,8 @@
         pwsh build/vm.ps1 -Action copy -Source <file> -Destination C:/otw-test/<name>
 
     Nothing here changes VM state except copying files into C:\otw-test.
-    Destructive apply/revert runs are M3 work and will get their own script
-    with explicit checkpoint/restore handling (see PLAN.md).
+    Destructive apply/revert runs have their own script with explicit
+    checkpoint/restore handling.
 #>
 [CmdletBinding()]
 param(

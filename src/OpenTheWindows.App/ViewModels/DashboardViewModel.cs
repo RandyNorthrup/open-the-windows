@@ -18,7 +18,6 @@ namespace OpenTheWindows.App.ViewModels;
 /// </summary>
 internal sealed partial class DashboardViewModel : ObservableObject, IPageViewModel
 {
-    private readonly INavigationService _navigation;
     private readonly IAuditCoordinator _audit;
 
     [ObservableProperty]
@@ -27,14 +26,12 @@ internal sealed partial class DashboardViewModel : ObservableObject, IPageViewMo
     [ObservableProperty]
     private string _auditStatus = "This machine has not been scored yet. Select “Score this machine” to audit it against the built-in security baselines.";
 
-    /// <summary>Builds the dashboard over the doctor panel, navigation and the audit coordinator.</summary>
-    public DashboardViewModel(DoctorViewModel doctor, INavigationService navigation, IAuditCoordinator audit)
+    /// <summary>Builds the dashboard over the doctor panel and the audit coordinator.</summary>
+    public DashboardViewModel(DoctorViewModel doctor, IAuditCoordinator audit)
     {
         ArgumentNullException.ThrowIfNull(doctor);
-        ArgumentNullException.ThrowIfNull(navigation);
         ArgumentNullException.ThrowIfNull(audit);
         Doctor = doctor;
-        _navigation = navigation;
         _audit = audit;
     }
 
@@ -60,7 +57,7 @@ internal sealed partial class DashboardViewModel : ObservableObject, IPageViewMo
     [SuppressMessage(
         "Design",
         "CA1031:Do not catch general exception types",
-        Justification = "UI boundary: a fault while auditing must be shown, not crash the window; the audit is read-only. Recorded in PLAN.md §7.3.")]
+        Justification = "UI boundary: a fault while auditing must be shown, not crash the window; the audit is read-only.")]
     private async Task LoadScoresAsync()
     {
         if (IsBusy)
@@ -92,10 +89,6 @@ internal sealed partial class DashboardViewModel : ObservableObject, IPageViewMo
             IsBusy = false;
         }
     }
-
-    /// <summary>Navigates to the page identified by <paramref name="pageKey"/>.</summary>
-    [RelayCommand]
-    private void Open(string pageKey) => _navigation.NavigateTo(pageKey);
 
     partial void OnIsBusyChanged(bool value)
     {

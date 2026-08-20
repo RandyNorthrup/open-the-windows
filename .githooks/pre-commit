@@ -14,4 +14,3 @@ fi
 pwsh -NoProfile -ExecutionPolicy Bypass -File build/quality.ps1 -Only format || exit 1
 pwsh -NoProfile -ExecutionPolicy Bypass -File build/quality.ps1 -Only build || exit 1
 pwsh -NoProfile -ExecutionPolicy Bypass -File build/quality.ps1 -Only test || exit 1
-pwsh -NoProfile -ExecutionPolicy Bypass -File build/quality.ps1 -Only plan || exit 1

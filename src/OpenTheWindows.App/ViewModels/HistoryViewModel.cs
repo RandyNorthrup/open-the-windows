@@ -74,7 +74,7 @@ internal sealed partial class HistoryViewModel : ObservableObject, IPageViewMode
         "Design",
         "CA1031:Do not catch general exception types",
         Justification = "UI boundary: a fault while reverting must be shown, not crash the window; the engine already " +
-            "journals and rolls back operational failures. Recorded in PLAN.md §7.3.")]
+            "journals and rolls back operational failures.")]
     private async Task RevertAsync()
     {
         if (SelectedRun is null || !_dialog.Confirm(Title,

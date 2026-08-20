@@ -24,11 +24,6 @@
                       IsChecked="{Binding Settings.RestartExplorerAutomatically, Mode=TwoWay}"
                       ToolTip="Some shell tweaks need Explorer restarted to show. Do it automatically instead of asking each time."
                       AutomationProperties.AutomationId="Settings_RestartExplorer" />
-            <CheckBox Content="Show draft (not yet verified) entries"
-                      Margin="0,4"
-                      IsChecked="{Binding Settings.IncludeDraft, Mode=TwoWay}"
-                      ToolTip="Show entries not yet verified on this Windows build, in every section. Off by default so only proven entries appear."
-                      AutomationProperties.AutomationId="Settings_IncludeDraft" />
             <CheckBox Content="Enterprise mode (hide the consumer-only profiles)"
                       Margin="0,4"
                       IsChecked="{Binding Settings.EnterpriseMode, Mode=TwoWay}"

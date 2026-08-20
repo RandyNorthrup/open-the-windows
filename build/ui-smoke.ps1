@@ -1,14 +1,14 @@
 <#
 .SYNOPSIS
-    GUI smoke for M6: launches the published WPF app, navigates every page with
+    GUI smoke: launches the published WPF app, navigates every page with
     FlaUI, captures a screenshot of each, and measures cold-start time.
 
 .DESCRIPTION
-    Milestone-certification harness (M6). It publishes the app self-contained,
+    GUI smoke harness. It publishes the app self-contained,
     re-launches itself elevated (one UAC prompt, because the app manifest
     requires administrator), attaches with FlaUI/UIA3, clicks each navigation
     item by its stable AutomationId (Nav_<Page>), and saves a screenshot per
-    page to docs/certification/M6/<Page>.png. Cold start (launch to first
+    page to artifacts/ui-smoke/<Page>.png. Cold start (launch to first
     window) is measured with a Stopwatch and must be under the target.
 
     REQUIRES AN INTERACTIVE, ELEVATED DESKTOP SESSION. UI automation renders and
@@ -38,7 +38,7 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $dotnet = if (Test-Path 'C:\Program Files\dotnet\dotnet.exe') { 'C:\Program Files\dotnet\dotnet.exe' } else { 'dotnet' }
 if (-not $OutputDir) {
-    $OutputDir = Join-Path $repoRoot 'docs/certification/M6'
+    $OutputDir = Join-Path $repoRoot 'artifacts/ui-smoke'
 }
 
 $pages = @(

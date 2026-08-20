@@ -13,8 +13,7 @@ namespace OpenTheWindows.App.Services;
     "Usage",
     "VSTHRD001:Avoid legacy thread switching APIs",
     Justification = "This type is the deliberate encapsulation of WPF Dispatcher marshalling for the whole app; " +
-        "JoinableTaskFactory would add the VS-Threading package with no benefit for a standalone WPF process. " +
-        "Recorded in PLAN.md section 7.3.")]
+        "JoinableTaskFactory would add the VS-Threading package with no benefit for a standalone WPF process.")]
 internal sealed class WpfDispatcherService : IDispatcherService
 {
     private readonly Dispatcher _dispatcher;

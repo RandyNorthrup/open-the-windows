@@ -2,8 +2,7 @@
 
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
-[Semantic Versioning](https://semver.org/). Entries record what happened, not
-what was planned (plans live in `PLAN.md`).
+[Semantic Versioning](https://semver.org/). Entries record what happened.
 
 ## [Unreleased]
 
@@ -705,6 +704,20 @@ what was planned (plans live in `PLAN.md`).
 
 ### Changed
 
+- Repository reorganised so the quality gates verify code, build and tests only —
+  never the existence of a document. Removed the `plan` gate and its
+  `build/check-plan.ps1`; the CI and pre-commit steps that ran it are gone.
+- Decoupled the catalogue from documents: the `verifiedOn.evidence` field (which
+  pointed every verified entry at a certification markdown file) is removed from
+  the schema, the `Verification` model, the validator, all 144 verified entries
+  and the tests. Verification is now recorded as build/edition/date alone.
+- Split the README: it is now product/user-facing, and all developer, build,
+  quality-gate, project-structure and troubleshooting detail moved to
+  `CONTRIBUTING.md`.
+- Rewrote `AGENTS.md`, `CLAUDE.md` and the Cursor rules to drop the milestone
+  runbook process, and added two standing rules — never add an analyzer
+  suppression without explicit approval, and never remove or disable app
+  functionality to make a build or gate pass.
 - M6 (GUI polish — button-up from live testing): the desktop app was reworked for
   clarity and to stop reading the machine on its own.
   - **Nothing scans on load.** The Dashboard's baseline **audit** and the Updates
@@ -732,6 +745,13 @@ what was planned (plans live in `PLAN.md`).
   - **A shared visual language** (`Resources/Styles.xaml`): page titles, section
     headers, cards, field labels and muted text are defined once so the pages read
     as one product.
+- M6 (GUI): the Profiles detail pane no longer repeats the list row. The list row
+  carries the name, signing badge, scope and change count; the detail pane now leads
+  with the description and breaks the profile down into a **What it changes** list (the
+  affected category, its level and change count per category) and a **How it applies**
+  list (risk ceiling, drafts, restore point, Explorer restart, include/exclude counts),
+  above the applies-to / signing / changes summary — so the two views are complementary
+  rather than duplicated.
 - Local builds report the plain version (e.g. `0.1.0`) instead of `0.1.0-local`;
   the developer and the shipped build now carry the same version string (the
   `-local` pre-release tag only confused users).
@@ -766,8 +786,34 @@ what was planned (plans live in `PLAN.md`).
   section 8 and `docs/milestones/M2-scan.md` updated; the M1 status-board row was
   also corrected to DONE.
 
+### Removed
+
+- Deleted the `docs/` tree (milestone specs, certification records, research and
+  reference docs), `PLAN.md`, `build/check-plan.ps1`, `build/start-milestone.ps1`,
+  and the Claude Code pre-edit/session-start hook scripts — the documentation-driven
+  milestone apparatus. `.claude/settings.json` no longer wires those hooks.
+- Removed the Intune Remediations scripts; scheduled enforcement remains
+  available through `otw task install`.
+
 ### Fixed
 
+- M6 (GUI): controls and detail panes were clipped on the right edge — the Profiles and
+  category two-pane layouts, the category toolbar's **Review & apply** button, and the
+  navigation-rail title were all cut off. The cause was layout overflow, not text that
+  needed wrapping: fixed-width grid columns with large minimum widths, and horizontal
+  `StackPanel`s (which measure children at infinite width), overran the window. The
+  two-pane bodies now use star-sized columns, the category page moves its selection
+  summary and **Review & apply** button up to the title row so the toolbar no longer
+  overflows, and the navigation-rail header is a `DockPanel` that bounds the title so it
+  fits the rail.
+- M6 (GUI): the dark Fluent theme rendered several surfaces with light-theme colours —
+  the navigation-rail fill, card and detail-pane borders, the Updates “managed” banner
+  and the link/warning text used legacy `SystemColors.*` brushes that do not track the
+  Fluent theme. WPF has no `ResourceDictionary.ThemeDictionaries` (that is a WinUI
+  feature), so the app now defines theme-agnostic translucent-grey brushes in
+  `Resources/Styles.xaml` — a semi-transparent grey lightens a dark surface and darkens
+  a light one, so a single definition is correct on both themes without theme
+  detection — and the managed banner's text inherits the theme foreground.
 - M6 (GUI): navigating from a quick action left the navigation rail highlighting a
   stale page, and clicking the already-highlighted entry did nothing — so there was
   no way back to the page you jumped from. The rail now follows the page the shell

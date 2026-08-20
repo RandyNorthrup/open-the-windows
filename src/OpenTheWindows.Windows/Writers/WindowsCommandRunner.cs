@@ -27,7 +27,7 @@ public sealed class WindowsCommandRunner : ICommandRunner
         var stderr = new StringBuilder();
 
         // RS0030: System.Diagnostics.Process is banned in src/ except here — this guarded runner is
-        // the single sanctioned process host (BannedSymbols.txt; PLAN.md section 7.3).
+        // the single sanctioned process host (BannedSymbols.txt).
 #pragma warning disable RS0030
         using var process = new Process();
         process.StartInfo = new ProcessStartInfo

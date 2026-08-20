@@ -24,7 +24,7 @@ namespace OpenTheWindows.Core.Catalog;
 /// <param name="ManagedBy">Where an organisation manages the same setting, if anywhere.</param>
 /// <param name="SideEffects">Known functional losses, one per item.</param>
 /// <param name="Sources">Documentation URLs (at least one).</param>
-/// <param name="VerifiedOn">Verification evidence per build.</param>
+/// <param name="VerifiedOn">Verification records per build.</param>
 /// <param name="Tags">Free-form tags for search and profiles (e.g. "gamer", "developer").</param>
 public sealed record TweakDefinition(
     TweakId Id,

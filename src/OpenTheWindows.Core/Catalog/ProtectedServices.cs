@@ -6,7 +6,6 @@ namespace OpenTheWindows.Core.Catalog;
 /// licensing, event logging) or is undone by Windows itself (WaaSMedicSvc).
 /// Temporary stops inside the supervised update hold/repair flow are engine
 /// behaviour, not catalogue actions, and are therefore not affected by this list.
-/// See PLAN.md D21 and docs/research/05 §3.
 /// </summary>
 public static class ProtectedServices
 {

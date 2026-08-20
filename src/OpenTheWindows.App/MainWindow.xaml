@@ -9,6 +9,7 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}"
         Title="{x:Static vm:MainWindowViewModel.WindowTitle}"
+        Icon="Resources/OpenTheWindows.ico"
         Width="960"
         Height="640"
         MinWidth="720"
@@ -46,15 +47,23 @@
 
         <!-- Navigation rail -->
         <Border Grid.Column="0"
-                Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+                Background="{DynamicResource RailBackgroundBrush}">
             <DockPanel>
-                <StackPanel DockPanel.Dock="Top" Margin="16,16,16,8">
+                <DockPanel DockPanel.Dock="Top" Margin="16,18,16,10">
+                    <Image DockPanel.Dock="Left"
+                           Source="{StaticResource OtwMark}"
+                           Width="34" Height="34"
+                           VerticalAlignment="Center"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           AutomationProperties.Name="Open the Windows logo" />
                     <TextBlock Text="{x:Static vm:MainWindowViewModel.Title}"
-                               FontSize="20"
+                               FontSize="18"
                                FontWeight="SemiBold"
                                TextWrapping="Wrap"
+                               VerticalAlignment="Center"
+                               Margin="11,0,0,0"
                                AutomationProperties.AutomationId="Shell_ProductTitle" />
-                </StackPanel>
+                </DockPanel>
 
                 <TextBlock DockPanel.Dock="Bottom"
                            Text="{x:Static vm:MainWindowViewModel.Version}"
@@ -91,23 +100,12 @@
         <!-- Page host. No scroll viewer here: each page owns its own scrolling,
              so there is never a second, detached scrollbar over a page that
              already scrolls its own content. -->
-        <DockPanel Grid.Column="1">
-            <Grid DockPanel.Dock="Top" Margin="24,16,24,0">
-                <Button HorizontalAlignment="Left"
-                        Content="◀  Back"
-                        Padding="12,5"
-                        Command="{Binding BackCommand}"
-                        ToolTipService.ShowOnDisabled="True"
-                        ToolTip="Return to the page you were on before this one"
-                        AutomationProperties.Name="Back"
-                        AutomationProperties.AutomationId="Shell_Back" />
-            </Grid>
-            <ContentControl Content="{Binding CurrentPage}"
-                            Margin="24,12,24,24"
-                            HorizontalContentAlignment="Stretch"
-                            VerticalContentAlignment="Stretch"
-                            AutomationProperties.Name="Current page"
-                            AutomationProperties.AutomationId="Shell_Content" />
-        </DockPanel>
+        <ContentControl Grid.Column="1"
+                        Content="{Binding CurrentPage}"
+                        Margin="28,24,28,24"
+                        HorizontalContentAlignment="Stretch"
+                        VerticalContentAlignment="Stretch"
+                        AutomationProperties.Name="Current page"
+                        AutomationProperties.AutomationId="Shell_Content" />
     </Grid>
 </Window>

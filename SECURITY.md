@@ -47,12 +47,11 @@ reporters in the release notes unless they prefer otherwise.
 ## What the project does to stay safe
 
 - The catalogue is data validated by schema and tests; only a closed set of
-  typed actions can execute (see `docs/adr/0004-data-driven-catalog.md`).
+  typed actions can execute.
 - Every apply is journaled first and verified after; failures roll back.
 - No telemetry, no network access unless the user explicitly enables the
   update check.
-- Binaries are **not** code-signed (see
-  `docs/adr/0003-unsigned-distribution.md`); releases carry SHA-256 sums, a
+- Binaries are **not** code-signed; releases carry SHA-256 sums, a
   CycloneDX SBOM, and GitHub build-provenance attestations instead. Verify
   before running:
 

@@ -4,7 +4,7 @@ namespace OpenTheWindows.Core;
 
 /// <summary>
 /// Product identity shared by every front end. Title only; the product has
-/// no tagline (product decision, see PLAN.md "Branding").
+/// no tagline (product decision).
 /// </summary>
 public static class AppInfo
 {
@@ -19,7 +19,7 @@ public static class AppInfo
         "Major Code Smell",
         "S1075:URIs should not be hardcoded",
         Justification = "Immutable product-identity constant (the project homepage) used as the SARIF tool " +
-            "informationUri; it is not environment-specific configuration. Recorded in PLAN.md §7.3.")]
+            "informationUri; it is not environment-specific configuration.")]
     public const string HomepageUri = "https://github.com/RandyNorthrup/open-the-windows";
 
     /// <summary>

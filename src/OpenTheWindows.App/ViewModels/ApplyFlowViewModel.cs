@@ -75,7 +75,7 @@ internal sealed partial class ApplyFlowViewModel : ObservableObject
         "Design",
         "CA1031:Do not catch general exception types",
         Justification = "UI boundary: a fault while reading machine state for the plan must be shown as a failed " +
-            "preview, not crash the window. Recorded in PLAN.md §7.3.")]
+            "preview, not crash the window.")]
     public void Start(string title, IReadOnlyList<TweakDefinition> entries, ApplyOptions options)
     {
         ArgumentNullException.ThrowIfNull(entries);
@@ -118,8 +118,7 @@ internal sealed partial class ApplyFlowViewModel : ObservableObject
         "Design",
         "CA1031:Do not catch general exception types",
         Justification = "UI boundary: any unexpected engine fault must land the flow in a Failed state with the " +
-            "message, not crash the window; operational failures are already journaled and rolled back by the engine. " +
-            "Recorded in PLAN.md §7.3.")]
+            "message, not crash the window; operational failures are already journaled and rolled back by the engine.")]
     private async Task ApplyAsync()
     {
         foreach (string id in _breakingIds)

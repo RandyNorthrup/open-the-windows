@@ -102,7 +102,7 @@ internal static class LocalGroupPolicy
         "Design",
         "CA1031:Do not catch general exception types",
         Justification = "The STA worker must marshal any failure (COMException, registry, security) back to the calling " +
-            "thread as a single fault; the caller's transactional boundary decides what to do. Recorded in PLAN.md section 7.3.")]
+            "thread as a single fault; the caller's transactional boundary decides what to do.")]
     private static void RunSta(Action action)
     {
         Exception? failure = null;

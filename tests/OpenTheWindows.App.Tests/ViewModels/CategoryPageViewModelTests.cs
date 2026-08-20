@@ -50,7 +50,6 @@ public sealed class CategoryPageViewModelTests
     public void The_level_dial_selects_entries_at_or_below_the_dial()
     {
         CategoryPageViewModel page = Build();
-        page.IncludeDraft = true;
 
         page.Level = Level.Paranoid;
 
@@ -66,7 +65,6 @@ public sealed class CategoryPageViewModelTests
     public void Higher_levels_are_cumulative()
     {
         CategoryPageViewModel page = Build();
-        page.IncludeDraft = true;
 
         page.Level = Level.Balanced;
         HashSet<TweakId> balanced = [.. page.SelectedItems.Select(i => i.Id)];
@@ -77,28 +75,21 @@ public sealed class CategoryPageViewModelTests
     }
 
     [Fact]
-    public void Draft_entries_are_hidden_until_included()
+    public void Every_applicable_entry_is_shown_regardless_of_verification_status()
     {
         CategoryPageViewModel page = Build();
-        int verifiedOnly = page.Items.Count;
 
-        page.IncludeDraft = true;
-
-        Assert.True(page.Items.Count >= verifiedOnly);
-        Assert.All(page.Items.Where(i => i.Status == TweakStatus.Draft), _ => Assert.True(page.IncludeDraft));
+        // No draft gating in the browse UI: the visible list is every applicable,
+        // non-deprecated entry, verified or not.
+        Assert.Equal(page.AllItems.Count, page.Items.Count);
+        Assert.Contains(page.Items, i => i.Status == TweakStatus.Draft);
     }
 
     [Fact]
-    public void An_all_draft_section_shows_a_hint_instead_of_an_empty_list()
+    public void An_all_draft_section_still_lists_its_entries()
     {
-        // Every Shell entry ships as Draft, so the section is empty until drafts are shown.
+        // Every Shell entry ships as Draft; they are shown, never hidden.
         CategoryPageViewModel page = Build(Category.Shell);
-
-        Assert.Empty(page.Items);
-        Assert.True(page.IsEmpty);
-        Assert.Contains("draft", page.EmptyMessage, StringComparison.OrdinalIgnoreCase);
-
-        page.IncludeDraft = true;
 
         Assert.NotEmpty(page.Items);
         Assert.False(page.IsEmpty);
@@ -109,7 +100,6 @@ public sealed class CategoryPageViewModelTests
     public void The_risk_filter_narrows_the_visible_list()
     {
         CategoryPageViewModel page = Build();
-        page.IncludeDraft = true;
 
         page.RiskFilter = RiskTier.Safe;
 
@@ -120,7 +110,6 @@ public sealed class CategoryPageViewModelTests
     public void Search_narrows_to_matching_entries_and_a_nonsense_term_empties_the_list()
     {
         CategoryPageViewModel page = Build();
-        page.IncludeDraft = true;
         string idFragment = page.Items[0].IdText;
 
         page.SearchText = idFragment;
@@ -182,14 +171,6 @@ public sealed class CategoryPageViewModelTests
     }
 
     [Fact]
-    public void The_draft_setting_shows_drafts_from_the_start()
-    {
-        CategoryPageViewModel page = Build(Category.Privacy, new FakeApplyFlowLauncher(), new AppSettings { IncludeDraft = true });
-
-        Assert.True(page.IncludeDraft);
-    }
-
-    [Fact]
     public void The_restore_point_setting_flows_into_the_apply_options()
     {
         FakeApplyFlowLauncher launcher = new();
@@ -229,7 +210,6 @@ public sealed class CategoryPageViewModelTests
     public void The_baseline_filter_narrows_the_list_to_the_baseline_tweaks()
     {
         CategoryPageViewModel page = Build(Category.Security);
-        page.IncludeDraft = true;
         Baseline baseline = Baselines.First(b => string.Equals(b.Id, "disa-stig-v2r7", StringComparison.Ordinal));
         HashSet<TweakId> baselineIds = [.. baseline.Rules.SelectMany(r => r.TweakIds)];
 

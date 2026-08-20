@@ -144,17 +144,9 @@ public static class CatalogValidator
             issues.Add(Error(source, entry, "verified-evidence", "Verified entries need at least one verifiedOn record."));
         }
 
-        foreach (Verification verification in entry.VerifiedOn)
+        foreach (Verification verification in entry.VerifiedOn.Where(v => v.Build < Abstractions.OperatingSystemFacts.FirstWindows11Build))
         {
-            if (verification.Build < Abstractions.OperatingSystemFacts.FirstWindows11Build)
-            {
-                issues.Add(Error(source, entry, "verified-build", $"verifiedOn build {verification.Build} is not a Windows 11 build."));
-            }
-
-            if (string.IsNullOrWhiteSpace(verification.Evidence))
-            {
-                issues.Add(Error(source, entry, "verified-evidence", "verifiedOn.evidence is required."));
-            }
+            issues.Add(Error(source, entry, "verified-build", $"verifiedOn build {verification.Build} is not a Windows 11 build."));
         }
     }
 
@@ -178,7 +170,7 @@ public static class CatalogValidator
                     if (ProtectedServices.IsProtected(service.Name))
                     {
                         issues.Add(new CatalogIssue(CatalogIssueSeverity.Error, source, location, "protected-service",
-                            $"Service '{service.Name}' is protected and may not be reconfigured (PLAN.md D21)."));
+                            $"Service '{service.Name}' is protected and may not be reconfigured."));
                     }
 
                     break;

@@ -121,7 +121,7 @@ public sealed class CatalogValidatorTests
     public void Pre_windows_11_verification_reports_verified_build()
     {
         AssertOnlyRule("verified-build", CatalogIssueSeverity.Error,
-            ValidEntry() with { VerifiedOn = [new Verification(21000, WindowsEdition.Pro, new DateOnly(2026, 1, 1), "cert path")] });
+            ValidEntry() with { VerifiedOn = [new Verification(21000, WindowsEdition.Pro, new DateOnly(2026, 1, 1))] });
     }
 
     [Fact]

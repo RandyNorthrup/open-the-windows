@@ -27,8 +27,7 @@ namespace OpenTheWindows.Core.Profiles;
     "Naming",
     "CA1724:Type names should not match namespaces",
     Justification = "The domain concept is a profile and the M5 spec names the type Profile; the only clash is " +
-        "the legacy ASP.NET System.Web.Profile namespace, which this net10.0 assembly never references. " +
-        "Recorded in PLAN.md §7.3.")]
+        "the legacy ASP.NET System.Web.Profile namespace, which this net10.0 assembly never references.")]
 public sealed record Profile(
     int SchemaVersion,
     string Id,

@@ -17,20 +17,31 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <TextBlock Grid.Row="0"
-                   Text="{Binding Title}"
-                   Style="{StaticResource PageTitleText}"
-                   AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_Title}" />
+        <DockPanel Grid.Row="0">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock VerticalAlignment="Center" Opacity="0.75" Margin="0,0,12,0"
+                           Text="{Binding SelectionSummary}"
+                           ToolTip="How many entries in this section are ticked for applying."
+                           AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_SelectionSummary}" />
+                <Button Content="Review &amp; apply…"
+                        Padding="14,5"
+                        Command="{Binding ReviewAndApplyCommand}"
+                        ToolTipService.ShowOnDisabled="True"
+                        ToolTip="Review the ticked entries and apply them. Nothing changes until you confirm on the next screen. Tick at least one entry to enable this."
+                        AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_Apply}" />
+            </StackPanel>
+            <TextBlock Text="{Binding Title}"
+                       Style="{StaticResource PageTitleText}"
+                       VerticalAlignment="Center"
+                       AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_Title}" />
+        </DockPanel>
 
         <!-- Toolbar: level dial, search, filters -->
-        <Grid Grid.Row="1" Margin="0,16,0,12">
+        <Grid Grid.Row="1" Margin="0,16,0,14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
@@ -46,13 +57,31 @@
                       AutomationProperties.Name="Protection level"
                       AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_LevelDial}" />
 
-            <TextBox Grid.Column="2"
-                     Margin="16,0"
-                     VerticalContentAlignment="Center"
-                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                     ToolTip="Filter the list by title, id or description. Clearing it shows everything again."
-                     AutomationProperties.Name="Search entries"
-                     AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_Search}" />
+            <!-- Search with placeholder -->
+            <Grid Grid.Column="2" Margin="16,0">
+                <TextBox VerticalContentAlignment="Center"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Filter the list by title, id or description. Clearing it shows everything again."
+                         AutomationProperties.Name="Search entries"
+                         AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_Search}" />
+                <TextBlock Text="Search titles, ids…"
+                           Margin="10,0,0,0"
+                           VerticalAlignment="Center"
+                           Opacity="0.5"
+                           TextTrimming="CharacterEllipsis"
+                           IsHitTestVisible="False">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SearchText}" Value="">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
 
             <ComboBox Grid.Column="3"
                       MinWidth="110"
@@ -77,90 +106,69 @@
                       AutomationProperties.Name="Filter by baseline"
                       AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_BaselineFilter}" />
 
-            <CheckBox Grid.Column="5"
-                      VerticalAlignment="Center"
-                      Margin="0,0,12,0"
-                      Content="Drafts"
-                      IsChecked="{Binding IncludeDraft, Mode=TwoWay}"
-                      ToolTip="Also show entries that are not yet verified on this Windows build. Hidden by default so only proven entries appear."
-                      AutomationProperties.Name="Include draft entries"
-                      AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_IncludeDraft}" />
-
-            <TextBlock Grid.Column="6"
-                       VerticalAlignment="Center"
-                       Opacity="0.75"
-                       Margin="0,0,12,0"
-                       Text="{Binding SelectionSummary}"
-                       ToolTip="How many entries in this section are ticked for applying."
-                       AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_SelectionSummary}" />
-
-            <Button Grid.Column="7"
-                    Content="Review &amp; apply…"
-                    Padding="14,5"
-                    Command="{Binding ReviewAndApplyCommand}"
-                    ToolTipService.ShowOnDisabled="True"
-                    ToolTip="Review the ticked entries and apply them. Nothing changes until you confirm on the next screen. Tick at least one entry to enable this."
-                    AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_Apply}" />
         </Grid>
 
         <!-- Body: entry list + detail pane -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MinWidth="320" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="360" MinWidth="280" />
+                <ColumnDefinition Width="1.2*" MinWidth="200" />
+                <ColumnDefinition Width="18" />
+                <ColumnDefinition Width="*" MinWidth="200" />
             </Grid.ColumnDefinitions>
 
             <ListBox Grid.Column="0"
                      ItemsSource="{Binding Items}"
                      SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                      HorizontalContentAlignment="Stretch"
+                     Padding="0,0,6,0"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                      VirtualizingPanel.IsVirtualizing="True"
                      VirtualizingPanel.VirtualizationMode="Recycling"
                      ScrollViewer.CanContentScroll="True"
                      AutomationProperties.Name="Tweak entries"
                      AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_List}">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Padding" Value="6,2" />
+                    </Style>
+                </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Grid Margin="0,4">
+                        <Grid Margin="0,5">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <CheckBox Grid.Column="0"
-                                      VerticalAlignment="Center"
-                                      Margin="0,0,10,0"
+                                      VerticalAlignment="Top"
+                                      Margin="0,1,12,0"
                                       IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                      ToolTip="Tick to include this entry when you Review &amp; apply."
                                       AutomationProperties.Name="{Binding Title}" />
                             <StackPanel Grid.Column="1">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <WrapPanel Margin="0,4,0,0">
                                     <Border BorderBrush="{Binding Risk, Converter={StaticResource RiskToBrush}}"
-                                            BorderThickness="1" CornerRadius="4" Padding="5,0" Margin="8,0,0,0"
+                                            BorderThickness="1" CornerRadius="4" Padding="5,0" Margin="0,0,6,0"
                                             VerticalAlignment="Center"
                                             ToolTip="How risky this change is. Caution and above can have side effects — the details pane lists them.">
                                         <TextBlock Text="{Binding RiskLabel}" FontSize="11"
                                                    Foreground="{Binding Risk, Converter={StaticResource RiskToBrush}}" />
                                     </Border>
-                                    <Border BorderThickness="1" CornerRadius="4" Padding="5,0" Margin="6,0,0,0"
+                                    <Border BorderThickness="1" CornerRadius="4" Padding="5,0" Margin="0,0,6,0"
                                             VerticalAlignment="Center"
-                                            BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                                            BorderBrush="{DynamicResource CardBorderBrush}"
                                             Visibility="{Binding RequiresRestart, Converter={StaticResource BoolToVisibility}}"
                                             ToolTip="This change only takes full effect after the restart shown here.">
                                         <TextBlock Text="{Binding RestartLabel}" FontSize="11" Opacity="0.8" />
                                     </Border>
-                                    <Border BorderThickness="1" CornerRadius="4" Padding="5,0" Margin="6,0,0,0"
-                                            VerticalAlignment="Center"
-                                            BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                                            Visibility="{Binding IsDraft, Converter={StaticResource BoolToVisibility}}"
-                                            ToolTip="Not yet verified on this Windows build. Shown because “Drafts” is on.">
-                                        <TextBlock Text="Draft" FontSize="11" Opacity="0.8" />
-                                    </Border>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
+                                </WrapPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                                     <TextBlock Text="{Binding IdText}" FontSize="11" Opacity="0.55" />
-                                    <TextBlock Text="{Binding VerifiedShort}" FontSize="11" Opacity="0.55" Margin="10,0,0,0" />
+                                    <TextBlock Text="{Binding VerifiedShort}" FontSize="11" Opacity="0.55" Margin="10,0,0,0"
+                                               Visibility="{Binding IsVerified, Converter={StaticResource BoolToVisibility}}"
+                                               ToolTip="Verified by round-trip on this Windows build." />
                                 </StackPanel>
                             </StackPanel>
                         </Grid>
@@ -168,53 +176,46 @@
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <!-- Shown in place of the list when nothing is visible, so an empty
-                 section (e.g. one whose entries are all still drafts) explains
-                 itself instead of looking broken. -->
+            <!-- Shown in place of the list when nothing matches the search / filters. -->
             <TextBlock Grid.Column="0"
                        Text="{Binding EmptyMessage}"
                        Style="{StaticResource MutedText}"
                        VerticalAlignment="Top"
-                       Margin="4,8,12,0"
+                       Margin="6,10,12,0"
                        Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}"
                        AutomationProperties.AutomationId="{Binding Key, StringFormat={}{0}_Empty}" />
-
-            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Center" VerticalAlignment="Stretch"
-                          Background="Transparent" />
 
             <!-- Detail pane -->
             <Border Grid.Column="2"
                     Padding="16"
                     BorderThickness="1"
                     CornerRadius="8"
-                    BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+                    BorderBrush="{DynamicResource CardBorderBrush}">
                 <Grid>
-                    <TextBlock Text="Select an entry to see details."
-                               Opacity="0.6"
-                               TextWrapping="Wrap"
+                    <TextBlock Text="Select an entry to see what it changes, why, and its sources."
+                               Style="{StaticResource MutedText}"
                                VerticalAlignment="Top"
-                               Visibility="{Binding SelectedItem, Converter={StaticResource NullToVisibility}}" />
+                               Visibility="{Binding DataContext.SelectedItem, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource NullToVisibility}}" />
 
                     <ScrollViewer VerticalScrollBarVisibility="Auto"
-                                  Visibility="{Binding SelectedItem, Converter={StaticResource NullToVisibility}, ConverterParameter=Invert}"
+                                  Visibility="{Binding DataContext.SelectedItem, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource NullToVisibility}, ConverterParameter=Invert}"
                                   DataContext="{Binding SelectedItem}"
                                   AutomationProperties.AutomationId="{Binding DataContext.Key, RelativeSource={RelativeSource AncestorType=UserControl}, StringFormat={}{0}_Detail}">
-                        <StackPanel>
+                        <StackPanel Margin="0,0,6,0">
                             <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" />
-                            <TextBlock Text="{Binding IdText}" FontSize="12" Opacity="0.6" Margin="0,2,0,0" />
-                            <WrapPanel Margin="0,8,0,0">
-                                <TextBlock Text="{Binding RiskLabel}" Margin="0,0,10,0" />
-                                <TextBlock Text="{Binding StatusLabel}" Margin="0,0,10,0" Opacity="0.8" />
+                            <TextBlock Text="{Binding IdText}" FontSize="12" Opacity="0.6" Margin="0,2,0,0" TextWrapping="Wrap" />
+                            <WrapPanel Margin="0,10,0,0">
+                                <TextBlock Text="{Binding RiskLabel}" Margin="0,0,12,0" />
                                 <TextBlock Text="{Binding RestartLabel}" Opacity="0.8" />
                             </WrapPanel>
 
                             <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Margin="0,12,0,0" />
 
-                            <TextBlock Text="Why" FontWeight="SemiBold" Margin="0,12,0,2" />
+                            <TextBlock Text="Why" FontWeight="SemiBold" Margin="0,14,0,2" />
                             <TextBlock Text="{Binding Rationale}" TextWrapping="Wrap" Opacity="0.9" />
 
                             <StackPanel Visibility="{Binding HasSideEffects, Converter={StaticResource BoolToVisibility}}">
-                                <TextBlock Text="Side effects" FontWeight="SemiBold" Margin="0,12,0,2" />
+                                <TextBlock Text="Side effects" FontWeight="SemiBold" Margin="0,14,0,2" />
                                 <ItemsControl ItemsSource="{Binding SideEffects}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
@@ -224,7 +225,7 @@
                                 </ItemsControl>
                             </StackPanel>
 
-                            <TextBlock Text="Actions" FontWeight="SemiBold" Margin="0,12,0,2" />
+                            <TextBlock Text="What it does" FontWeight="SemiBold" Margin="0,14,0,2" />
                             <ItemsControl ItemsSource="{Binding ActionSummaries}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
@@ -233,17 +234,17 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
 
-                            <TextBlock Text="Sources" FontWeight="SemiBold" Margin="0,12,0,2" />
+                            <TextBlock Text="Sources" FontWeight="SemiBold" Margin="0,14,0,2" />
                             <ItemsControl ItemsSource="{Binding Sources}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <TextBox Text="{Binding Mode=OneWay}" IsReadOnly="True" BorderThickness="0"
-                                                 Background="Transparent" Padding="0" FontSize="12" />
+                                                 Background="Transparent" Padding="0" FontSize="12" TextWrapping="Wrap" />
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
 
-                            <TextBlock Text="Verified on" FontWeight="SemiBold" Margin="0,12,0,2" />
+                            <TextBlock Text="Verified on" FontWeight="SemiBold" Margin="0,14,0,2" />
                             <TextBlock Text="{Binding VerifiedOnLabel}" TextWrapping="Wrap" Opacity="0.9" />
                         </StackPanel>
                     </ScrollViewer>

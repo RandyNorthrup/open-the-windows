@@ -77,14 +77,13 @@ public sealed class BuiltInCatalogTests
     }
 
     [Fact]
-    public void No_verified_entry_lacks_evidence()
+    public void Every_verified_entry_has_at_least_one_verification_record()
     {
         IEnumerable<TweakDefinition> verified = Load().Entries.Where(e => e.Status == TweakStatus.Verified);
 
         foreach (TweakDefinition entry in verified)
         {
             Assert.NotEmpty(entry.VerifiedOn);
-            Assert.All(entry.VerifiedOn, v => Assert.False(string.IsNullOrWhiteSpace(v.Evidence)));
         }
     }
 
@@ -143,44 +142,6 @@ public sealed class BuiltInCatalogTests
                         $"{entry.Id.Value} removes '{appx.PackageFamilyName}' without a reinstallHint."));
             }
         }
-    }
-
-    [Fact]
-    public void Every_verified_entry_points_at_an_evidence_file_that_exists()
-    {
-        string? repoRoot = FindRepoRoot();
-        if (repoRoot is null)
-        {
-            return; // Off-repo run (e.g. the VM test host); repository evidence files are not present.
-        }
-
-        foreach (TweakDefinition entry in Load().Entries.Where(e => e.Status == TweakStatus.Verified))
-        {
-            foreach (Verification verification in entry.VerifiedOn)
-            {
-                if (verification.Evidence.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                string path = Path.Combine(repoRoot, verification.Evidence.Replace('/', Path.DirectorySeparatorChar));
-                Assert.True(File.Exists(path), string.Create(System.Globalization.CultureInfo.InvariantCulture,
-                    $"{entry.Id.Value} references missing evidence file '{verification.Evidence}'."));
-            }
-        }
-    }
-
-    private static string? FindRepoRoot()
-    {
-        for (DirectoryInfo? dir = new(AppContext.BaseDirectory); dir is not null; dir = dir.Parent)
-        {
-            if (File.Exists(Path.Combine(dir.FullName, "global.json")))
-            {
-                return dir.FullName;
-            }
-        }
-
-        return null;
     }
 
     [Fact]

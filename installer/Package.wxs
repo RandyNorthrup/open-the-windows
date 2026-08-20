@@ -43,8 +43,7 @@
     <!-- Uninstall always preserves %ProgramData%\OpenTheWindows (journals + audit).
          This is deliberate: the audit trail of an elevated system tool is forensic
          evidence, so the installer never offers a switch to wipe it silently
-         (msiexec /x ... /qn). Removing the data is an explicit manual step, see
-         docs/install.md. -->
+         (msiexec /x ... /qn). Removing the data is an explicit manual step. -->
 
     <Feature Id="Product" Title="Open the Windows" Level="1" AllowAbsent="no"
              Description="The Open the Windows application and command-line tool.">

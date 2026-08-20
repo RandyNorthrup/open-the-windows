@@ -2,8 +2,7 @@ namespace OpenTheWindows.Core.Abstractions;
 
 /// <summary>
 /// Stable Windows Event Log / audit event identifiers. Values are a contract:
-/// they never change once released and new ones are appended. See
-/// <c>docs/event-log.md</c>.
+/// they never change once released and new ones are appended.
 /// </summary>
 public enum AuditEventId
 {

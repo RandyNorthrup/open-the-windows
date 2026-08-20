@@ -8,6 +8,17 @@
         Fluent theme without stripping its default control chrome.
     -->
 
+    <!--
+        Surface / accent brushes. Deliberately translucent grey (alpha over #808080)
+        so one definition reads correctly on both the light and dark Fluent themes:
+        a translucent grey lightens a dark surface and darkens a light one, so no
+        per-theme swap is needed. The link colour is a mid blue legible on both.
+    -->
+    <SolidColorBrush x:Key="RailBackgroundBrush" Color="#26808080" />
+    <SolidColorBrush x:Key="CardBorderBrush" Color="#33888888" />
+    <SolidColorBrush x:Key="InfoBackgroundBrush" Color="#22808080" />
+    <SolidColorBrush x:Key="LinkBrush" Color="#3B82F6" />
+
     <!-- Page heading (the title at the top of each page). -->
     <Style x:Key="PageTitleText" TargetType="TextBlock">
         <Setter Property="FontSize" Value="24" />
@@ -38,7 +49,7 @@
         <Setter Property="Padding" Value="16" />
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
     </Style>
 
     <!-- Tooltips wrap instead of running off the screen, and appear promptly. -->

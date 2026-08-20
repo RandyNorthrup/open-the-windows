@@ -5,7 +5,7 @@
     Runs requireAdministrator: the GUI's purpose is to apply changes and a
     single elevation at start is the standard model for this class of tool.
     Per-user writes still target the interactive user's hive, never HKCU of
-    the elevating account (see docs/research/07-enterprise-safety-architecture.md).
+    the elevating account.
   -->
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -15,14 +15,16 @@
     <RootNamespace>OpenTheWindows.App</RootNamespace>
     <AssemblyName>OpenTheWindows</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Product icon embedded in OpenTheWindows.exe (Explorer, taskbar, shortcuts). -->
+    <ApplicationIcon>Resources\OpenTheWindows.ico</ApplicationIcon>
     <IsPackable>false</IsPackable>
     <Platforms>AnyCPU;x64;ARM64</Platforms>
     <RollForward>LatestPatch</RollForward>
     <!-- WPF has no trimming / Native AOT support. -->
     <PublishTrimmed>false</PublishTrimmed>
     <!-- WPF0001: the Fluent ThemeMode API is marked [Experimental] by the WPF
-         team. We accept the API on purpose (ADR 0001); tracked in PLAN.md
-         "Escape hatches". Remove when the attribute is dropped upstream. -->
+         team. The experimental API is used on purpose. Remove this when the
+         attribute is dropped upstream. -->
     <NoWarn>$(NoWarn);WPF0001</NoWarn>
   </PropertyGroup>
 
@@ -41,6 +43,12 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The .ico is embedded via ApplicationIcon; also expose it as a WPF resource
+         so MainWindow can set Icon="Resources/OpenTheWindows.ico" for the window chrome. -->
+    <Resource Include="Resources\OpenTheWindows.ico" />
   </ItemGroup>
 
   <ItemGroup>

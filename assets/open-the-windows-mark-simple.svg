@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img">
+        <title>Open the Windows app icon</title>
+        <defs>
+          <linearGradient id="simple-bg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#081A31"/>
+            <stop offset="1" stop-color="#0878D1"/>
+          </linearGradient>
+          <linearGradient id="simple-open" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#7CE7FF"/>
+            <stop offset="1" stop-color="#20A8F2"/>
+          </linearGradient>
+        </defs>
+        <rect x="32" y="32" width="960" height="960" rx="220" fill="url(#simple-bg)"/>
+        <rect x="202" y="230" width="264" height="244" rx="38" fill="#F8FBFF"/>
+        <rect x="202" y="522" width="264" height="244" rx="38" fill="#F8FBFF"/>
+        <rect x="516" y="522" width="264" height="244" rx="38" fill="#F8FBFF"/>
+        <path d="M516 255 Q516 227 543 221 L757 178 Q789 172 798 203 L846 433 Q853 466 820 474 L547 485 Q516 486 516 455 Z"
+              fill="url(#simple-open)" stroke="#EAF8FF" stroke-width="18" stroke-linejoin="round"/>
+        </svg>

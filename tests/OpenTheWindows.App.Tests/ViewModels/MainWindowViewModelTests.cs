@@ -67,35 +67,6 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
-    public void Back_is_disabled_until_there_is_somewhere_to_go_back_to()
-    {
-        FakeNavigationService navigation = new();
-        MainWindowViewModel shell = new(navigation, Pages);
-
-        Assert.False(shell.CanGoBack);
-        Assert.False(shell.BackCommand.CanExecute(null));
-
-        navigation.NavigateTo(PageKeys.About);
-
-        Assert.True(shell.CanGoBack);
-        Assert.True(shell.BackCommand.CanExecute(null));
-    }
-
-    [Fact]
-    public void Back_returns_to_the_previous_page_and_the_rail_follows()
-    {
-        FakeNavigationService navigation = new();
-        MainWindowViewModel shell = new(navigation, Pages);
-        navigation.NavigateTo(PageKeys.About);
-        Assert.Equal(Pages[1], shell.SelectedItem);
-
-        shell.BackCommand.Execute(null);
-
-        Assert.Equal(Pages[0], shell.SelectedItem);
-        Assert.False(shell.CanGoBack);
-    }
-
-    [Fact]
     public void Exposes_product_identity()
     {
         Assert.Equal(AppInfo.Title, MainWindowViewModel.Title);

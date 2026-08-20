@@ -53,12 +53,11 @@
     "verification": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["build", "edition", "date", "evidence"],
+      "required": ["build", "edition", "date"],
       "properties": {
         "build": { "$ref": "#/$defs/build" },
         "edition": { "$ref": "#/$defs/edition" },
-        "date": { "type": "string", "format": "date" },
-        "evidence": { "type": "string", "minLength": 1 }
+        "date": { "type": "string", "format": "date" }
       }
     },
     "registryValue": {

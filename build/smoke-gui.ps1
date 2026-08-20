@@ -3,7 +3,7 @@
     Launches the built WPF app, waits for its main window, captures a screenshot of it, closes it.
 
 .DESCRIPTION
-    Visual smoke test used for milestone certification (see PLAN.md). The app
+    Visual smoke test for the WPF app. The app
     manifest requires administrator; this script therefore re-launches itself
     elevated (one UAC prompt) so it can bring the window to the foreground and
     capture exactly its client rectangle. Output:

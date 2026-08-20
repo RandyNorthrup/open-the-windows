@@ -10,9 +10,18 @@
              d:DesignWidth="640">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
-        <TextBlock Text="{Binding ProductName, Mode=OneTime}"
-                   Style="{StaticResource PageTitleText}"
-                   AutomationProperties.AutomationId="About_ProductName" />
+        <StackPanel Orientation="Horizontal">
+            <Image Source="{StaticResource OtwMark}"
+                   Width="56" Height="56"
+                   VerticalAlignment="Center"
+                   RenderOptions.BitmapScalingMode="HighQuality"
+                   AutomationProperties.Name="Open the Windows logo" />
+            <TextBlock Text="{Binding ProductName, Mode=OneTime}"
+                       Style="{StaticResource PageTitleText}"
+                       VerticalAlignment="Center"
+                       Margin="14,0,0,0"
+                       AutomationProperties.AutomationId="About_ProductName" />
+        </StackPanel>
 
         <Grid Margin="0,16,0,0">
             <Grid.ColumnDefinitions>

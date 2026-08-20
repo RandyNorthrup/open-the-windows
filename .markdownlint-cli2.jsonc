@@ -13,9 +13,6 @@
     "node_modules/**",
     ".venv-tools/**",
     "artifacts/**",
-    "temp/**",
-    // Research reports are generated reference material (wide tables, raw
-    // URLs). They are not maintained prose; lint would only churn them.
-    "docs/research/**"
+    "temp/**"
   ]
 }

@@ -13,13 +13,19 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="Profiles" FontSize="24" FontWeight="SemiBold"
+        <TextBlock Grid.Row="0" Text="Profiles" Style="{StaticResource PageTitleText}"
                    AutomationProperties.AutomationId="Profiles_Title" />
 
-        <DockPanel Grid.Row="1" Margin="0,16,0,12">
+        <TextBlock Grid.Row="1"
+                   Style="{StaticResource MutedText}"
+                   Margin="0,6,0,0"
+                   Text="A profile applies a curated set of tweaks in one step. Pick one, see what it changes on the right, then Review &amp; apply." />
+
+        <DockPanel Grid.Row="2" Margin="0,16,0,14">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                 <Button Content="Import…" Padding="14,5" Margin="0,0,8,0" Command="{Binding ImportCommand}"
                         ToolTip="Load a profile from a .json file and check its signature."
@@ -37,20 +43,27 @@
                        Text="{Binding Status}" AutomationProperties.AutomationId="Profiles_Status" />
         </DockPanel>
 
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MinWidth="280" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="360" MinWidth="280" />
+                <ColumnDefinition Width="1.1*" MinWidth="200" />
+                <ColumnDefinition Width="18" />
+                <ColumnDefinition Width="*" MinWidth="200" />
             </Grid.ColumnDefinitions>
 
             <ListBox Grid.Column="0"
                      ItemsSource="{Binding Profiles}"
                      SelectedItem="{Binding SelectedProfile, Mode=TwoWay}"
                      HorizontalContentAlignment="Stretch"
+                     Padding="0,0,6,0"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                      AutomationProperties.Name="Profiles"
                      AutomationProperties.AutomationId="Profiles_List">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Padding" Value="6,4" />
+                    </Style>
+                </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Margin="0,4">
@@ -58,30 +71,51 @@
                                 <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
                                 <Border BorderThickness="1" CornerRadius="4" Padding="5,0" Margin="8,0,0,0"
                                         VerticalAlignment="Center"
-                                        BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                                        BorderBrush="{DynamicResource CardBorderBrush}"
                                         ToolTip="Signing state: built-in, unsigned, or signed with a trusted / untrusted key.">
                                     <TextBlock Text="{Binding SignatureLabel}" FontSize="11" Opacity="0.8" />
                                 </Border>
                             </StackPanel>
-                            <TextBlock Text="{Binding ScopeLabel}" FontSize="12" Opacity="0.6" />
+                            <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                <TextBlock Text="{Binding ScopeLabel}" FontSize="11" Opacity="0.55" />
+                                <TextBlock Text="{Binding EntryCountLabel}" FontSize="11" Opacity="0.55" Margin="10,0,0,0" />
+                            </StackPanel>
                         </StackPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="Transparent" />
-
             <Border Grid.Column="2" Padding="16" BorderThickness="1" CornerRadius="8"
-                    BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+                    BorderBrush="{DynamicResource CardBorderBrush}">
                 <Grid>
-                    <TextBlock Text="Select a profile." Opacity="0.6" VerticalAlignment="Top"
-                               Visibility="{Binding SelectedProfile, Converter={StaticResource NullToVisibility}}" />
+                    <TextBlock Text="Select a profile to see what it changes and when to use it."
+                               Style="{StaticResource MutedText}" VerticalAlignment="Top"
+                               Visibility="{Binding DataContext.SelectedProfile, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource NullToVisibility}}" />
                     <ScrollViewer VerticalScrollBarVisibility="Auto" DataContext="{Binding SelectedProfile}"
-                                  Visibility="{Binding SelectedProfile, Converter={StaticResource NullToVisibility}, ConverterParameter=Invert, RelativeSource={RelativeSource AncestorType=Border}}">
-                        <StackPanel>
+                                  Visibility="{Binding DataContext.SelectedProfile, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource NullToVisibility}, ConverterParameter=Invert}">
+                        <StackPanel Margin="0,0,6,0">
                             <TextBlock Text="{Binding Name}" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" />
-                            <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Margin="0,6,0,0" Opacity="0.9" />
-                            <Grid Margin="0,12,0,0">
+                            <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Margin="0,8,0,0" Opacity="0.9" />
+
+                            <TextBlock Text="What it changes" FontWeight="SemiBold" Margin="0,16,0,4" />
+                            <ItemsControl ItemsSource="{Binding CategoryLines}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" TextWrapping="Wrap" Opacity="0.9" Margin="0,0,0,3" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Text="How it applies" FontWeight="SemiBold" Margin="0,16,0,4" />
+                            <ItemsControl ItemsSource="{Binding OptionLines}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" TextWrapping="Wrap" Opacity="0.9" Margin="0,0,0,3" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <Grid Margin="0,16,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
@@ -91,15 +125,17 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Scope" Opacity="0.7" Margin="0,0,16,4" />
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Applies to" Style="{StaticResource FieldLabelText}"
+                                           ToolTip="Whether per-user tweaks reach only you or every account on this PC." />
                                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ScopeLabel}" />
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Signing" Opacity="0.7" Margin="0,0,16,4" />
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Signing" Style="{StaticResource FieldLabelText}" />
                                 <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SignatureLabel}" />
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Entries" Opacity="0.7" Margin="0,0,16,4" />
-                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding EntryCount}" AutomationProperties.AutomationId="Profiles_EntryCount" />
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Changes" Style="{StaticResource FieldLabelText}" />
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding EntryCountLabel}" AutomationProperties.AutomationId="Profiles_EntryCount" />
                             </Grid>
-                            <TextBlock Text="{Binding ErrorsText}" TextWrapping="Wrap" Margin="0,12,0,0"
-                                       Foreground="{DynamicResource {x:Static SystemColors.HotTrackBrushKey}}"
+
+                            <TextBlock Text="{Binding ErrorsText}" TextWrapping="Wrap" Margin="0,14,0,0"
+                                       Foreground="{DynamicResource LinkBrush}"
                                        Visibility="{Binding ErrorsText, Converter={StaticResource NullToVisibility}, ConverterParameter=Invert}" />
                         </StackPanel>
                     </ScrollViewer>

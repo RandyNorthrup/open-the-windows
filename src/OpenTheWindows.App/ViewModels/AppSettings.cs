@@ -17,10 +17,6 @@ internal sealed partial class AppSettings : ObservableObject
     [ObservableProperty]
     private bool _restartExplorerAutomatically;
 
-    /// <summary>Whether Draft (not-yet-verified) catalogue entries are shown and selectable.</summary>
-    [ObservableProperty]
-    private bool _includeDraft;
-
     /// <summary>Whether enterprise mode is on (hides the consumer-only built-in profiles).</summary>
     [ObservableProperty]
     private bool _enterpriseMode;

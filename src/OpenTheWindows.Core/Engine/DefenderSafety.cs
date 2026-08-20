@@ -7,7 +7,7 @@ namespace OpenTheWindows.Core.Engine;
 /// The Microsoft Defender safety boundary the engine never crosses, regardless of
 /// what a catalogue entry asks for: nothing may disable real-time protection or
 /// interfere with signature (security-intelligence) updates. Refusing these is a
-/// product non-negotiable (AGENTS.md, PLAN.md D21) and is also asserted directly
+/// product non-negotiable (AGENTS.md) and is also asserted directly
 /// against the shipped catalogue by a test.
 /// </summary>
 public static class DefenderSafety

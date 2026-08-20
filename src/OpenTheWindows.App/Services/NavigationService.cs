@@ -11,7 +11,6 @@ namespace OpenTheWindows.App.Services;
 internal sealed class NavigationService : INavigationService
 {
     private readonly IServiceProvider _provider;
-    private readonly Stack<string> _back = new();
 
     /// <summary>Creates the service over the application's <paramref name="provider"/>.</summary>
     public NavigationService(IServiceProvider provider)
@@ -27,9 +26,6 @@ internal sealed class NavigationService : INavigationService
     public string? CurrentPageKey { get; private set; }
 
     /// <inheritdoc />
-    public bool CanGoBack => _back.Count > 0;
-
-    /// <inheritdoc />
     public event EventHandler? CurrentPageChanged;
 
     /// <inheritdoc />
@@ -41,27 +37,6 @@ internal sealed class NavigationService : INavigationService
             return;
         }
 
-        if (CurrentPageKey is { } leaving)
-        {
-            _back.Push(leaving);
-        }
-
-        Show(pageKey);
-    }
-
-    /// <inheritdoc />
-    public void GoBack()
-    {
-        if (_back.Count == 0)
-        {
-            return;
-        }
-
-        Show(_back.Pop());
-    }
-
-    private void Show(string pageKey)
-    {
         IPageViewModel page = _provider.GetRequiredKeyedService<IPageViewModel>(pageKey);
         CurrentPage = page;
         CurrentPageKey = pageKey;

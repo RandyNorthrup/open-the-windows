@@ -6,8 +6,7 @@ namespace OpenTheWindows.Core.Journal;
 /// The complete record of one apply or revert run. Written before the first
 /// machine change (with every action's prior state), then updated after each
 /// action and at completion. The <see cref="Hash"/>/<see cref="PreviousHash"/>
-/// pair forms a tamper-evident chain over the journal directory. Schema is
-/// documented in <c>docs/journal-format.md</c>.
+/// pair forms a tamper-evident chain over the journal directory.
 /// </summary>
 public sealed class JournalRecord
 {

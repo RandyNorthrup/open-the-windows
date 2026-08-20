@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using OpenTheWindows.App.Navigation;
 using OpenTheWindows.App.Services;
 using OpenTheWindows.Core;
@@ -48,13 +47,6 @@ internal sealed partial class MainWindowViewModel : ObservableObject
     /// <summary>The page view model currently hosted in the content area.</summary>
     public object? CurrentPage => _navigation.CurrentPage;
 
-    /// <summary>Whether the shell can return to the previous page.</summary>
-    public bool CanGoBack => _navigation.CanGoBack;
-
-    /// <summary>Returns to the previous page on the navigation back stack.</summary>
-    [RelayCommand(CanExecute = nameof(CanGoBack))]
-    private void Back() => _navigation.GoBack();
-
     partial void OnSelectedItemChanged(NavigationItem? value)
     {
         // Ignore the selection we set ourselves to mirror a programmatic navigation
@@ -71,8 +63,6 @@ internal sealed partial class MainWindowViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(CurrentPage));
         SyncSelectionToCurrentPage();
-        OnPropertyChanged(nameof(CanGoBack));
-        BackCommand.NotifyCanExecuteChanged();
     }
 
     // Keep the navigation-rail highlight in step with the page the shell actually

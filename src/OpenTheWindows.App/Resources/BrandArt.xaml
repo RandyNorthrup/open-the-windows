@@ -1,0 +1,55 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        The Open the Windows app mark as native WPF vector art (a DrawingImage),
+        converted from assets/open-the-windows-mark-simple.svg so it renders crisp
+        at any DPI without shipping a raster. Three stable panes and one pane
+        opening outward (the control-panel metaphor). The exe / taskbar icon is the
+        separate Resources/OpenTheWindows.ico (Windows needs an .ico for the
+        application icon). viewBox is 0 0 1024 1024.
+    -->
+    <DrawingImage x:Key="OtwMark">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <!-- Rounded background -->
+                <GeometryDrawing>
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry RadiusX="220" RadiusY="220" Rect="32,32,960,960" />
+                    </GeometryDrawing.Geometry>
+                    <GeometryDrawing.Brush>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Offset="0" Color="#081A31" />
+                            <GradientStop Offset="1" Color="#0878D1" />
+                        </LinearGradientBrush>
+                    </GeometryDrawing.Brush>
+                </GeometryDrawing>
+
+                <!-- Three stable panes -->
+                <GeometryDrawing Brush="#F8FBFF">
+                    <GeometryDrawing.Geometry>
+                        <GeometryGroup>
+                            <RectangleGeometry RadiusX="38" RadiusY="38" Rect="202,230,264,244" />
+                            <RectangleGeometry RadiusX="38" RadiusY="38" Rect="202,522,264,244" />
+                            <RectangleGeometry RadiusX="38" RadiusY="38" Rect="516,522,264,244" />
+                        </GeometryGroup>
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+
+                <!-- The fourth pane opening outward -->
+                <GeometryDrawing Geometry="M516,255 Q516,227 543,221 L757,178 Q789,172 798,203 L846,433 Q853,466 820,474 L547,485 Q516,486 516,455 Z">
+                    <GeometryDrawing.Brush>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Offset="0" Color="#7CE7FF" />
+                            <GradientStop Offset="1" Color="#20A8F2" />
+                        </LinearGradientBrush>
+                    </GeometryDrawing.Brush>
+                    <GeometryDrawing.Pen>
+                        <Pen Brush="#EAF8FF" Thickness="18" LineJoin="Round" />
+                    </GeometryDrawing.Pen>
+                </GeometryDrawing>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+</ResourceDictionary>

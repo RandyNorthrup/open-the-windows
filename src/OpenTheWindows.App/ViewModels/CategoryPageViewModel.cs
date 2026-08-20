@@ -42,9 +42,6 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
     private Baseline? _baselineFilter;
 
     [ObservableProperty]
-    private bool _includeDraft;
-
-    [ObservableProperty]
     private TweakItemViewModel? _selectedItem;
 
     [ObservableProperty]
@@ -92,7 +89,6 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
             : [];
 
         Items = [];
-        _includeDraft = settings.IncludeDraft;
         RebuildItems();
         UpdateSelectionSummary();
     }
@@ -145,12 +141,6 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
 
     partial void OnLevelChanged(Level value) => ApplyLevelSelection();
 
-    partial void OnIncludeDraftChanged(bool value)
-    {
-        ApplyLevelSelection();
-        RebuildItems();
-    }
-
     partial void OnSearchTextChanged(string value) => RebuildItems();
 
     partial void OnRiskFilterChanged(RiskTier? value) => RebuildItems();
@@ -163,7 +153,10 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
 
     private void ApplyLevelSelection()
     {
-        HashSet<TweakId> selectedIds = [.. _catalog.Select(_category, Level, IncludeDraft).Select(e => e.Id)];
+        // The browse UI shows and selects every applicable entry regardless of
+        // verification status (verified-only gating belongs to built-in profiles,
+        // not to hand-picking on this page).
+        HashSet<TweakId> selectedIds = [.. _catalog.Select(_category, Level, includeDraft: true).Select(e => e.Id)];
         _updatingSelection = true;
         try
         {
@@ -186,11 +179,6 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
         Items.Clear();
         foreach (TweakItemViewModel item in AllItems)
         {
-            if (!IncludeDraft && item.Status == TweakStatus.Draft)
-            {
-                continue;
-            }
-
             if (RiskFilter is RiskTier risk && item.Risk != risk)
             {
                 continue;
@@ -213,29 +201,21 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
     }
 
     // The message shown in place of the list when nothing is visible, so an empty
-    // section explains itself instead of looking broken. The common case is a
-    // section whose entries are all still drafts (hidden unless the user opts in).
+    // section explains itself instead of looking broken.
     private void UpdateEmptyState()
     {
         OnPropertyChanged(nameof(IsEmpty));
         if (Items.Count > 0)
         {
             EmptyMessage = string.Empty;
-            return;
         }
-
-        if (AllItems.Count == 0)
+        else if (AllItems.Count == 0)
         {
             EmptyMessage = "No entries in this section apply to this edition of Windows.";
         }
-        else if (!IncludeDraft && AllItems.All(i => i.Status == TweakStatus.Draft))
-        {
-            EmptyMessage = "Every entry in this section is still a draft — verified on other builds but not yet on this one. "
-                + "Turn on “Drafts” above (or “Show draft entries” in Settings) to review and apply them.";
-        }
         else
         {
-            EmptyMessage = "No entries match the current search and filters. Drafts are hidden unless “Drafts” is on.";
+            EmptyMessage = "No entries match the current search and filters.";
         }
     }
 

@@ -9,15 +9,15 @@ using OpenTheWindows.TestSupport.Fakes;
 
 namespace OpenTheWindows.App.Tests.ViewModels;
 
-/// <summary>Dashboard composition, quick-action navigation and baseline scoring, with fakes (no UI thread, no OS).</summary>
+/// <summary>Dashboard composition and on-demand baseline scoring, with fakes (no UI thread, no OS).</summary>
 public sealed class DashboardViewModelTests
 {
-    private static DashboardViewModel Build(FakeNavigationService navigation, IAuditCoordinator? audit = null)
+    private static DashboardViewModel Build(IAuditCoordinator? audit = null)
     {
         DoctorService doctor = new(
             new FakeOperatingSystemInfo(FakeOperatingSystemInfo.Windows11Pro24H2()),
             new FakeElevationContext(isElevated: true, processUserName: "tester"));
-        return new DashboardViewModel(new DoctorViewModel(doctor), navigation, audit ?? new FakeAuditCoordinator());
+        return new DashboardViewModel(new DoctorViewModel(doctor), audit ?? new FakeAuditCoordinator());
     }
 
     private static Baseline Baseline(string id)
@@ -34,22 +34,11 @@ public sealed class DashboardViewModelTests
     [Fact]
     public void Is_the_dashboard_page_and_exposes_the_health_panel()
     {
-        DashboardViewModel dashboard = Build(new FakeNavigationService());
+        DashboardViewModel dashboard = Build();
 
         Assert.Equal(PageKeys.Dashboard, dashboard.Key);
         Assert.NotNull(dashboard.Doctor);
         Assert.False(string.IsNullOrEmpty(dashboard.Title));
-    }
-
-    [Fact]
-    public void Open_navigates_to_the_requested_page()
-    {
-        FakeNavigationService navigation = new();
-        DashboardViewModel dashboard = Build(navigation);
-
-        dashboard.OpenCommand.Execute(PageKeys.About);
-
-        Assert.Equal([PageKeys.About], navigation.Navigations);
     }
 
     [Fact]
@@ -60,7 +49,7 @@ public sealed class DashboardViewModelTests
             Baselines = [Baseline("a")],
             OnAudit = b => Report(b.Id, 50),
         };
-        DashboardViewModel dashboard = Build(new FakeNavigationService(), audit);
+        DashboardViewModel dashboard = Build(audit);
 
         Assert.Empty(dashboard.BaselineScores);
         Assert.Equal(0, audit.AuditCount);
@@ -75,7 +64,7 @@ public sealed class DashboardViewModelTests
             Baselines = [Baseline("a"), Baseline("b")],
             OnAudit = b => Report(b.Id, string.Equals(b.Id, "a", StringComparison.Ordinal) ? 80 : 40),
         };
-        DashboardViewModel dashboard = Build(new FakeNavigationService(), audit);
+        DashboardViewModel dashboard = Build(audit);
 
         await dashboard.RefreshScoresCommand.ExecuteAsync(null);
 
@@ -90,10 +79,10 @@ public sealed class DashboardViewModelTests
     [Fact]
     public void Rejects_null_dependencies()
     {
-        Assert.Throws<ArgumentNullException>(() => new DashboardViewModel(null!, new FakeNavigationService(), new FakeAuditCoordinator()));
+        Assert.Throws<ArgumentNullException>(() => new DashboardViewModel(null!, new FakeAuditCoordinator()));
         DoctorService doctor = new(
             new FakeOperatingSystemInfo(FakeOperatingSystemInfo.Windows11Pro24H2()),
             new FakeElevationContext(isElevated: true));
-        Assert.Throws<ArgumentNullException>(() => new DashboardViewModel(new DoctorViewModel(doctor), new FakeNavigationService(), null!));
+        Assert.Throws<ArgumentNullException>(() => new DashboardViewModel(new DoctorViewModel(doctor), null!));
     }
 }

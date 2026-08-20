@@ -15,16 +15,15 @@
                        AutomationProperties.AutomationId="Updates_Title" />
 
             <Border Margin="0,12,0,0" Padding="12,8" CornerRadius="6"
-                    Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}"
+                    Background="{DynamicResource InfoBackgroundBrush}"
                     Visibility="{Binding IsManaged, Converter={StaticResource BoolToVisibility}}"
                     AutomationProperties.AutomationId="Updates_ManagedBanner">
                 <TextBlock TextWrapping="Wrap"
-                           Foreground="{DynamicResource {x:Static SystemColors.InfoTextBrushKey}}"
                            Text="Windows Update is managed by your organisation. Pause and resume are read-only here." />
             </Border>
 
             <Border Margin="0,16,0,0" Padding="16" BorderThickness="1" CornerRadius="8"
-                    BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+                    BorderBrush="{DynamicResource CardBorderBrush}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -44,7 +43,7 @@
                     <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
                         <TextBlock Text="{Binding EndOfService}" AutomationProperties.AutomationId="Updates_Eos" />
                         <TextBlock Text="  · approaching end of servicing" Margin="6,0,0,0"
-                                   Foreground="{DynamicResource {x:Static SystemColors.HotTrackBrushKey}}"
+                                   Foreground="{DynamicResource LinkBrush}"
                                    Visibility="{Binding EndOfServiceWarning, Converter={StaticResource BoolToVisibility}}" />
                     </StackPanel>
 

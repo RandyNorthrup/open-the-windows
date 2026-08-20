@@ -1,5 +1,5 @@
 {
-  "$comment": "Deliberately invalid catalogue used to prove the 'catalog' quality gate rejects bad input (see build/quality.ps1 and PLAN.md 7.2). The single entry is missing every required field except id and title, so the schema reports it as invalid and 'otw catalog validate --catalog-dir tests/fixtures/catalog-bad' exits 4.",
+  "$comment": "Deliberately invalid catalogue used to prove the 'catalog' quality gate rejects bad input (see build/quality.ps1). The single entry is missing every required field except id and title, so the schema reports it as invalid and 'otw catalog validate --catalog-dir tests/fixtures/catalog-bad' exits 4.",
   "entries": [
     {
       "id": "broken.example.entry",
