@@ -802,6 +802,16 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- CI was red on every push because the report-writer feature was silently
+  missing from git. The `.gitignore` rule `reports/` (meant for a top-level
+  tool-output directory) also matched the source directory
+  `src/OpenTheWindows.Core/Reports/`, because Windows git runs with
+  `core.ignorecase=true` and treats `reports/` as `Reports/`. That excluded the
+  whole feature — the JSON/CSV/HTML/SARIF report writers and their tests, which
+  `otw scan` references — from version control. Local builds passed (the files
+  were on disk); the clean CI checkout had them missing and failed to compile.
+  The rule is now anchored to `/reports/` (top level only) and the 15 files are
+  committed.
 - `build/setup-dev.ps1` no longer points at the removed milestone apparatus: it
   dropped the `plan` gate from its pre-commit description and replaced the
   `build/start-milestone.ps1` "next step" (that script was deleted) with

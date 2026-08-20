@@ -17,7 +17,12 @@ coverage/
 artifacts/
 StrykerOutput/
 .jscpd-report/
-reports/
+# Anchored to the repo root: this ignores a top-level tool-output reports/ dir
+# only. Unanchored "reports/" also matched the SOURCE dir
+# src/OpenTheWindows.Core/Reports/ (Windows core.ignorecase makes reports/ ==
+# Reports/), which silently excluded the whole report-writer feature from git
+# and broke CI. Keep it anchored.
+/reports/
 *.sarif
 node_modules/
 # OS
