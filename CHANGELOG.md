@@ -797,6 +797,11 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- `build/setup-dev.ps1` no longer points at the removed milestone apparatus: it
+  dropped the `plan` gate from its pre-commit description and replaced the
+  `build/start-milestone.ps1` "next step" (that script was deleted) with
+  `build/quality.ps1`. It still sets `core.hooksPath=.githooks`, so the
+  pre-commit gate is wired on a fresh clone.
 - M6 (GUI): controls and detail panes were clipped on the right edge — the Profiles and
   category two-pane layouts, the category toolbar's **Review & apply** button, and the
   navigation-rail title were all cut off. The cause was layout overflow, not text that
