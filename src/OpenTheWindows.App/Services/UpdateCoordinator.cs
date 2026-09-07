@@ -11,12 +11,15 @@ namespace OpenTheWindows.App.Services;
 internal sealed class UpdateCoordinator : IUpdateCoordinator
 {
     private readonly Lazy<UpdateControlService> _service;
+    private readonly Lazy<IUpdateHideService> _hide;
 
-    /// <summary>Creates the coordinator over the update-control factory.</summary>
-    public UpdateCoordinator(Func<UpdateControlService> factory)
+    /// <summary>Creates the coordinator over the update-control and hide factories.</summary>
+    public UpdateCoordinator(Func<UpdateControlService> factory, Func<IUpdateHideService> hideFactory)
     {
         ArgumentNullException.ThrowIfNull(factory);
+        ArgumentNullException.ThrowIfNull(hideFactory);
         _service = new Lazy<UpdateControlService>(factory);
+        _hide = new Lazy<IUpdateHideService>(hideFactory);
     }
 
     /// <inheritdoc />
@@ -34,4 +37,13 @@ internal sealed class UpdateCoordinator : IUpdateCoordinator
 
     /// <inheritdoc />
     public Task<ResumeOutcome> ResumeAsync() => Task.Run(() => _service.Value.Resume(whatIf: false));
+
+    /// <inheritdoc />
+    public Task<IReadOnlyList<DiscoveredUpdate>> ListHiddenAsync() => Task.Run(() => _hide.Value.ListHidden());
+
+    /// <inheritdoc />
+    public Task<UpdateHideOutcome> HideAsync(string knowledgeBaseId) => Task.Run(() => _hide.Value.Hide(knowledgeBaseId));
+
+    /// <inheritdoc />
+    public Task<UpdateHideOutcome> UnhideAsync(string knowledgeBaseId) => Task.Run(() => _hide.Value.Unhide(knowledgeBaseId));
 }

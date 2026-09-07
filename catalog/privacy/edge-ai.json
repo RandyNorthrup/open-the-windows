@@ -1,0 +1,73 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "privacy.edge.disable-copilot",
+      "title": "Turn off Copilot in Microsoft Edge",
+      "description": "Applies the Edge policies that hide the Copilot/Discover sidebar and stop Copilot from reading page content in the browser or in Microsoft 365 Copilot.",
+      "rationale": "Edge Copilot is a separate surface from the Windows Copilot app. These policies leave Edge installed (the product never removes Edge or WebView2) and only turn off Copilot integration. The policy values are absent by default.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": null,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "HubsSidebarEnabled",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "CopilotPageContext",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        },
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "CopilotCDPPageContext",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": null,
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Microsoft Edge"
+      },
+      "sideEffects": [
+        "The Copilot/Discover sidebar is hidden in Edge. Copilot cannot read the current page in Edge or send it to Microsoft 365 Copilot. Browsing itself is unchanged."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-browser-policies/hubssidebarenabled",
+        "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-browser-policies/copilotpagecontext",
+        "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-browser-policies/copilotcdppagecontext"
+      ],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-09-07" }
+      ],
+      "tags": ["edge", "copilot", "ai"]
+    }
+  ]
+}

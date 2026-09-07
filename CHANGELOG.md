@@ -6,6 +6,37 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-06
+
+### Added
+
+- Catalogue: Windows 11 25H2/2026 AI and persistence entries. VM-verified on
+  Windows 11 Pro 25H2 (build 26200): each of the following applied, was confirmed
+  by an independent registry read, and reverted to the prior value — block Recall
+  enablement (`AllowRecallEnablement=0`), deny apps access to system AI models,
+  hide File Explorer AI Actions, uninstall unused Copilot via policy, turn off
+  Copilot in Edge (sidebar and page context), prevent OneDrive file storage, hide
+  Settings Home, and hide lock-screen Widgets. Still Draft: Settings agentic
+  search, agent workspaces, and `RemoveDefaultMicrosoftStorePackages` (Enterprise
+  / Education only; the lab VM is Pro), Cross Device Resume (apply verification
+  failed and rolled back; `IsResumeAllowed` did not stick at 0), Clipchamp (Appx
+  apply rolled back), and OEM Store stubs that were already absent so removal was
+  not exercised.
+- GUI settings persist under `%LocalAppData%\OpenTheWindows\gui-settings.json`
+  (restore point, Explorer restart, enterprise mode, theme).
+- Per-update hide/unhide through the Windows Update Agent: `otw updates hide
+  --kb`, `otw updates unhide --kb`, `otw updates hidden`, and matching controls
+  on the Updates page. Audited as events 4003/4004.
+- Opt-in GitHub Releases check: `otw check-update` and **Check for updates** on
+  About. One HTTPS GET, never on launch.
+
+### Changed
+
+- README catalogue count and CLI list now include hide, unhide, hidden and
+  `check-update`. Authenticode signing is still a release-process item (a
+  purchased certificate); releases remain unsigned with SHA-256, SBOM and
+  attestations.
+
 ## [0.1.0] - 2026-08-19
 
 ### Added
@@ -1019,5 +1050,6 @@ Milestone M0: repository scaffold, quality gates, research.
   and on the lab VM (Windows 11 Pro 25H2 build 26200.9168, elevated).
 - GUI launched elevated and rendered the system check (screenshot captured).
 
-[Unreleased]: https://github.com/RandyNorthrup/open-the-windows/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/RandyNorthrup/open-the-windows/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/RandyNorthrup/open-the-windows/releases/tag/v0.2.0
 [0.1.0]: https://github.com/RandyNorthrup/open-the-windows/releases/tag/v0.1.0

@@ -8,7 +8,7 @@ Free, open-source (MIT), enterprise-grade Windows 11 control panel for
 reversibility, drift detection and remediation, and an audit trail. GUI
 (WPF) and CLI (`otw.exe`) over one shared engine.
 
-> The catalogue ships **440 entries** across privacy, Windows Update, security,
+> The catalogue ships **458 entries** across privacy, Windows Update, security,
 > performance, debloat and shell; the CLI and GUI scan, apply, revert and inspect
 > history, audit against security baselines (STIG/CIS/Microsoft), and pause/resume
 > Windows Update. Entries confirmed on Windows 11 25H2 are marked `Verified`; the
@@ -42,13 +42,13 @@ Windows Server is refused. x64 and ARM64.
 
 ## Install
 
-Current release: **v0.1.0**, on the GitHub **Releases** page. Download the
+Current release: **v0.2.0**, on the GitHub **Releases** page. Download the
 per-machine **MSI** or a self-contained **portable ZIP** (x64 or ARM64); a
 smaller framework-dependent `-fdd` ZIP is also published for machines that
 already have the .NET 10 Desktop Runtime.
 
 ```powershell
-msiexec /i OpenTheWindows-0.1.0-win-x64.msi /qn   # silent, per-machine
+msiexec /i OpenTheWindows-0.2.0-win-x64.msi /qn   # silent, per-machine
 ```
 
 Binaries are not code-signed; every release carries SHA-256 sums, a CycloneDX
@@ -67,9 +67,10 @@ category page has a level dial, search, a risk filter and a per-entry detail
 pane; **Review & apply…** opens a modal flow that previews the what-if plan,
 confirms Breaking entries by typing their id, applies transactionally on a
 background thread, and lets you revert from **History**. **Updates**
-pauses/resumes Windows Update (with an extended pause behind a warning, and a
-read-only mode when it is managed by policy); **Profiles** applies, imports and
-exports profiles with their signing state.
+pauses/resumes Windows Update (with an extended pause behind a warning, a
+per-update hide/unhide, and a read-only mode when it is managed by policy);
+**Profiles** applies, imports and exports profiles with their signing state.
+**About** can check GitHub Releases for a newer version when you ask.
 
 ## Using the CLI (`otw`)
 
@@ -109,8 +110,11 @@ Every command takes `--help` for its full options and exit codes, and most take
   `validate`, and `sign` / `verify` (detached ES256 signatures). A machine can be
   set by policy to require signed profiles.
 - **`otw updates`** — control Windows Update safely and reversibly: `pause --days
-  <1-35>` (with an opt-in extended pause), `resume`, and `status` (running
-  version, days to end-of-servicing, and pause state).
+  <1-35>` (with an opt-in extended pause), `resume`, `status` (running version,
+  days to end-of-servicing, and pause state), `hidden`, `hide --kb <id>` and
+  `unhide --kb <id>` (per-update hide through the Windows Update Agent).
+- **`otw check-update`** — opt-in query of GitHub Releases for a newer version
+  (one HTTPS request; nothing runs on a schedule).
 
 ## Contributing
 
@@ -120,7 +124,8 @@ Build from source, the quality gates, project layout and coding standards are in
 ## Security
 
 See [SECURITY.md](SECURITY.md) for reporting and the security model (closed
-action set, journal-first apply, no telemetry, no network).
+action set, journal-first apply, no telemetry, no network unless you opt into
+the update check).
 
 ## License
 

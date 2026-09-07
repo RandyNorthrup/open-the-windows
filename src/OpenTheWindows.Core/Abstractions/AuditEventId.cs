@@ -42,6 +42,12 @@ public enum AuditEventId
     /// <summary>An extended Windows Update pause (beyond Microsoft's 35-day cap) was applied.</summary>
     ExtendedPause = 4002,
 
+    /// <summary>One or more Windows updates were hidden through the Windows Update Agent.</summary>
+    UpdateHidden = 4003,
+
+    /// <summary>One or more Windows updates were unhidden through the Windows Update Agent.</summary>
+    UpdateUnhidden = 4004,
+
     /// <summary>An unexpected error.</summary>
     Error = 9000,
 }

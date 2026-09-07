@@ -20,4 +20,13 @@ internal interface IUpdateCoordinator
 
     /// <summary>Resumes updates, on a background thread.</summary>
     Task<ResumeOutcome> ResumeAsync();
+
+    /// <summary>Lists updates the Windows Update Agent currently has hidden.</summary>
+    Task<IReadOnlyList<DiscoveredUpdate>> ListHiddenAsync();
+
+    /// <summary>Hides a discovered update by knowledge-base id, on a background thread.</summary>
+    Task<UpdateHideOutcome> HideAsync(string knowledgeBaseId);
+
+    /// <summary>Unhides a discovered update by knowledge-base id, on a background thread.</summary>
+    Task<UpdateHideOutcome> UnhideAsync(string knowledgeBaseId);
 }

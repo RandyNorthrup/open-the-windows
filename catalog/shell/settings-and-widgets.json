@@ -1,0 +1,99 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "shell.settings.hide-home",
+      "title": "Hide the Settings Home page",
+      "description": "Sets SettingsPageVisibility to hide:home so Settings opens on System instead of the promotional Home page (Microsoft 365, Game Pass and similar cards).",
+      "rationale": "Cloud Content policies hide some 365 upsell cards but do not remove the Home page itself. Microsoft's Settings Page Visibility policy is the supported way to hide Home. Other Settings pages stay reachable.",
+      "category": "Shell",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Verified",
+      "appliesTo": {
+        "editions": ["Pro", "Enterprise", "Education"],
+        "minBuild": 22631,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+          "name": "SettingsPageVisibility",
+          "type": "Sz",
+          "value": "hide:home",
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "SignOut",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Settings/PageVisibilityList",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Control Panel\\Settings Page Visibility"
+      },
+      "sideEffects": [
+        "Settings no longer shows the Home page. Sign out (or reboot) for the navigation list to update."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/configuration/hide-show-pages-in-settings-app",
+        "https://pureinfotech.com/remove-settings-home-windows-11"
+      ],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-09-07" }
+      ],
+      "tags": ["settings", "ads", "shell"]
+    },
+    {
+      "id": "shell.widgets.disable-lock-screen",
+      "title": "Hide Widgets on the lock screen",
+      "description": "Applies DisableWidgetsOnLockScreen so the lock screen does not show the Widgets board, while leaving the taskbar Widgets policy alone.",
+      "rationale": "Turning off Widgets entirely also kills lock-screen widgets. This policy is the finer control for keeping taskbar Widgets but dropping lock-screen weather/news. The policy value is absent by default.",
+      "category": "Shell",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 26100,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Dsh",
+          "name": "DisableWidgetsOnLockScreen",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "NewsAndInterests/DisableWidgetsOnLockScreen",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Widgets\\Disable Widgets On Lock Screen"
+      },
+      "sideEffects": [
+        "Lock-screen Widgets (weather, MSN feed) are hidden. The taskbar Widgets button is unchanged unless shell.taskbar.disable-widgets is also applied."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-newsandinterests",
+        "https://www.anoopcnair.com/intune-settings-catalog-windows-11-25h2-update/"
+      ],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-09-07" }
+      ],
+      "tags": ["widgets", "lock-screen", "ads"]
+    }
+  ]
+}

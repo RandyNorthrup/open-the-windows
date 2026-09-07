@@ -53,4 +53,33 @@ internal sealed class FakeUpdateCoordinator : IUpdateCoordinator
         ResumeCount++;
         return Task.FromResult(new ResumeOutcome(true, null, null, false));
     }
+
+    /// <summary>Hidden updates <see cref="ListHiddenAsync"/> returns.</summary>
+    public IReadOnlyList<DiscoveredUpdate> HiddenToReturn { get; set; } = [];
+
+    /// <summary>Hide/unhide outcome to return.</summary>
+    public UpdateHideOutcome HideOutcome { get; set; } = new(true, "1", 1, "Hid.");
+
+    /// <summary>Last hide id.</summary>
+    public string? LastHide { get; private set; }
+
+    /// <summary>Last unhide id.</summary>
+    public string? LastUnhide { get; private set; }
+
+    /// <inheritdoc />
+    public Task<IReadOnlyList<DiscoveredUpdate>> ListHiddenAsync() => Task.FromResult(HiddenToReturn);
+
+    /// <inheritdoc />
+    public Task<UpdateHideOutcome> HideAsync(string knowledgeBaseId)
+    {
+        LastHide = knowledgeBaseId;
+        return Task.FromResult(HideOutcome);
+    }
+
+    /// <inheritdoc />
+    public Task<UpdateHideOutcome> UnhideAsync(string knowledgeBaseId)
+    {
+        LastUnhide = knowledgeBaseId;
+        return Task.FromResult(HideOutcome);
+    }
 }

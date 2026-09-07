@@ -101,6 +101,35 @@
                     Command="{Binding RefreshCommand}"
                     ToolTip="Read the current update, pause and end-of-servicing status from this PC. Nothing is loaded until you do this."
                     AutomationProperties.AutomationId="Updates_Refresh" />
+
+            <TextBlock Text="Hide a specific update" FontSize="16" FontWeight="SemiBold" Margin="0,20,0,8" />
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,8" Opacity="0.75"
+                       Text="Hides one knowledge-base article the Windows Update Agent has already discovered. Reversible. The agent may contact Microsoft Update to resolve the KB." />
+            <StackPanel Orientation="Horizontal">
+                <TextBox MinWidth="160" Padding="6,4"
+                         Text="{Binding KnowledgeBaseId, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Knowledge-base id, for example KB5063878."
+                         AutomationProperties.Name="Knowledge-base id"
+                         AutomationProperties.AutomationId="Updates_Kb" />
+                <Button Content="Hide" Padding="14,5" Margin="8,0,0,0"
+                        Command="{Binding HideCommand}"
+                        ToolTipService.ShowOnDisabled="True"
+                        ToolTip="Hide this KB. Disabled when updates are managed or the id is empty."
+                        AutomationProperties.AutomationId="Updates_Hide" />
+                <Button Content="Unhide" Padding="14,5" Margin="8,0,0,0"
+                        Command="{Binding UnhideCommand}"
+                        ToolTipService.ShowOnDisabled="True"
+                        ToolTip="Clear the hidden flag on this KB."
+                        AutomationProperties.AutomationId="Updates_Unhide" />
+                <Button Content="Refresh hidden" Padding="14,5" Margin="8,0,0,0"
+                        Command="{Binding RefreshHiddenCommand}"
+                        ToolTip="List updates the agent currently has hidden."
+                        AutomationProperties.AutomationId="Updates_RefreshHidden" />
+            </StackPanel>
+            <TextBlock Text="{Binding HideStatus}" Margin="0,8,0,0" TextWrapping="Wrap"
+                       AutomationProperties.AutomationId="Updates_HideStatus" />
+            <TextBlock Text="{Binding HiddenList}" Margin="0,8,0,0" TextWrapping="Wrap"
+                       AutomationProperties.AutomationId="Updates_HiddenList" />
         </StackPanel>
     </ScrollViewer>
 </UserControl>

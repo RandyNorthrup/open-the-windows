@@ -1,3 +1,4 @@
+using System.Net.Http;
 using System.Windows;
 using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,7 @@ using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Model;
+using OpenTheWindows.Core.Releases;
 using OpenTheWindows.Core.Updates;
 using OpenTheWindows.Windows;
 using OpenTheWindows.Windows.Readers;
@@ -49,11 +51,15 @@ internal sealed partial class DesktopApp : Application, IDisposable
         services.AddSingleton<IApplyFlowLauncher, ApplyFlowLauncher>();
         services.AddSingleton<IFileDialogService, FileDialogService>();
         services.AddSingleton<Func<UpdateControlService>>(_ => static () => WindowsUpdateControlFactory.Create());
+        services.AddSingleton<Func<IUpdateHideService>>(_ => static () => WindowsUpdateHideFactory.Create());
+        services.AddSingleton(_ => GitHubAppReleaseChecker.CreateClient());
+        services.AddSingleton<IAppReleaseChecker>(sp => new GitHubAppReleaseChecker(sp.GetRequiredService<HttpClient>()));
         services.AddSingleton<IUpdateCoordinator, UpdateCoordinator>();
         RegisterAudit(services);
 
         // Shell services.
-        services.AddSingleton<AppSettings>();
+        services.AddSingleton<IGuiSettingsStore, FileGuiSettingsStore>();
+        services.AddSingleton<AppSettings>(sp => new AppSettings(sp.GetRequiredService<IGuiSettingsStore>()));
         services.AddSingleton<IThemeService, ThemeService>();
         services.AddSingleton<IDispatcherService>(_ => new WpfDispatcherService(Dispatcher.CurrentDispatcher));
         services.AddSingleton<IDialogService, DialogService>();
@@ -107,6 +113,9 @@ internal sealed partial class DesktopApp : Application, IDisposable
         _services?.Dispose();
         _services = ConfigureServices(new ServiceCollection()).BuildServiceProvider(
             new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
+
+        AppSettings settings = _services.GetRequiredService<AppSettings>();
+        _services.GetRequiredService<IThemeService>().Apply(settings.Theme);
 
         MainWindow window = _services.GetRequiredService<MainWindow>();
         MainWindow = window;

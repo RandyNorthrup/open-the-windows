@@ -129,6 +129,161 @@
       ],
       "verifiedOn": [],
       "tags": ["ads", "start"]
+    },
+    {
+      "id": "debloat.apps.remove-candy-crush",
+      "title": "Remove Candy Crush Saga",
+      "description": "Removes the Candy Crush Saga Store stub for all users and deprovisions it.",
+      "rationale": "OEM and Content Delivery often pin this game; it has no system role. If the package is not installed the removal is already the desired state.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "king.com.CandyCrushSaga_kgqvnymyfvs32",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Microsoft Store: search for Candy Crush Saga"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/windows/application-management/provisioned-apps-windows-client-os"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "games", "oem"]
+    },
+    {
+      "id": "debloat.apps.remove-spotify",
+      "title": "Remove Spotify stub",
+      "description": "Removes the Spotify Store stub for all users and deprovisions it.",
+      "rationale": "OEM images often pin Spotify; it is not required by Windows. Reinstall from the Store if you use it.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "SpotifyAB.SpotifyMusic_zpdnekdrzrea0",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Microsoft Store: search for Spotify"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": ["The Store Spotify stub is gone; a Win32 Spotify install is unaffected."],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/windows/application-management/provisioned-apps-windows-client-os"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "oem"]
+    },
+    {
+      "id": "debloat.apps.remove-tiktok",
+      "title": "Remove TikTok stub",
+      "description": "Removes the TikTok Store stub for all users and deprovisions it.",
+      "rationale": "OEM and suggested-app delivery pin TikTok; Windows does not depend on it.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "BytedancePte.Ltd.TikTok_6yccndn93v84r",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Microsoft Store: search for TikTok"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/windows/application-management/provisioned-apps-windows-client-os"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "oem"]
+    },
+    {
+      "id": "debloat.apps.remove-instagram",
+      "title": "Remove Instagram stub",
+      "description": "Removes the Instagram Store stub for all users and deprovisions it.",
+      "rationale": "OEM and suggested-app delivery pin Instagram; Windows does not depend on it.",
+      "category": "Debloat",
+      "level": "Basic",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Facebook.InstagramBeta_8xx8rvfyw5nnt",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Microsoft Store: search for Instagram"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/windows/application-management/provisioned-apps-windows-client-os"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "oem"]
+    },
+    {
+      "id": "debloat.apps.remove-disney-plus",
+      "title": "Remove Disney+ stub",
+      "description": "Removes the Disney+ Store stub for all users and deprovisions it.",
+      "rationale": "OEM images often pin Disney+; Windows does not depend on it.",
+      "category": "Debloat",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
+      "actions": [
+        {
+          "kind": "Appx",
+          "packageFamilyName": "Disney.37853FC22B2CE_6rarak0p23mb6",
+          "mode": "AllUsersAndDeprovision",
+          "reinstallHint": "Microsoft Store: search for Disney+"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [],
+      "sources": [
+        "https://github.com/Raphire/Win11Debloat",
+        "https://learn.microsoft.com/windows/application-management/provisioned-apps-windows-client-os"
+      ],
+      "verifiedOn": [],
+      "tags": ["appx", "oem"]
     }
   ]
 }

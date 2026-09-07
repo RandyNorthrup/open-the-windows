@@ -55,7 +55,13 @@ mono_crash.*
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
-[Rr]eleases/
+# Anchored to the repo root: unanchored [Rr]eleases/ also matched
+# src/OpenTheWindows.Core/Releases/ (the GitHub Releases checker) and
+# tests/OpenTheWindows.Core.Tests/Releases/. Same class of bug as
+# reports/ vs Reports/ (Windows core.ignorecase). ClickOnce/publish
+# output at the repo root stays ignored; bin/Release and obj/Release
+# stay ignored via [Bb]in/ and [Oo]bj/.
+/[Rr]eleases/
 x64/
 x86/
 [Ww][Ii][Nn]32/

@@ -14,6 +14,9 @@ public static class AppInfo
     /// <summary>Short executable name of the CLI.</summary>
     public const string CliName = "otw";
 
+    /// <summary>Directory name under ProgramData / LocalAppData for journals, audit and GUI settings.</summary>
+    public const string DataDirectoryName = "OpenTheWindows";
+
     /// <summary>Canonical project home, used as the SARIF tool <c>informationUri</c>.</summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Major Code Smell",

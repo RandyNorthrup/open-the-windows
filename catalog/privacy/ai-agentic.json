@@ -1,0 +1,279 @@
+{
+  "$schema": "../schema/tweak.schema.json",
+  "entries": [
+    {
+      "id": "privacy.recall.block-enablement",
+      "title": "Block Windows Recall from being enabled",
+      "description": "Sets AllowRecallEnablement=0 so the Recall optional component is unavailable, its bits are removed, and any saved snapshots are deleted. Stronger than turning off snapshot saving alone.",
+      "rationale": "DisableAIDataAnalysis stops snapshot saving but leaves Recall available for a user to turn back on. Microsoft's Allow Recall to be enabled policy, when disabled, removes the feature and deletes snapshots. Complements the optional-feature removal. The policy value is absent by default (Recall stays available on unmanaged Copilot+ PCs).",
+      "category": "Privacy",
+      "level": "Paranoid",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Verified",
+      "appliesTo": {
+        "editions": ["Pro", "Enterprise", "Education"],
+        "minBuild": 26100,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+          "name": "AllowRecallEnablement",
+          "type": "Dword",
+          "value": 0,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "Reboot",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "WindowsAI/AllowRecallEnablement",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows AI\\Allow Recall to be enabled"
+      },
+      "sideEffects": [
+        "Recall cannot be turned on by the user; existing snapshots are deleted; a reboot is required for removal of the optional component."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai",
+        "https://learn.microsoft.com/en-us/windows/client-management/manage-recall"
+      ],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-09-07" }
+      ],
+      "tags": ["ai", "recall", "copilot-plus"]
+    },
+    {
+      "id": "privacy.ai.disable-settings-agent",
+      "title": "Disable the Settings agentic search experience",
+      "description": "Applies DisableSettingsAgent so Settings search stays on static and semantic index results and does not call an AI model for natural-language suggestions.",
+      "rationale": "Windows 11 25H2 added an agentic Settings search experience that uses an on-device AI model. This policy turns that path off. Documented for Enterprise and Education; the policy value is absent by default.",
+      "category": "Privacy",
+      "level": "Strict",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": ["Enterprise", "Education"],
+        "minBuild": 26100,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+          "name": "DisableSettingsAgent",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "WindowsAI/DisableSettingsAgent",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows AI\\Disable Settings agentic search experience"
+      },
+      "sideEffects": [
+        "Natural-language AI suggestions in Settings search are unavailable; ordinary Settings search still works."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai"
+      ],
+      "verifiedOn": [],
+      "tags": ["ai", "settings", "agentic"]
+    },
+    {
+      "id": "privacy.ai.deny-system-ai-models",
+      "title": "Deny apps access to Windows AI models",
+      "description": "Force-denies packaged Windows apps access to on-device text and image generation models through the App Privacy LetAppsAccessSystemAIModels policy.",
+      "rationale": "Inbox and Store apps can call Windows system AI models (Cocreator, Image Creator, and similar) even when the user never opens Copilot. Force Deny is the same App Privacy pattern as camera and microphone. The policy value is absent by default (user choice).",
+      "category": "Privacy",
+      "level": "Strict",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Verified",
+      "appliesTo": {
+        "editions": ["Pro", "Enterprise", "Education"],
+        "minBuild": 26100,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy",
+          "name": "LetAppsAccessSystemAIModels",
+          "type": "Dword",
+          "value": 2,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "Privacy/LetAppsAccessSystemAIModels",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\App Privacy\\Let Windows apps make use of Text and image generation features of Windows"
+      },
+      "sideEffects": [
+        "Store and inbox apps cannot use Windows text/image generation APIs; Paint Cocreator, Photos generative features and similar buttons that depend on those models stop working."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy",
+        "https://www.elevenforum.com/t/enable-or-disable-text-and-image-generation-for-apps-in-windows-11.26022/"
+      ],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-09-07" }
+      ],
+      "tags": ["ai", "app-privacy", "models"]
+    },
+    {
+      "id": "privacy.ai.hide-explorer-actions",
+      "title": "Hide AI Actions in File Explorer",
+      "description": "Sets the Explorer HideAIActionsMenu preference so the AI Actions section is omitted from the File Explorer context menu.",
+      "rationale": "Windows 11 25H2 added an AI Actions flyout on right-click (Paint, Photos, Microsoft 365 Copilot). The supported Settings path is Apps > Actions; this preference hides the parent menu. Absent by default. Complements turning individual App Actions off.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Verified",
+      "appliesTo": {
+        "editions": [],
+        "minBuild": 26100,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer",
+          "name": "HideAIActionsMenu",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Preference"
+        }
+      ],
+      "requires": "ExplorerRestart",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": null,
+      "sideEffects": [
+        "The AI Actions section no longer appears on the File Explorer right-click menu. Individual App Actions in Settings > Apps > Actions are unchanged."
+      ],
+      "sources": [
+        "https://www.windowscentral.com/microsoft/windows-11/how-to-manage-ai-actions-in-file-explorer-on-windows-11/",
+        "https://www.askvg.com/how-to-enable-or-disable-ai-actions-in-file-explorer-context-menu-in-windows-11/"
+      ],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-09-07" }
+      ],
+      "tags": ["ai", "explorer", "context-menu"]
+    },
+    {
+      "id": "privacy.ai.disable-agent-workspaces",
+      "title": "Keep agent workspaces turned off",
+      "description": "Sets DisableAgentWorkspaces to Force Disable so Windows will not create the experimental agent account and isolated agent desktop used by Copilot Actions.",
+      "rationale": "Experimental agentic features are off by default; this policy keeps them off so an administrator or a later Windows build cannot silently enable agent workspaces. Documented for Enterprise and Education and still preview on some builds. The policy value is absent by default (user in control).",
+      "category": "Privacy",
+      "level": "Paranoid",
+      "risk": "Caution",
+      "scope": "Machine",
+      "status": "Draft",
+      "appliesTo": {
+        "editions": ["Enterprise", "Education"],
+        "minBuild": 26100,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+          "name": "DisableAgentWorkspaces",
+          "type": "Dword",
+          "value": 2,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "WindowsAI/DisableAgentWorkspaces",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows AI\\Disable Agent Workspaces"
+      },
+      "sideEffects": [
+        "Copilot Actions and other features that require an agent workspace cannot run. The experimental agentic-features toggle in Settings cannot enable them."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai",
+        "https://support.microsoft.com/en-us/windows/ai/ai-features/experimental-agentic-features"
+      ],
+      "verifiedOn": [],
+      "tags": ["ai", "agentic", "copilot-actions"]
+    },
+    {
+      "id": "privacy.ai.remove-copilot-app-policy",
+      "title": "Uninstall unused Microsoft Copilot via policy",
+      "description": "Enables the RemoveMicrosoftCopilotApp policy so Windows uninstalls the consumer Copilot app when it was not user-installed and has not been launched in 28 days. Users can still reinstall it from the Store.",
+      "rationale": "Appx removal takes Copilot off immediately but the Store can offer it again. This is Microsoft's supported uninstall policy (24H2+). It does not cover a Copilot the user installed themselves. Complements debloat.apps.remove-copilot. The policy value is absent by default.",
+      "category": "Privacy",
+      "level": "Balanced",
+      "risk": "Safe",
+      "scope": "Machine",
+      "status": "Verified",
+      "appliesTo": {
+        "editions": ["Pro", "Enterprise", "Education"],
+        "minBuild": 26100,
+        "maxBuild": null,
+        "architectures": []
+      },
+      "actions": [
+        {
+          "kind": "Registry",
+          "hive": "LocalMachine",
+          "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+          "name": "RemoveMicrosoftCopilotApp",
+          "type": "Dword",
+          "value": 1,
+          "default": null,
+          "valueKind": "Policy"
+        }
+      ],
+      "requires": "None",
+      "dependsOn": [],
+      "conflictsWith": [],
+      "managedBy": {
+        "policyCsp": "WindowsAI/RemoveMicrosoftCopilotApp",
+        "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Windows AI\\Remove Microsoft Copilot App"
+      },
+      "sideEffects": [
+        "Copilot is uninstalled only when both Copilot packages are present, the app was not installed by the user, and it has not been launched in the last 28 days. The user can reinstall it from the Store."
+      ],
+      "sources": [
+        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai",
+        "https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot"
+      ],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-09-07" }
+      ],
+      "tags": ["ai", "copilot", "policy"]
+    }
+  ]
+}

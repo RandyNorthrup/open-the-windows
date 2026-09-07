@@ -31,7 +31,7 @@
       "managedBy": null,
       "sideEffects": [
         "Only applies to Copilot+ PCs on 24H2 or later, where Recall is present.",
-        "Disabling the feature removes Recall; for a policy-level block (Paranoid) also set AllowRecallEnablement=0 via the privacy catalogue."
+        "Disabling the feature removes Recall; for a policy-level block (Paranoid) also apply privacy.recall.block-enablement."
       ],
       "sources": [
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai",

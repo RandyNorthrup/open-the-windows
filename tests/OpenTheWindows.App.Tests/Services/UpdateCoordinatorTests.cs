@@ -10,7 +10,7 @@ public sealed class UpdateCoordinatorTests
     private static UpdateCoordinator Build()
     {
         (UpdateControlService service, _) = FakeUpdateControl.Create(new FakeMachine());
-        return new UpdateCoordinator(() => service);
+        return new UpdateCoordinator(() => service, () => new FakeUpdateHideService());
     }
 
     [Fact]
@@ -39,6 +39,8 @@ public sealed class UpdateCoordinatorTests
     [Fact]
     public void Rejects_a_null_factory()
     {
-        Assert.Throws<ArgumentNullException>(() => new UpdateCoordinator(null!));
+        Assert.Throws<ArgumentNullException>(() => new UpdateCoordinator(null!, () => new FakeUpdateHideService()));
+        (UpdateControlService service, _) = FakeUpdateControl.Create(new FakeMachine());
+        Assert.Throws<ArgumentNullException>(() => new UpdateCoordinator(() => service, null!));
     }
 }

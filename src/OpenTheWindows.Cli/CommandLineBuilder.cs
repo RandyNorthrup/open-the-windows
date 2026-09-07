@@ -33,6 +33,7 @@ internal static class CommandLineBuilder
         root.Subcommands.Add(TaskCommand.Create(services));
         root.Subcommands.Add(EventLogCommand.Create(services));
         root.Subcommands.Add(UsersCommand.Create(services));
+        root.Subcommands.Add(CheckUpdateCommand.Create(services.CreateReleaseChecker));
         return root;
     }
 }

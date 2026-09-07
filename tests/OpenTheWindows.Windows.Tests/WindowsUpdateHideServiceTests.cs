@@ -1,0 +1,61 @@
+using OpenTheWindows.Core.Abstractions;
+using OpenTheWindows.Core.Updates;
+using OpenTheWindows.TestSupport.Fakes;
+using OpenTheWindows.Windows.Updates;
+
+namespace OpenTheWindows.Windows.Tests;
+
+public sealed class WindowsUpdateHideServiceTests
+{
+    [Fact]
+    public void Hide_marks_a_discovered_kb_and_audits()
+    {
+        var agent = new FakeWindowsUpdateAgent();
+        agent.NotInstalled.Add(new DiscoveredUpdate("id-1", "Cumulative 2026-08", ["5063878"], false));
+        var audit = new FakeAuditSink();
+        var service = new WindowsUpdateHideService(agent, audit, TimeProvider.System);
+
+        UpdateHideOutcome outcome = service.Hide("KB5063878");
+
+        Assert.True(outcome.Succeeded);
+        Assert.Equal(1, outcome.Affected);
+        Assert.True(agent.Hidden.Single().IsHidden);
+        Assert.True(audit.Has(AuditEventId.UpdateHidden));
+    }
+
+    [Fact]
+    public void Hide_fails_when_the_agent_has_not_discovered_the_kb()
+    {
+        var service = new WindowsUpdateHideService(new FakeWindowsUpdateAgent(), new FakeAuditSink(), TimeProvider.System);
+
+        UpdateHideOutcome outcome = service.Hide("KB1");
+
+        Assert.False(outcome.Succeeded);
+        Assert.Equal(0, outcome.Affected);
+    }
+
+    [Fact]
+    public void Unhide_clears_a_hidden_kb()
+    {
+        var agent = new FakeWindowsUpdateAgent();
+        agent.Hidden.Add(new DiscoveredUpdate("id-1", "Cumulative 2026-08", ["5063878"], true));
+        var service = new WindowsUpdateHideService(agent, new FakeAuditSink(), TimeProvider.System);
+
+        UpdateHideOutcome outcome = service.Unhide("5063878");
+
+        Assert.True(outcome.Succeeded);
+        Assert.Equal(1, outcome.Affected);
+        Assert.False(agent.NotInstalled.Single().IsHidden);
+        Assert.Empty(agent.Hidden);
+    }
+
+    [Fact]
+    public void Rejects_null_dependencies()
+    {
+        var agent = new FakeWindowsUpdateAgent();
+        var audit = new FakeAuditSink();
+        Assert.Throws<ArgumentNullException>(() => new WindowsUpdateHideService(null!, audit, TimeProvider.System));
+        Assert.Throws<ArgumentNullException>(() => new WindowsUpdateHideService(agent, null!, TimeProvider.System));
+        Assert.Throws<ArgumentNullException>(() => new WindowsUpdateHideService(agent, audit, null!));
+    }
+}

@@ -158,4 +158,42 @@ public sealed class UpdatesCommandTests
         Assert.Equal(ExitCodes.Success, code);
         Assert.Contains("ago", stdout.ToString(), StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Hide_unelevated_exits_5()
+    {
+        var (root, stdout, stderr, _) = Build(elevated: false);
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "updates", "hide", "--kb", "KB5063878");
+
+        Assert.Equal(ExitCodes.ElevationRequired, code);
+    }
+
+    [Fact]
+    public void Hide_rejects_a_malformed_kb()
+    {
+        var (root, stdout, stderr, _) = Build();
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "updates", "hide", "--kb", "nope");
+
+        Assert.Equal(ExitCodes.InvalidInput, code);
+    }
+
+    [Fact]
+    public void Hidden_lists_the_fake_agent_contents()
+    {
+        var hide = new FakeUpdateHideService();
+        hide.Hidden.Add(new DiscoveredUpdate("id", "Cumulative", ["5063878"], true));
+        var doctor = Doctor();
+        (RootCommand root, StringWriter stdout, StringWriter stderr) = CliTestHost.Host(TestCli.Services(
+            doctor,
+            _ => CatalogLoader.LoadBuiltIn(),
+            createUpdateHide: () => hide));
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "updates", "hidden");
+
+        Assert.Equal(ExitCodes.Success, code);
+        Assert.Contains("5063878", stdout.ToString(), StringComparison.Ordinal);
+        Assert.Contains("Cumulative", stdout.ToString(), StringComparison.Ordinal);
+    }
 }

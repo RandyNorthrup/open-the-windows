@@ -1,5 +1,6 @@
 using System.CommandLine;
 using System.Globalization;
+using System.Text.Json;
 using OpenTheWindows.Core;
 using OpenTheWindows.Core.Journal;
 using OpenTheWindows.Core.Updates;
@@ -8,9 +9,10 @@ namespace OpenTheWindows.Cli.Commands;
 
 /// <summary>
 /// <c>otw updates pause --days &lt;n&gt; [--extended]</c>, <c>otw updates resume</c>,
-/// <c>otw updates status</c>: the Windows Update guardrails (spec M4). Pause and
-/// resume change machine state (journaled, reversible) and need elevation; status
-/// is read-only. Exit codes: 0 success, 2 error, 3 unsupported OS, 4 invalid input,
+/// <c>otw updates status</c>, <c>otw updates hidden</c>, <c>otw updates hide --kb</c>,
+/// <c>otw updates unhide --kb</c>: the Windows Update guardrails. Pause, resume,
+/// hide and unhide change machine state and need elevation; status and hidden are
+/// reads. Exit codes: 0 success, 2 error, 3 unsupported OS, 4 invalid input,
 /// 5 elevation required.
 /// </summary>
 internal static class UpdatesCommand
@@ -23,6 +25,9 @@ internal static class UpdatesCommand
         command.Subcommands.Add(CreatePause(services));
         command.Subcommands.Add(CreateResume(services));
         command.Subcommands.Add(CreateStatus(services));
+        command.Subcommands.Add(CreateHidden(services));
+        command.Subcommands.Add(CreateHide(services));
+        command.Subcommands.Add(CreateUnhide(services));
         return command;
     }
 
@@ -190,5 +195,84 @@ internal static class UpdatesCommand
         }
 
         return ExitCodes.Success;
+    }
+
+    private static Command CreateHidden(CliServices services)
+    {
+        var json = new Option<bool>("--json") { Description = "Emit the hidden-update list as JSON." };
+        var command = new Command("hidden", "List updates the Windows Update Agent currently has hidden.");
+        command.Options.Add(json);
+        command.SetAction(parseResult => ExecuteHidden(parseResult, services, json));
+        return command;
+    }
+
+    private static Command CreateHide(CliServices services)
+    {
+        var kb = new Option<string>("--kb") { Description = "Knowledge-base id to hide (KB5063878 or 5063878).", Required = true };
+        var command = new Command("hide", "Hide a discovered Windows update by knowledge-base id (reversible with unhide).");
+        command.Options.Add(kb);
+        command.SetAction(parseResult => ExecuteHide(parseResult, services, kb, hide: true));
+        return command;
+    }
+
+    private static Command CreateUnhide(CliServices services)
+    {
+        var kb = new Option<string>("--kb") { Description = "Knowledge-base id to unhide (KB5063878 or 5063878).", Required = true };
+        var command = new Command("unhide", "Clear the hidden flag on a discovered Windows update by knowledge-base id.");
+        command.Options.Add(kb);
+        command.SetAction(parseResult => ExecuteHide(parseResult, services, kb, hide: false));
+        return command;
+    }
+
+    private static int ExecuteHidden(ParseResult parseResult, CliServices services, Option<bool> jsonOption)
+    {
+        TextWriter stdout = parseResult.InvocationConfiguration.Output;
+        TextWriter stderr = parseResult.InvocationConfiguration.Error;
+        if (!CommandSupport.IsSupported(services.Doctor, stderr, out int exitCode))
+        {
+            return exitCode;
+        }
+
+        IReadOnlyList<DiscoveredUpdate> hidden = services.CreateUpdateHide().ListHidden();
+        if (parseResult.GetValue(jsonOption))
+        {
+            stdout.WriteLine(JsonSerializer.Serialize(hidden, CliJsonContext.Default.IReadOnlyListDiscoveredUpdate));
+            return ExitCodes.Success;
+        }
+
+        if (hidden.Count == 0)
+        {
+            stdout.WriteLine("No hidden updates.");
+            return ExitCodes.Success;
+        }
+
+        foreach (DiscoveredUpdate update in hidden)
+        {
+            string kbs = string.Join(", ", update.KnowledgeBaseIds.Select(KnowledgeBaseId.Format));
+            stdout.WriteLine(string.Create(CultureInfo.InvariantCulture, $"{kbs}  {update.Title}"));
+        }
+
+        return ExitCodes.Success;
+    }
+
+    private static int ExecuteHide(ParseResult parseResult, CliServices services, Option<string> kbOption, bool hide)
+    {
+        if (!TryBeginElevatedCommand(parseResult, services, whatIf: false, hide ? "Hiding" : "Unhiding", out TextWriter stdout, out TextWriter stderr, out int exitCode))
+        {
+            return exitCode;
+        }
+
+        string kb = parseResult.GetValue(kbOption) ?? string.Empty;
+        if (KnowledgeBaseId.Normalize(kb) is null)
+        {
+            stderr.WriteLine("A knowledge-base id looks like KB5063878 or 5063878.");
+            return ExitCodes.InvalidInput;
+        }
+
+        UpdateHideOutcome outcome = hide
+            ? services.CreateUpdateHide().Hide(kb)
+            : services.CreateUpdateHide().Unhide(kb);
+        stdout.WriteLine(outcome.Message);
+        return outcome.Succeeded ? ExitCodes.Success : ExitCodes.Error;
     }
 }

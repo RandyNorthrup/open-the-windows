@@ -147,4 +147,18 @@ public sealed class UpdatesViewModelTests
         Assert.Throws<ArgumentNullException>(() => new UpdatesViewModel(null!, _dialog));
         Assert.Throws<ArgumentNullException>(() => new UpdatesViewModel(_coordinator, null!));
     }
+
+    [Fact]
+    public async Task Hide_sends_the_typed_kb()
+    {
+        _coordinator.StatusToReturn = Status();
+        UpdatesViewModel page = Build();
+        page.RefreshCommand.Execute(null);
+        page.KnowledgeBaseId = "KB5063878";
+
+        await page.HideCommand.ExecuteAsync(null);
+
+        Assert.Equal("KB5063878", _coordinator.LastHide);
+        Assert.Contains("Hid", page.HideStatus, StringComparison.Ordinal);
+    }
 }

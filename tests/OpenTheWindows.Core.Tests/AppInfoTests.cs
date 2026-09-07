@@ -7,6 +7,7 @@ public sealed class AppInfoTests
     {
         Assert.Equal("Open the Windows", AppInfo.Title);
         Assert.Equal("otw", AppInfo.CliName);
+        Assert.Equal("OpenTheWindows", AppInfo.DataDirectoryName);
     }
 
     [Fact]

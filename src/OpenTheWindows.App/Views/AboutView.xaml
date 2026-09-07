@@ -54,6 +54,15 @@
                      AutomationProperties.AutomationId="About_Homepage" />
         </Grid>
 
+        <TextBlock Text="Updates" FontSize="16" FontWeight="SemiBold" Margin="0,24,0,8" />
+        <TextBlock Text="{Binding UpdateStatus}" TextWrapping="Wrap"
+                   Style="{StaticResource MutedText}"
+                   AutomationProperties.AutomationId="About_UpdateStatus" />
+        <Button Content="Check for updates" Padding="14,5" Margin="0,12,0,0" HorizontalAlignment="Left"
+                Command="{Binding CheckForUpdatesCommand}"
+                ToolTip="Makes one HTTPS request to GitHub Releases. Nothing is sent except the request itself."
+                AutomationProperties.AutomationId="About_CheckUpdate" />
+
         <TextBlock Text="{Binding Disclaimer, Mode=OneTime}"
                    Margin="0,24,0,0"
                    Style="{StaticResource MutedText}"

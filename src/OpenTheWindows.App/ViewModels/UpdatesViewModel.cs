@@ -50,6 +50,15 @@ internal sealed partial class UpdatesViewModel : ObservableObject, IPageViewMode
     [ObservableProperty]
     private int _extendedDays = 90;
 
+    [ObservableProperty]
+    private string _knowledgeBaseId = string.Empty;
+
+    [ObservableProperty]
+    private string _hiddenList = "Not loaded — select “Refresh hidden”.";
+
+    [ObservableProperty]
+    private string _hideStatus = string.Empty;
+
     /// <summary>Creates the page over the update coordinator and the dialog service.</summary>
     public UpdatesViewModel(IUpdateCoordinator coordinator, IDialogService dialog)
     {
@@ -76,6 +85,9 @@ internal sealed partial class UpdatesViewModel : ObservableObject, IPageViewMode
 
     /// <summary>Whether Resume is available (currently paused and controllable).</summary>
     public bool CanResume => IsPaused && CanControl;
+
+    /// <summary>Whether hide/unhide can run (not managed, not busy, KB looks valid).</summary>
+    public bool CanHide => CanControl && Core.Updates.KnowledgeBaseId.Normalize(KnowledgeBaseId) is not null;
 
     /// <summary>Reads and shows the update status. User-initiated only.</summary>
     [RelayCommand]
@@ -125,6 +137,54 @@ internal sealed partial class UpdatesViewModel : ObservableObject, IPageViewMode
         await RunAsync(_coordinator.ResumeAsync).ConfigureAwait(true);
     }
 
+    /// <summary>Reads the hidden-update list from the Windows Update Agent.</summary>
+    [RelayCommand]
+    private async Task RefreshHiddenAsync()
+    {
+        IsBusy = true;
+        try
+        {
+            IReadOnlyList<DiscoveredUpdate> hidden = await _coordinator.ListHiddenAsync().ConfigureAwait(true);
+            HiddenList = hidden.Count == 0
+                ? "No hidden updates."
+                : string.Join(Environment.NewLine, hidden.Select(u => string.Create(CultureInfo.CurrentCulture, $"{string.Join(", ", u.KnowledgeBaseIds)}  {u.Title}")));
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    /// <summary>Hides the typed knowledge-base id.</summary>
+    [RelayCommand(CanExecute = nameof(CanHide))]
+    private async Task HideAsync()
+        => await RunHideAsync(hide: true).ConfigureAwait(true);
+
+    /// <summary>Unhides the typed knowledge-base id.</summary>
+    [RelayCommand(CanExecute = nameof(CanHide))]
+    private async Task UnhideAsync()
+        => await RunHideAsync(hide: false).ConfigureAwait(true);
+
+    private async Task RunHideAsync(bool hide)
+    {
+        IsBusy = true;
+        try
+        {
+            UpdateHideOutcome outcome = hide
+                ? await _coordinator.HideAsync(KnowledgeBaseId).ConfigureAwait(true)
+                : await _coordinator.UnhideAsync(KnowledgeBaseId).ConfigureAwait(true);
+            HideStatus = outcome.Message;
+            if (outcome.Succeeded)
+            {
+                await RefreshHiddenAsync().ConfigureAwait(true);
+            }
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     private async Task RunAsync(Func<Task> operation)
     {
         IsBusy = true;
@@ -152,5 +212,14 @@ internal sealed partial class UpdatesViewModel : ObservableObject, IPageViewMode
         PauseCommand.NotifyCanExecuteChanged();
         ExtendedPauseCommand.NotifyCanExecuteChanged();
         ResumeCommand.NotifyCanExecuteChanged();
+        HideCommand.NotifyCanExecuteChanged();
+        UnhideCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnKnowledgeBaseIdChanged(string value)
+    {
+        OnPropertyChanged(nameof(CanHide));
+        HideCommand.NotifyCanExecuteChanged();
+        UnhideCommand.NotifyCanExecuteChanged();
     }
 }

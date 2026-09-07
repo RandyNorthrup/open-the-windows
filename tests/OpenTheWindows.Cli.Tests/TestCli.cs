@@ -4,6 +4,7 @@ using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Journal;
+using OpenTheWindows.Core.Releases;
 using OpenTheWindows.Core.Updates;
 using OpenTheWindows.TestSupport.Fakes;
 
@@ -26,6 +27,8 @@ internal static class TestCli
         IMachineHealthProbe? health = null,
         Func<ApplyEngine>? createApplyEngine = null,
         Func<UpdateControlService>? createUpdateControl = null,
+        Func<IUpdateHideService>? createUpdateHide = null,
+        Func<IAppReleaseChecker>? createReleaseChecker = null,
         IElevationContext? elevation = null,
         IScheduledTaskInstaller? taskInstaller = null,
         IJournalStore? journalStore = null,
@@ -45,6 +48,8 @@ internal static class TestCli
             () => FakeScanEngine.Create(scanReaders, FakeOperatingSystemInfo.Windows11Pro24H2(), FixedTime),
             createApplyEngine ?? (() => FakeApplyEngine.Create(new FakeMachine()).Engine),
             createUpdateControl ?? (() => FakeUpdateControl.Create(new FakeMachine()).Service),
+            createUpdateHide ?? (() => new FakeUpdateHideService()),
+            createReleaseChecker ?? (() => new FakeAppReleaseChecker()),
             () => scanReaders,
             () => taskInstaller ?? defaultInstaller,
             () => journalStore ?? defaultJournal,

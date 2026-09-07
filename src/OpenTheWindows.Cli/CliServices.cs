@@ -3,6 +3,7 @@ using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Journal;
+using OpenTheWindows.Core.Releases;
 using OpenTheWindows.Core.Updates;
 using OpenTheWindows.Windows;
 using OpenTheWindows.Windows.Readers;
@@ -19,6 +20,8 @@ namespace OpenTheWindows.Cli;
 /// <param name="CreateScanEngine">Builds a scan engine over the real state readers.</param>
 /// <param name="CreateApplyEngine">Builds the transactional apply engine over the real readers, writers and services.</param>
 /// <param name="CreateUpdateControl">Builds the Windows Update guardrail service over the real apply engine and adapters.</param>
+/// <param name="CreateUpdateHide">Builds the per-update hide/unhide service over the Windows Update Agent.</param>
+/// <param name="CreateReleaseChecker">Builds the opt-in GitHub Releases checker.</param>
 /// <param name="CreateRegistryReader">Builds a read-only registry reader (used to read the machine profile policy).</param>
 /// <param name="CreateTaskInstaller">Builds the scheduled-task installer (drift remediation task).</param>
 /// <param name="CreateJournalStore">Builds a journal store (read to compare the last-run OS build against the live one).</param>
@@ -33,6 +36,8 @@ internal sealed record CliServices(
     Func<ScanEngine> CreateScanEngine,
     Func<ApplyEngine> CreateApplyEngine,
     Func<UpdateControlService> CreateUpdateControl,
+    Func<IUpdateHideService> CreateUpdateHide,
+    Func<IAppReleaseChecker> CreateReleaseChecker,
     Func<IRegistryReader> CreateRegistryReader,
     Func<IScheduledTaskInstaller> CreateTaskInstaller,
     Func<IJournalStore> CreateJournalStore,
@@ -50,6 +55,8 @@ internal sealed record CliServices(
             CreateDefaultScanEngine,
             CreateDefaultApplyEngine,
             static () => WindowsUpdateControlFactory.Create(),
+            static () => WindowsUpdateHideFactory.Create(),
+            static () => GitHubAppReleaseChecker.ForProcess(),
             static () => new WindowsRegistryReader(),
             static () => new WindowsScheduledTaskInstaller(),
             static () => new WindowsJournalStore(),
