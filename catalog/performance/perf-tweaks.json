@@ -395,7 +395,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -431,7 +431,13 @@
         "https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/powercfg-command-line-options",
         "https://github.com/farag2/Sophia-Script-for-Windows"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "power",
         "gamer"
@@ -591,7 +597,8 @@
       "managedBy": null,
       "sideEffects": [
         "The Hibernate entry is removed from the power menu; Fast Startup still works.",
-        "On laptops this disables the ability to hibernate on critical battery."
+        "On laptops this disables the ability to hibernate on critical battery.",
+        "On a PC where hibernation is off, this turns it on (with the reduced file), and a revert turns it off again but leaves the reduced file type set."
       ],
       "sources": [
         "https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/powercfg-command-line-options"
@@ -610,7 +617,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -644,7 +651,13 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/powercfg-command-line-options"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "power"
       ]
@@ -899,7 +912,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -935,7 +948,13 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/fsutil-behavior"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "storage",
         "developer",

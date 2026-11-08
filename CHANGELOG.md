@@ -172,7 +172,7 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
-- 171 Draft catalogue entries are now Verified (323 of 458 in all) after an apply, re-read and
+- 178 Draft catalogue entries are now Verified (330 of 458 in all) after an apply, re-read and
   revert of each on Windows 11 Pro 25H2 (build 26200) hardware, with the prior value checked
   after the revert. Entries that failed there stay Draft: three scheduled tasks whose paths
   moved in 25H2, two values Windows' User Choice Protection driver blocks (the taskbar Widgets
@@ -180,8 +180,10 @@ All notable changes to this project are documented here. The format follows
   classic search indexing), the Ultimate Performance plan, whose scheme copy gets a new GUID,
   six UAC and logon policy entries (the lab PC is MDM-enrolled, so they were rightly left
   alone), and two optional-feature removals (WMIC's revert failed; Fax and Scan waited on a
-  pending reboot). Command entries (power, 8.3 names, audit policy) wait for a re-check of the
-  new command revert below.
+  pending reboot). The command entries (power plan, hibernation, 8.3 names, audit policy) were
+  re-checked with the new command revert below, with every audit subcategory, the power scheme,
+  hibernation and the 8.3 setting compared before and after; "reduced hibernation file" stays
+  Draft because on a PC with hibernation off it turns hibernation on.
 - `privacy.defender.never-submit-samples` moved to Paranoid / Advanced risk and now declares a
   conflict with `security.defender.submit-samples-safe`: "never send" also turns off Defender's
   Block at First Sight, which the entry now says plainly.
