@@ -71,4 +71,27 @@ public sealed class WindowsUpdateHideServiceTests
         Assert.False(outcome.Succeeded);
         Assert.Contains("still reports", outcome.Message, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Preview_reports_what_would_change_and_changes_and_audits_nothing()
+    {
+        var agent = new FakeWindowsUpdateAgent();
+        agent.NotInstalled.Add(new DiscoveredUpdate("id-1", "Cumulative 2026-08", ["5063878"], false));
+        agent.Hidden.Add(new DiscoveredUpdate("id-2", "Hidden one", ["5000001"], true));
+        var audit = new FakeAuditSink();
+        var service = new WindowsUpdateHideService(agent, audit, TimeProvider.System);
+
+        UpdateHideOutcome hide = service.Preview("KB5063878", hide: true);
+        UpdateHideOutcome alreadyHidden = service.Preview("KB5000001", hide: true);
+        UpdateHideOutcome unknown = service.Preview("KB1", hide: false);
+
+        Assert.True(hide.Succeeded);
+        Assert.Equal(1, hide.Affected);
+        Assert.Contains("Would hide KB5063878", hide.Message, StringComparison.Ordinal);
+        Assert.Contains("already hidden", alreadyHidden.Message, StringComparison.Ordinal);
+        Assert.Equal(0, alreadyHidden.Affected);
+        Assert.False(unknown.Succeeded);
+        Assert.False(agent.NotInstalled.Single().IsHidden);
+        Assert.False(audit.Has(AuditEventId.UpdateHidden));
+    }
 }

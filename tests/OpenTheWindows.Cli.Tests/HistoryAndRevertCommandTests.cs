@@ -74,4 +74,23 @@ public sealed class HistoryAndRevertCommandTests
         using var document = JsonDocument.Parse(revertOut.ToString());
         Assert.Equal("Completed", document.RootElement.GetProperty("state").GetString());
     }
+
+    [Fact]
+    public void Revert_last_never_picks_a_revert_run()
+    {
+        ApplyHarness harness = FakeApplyEngine.Create(new FakeMachine());
+        string id = CatalogLoader.LoadBuiltIn().Catalog!.Entries.First(e => e.Status == TweakStatus.Verified && e.Scope == Core.Model.Scope.Machine).Id.Value;
+        var (applyRoot, applyOut, applyErr) = Build(harness.Engine);
+        CliTestHost.Invoke(applyRoot, applyOut, applyErr, "apply", "--only", id, "--no-restore-point", "--allow-advanced", "--yes", "--json");
+        var (revertRoot, revertOut, revertErr) = Build(harness.Engine);
+        Assert.Equal(ExitCodes.Success, CliTestHost.Invoke(revertRoot, revertOut, revertErr, "revert", "last"));
+
+        var (againRoot, againOut, againErr) = Build(harness.Engine);
+        int again = CliTestHost.Invoke(againRoot, againOut, againErr, "revert", "last");
+
+        // 'last' is the apply run again (already reverted, so refused), not the revert run (which would re-apply).
+        Assert.Equal(ExitCodes.Error, again);
+        Assert.Contains("already reverted", againOut.ToString() + againErr.ToString(), StringComparison.Ordinal);
+        Assert.Equal(2, harness.Engine.History().Count);
+    }
 }

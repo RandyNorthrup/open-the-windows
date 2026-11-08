@@ -26,6 +26,14 @@ internal static class RevertGuard
                 $"Run {original.RunId} did not finish; the next apply or revert recovers it automatically."), false, requested);
         }
 
+        if (original.RevertOf is { } undone)
+        {
+            // Reverting a revert would re-apply the original run's changes without its plan, gates or
+            // confirmations; that is what apply is for.
+            return (string.Create(CultureInfo.InvariantCulture,
+                $"Run {original.RunId} is itself a revert of run {undone}; reverting it would re-apply those changes. Apply the profile again instead."), false, requested);
+        }
+
         if (force)
         {
             return (null, false, requested);

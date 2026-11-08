@@ -237,4 +237,24 @@ public sealed class UpdatesCommandTests
         using var unhidden = System.Text.Json.JsonDocument.Parse(stdout2.ToString());
         Assert.True(unhidden.RootElement.GetProperty("succeeded").GetBoolean());
     }
+
+    [Fact]
+    public void Hide_and_unhide_what_if_preview_without_elevation()
+    {
+        var hide = new FakeUpdateHideService();
+        (RootCommand root, StringWriter stdout, StringWriter stderr) = CliTestHost.Host(TestCli.Services(
+            Doctor(),
+            _ => CatalogLoader.LoadBuiltIn(),
+            createUpdateHide: () => hide,
+            elevation: new FakeElevationContext(isElevated: false)));
+
+        Assert.Equal(ExitCodes.Success, CliTestHost.Invoke(root, stdout, stderr, "updates", "hide", "--kb", "KB5063878", "--what-if"));
+        Assert.Equal(("KB5063878", true), hide.LastPreview);
+        Assert.Null(hide.LastHide);
+        Assert.Contains("Would hide.", stdout.ToString(), StringComparison.Ordinal);
+
+        Assert.Equal(ExitCodes.Success, CliTestHost.Invoke(root, stdout, stderr, "updates", "unhide", "--kb", "5063878", "--what-if"));
+        Assert.Equal(("5063878", false), hide.LastPreview);
+        Assert.Null(hide.LastUnhide);
+    }
 }

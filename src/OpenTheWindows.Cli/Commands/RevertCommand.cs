@@ -23,7 +23,7 @@ internal static class RevertCommand
         ArgumentNullException.ThrowIfNull(services);
         var runArgument = new Argument<string>("run")
         {
-            Description = "The run id (GUID) to revert, or 'last' for the most recent run (omit with --all).",
+            Description = "The run id (GUID) to revert, or 'last' for the most recent apply run (omit with --all).",
             Arity = ArgumentArity.ZeroOrOne,
         };
         var entry = new Option<string[]>("--entry") { Description = "Revert only this entry of the run (repeatable).", AllowMultipleArgumentsPerToken = false };
@@ -119,19 +119,20 @@ internal static class RevertCommand
     }
 
     /// <summary>
-    /// Resolves the run token: a GUID, or <c>last</c> for the newest run whose journal
-    /// verifies (a damaged or tampered journal is never picked implicitly).
+    /// Resolves the run token: a GUID, or <c>last</c> for the newest apply run (never a revert run,
+    /// which would re-apply what it undid) whose journal verifies (a damaged or tampered journal is
+    /// never picked implicitly).
     /// </summary>
     private static bool TryResolveRun(ApplyEngine engine, string token, out Guid runId, out string error)
     {
         error = string.Empty;
         if (string.Equals(token, "last", StringComparison.OrdinalIgnoreCase))
         {
-            JournalSummary? newest = engine.History().FirstOrDefault(s => s.Integrity == JournalIntegrity.Verified);
+            JournalSummary? newest = engine.History().FirstOrDefault(s => s.Integrity == JournalIntegrity.Verified && s.RevertOf is null);
             if (newest is null)
             {
                 runId = Guid.Empty;
-                error = "No prior runs with a verified journal to revert.";
+                error = "No prior apply runs with a verified journal to revert.";
                 return false;
             }
 

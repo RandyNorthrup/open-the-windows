@@ -28,6 +28,16 @@ public sealed class FakeUpdateHideService : IUpdateHideService
     }
 
     /// <inheritdoc />
+    public UpdateHideOutcome Preview(string knowledgeBaseId, bool hide)
+    {
+        LastPreview = (knowledgeBaseId, hide);
+        return new UpdateHideOutcome(true, KnowledgeBaseId.Normalize(knowledgeBaseId) ?? knowledgeBaseId, 1, hide ? "Would hide." : "Would unhide.");
+    }
+
+    /// <summary>The last preview requested.</summary>
+    public (string KnowledgeBaseId, bool Hide)? LastPreview { get; private set; }
+
+    /// <inheritdoc />
     public UpdateHideOutcome Unhide(string knowledgeBaseId)
     {
         LastUnhide = knowledgeBaseId;

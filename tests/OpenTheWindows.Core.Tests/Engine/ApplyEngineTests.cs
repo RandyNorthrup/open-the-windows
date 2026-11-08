@@ -1146,4 +1146,26 @@ public sealed class ApplyEngineTests
         Assert.False(Exists(machine, "A"));
         Assert.Equal(1, machine.WriteCount);
     }
+
+    [Fact]
+    public void A_revert_run_is_never_reverted_even_with_force()
+    {
+        var machine = new FakeMachine();
+        SeedDword(machine, "A", 0);
+        ApplyHarness h = FakeApplyEngine.Create(machine);
+        ApplyResult applied = h.Engine.Apply([Entry("privacy.test.first", [Reg("A", 1)])], Opts());
+        RevertResult reverted = h.Engine.Revert(applied.RunId, new RevertOptions(false, false));
+        Guid revertRun = Assert.Single(h.Engine.History(), s => s.RevertOf == applied.RunId).RunId;
+
+        RevertResult again = h.Engine.Revert(revertRun, new RevertOptions(false, false));
+        RevertResult forced = h.Engine.Revert(revertRun, new RevertOptions(false, false, Force: true));
+
+        Assert.Equal(RunState.Completed, reverted.State);
+        Assert.All([again, forced], r =>
+        {
+            Assert.Equal(RunState.Failed, r.State);
+            Assert.Contains("itself a revert", Assert.Single(r.Entries).Note, StringComparison.Ordinal);
+        });
+        Assert.Equal(0, ReadDword(machine, "A"));
+    }
 }

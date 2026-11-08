@@ -80,7 +80,7 @@ public sealed class WindowsManagedSettingDetectorTests : IDisposable
 
     private Windows.Security.PolicyOwnershipLedger Ledger() => new(Path.Combine(_root, "state"), guard: null);
 
-    private static Core.Journal.JournalRecord AppliedPolicyRun(Guid runId, string name, int value, Guid? revertOf = null) => new()
+    private static Core.Journal.JournalRecord AppliedPolicyRun(Guid runId, string name, int value, Guid? revertOf = null, int? restored = null) => new()
     {
         RunId = runId,
         StartedAt = DateTimeOffset.UnixEpoch,
@@ -107,7 +107,9 @@ public sealed class WindowsManagedSettingDetectorTests : IDisposable
                             RegistryHive.LocalMachine, PolicyKey, name, RegistryValueType.Dword,
                             System.Text.Json.JsonSerializer.SerializeToElement(value), System.Text.Json.JsonSerializer.SerializeToElement(0),
                             RegistryValueKind.Policy),
-                        Desired = new Core.Journal.JournalActionState(),
+                        Desired = restored is { } prior
+                            ? new Core.Journal.JournalActionState { Exists = true, Type = RegistryValueType.Dword, Data = System.Text.Json.JsonSerializer.SerializeToElement(prior) }
+                            : new Core.Journal.JournalActionState(),
                         Result = Core.Journal.ApplyState.Applied,
                     },
                 ],
@@ -182,5 +184,21 @@ public sealed class WindowsManagedSettingDetectorTests : IDisposable
         File.WriteAllText(Path.Combine(_root, "state", "owned-policies.json"), "{ not json");
 
         Assert.False(Ledger().IsOwned(PolicyKey, "Flag", System.Text.Json.JsonSerializer.SerializeToElement(1)));
+    }
+
+    [Fact]
+    public void A_value_a_revert_wrote_back_through_local_policy_stays_this_products_own()
+    {
+        // The revert restores 0 through Registry.pol; the next apply must not read that as Group Policy.
+        WriteMachinePolicy((PolicyKey, "Flag", 4u, [0, 0, 0, 0]));
+        Windows.Security.PolicyOwnershipLedger ledger = Ledger();
+        var applied = Guid.NewGuid();
+        ledger.Record(AppliedPolicyRun(applied, "Flag", 1));
+        ledger.Record(AppliedPolicyRun(Guid.NewGuid(), "Flag", 1, revertOf: applied, restored: 0));
+
+        var detector = new WindowsManagedSettingDetector(_root, ledger, LiveFlag(0), static () => null);
+
+        Assert.True(ledger.IsOwned(PolicyKey, "Flag", System.Text.Json.JsonSerializer.SerializeToElement(0)));
+        Assert.Equal(ManagedState.NotManaged, detector.Detect(RegistryHive.LocalMachine, PolicyKey, "Flag"));
     }
 }

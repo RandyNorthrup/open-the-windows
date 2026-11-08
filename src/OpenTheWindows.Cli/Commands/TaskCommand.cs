@@ -54,8 +54,10 @@ internal static class TaskCommand
 
     private static Command CreateRemove(CliServices services)
     {
+        var whatIf = new Option<bool>("--what-if") { Description = "Report what would be removed; change nothing (no elevation needed)." };
         var command = new Command("remove", "Remove the remediation task and any per-user logon fallback components.");
-        command.SetAction(parseResult => ExecuteRemove(parseResult, services));
+        command.Options.Add(whatIf);
+        command.SetAction(parseResult => parseResult.GetValue(whatIf) ? PreviewRemove(parseResult, services) : ExecuteRemove(parseResult, services));
         return command;
     }
 
@@ -171,6 +173,22 @@ internal static class TaskCommand
             stdout.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Before that, {note}."));
         }
 
+        return ExitCodes.Success;
+    }
+
+    private static int PreviewRemove(ParseResult parseResult, CliServices services)
+    {
+        if (!CommandSupport.TryBeginSupported(services, parseResult, out TextWriter stdout, out _, out int exitCode))
+        {
+            return exitCode;
+        }
+
+        bool present = services.CreateTaskInstaller().Exists(RemediationTask.TaskPath);
+        int fallbacks = services.CreateActiveSetupRegistrar().Count();
+        stdout.WriteLine(present
+            ? string.Create(CultureInfo.InvariantCulture, $"Would remove task '{RemediationTask.TaskPath}'.")
+            : string.Create(CultureInfo.InvariantCulture, $"No task '{RemediationTask.TaskPath}' to remove."));
+        stdout.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Would remove {fallbacks} per-user logon fallback component(s). Nothing was changed."));
         return ExitCodes.Success;
     }
 

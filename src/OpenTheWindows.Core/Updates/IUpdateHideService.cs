@@ -15,4 +15,10 @@ public interface IUpdateHideService
 
     /// <summary>Clears the hidden flag on every discovered update whose KB list contains <paramref name="knowledgeBaseId"/>.</summary>
     UpdateHideOutcome Unhide(string knowledgeBaseId);
+
+    /// <summary>
+    /// Reports what <see cref="Hide"/> (or <see cref="Unhide"/> when <paramref name="hide"/> is
+    /// false) would change for <paramref name="knowledgeBaseId"/>, changing and auditing nothing.
+    /// </summary>
+    UpdateHideOutcome Preview(string knowledgeBaseId, bool hide);
 }

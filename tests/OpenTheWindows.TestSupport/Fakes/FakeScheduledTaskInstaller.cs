@@ -28,6 +28,9 @@ public sealed class FakeScheduledTaskInstaller : IScheduledTaskInstaller
     }
 
     /// <inheritdoc />
+    public bool Exists(string taskPath) => RemoveResult;
+
+    /// <inheritdoc />
     public bool Remove(string taskPath)
     {
         _removed.Add(taskPath);

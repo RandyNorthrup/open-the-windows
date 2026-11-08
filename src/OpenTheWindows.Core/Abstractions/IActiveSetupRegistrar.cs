@@ -22,4 +22,7 @@ public interface IActiveSetupRegistrar
     /// stops firing. Returns the number of components removed.
     /// </summary>
     int RemoveAll();
+
+    /// <summary>How many of this product's logon fallback components are registered (read-only).</summary>
+    int Count();
 }

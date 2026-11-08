@@ -45,6 +45,14 @@ public sealed class WindowsActiveSetupRegistrar : IActiveSetupRegistrar
     }
 
     /// <inheritdoc />
+    public int Count()
+    {
+        using var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+        using RegistryKey? parent = hklm.OpenSubKey(ActiveSetupFallback.InstalledComponentsKey, writable: false);
+        return parent?.GetSubKeyNames().Count(n => n.StartsWith(ActiveSetupFallback.ComponentKeyPrefix, StringComparison.Ordinal)) ?? 0;
+    }
+
+    /// <inheritdoc />
     public int RemoveAll()
     {
         using var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);

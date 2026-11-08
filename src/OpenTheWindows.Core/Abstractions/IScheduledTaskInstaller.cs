@@ -12,4 +12,7 @@ public interface IScheduledTaskInstaller
 
     /// <summary>Removes the task at <paramref name="taskPath"/>. Returns <see langword="false"/> if it did not exist.</summary>
     bool Remove(string taskPath);
+
+    /// <summary>Whether a task is registered at <paramref name="taskPath"/> (read-only).</summary>
+    bool Exists(string taskPath);
 }

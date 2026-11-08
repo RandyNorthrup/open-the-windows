@@ -80,6 +80,7 @@ public sealed class PolicyOwnershipLedger
                 }
 
                 owned.RemoveAll(v => v.RunId == reverted);
+                owned.AddRange(RestoredPolicies(record));
             }
             else
             {
@@ -99,6 +100,25 @@ public sealed class PolicyOwnershipLedger
             .OfType<RegistryAction>()
             .Where(r => r.Hive == RegistryHive.LocalMachine && r.ValueKind == RegistryValueKind.Policy)
             .Select(r => new OwnedPolicyValue(record.RunId, r.Path, r.Name, r.Value.Clone()));
+
+    /// <summary>
+    /// The policy values a revert wrote back. A revert restores a policy value's prior state through
+    /// the Local Group Policy store, because taking it out makes Group Policy delete the live value, so
+    /// the restored value belongs to this product too. Without owning it, the next apply would read it
+    /// as organisation policy and refuse.
+    /// </summary>
+    private static IEnumerable<OwnedPolicyValue> RestoredPolicies(JournalRecord record)
+        => record.Entries.SelectMany(e => e.Actions).Select(a => Restored(record.RunId, a)).OfType<OwnedPolicyValue>();
+
+    private static OwnedPolicyValue? Restored(Guid runId, JournalAction action)
+        => action is
+        {
+            Result: ApplyState.Applied,
+            Action: RegistryAction { Hive: RegistryHive.LocalMachine, ValueKind: RegistryValueKind.Policy } registry,
+            Desired: { Exists: true, Data: { } restored },
+        }
+            ? new OwnedPolicyValue(runId, registry.Path, registry.Name, restored.Clone())
+            : null;
 
     private static bool Matches(OwnedPolicyValue value, string path, string name)
         => string.Equals(value.Path, path, StringComparison.OrdinalIgnoreCase) && string.Equals(value.Name, name, StringComparison.OrdinalIgnoreCase);

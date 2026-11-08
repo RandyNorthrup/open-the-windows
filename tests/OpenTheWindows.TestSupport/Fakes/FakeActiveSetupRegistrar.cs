@@ -40,6 +40,9 @@ public sealed class FakeActiveSetupRegistrar : IActiveSetupRegistrar
     }
 
     /// <inheritdoc />
+    public int Count() => _registered.Count;
+
+    /// <inheritdoc />
     public int RemoveAll()
     {
         RemoveAllCalls++;

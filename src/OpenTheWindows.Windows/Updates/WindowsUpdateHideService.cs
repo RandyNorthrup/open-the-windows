@@ -37,7 +37,10 @@ internal sealed class WindowsUpdateHideService : IUpdateHideService
     /// <inheritdoc />
     public UpdateHideOutcome Unhide(string knowledgeBaseId) => SetHidden(knowledgeBaseId, hidden: false);
 
-    private UpdateHideOutcome SetHidden(string knowledgeBaseId, bool hidden)
+    /// <inheritdoc />
+    public UpdateHideOutcome Preview(string knowledgeBaseId, bool hide) => SetHidden(knowledgeBaseId, hide, whatIf: true);
+
+    private UpdateHideOutcome SetHidden(string knowledgeBaseId, bool hidden, bool whatIf = false)
     {
         string? normalized = KnowledgeBaseId.Normalize(knowledgeBaseId);
         if (normalized is null)
@@ -56,6 +59,12 @@ internal sealed class WindowsUpdateHideService : IUpdateHideService
                     $"Windows Update Agent has not discovered {KnowledgeBaseId.Format(normalized)}. Search for updates, then retry."));
         }
 
+        return whatIf ? Previewed(normalized, matches, hidden) : Change(normalized, matches, hidden);
+    }
+
+    // Audits, flips each update not already in the requested state, then re-reads to verify.
+    private UpdateHideOutcome Change(string normalized, List<DiscoveredUpdate> matches, bool hidden)
+    {
         string gerund = hidden ? "Hiding" : "Unhiding";
         _audit.Write(new AuditEvent(
             hidden ? AuditEventId.UpdateHidden : AuditEventId.UpdateUnhidden,
@@ -94,6 +103,21 @@ internal sealed class WindowsUpdateHideService : IUpdateHideService
 
         string verb = hidden ? "Hid" : "Unhid";
         return new UpdateHideOutcome(true, normalized, affected, string.Create(CultureInfo.InvariantCulture, $"{verb} {formatted} ({affected} update(s))."));
+    }
+
+    private static UpdateHideOutcome Previewed(string normalized, List<DiscoveredUpdate> matches, bool hidden)
+    {
+        string formatted = KnowledgeBaseId.Format(normalized);
+        int wouldChange = matches.Count(m => m.IsHidden != hidden);
+        if (wouldChange == 0)
+        {
+            string already = hidden ? "hidden" : "visible";
+            return new UpdateHideOutcome(true, normalized, 0, string.Create(CultureInfo.InvariantCulture, $"{formatted} is already {already}; nothing would change."));
+        }
+
+        string verb = hidden ? "hide" : "unhide";
+        return new UpdateHideOutcome(true, normalized, wouldChange,
+            string.Create(CultureInfo.InvariantCulture, $"Would {verb} {formatted} ({wouldChange} update(s)); nothing was changed."));
     }
 
     private IEnumerable<DiscoveredUpdate> Find(string normalized)

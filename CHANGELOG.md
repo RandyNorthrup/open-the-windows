@@ -26,8 +26,10 @@ All notable changes to this project are documented here. The format follows
   and `catroot2` are renamed aside with a timestamp (never deleted), the services are started
   again, and the run is audited as Event 4005.
 - `otw updates status --json`, `updates hide|unhide --json` and `eventlog status --json`.
-- `otw task install --what-if` shows the task that would be registered (path, trigger, account
-  and command line) without registering it or needing elevation.
+- `--what-if` for `otw task install` (the task it would register: path, trigger, account and
+  command line), `otw task remove` (whether the task and how many logon fallbacks would go) and
+  `otw updates hide|unhide` (how many discovered updates would change); none of them changes
+  anything or needs elevation.
 - `otw revert --entry <id>` reverts one entry of a run; `otw revert --all` undoes every change
   the tool has made, newest first, skipping runs already reverted.
 - `otw profile capture --out <file>`: writes a profile of the catalogue settings this PC
@@ -159,6 +161,12 @@ All notable changes to this project are documented here. The format follows
   turned hibernation on where it had been off), the prior 8.3 name setting and the prior active
   power scheme. The state is captured before the command runs and journaled; journals written
   before this keep the fixed revert.
+- A revert run is never itself reverted (that re-applied the original change without its plan
+  or confirmations), and `otw revert last` now means the newest *apply* run. Before, `last` after
+  a revert picked the revert run and put the change back.
+- A policy value a revert writes back through Local Group Policy is recorded as this product's,
+  so applying the same entry again works; before, the restored value read as organisation
+  policy and every later apply of that entry was refused as managed.
 - `apply --only` with an entry that does not apply to this edition no longer applies its
   dependencies on its behalf (Credential Guard on Pro applied virtualization-based security).
 - A rollback or revert of a change that never happened (the write was refused, for example on a
@@ -171,15 +179,16 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
-- 178 Draft catalogue entries are now Verified (330 of 458 in all) after an apply, re-read and
+- 184 Draft catalogue entries are now Verified (336 of 458 in all) after an apply, re-read and
   revert of each on Windows 11 Pro 25H2 (build 26200) hardware, with the prior value checked
   after the revert. Entries that failed there stay Draft: three scheduled tasks whose paths
   moved in 25H2, two values Windows' User Choice Protection driver blocks (the taskbar Widgets
   button and its policy), two keys administrators cannot write (Teams chat auto-install,
   classic search indexing), the Ultimate Performance plan, whose scheme copy gets a new GUID,
-  six UAC and logon policy entries (the lab PC is MDM-enrolled, so they were rightly left
-  alone), and two optional-feature removals (WMIC's revert failed; Fax and Scan waited on a
-  pending reboot). The command entries (power plan, hibernation, 8.3 names, audit policy) were
+  and two optional-feature removals (WMIC's revert failed; Fax and Scan waited on a pending
+  reboot). The six UAC and logon policy entries were verified once the lab PC was taken out of
+  MDM, with apply and revert repeated twice and each value checked after a forced Group Policy
+  refresh. The command entries (power plan, hibernation, 8.3 names, audit policy) were
   re-checked with the new command revert below, with every audit subcategory, the power scheme,
   hibernation and the 8.3 setting compared before and after; "reduced hibernation file" stays
   Draft because on a PC with hibernation off it turns hibernation on.

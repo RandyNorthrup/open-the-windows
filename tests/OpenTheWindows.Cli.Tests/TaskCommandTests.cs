@@ -270,4 +270,26 @@ public sealed class TaskCommandTests
         Assert.Empty(installer.Installed);
         Assert.Contains("Would install task", stdout.ToString(), StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Remove_what_if_reports_without_removing_or_needing_elevation()
+    {
+        var installer = new FakeScheduledTaskInstaller();
+        var registrar = new FakeActiveSetupRegistrar();
+        registrar.Register(ActiveSetupFallback.For("enterprise-workstation", "OTW Enterprise", @"C:\otw.exe"));
+        var (root, stdout, stderr) = TestCli.ApplyHost(elevated: false, taskInstaller: installer, activeSetupRegistrar: registrar);
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "task", "remove", "--what-if");
+
+        Assert.Equal(ExitCodes.Success, code);
+        Assert.Empty(installer.Removed);
+        Assert.Equal(0, registrar.RemoveAllCalls);
+        Assert.Contains($"Would remove task '{RemediationTask.TaskPath}'.", stdout.ToString(), StringComparison.Ordinal);
+        Assert.Contains("Would remove 1 per-user logon fallback component(s)", stdout.ToString(), StringComparison.Ordinal);
+
+        installer.RemoveResult = false;
+        var (root2, stdout2, stderr2) = TestCli.ApplyHost(elevated: false, taskInstaller: installer, activeSetupRegistrar: registrar);
+        Assert.Equal(ExitCodes.Success, CliTestHost.Invoke(root2, stdout2, stderr2, "task", "remove", "--what-if"));
+        Assert.Contains("No task", stdout2.ToString(), StringComparison.Ordinal);
+    }
 }

@@ -39,6 +39,15 @@ public sealed class WindowsScheduledTaskInstaller : IScheduledTaskInstaller
     }
 
     /// <inheritdoc />
+    public bool Exists(string taskPath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(taskPath);
+        using var scheduler = new TaskService();
+        using SchedTask? task = scheduler.GetTask(taskPath);
+        return task is not null;
+    }
+
+    /// <inheritdoc />
     public bool Remove(string taskPath)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(taskPath);
