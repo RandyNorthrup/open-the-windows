@@ -65,7 +65,9 @@ public sealed class ActionApplier
             DefenderPreferenceAction d => CaptureDefender(d),
             PowerSettingAction p => CapturePower(p),
             SecurityPolicyAction s => CaptureSecurityPolicy(s),
-            CommandAction => null,
+            CommandAction c => CommandStates.Capture(c, _readers.Registry, _writers.Commands) is { } state
+                ? new JournalActionState { CommandState = state }
+                : null,
             _ => null,
         };
     }
@@ -224,7 +226,8 @@ public sealed class ActionApplier
             SecurityPolicyAction s => prior?.SecurityValue is not { } value || string.Equals(_readers.SecurityPolicy.Read(s.Section, s.Setting), value, StringComparison.Ordinal),
             // Appx reprovision cannot be verified by a subsequent read (staging is asynchronous); trust the writer.
             AppxAction => true,
-            CommandAction => true,
+            CommandAction c => prior?.CommandState is not { } state
+                || string.Equals(CommandStates.Capture(c, _readers.Registry, _writers.Commands), state, StringComparison.Ordinal),
             _ => false,
         };
     }
@@ -296,7 +299,7 @@ public sealed class ActionApplier
                 _writers.SecurityPolicy.Configure(s.Section, s.Setting, value);
                 break;
             case CommandAction c:
-                RunCommand(c, c.RevertArguments);
+                RestoreCommand(c, prior);
                 break;
             default:
                 // Nothing revertible (e.g. a service/task whose prior did not exist); leave as-is.
@@ -370,12 +373,32 @@ public sealed class ActionApplier
         }
     }
 
+    // A captured state is put back exactly; without one (an older journal, or a state that could not
+    // be read) the entry's declared revert arguments run, as before.
+    private void RestoreCommand(CommandAction action, JournalActionState? prior)
+    {
+        if (prior?.CommandState is { } state && CommandStates.RestoreCommands(action, state) is { } commands)
+        {
+            foreach (IReadOnlyList<string> arguments in commands)
+            {
+                RunCommand(action, arguments);
+            }
+
+            return;
+        }
+
+        RunCommand(action, action.RevertArguments);
+    }
+
     private JournalActionState CaptureRegistry(RegistryAction action, string? userSid)
     {
         RegistryValueSnapshot snapshot = _readers.Registry.Read(action.Hive, HiveSid(action.Hive, userSid), action.Path, action.Name);
+        bool? inLocalPolicy = action is { ValueKind: RegistryValueKind.Policy, Hive: RegistryHive.LocalMachine }
+            ? _readers.Registry.IsInLocalPolicy(action.Path, action.Name)
+            : null;
         return snapshot is { Exists: true }
-            ? new JournalActionState { Exists = true, Type = snapshot.Type, Data = snapshot.Data }
-            : new JournalActionState { Exists = false };
+            ? new JournalActionState { Exists = true, Type = snapshot.Type, Data = snapshot.Data, InLocalPolicy = inLocalPolicy }
+            : new JournalActionState { Exists = false, InLocalPolicy = inLocalPolicy };
     }
 
     private JournalActionState CaptureService(ServiceAction action)
@@ -491,13 +514,22 @@ public sealed class ActionApplier
     private void RestoreRegistry(RegistryAction action, JournalActionState? prior, string? userSid)
     {
         string? sid = HiveSid(action.Hive, userSid);
-        if (prior is { Exists: true, Type: { } type, Data: { } data })
-        {
-            _writers.Registry.Write(action.Hive, sid, action.Path, action.Name, type, data, action.ValueKind);
-        }
-        else
+        if (prior is not { Exists: true, Type: { } type, Data: { } data, InLocalPolicy: var inLocalPolicy })
         {
             _writers.Registry.Delete(action.Hive, sid, action.Path, action.Name, action.ValueKind);
+            return;
         }
+
+        if (inLocalPolicy == false)
+        {
+            // The value was set outside policy (Windows' own default, say): take this product's entry out
+            // of the Local Group Policy store, then put the live value back directly, so the store is left
+            // as it was found instead of now "configuring" the old value.
+            _writers.Registry.Delete(action.Hive, sid, action.Path, action.Name, action.ValueKind);
+            _writers.Registry.Write(action.Hive, sid, action.Path, action.Name, type, data, RegistryValueKind.Preference);
+            return;
+        }
+
+        _writers.Registry.Write(action.Hive, sid, action.Path, action.Name, type, data, action.ValueKind);
     }
 }

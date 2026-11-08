@@ -1,7 +1,6 @@
 using System.Runtime.Versioning;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
-using OpenTheWindows.Core.Policy;
 
 namespace OpenTheWindows.Windows.Readers;
 
@@ -109,40 +108,9 @@ public sealed class WindowsManagedSettingDetector : IManagedSettingDetector
             || path.Contains(PoliciesSegment, StringComparison.OrdinalIgnoreCase);
 
     private static bool OwnedByPolicy(string policyPath, string path, string name)
-    {
-        byte[] bytes;
-        try
-        {
-            if (!File.Exists(policyPath))
-            {
-                return false;
-            }
-
-            bytes = File.ReadAllBytes(policyPath);
-        }
-        catch (IOException)
-        {
-            return false;
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return false;
-        }
-
-        IReadOnlyList<PolicyRegistryEntry> entries;
-        try
-        {
-            entries = PolicyRegistryFile.Parse(bytes);
-        }
-        catch (FormatException)
-        {
-            return false;
-        }
-
-        return entries.Any(entry =>
+        => LocalPolicyFile.Entries(policyPath)?.Any(entry =>
             string.Equals(entry.Key, path, StringComparison.OrdinalIgnoreCase)
-            && IsValueMatch(entry.ValueName, name));
-    }
+            && IsValueMatch(entry.ValueName, name)) == true;
 
     private static bool IsValueMatch(string entryValueName, string name)
     {

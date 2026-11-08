@@ -20,6 +20,7 @@ public sealed class FakeMachine :
     IOptionalFeatureWriter, IDefenderPreferenceWriter, IPowerSettingWriter, ICommandRunner,
     ISecurityPolicyWriter
 {
+    private readonly HashSet<string> _localPolicy = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, (RegistryValueType Type, JsonElement Data)> _registry = new(StringComparer.Ordinal);
     private readonly HashSet<string> _uncapturable = new(StringComparer.Ordinal);
     private readonly Dictionary<string, ServiceSnapshot> _services = new(StringComparer.OrdinalIgnoreCase);
@@ -36,6 +37,22 @@ public sealed class FakeMachine :
 
     /// <summary>Exit code the command runner returns.</summary>
     public int CommandExitCode { get; set; }
+
+    /// <summary>
+    /// Whether the machine has a Local Group Policy store. When set, machine policy writes are
+    /// recorded in it (and deletes remove them) and <see cref="IRegistryReader.IsInLocalPolicy"/>
+    /// answers from it; when not, it reports "unknown", as on Windows Home.
+    /// </summary>
+    public bool LocalPolicyAvailable { get; set; }
+
+    /// <summary>Whether the Local Group Policy store sets a machine value.</summary>
+    public bool InLocalPolicy(string path, string name) => _localPolicy.Contains(PolicyKey(path, name));
+
+    /// <summary>Seeds the Local Group Policy store with a machine value.</summary>
+    public void SetLocalPolicy(string path, string name) => _localPolicy.Add(PolicyKey(path, name));
+
+    /// <summary>The standard output a command returns, by executable and arguments (empty when unset).</summary>
+    public Func<string, IReadOnlyList<string>, string>? CommandOutput { get; set; }
 
     /// <summary>The interactive user the resolver returns.</summary>
     public InteractiveUser? User { get; set; }
@@ -92,6 +109,9 @@ public sealed class FakeMachine :
 
     // ---- Readers ----------------------------------------------------------
 
+    bool? IRegistryReader.IsInLocalPolicy(string path, string name)
+        => LocalPolicyAvailable ? _localPolicy.Contains(PolicyKey(path, name)) : null;
+
     RegistryValueSnapshot IRegistryReader.Read(RegistryHive hive, string? userSid, string path, string name)
     {
         string key = RegistryKey(hive, userSid, path, name);
@@ -138,12 +158,21 @@ public sealed class FakeMachine :
         {
             _registry[RegistryKey(hive, userSid, path, name)] = (type, data.Clone());
         }
+
+        if (LocalPolicyAvailable && kind == RegistryValueKind.Policy && hive == RegistryHive.LocalMachine)
+        {
+            _localPolicy.Add(PolicyKey(path, name));
+        }
     }
 
     void IRegistryWriter.Delete(RegistryHive hive, string? userSid, string path, string name, RegistryValueKind kind)
     {
         Mutate(string.Create(CultureInfo.InvariantCulture, $"registry-delete:{hive}:{path}:{name}"));
         _registry.Remove(RegistryKey(hive, userSid, path, name));
+        if (kind == RegistryValueKind.Policy && hive == RegistryHive.LocalMachine)
+        {
+            _localPolicy.Remove(PolicyKey(path, name));
+        }
     }
 
     void IServiceWriter.SetStartType(string name, ServiceStartType startType)
@@ -213,7 +242,7 @@ public sealed class FakeMachine :
     {
         Mutate(string.Create(CultureInfo.InvariantCulture, $"command:{executable}"));
         Commands.Add((executable, args));
-        return new CommandResult(CommandExitCode, string.Empty, string.Empty, TimedOut: false);
+        return new CommandResult(CommandExitCode, CommandOutput?.Invoke(executable, args) ?? string.Empty, string.Empty, TimedOut: false);
     }
 
     void ISecurityPolicyWriter.Configure(SecurityPolicySection section, string setting, string value)
@@ -234,6 +263,9 @@ public sealed class FakeMachine :
 
     private static string RegistryKey(RegistryHive hive, string? sid, string path, string name)
         => string.Create(CultureInfo.InvariantCulture, $"{hive}|{sid ?? string.Empty}|{path}|{name}");
+
+    private static string PolicyKey(string path, string name)
+        => string.Create(CultureInfo.InvariantCulture, $"{path}|{name}");
 
     private static string ManagedKey(RegistryHive hive, string path, string name)
         => string.Create(CultureInfo.InvariantCulture, $"{hive}|{path}|{name}");

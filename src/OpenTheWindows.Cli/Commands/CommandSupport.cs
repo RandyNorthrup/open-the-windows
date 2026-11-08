@@ -152,7 +152,7 @@ internal static class CommandSupport
                 return false;
             }
 
-            entries = WithDependencies(catalog, entry);
+            entries = WithDependencies(catalog, entry, facts);
             label = string.Create(CultureInfo.InvariantCulture, $"only:{onlyId}");
             return true;
         }
@@ -177,14 +177,21 @@ internal static class CommandSupport
 
     /// <summary>
     /// <paramref name="entry"/> preceded by every entry it (transitively) depends on, in
-    /// catalogue order, so a single-entry run satisfies its own requirements.
+    /// catalogue order, so a single-entry run satisfies its own requirements. An entry that does
+    /// not apply to this edition or build brings in nothing: it will be reported not applicable,
+    /// and its dependencies must not be applied on its behalf.
     /// </summary>
-    private static List<TweakDefinition> WithDependencies(TweakCatalog catalog, TweakDefinition entry)
+    private static List<TweakDefinition> WithDependencies(TweakCatalog catalog, TweakDefinition entry, OperatingSystemFacts facts)
     {
         HashSet<TweakId> needed = [entry.Id];
         Queue<TweakDefinition> pending = new([entry]);
         while (pending.TryDequeue(out TweakDefinition? current))
         {
+            if (!current.AppliesTo.Matches(facts))
+            {
+                continue;
+            }
+
             foreach (TweakDefinition dependency in catalog.Entries.Where(e => current.DependsOn.Contains(e.Id) && needed.Add(e.Id)))
             {
                 pending.Enqueue(dependency);

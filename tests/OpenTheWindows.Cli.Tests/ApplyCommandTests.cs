@@ -78,6 +78,23 @@ public sealed class ApplyCommandTests
     }
 
     [Fact]
+    public void Only_an_entry_that_does_not_apply_here_brings_in_none_of_its_dependencies()
+    {
+        // Credential Guard is Enterprise/Education only; on Pro its VBS dependency must not be applied for it.
+        var (root, stdout, stderr) = Build(engine: FakeApplyEngine.Create(new FakeMachine()).Engine);
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "apply", "--only", "security.credentials.credential-guard", "--what-if", "--json");
+
+        Assert.Equal(ExitCodes.Success, code);
+        using var document = JsonDocument.Parse(stdout.ToString());
+        JsonElement entries = document.RootElement.GetProperty("entries");
+        Assert.Equal(1, entries.GetArrayLength());
+        JsonElement entry = entries[0];
+        Assert.Equal("security.credentials.credential-guard", entry.GetProperty("id").GetString());
+        Assert.Equal("NotApplicable", entry.GetProperty("result").GetString());
+    }
+
+    [Fact]
     public void Neither_profile_nor_only_reports_profile_required()
     {
         var (root, stdout, stderr) = Build();

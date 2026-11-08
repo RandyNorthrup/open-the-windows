@@ -46,4 +46,17 @@ public sealed record JournalActionState
 
     /// <summary>Security policy: the setting's value (from the <c>secedit</c> export).</summary>
     public string? SecurityValue { get; init; }
+
+    /// <summary>
+    /// The state a catalogue command changes, captured before it ran (see the command-state
+    /// encodings in the engine), so a revert restores it exactly; absent in journals written
+    /// before it was recorded, which revert with the entry's declared revert arguments.
+    /// </summary>
+    public string? CommandState { get; init; }
+
+    /// <summary>
+    /// Policy registry values: whether the Local Group Policy store set the value before the run
+    /// (absent when unknown, and for preference values).
+    /// </summary>
+    public bool? InLocalPolicy { get; init; }
 }

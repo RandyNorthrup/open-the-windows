@@ -1146,4 +1146,37 @@ public sealed class ApplyEngineTests
         Assert.False(Exists(machine, "A"));
         Assert.Equal(1, machine.WriteCount);
     }
+
+    [Fact]
+    public void Reverting_a_policy_value_windows_had_set_directly_leaves_the_local_policy_store_as_it_was()
+    {
+        // ConsentPromptBehaviorAdmin-style: Windows writes the value itself; nothing in Registry.pol.
+        var machine = new FakeMachine { LocalPolicyAvailable = true };
+        SeedDword(machine, "UacLike", 5);
+        ApplyHarness h = FakeApplyEngine.Create(machine);
+
+        ApplyResult applied = h.Engine.Apply([Entry("security.test.policy", [Reg("UacLike", 2, RegistryValueKind.Policy)])], Opts());
+        Assert.True(machine.InLocalPolicy(Path, "UacLike"));
+        RevertResult reverted = h.Engine.Revert(applied.RunId, new RevertOptions(false, false));
+
+        Assert.Equal(RunState.Completed, reverted.State);
+        Assert.Equal(5, ReadDword(machine, "UacLike"));
+        Assert.False(machine.InLocalPolicy(Path, "UacLike"));
+    }
+
+    [Fact]
+    public void Reverting_a_policy_value_the_local_policy_store_already_set_keeps_it_there()
+    {
+        var machine = new FakeMachine { LocalPolicyAvailable = true };
+        SeedDword(machine, "Configured", 1);
+        machine.SetLocalPolicy(Path, "Configured");
+        ApplyHarness h = FakeApplyEngine.Create(machine);
+
+        ApplyResult applied = h.Engine.Apply([Entry("security.test.policy", [Reg("Configured", 0, RegistryValueKind.Policy)])], Opts());
+        h.Engine.Revert(applied.RunId, new RevertOptions(false, false));
+
+        Assert.Equal(1, ReadDword(machine, "Configured"));
+        Assert.True(machine.InLocalPolicy(Path, "Configured"));
+        Assert.True(h.Journal.Load(applied.RunId).Entries[0].Actions[0].Prior!.InLocalPolicy);
+    }
 }
