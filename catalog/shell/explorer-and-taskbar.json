@@ -47,7 +47,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -72,7 +72,9 @@
       "sources": [
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-newsandinterests"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["taskbar", "widgets", "ads"]
     },
     {

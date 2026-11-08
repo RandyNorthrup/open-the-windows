@@ -52,52 +52,6 @@
         "debloat",
         "oem"
       ]
-    },
-    {
-      "id": "debloat.components.disable-teams-chat-autoinstall",
-      "title": "Stop auto-install of consumer Teams (Chat)",
-      "description": "Sets ConfigureChatAutoInstall to 0 so Windows does not automatically install the consumer Teams/Chat app.",
-      "rationale": "Prevents the Chat app from returning after it is removed. The value name is used widely by community debloat tools but is not documented by Microsoft, so it is marked unverified.",
-      "category": "Debloat",
-      "level": "Basic",
-      "risk": "Safe",
-      "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": {
-        "editions": [],
-        "minBuild": null,
-        "maxBuild": null,
-        "architectures": []
-      },
-      "actions": [
-        {
-          "kind": "Registry",
-          "hive": "LocalMachine",
-          "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Communications",
-          "name": "ConfigureChatAutoInstall",
-          "type": "Dword",
-          "value": 0,
-          "default": null,
-          "valueKind": "Preference"
-        }
-      ],
-      "requires": "None",
-      "dependsOn": [],
-      "conflictsWith": [],
-      "managedBy": null,
-      "sideEffects": [
-        "The value name is documented by community debloat tools (winutil, Raphire) and is not part of official Microsoft documentation."
-      ],
-      "sources": [
-        "https://github.com/ChrisTitusTech/winutil",
-        "https://github.com/Raphire/Win11Debloat"
-      ],
-      "verifiedOn": [],
-      "tags": [
-        "debloat",
-        "teams",
-        "unverified-ms"
-      ]
     }
   ]
 }

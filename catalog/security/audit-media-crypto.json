@@ -1263,7 +1263,7 @@
       "level": "Paranoid",
       "risk": "Breaking",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -1308,7 +1308,13 @@
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
         "https://github.com/scipag/HardeningKitty"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-08"
+        }
+      ],
       "tags": [
         "media",
         "removable-media",
@@ -1325,7 +1331,7 @@
       "level": "Paranoid",
       "risk": "Breaking",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -1361,7 +1367,13 @@
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
         "https://github.com/scipag/HardeningKitty"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-08"
+        }
+      ],
       "tags": [
         "media",
         "removable-media",
@@ -1378,7 +1390,7 @@
       "level": "Strict",
       "risk": "Breaking",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -1425,7 +1437,13 @@
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-08"
+        }
+      ],
       "tags": [
         "media",
         "removable-media",
@@ -1443,7 +1461,7 @@
       "level": "Paranoid",
       "risk": "Breaking",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -1526,7 +1544,13 @@
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
         "https://github.com/scipag/HardeningKitty"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-08"
+        }
+      ],
       "tags": [
         "media",
         "dma",
@@ -1599,7 +1623,7 @@
       "level": "Strict",
       "risk": "Breaking",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -1632,7 +1656,13 @@
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10",
         "https://github.com/scipag/HardeningKitty"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-08"
+        }
+      ],
       "tags": [
         "media",
         "dma",

@@ -19,7 +19,7 @@ Free, open-source (MIT), enterprise-grade Windows 11 control panel for
 reversibility, drift detection and remediation, and an audit trail. GUI
 (WPF) and CLI (`otw.exe`) over one shared engine.
 
-> The catalogue ships **458 entries** across privacy, Windows Update, security,
+> The catalogue ships **455 entries** across privacy, Windows Update, security,
 > performance, debloat and shell; the CLI and GUI scan, apply, revert and inspect
 > history, audit against security baselines (STIG/CIS/Microsoft), and pause/resume
 > Windows Update. Entries confirmed on Windows 11 25H2 are marked `Verified`; the

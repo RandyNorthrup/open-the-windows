@@ -1321,54 +1321,6 @@
         "spotlight",
         "lockscreen"
       ]
-    },
-    {
-      "id": "privacy.widgets.hide-taskbar-button",
-      "title": "Hide the Widgets taskbar button",
-      "description": "Turns off just the Widgets button on the taskbar without removing the Widgets platform.",
-      "rationale": "A lightweight, per-user way to hide the Widgets entry point while leaving the platform installed.",
-      "category": "Privacy",
-      "level": "Basic",
-      "risk": "Safe",
-      "scope": "User",
-      "status": "Draft",
-      "appliesTo": {
-        "editions": [],
-        "minBuild": null,
-        "maxBuild": null,
-        "architectures": []
-      },
-      "actions": [
-        {
-          "kind": "Registry",
-          "hive": "User",
-          "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
-          "name": "TaskbarDa",
-          "type": "Dword",
-          "value": 0,
-          "default": 1,
-          "valueKind": "Preference"
-        }
-      ],
-      "requires": "ExplorerRestart",
-      "dependsOn": [],
-      "conflictsWith": [],
-      "managedBy": {
-        "policyCsp": null,
-        "groupPolicyPath": null
-      },
-      "sideEffects": [
-        "On Windows 11 24H2 this value is protected by the UCPD driver and a standard write may be reverted by Windows.",
-        "Microsoft documents the behaviour but not this exact registry value; community-verified (privacy.sexy / Sophia / winutil)."
-      ],
-      "sources": [
-        "https://github.com/farag2/Sophia-Script-for-Windows"
-      ],
-      "verifiedOn": [],
-      "tags": [
-        "widgets",
-        "unverified-ms"
-      ]
     }
   ]
 }

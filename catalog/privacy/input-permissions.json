@@ -10,7 +10,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -44,7 +44,13 @@
         "https://github.com/undergroundwires/privacy.sexy",
         "https://github.com/Raphire/Win11Debloat"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "input",
         "typing",

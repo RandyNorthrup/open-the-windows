@@ -452,7 +452,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -501,7 +501,13 @@
         "https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/powercfg-command-line-options",
         "https://github.com/ChrisTitusTech/winutil"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-08"
+        }
+      ],
       "tags": [
         "power",
         "gamer"
@@ -567,7 +573,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -604,7 +610,13 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/powercfg-command-line-options"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-08"
+        }
+      ],
       "tags": [
         "power"
       ]
@@ -713,7 +725,7 @@
       "level": "Strict",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -739,7 +751,13 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/powercfg-command-line-options"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "power"
       ]
@@ -817,7 +835,7 @@
       "level": "Strict",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -850,58 +868,17 @@
         "https://github.com/ChrisTitusTech/winutil",
         "https://github.com/farag2/Sophia-Script-for-Windows"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "storage",
         "developer",
         "unverified-ms"
-      ]
-    },
-    {
-      "id": "performance.storage.classic-search-indexing",
-      "title": "Use Classic Windows Search indexing scope",
-      "description": "Sets EnableFindMyFiles to 0 so Windows Search uses the default Classic scope instead of Enhanced whole-drive indexing.",
-      "rationale": "Enhanced ('Find my files') mode indexes entire drives, generating extra background CPU and disk IO. Classic mode indexes only the default locations and is the shipping default; enforcing it removes that indexing load on machines where Enhanced was turned on. The search service itself is left running.",
-      "category": "Performance",
-      "level": "Balanced",
-      "risk": "Safe",
-      "scope": "Machine",
-      "status": "Draft",
-      "appliesTo": {
-        "editions": [],
-        "minBuild": null,
-        "maxBuild": null,
-        "architectures": []
-      },
-      "actions": [
-        {
-          "kind": "Registry",
-          "hive": "LocalMachine",
-          "path": "SOFTWARE\\Microsoft\\Windows Search\\Gather\\Windows\\SystemIndex",
-          "name": "EnableFindMyFiles",
-          "type": "Dword",
-          "value": 0,
-          "default": 0,
-          "valueKind": "Preference"
-        }
-      ],
-      "requires": "None",
-      "dependsOn": [],
-      "conflictsWith": [],
-      "managedBy": {
-        "policyCsp": "Search/AllowFindMyFiles",
-        "groupPolicyPath": null
-      },
-      "sideEffects": [
-        "Whole-drive content search (Enhanced mode) is off; searching still covers the Start menu and indexed library locations."
-      ],
-      "sources": [
-        "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-search"
-      ],
-      "verifiedOn": [],
-      "tags": [
-        "storage",
-        "search"
       ]
     },
     {

@@ -59,7 +59,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -84,7 +84,13 @@
       "sources": [
         "https://learn.microsoft.com/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "telemetry",
         "tasks"

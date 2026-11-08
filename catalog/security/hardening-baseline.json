@@ -10,7 +10,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -43,7 +43,13 @@
         "https://learn.microsoft.com/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-localsecurityauthority"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "credentials",
         "baseline",
@@ -177,7 +183,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -210,7 +216,13 @@
         "https://learn.microsoft.com/windows-server/storage/file-server/enable-insecure-guest-logons-smb2-and-smb3",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-lanmanworkstation"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "smb",
         "baseline"

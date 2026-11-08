@@ -602,7 +602,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -629,7 +629,13 @@
       "sources": [
         "https://github.com/farag2/Sophia-Script-for-Windows"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-08"
+        }
+      ],
       "tags": [
         "start",
         "recommendations"
@@ -788,7 +794,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -815,7 +821,13 @@
       "sources": [
         "https://github.com/farag2/Sophia-Script-for-Windows"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-08"
+        }
+      ],
       "tags": [
         "explorer",
         "selection"

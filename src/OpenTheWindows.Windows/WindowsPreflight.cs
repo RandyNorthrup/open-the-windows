@@ -73,7 +73,14 @@ public sealed partial class WindowsPreflight : IPreflight
     private static bool IsRebootPending()
         => KeyExists(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending")
             || KeyExists(@"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired")
-            || ValueExists(@"SYSTEM\CurrentControlSet\Control\Session Manager", "PendingFileRenameOperations");
+            || PendingFileRenames.RequireReboot(PendingRenameOperations());
+
+    // Session Manager's delete/rename-at-restart queue (REG_MULTI_SZ source/destination pairs).
+    private static string[] PendingRenameOperations()
+    {
+        using RegistryKey? key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\Session Manager", writable: false);
+        return key?.GetValue("PendingFileRenameOperations") as string[] ?? [];
+    }
 
     private static bool IsOobe()
     {
@@ -100,12 +107,6 @@ public sealed partial class WindowsPreflight : IPreflight
     {
         using RegistryKey? key = Registry.LocalMachine.OpenSubKey(path, writable: false);
         return key is not null;
-    }
-
-    private static bool ValueExists(string path, string name)
-    {
-        using RegistryKey? key = Registry.LocalMachine.OpenSubKey(path, writable: false);
-        return key?.GetValue(name) is not null;
     }
 
     [LibraryImport("user32.dll")]

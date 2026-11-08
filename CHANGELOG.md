@@ -128,6 +128,10 @@ All notable changes to this project are documented here. The format follows
 - Machine policies that only Group Policy itself may write (the Widgets policy, guarded by
   Windows' User Choice Protection driver) are applied by asking Group Policy to refresh and
   waiting for the value, instead of failing after the Local GPO write.
+- Files an installer or uninstaller queued for deletion from a temporary folder at the next
+  restart (`PendingFileRenameOperations`) no longer block every apply as "a reboot is pending
+  from earlier servicing". A queued rename, or a deletion outside the Windows, system and user
+  temporary folders, still does.
 - Three scheduled-task entries pointed at paths Windows 11 24H2/25H2 no longer uses:
   `Microsoft Compatibility Appraiser Exp`, `\Microsoft\XblGameSave\XblGameSaveTask` and
   `SpeechModelDownloadTask`.
@@ -221,6 +225,18 @@ All notable changes to this project are documented here. The format follows
 - `privacy.defender.never-submit-samples` moved to Paranoid / Advanced risk and now declares a
   conflict with `security.defender.submit-samples-safe`: "never send" also turns off Defender's
   Block at First Sight, which the entry now says plainly.
+
+### Removed
+
+- Three catalogue entries that cannot work for an administrator on Windows 11 24H2/25H2 without
+  taking ownership of protected keys or getting around a Windows driver, which the product
+  refuses to do: `debloat.components.disable-teams-chat-autoinstall` (the `Communications` key
+  is writable only by TrustedInstaller, and 24H2 no longer has the Chat app it controlled),
+  `performance.storage.classic-search-indexing` (`EnableFindMyFiles` is writable only by
+  SYSTEM and the Windows Search service; Windows has no policy for it) and
+  `privacy.widgets.hide-taskbar-button` (Windows' User Choice Protection driver lets only
+  Microsoft's own processes write `TaskbarDa`; `shell.taskbar.disable-widgets` turns Widgets
+  off through policy instead).
 
 ## [0.2.0] - 2026-09-06
 
