@@ -112,7 +112,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -139,7 +139,13 @@
         "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod",
         "https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-08"
+        }
+      ],
       "tags": [
         "debloat",
         "optional-feature",
@@ -157,7 +163,7 @@
       "level": "Paranoid",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": 26100,
@@ -184,7 +190,13 @@
         "https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features",
         "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-08"
+        }
+      ],
       "tags": [
         "debloat",
         "optional-feature",
@@ -244,7 +256,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -270,7 +282,13 @@
         "https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features",
         "https://github.com/farag2/Sophia-Script-for-Windows"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-08"
+        }
+      ],
       "tags": [
         "debloat",
         "optional-feature",
@@ -307,7 +325,8 @@
       "managedBy": null,
       "sideEffects": [
         "Removing the Internet Explorer 11 capability breaks Edge's IE mode and some legacy line-of-business apps that depend on the IE engine.",
-        "Microsoft lists IE11 under preinstalled capabilities that should normally be kept."
+        "Microsoft lists IE11 under preinstalled capabilities that should normally be kept.",
+        "On Windows 11 25H2 (build 26200) Windows Update does not offer this capability back once it is removed (adding it fails with 0x8000FFFF), so a revert cannot restore it; it then needs Features on Demand installation media."
       ],
       "sources": [
         "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod",
@@ -329,7 +348,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -362,7 +381,13 @@
         "https://github.com/farag2/Sophia-Script-for-Windows",
         "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-08"
+        }
+      ],
       "tags": [
         "debloat",
         "optional-feature",
@@ -379,7 +404,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -404,7 +429,13 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-08"
+        }
+      ],
       "tags": [
         "debloat",
         "optional-feature",
@@ -420,7 +451,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -446,7 +477,13 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-08"
+        }
+      ],
       "tags": [
         "debloat",
         "optional-feature",
@@ -463,7 +500,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -489,7 +526,13 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-08"
+        }
+      ],
       "tags": [
         "debloat",
         "optional-feature",
@@ -554,7 +597,7 @@
       "level": "Strict",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -581,7 +624,13 @@
         "https://learn.microsoft.com/en-us/windows/whats-new/deprecated-features",
         "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-08"
+        }
+      ],
       "tags": [
         "debloat",
         "optional-feature",
@@ -644,7 +693,7 @@
       "level": "Paranoid",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -669,7 +718,13 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/features-on-demand-non-language-fod"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-08"
+        }
+      ],
       "tags": [
         "debloat",
         "optional-feature",
