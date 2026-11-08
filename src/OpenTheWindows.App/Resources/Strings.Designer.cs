@@ -408,15 +408,6 @@ internal class Strings
         }
     }
 
-    /// <summary>Looks up a localized string similar to Include draft entries.</summary>
-    internal static string Category_IncludeDraft
-    {
-        get
-        {
-            return ResourceManager.GetString("Category_IncludeDraft", resourceCulture);
-        }
-    }
-
     /// <summary>Looks up a localized string similar to {0} of {1} selected.</summary>
     internal static string Category_SelectedCount
     {

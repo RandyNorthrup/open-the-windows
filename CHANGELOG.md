@@ -34,6 +34,26 @@ All notable changes to this project are documented here. The format follows
 - `MaxExtendedPauseDays` policy (ADMX): administrators can lower the extended-pause limit from
   365 days down to 35.
 - `otw --help` lists the exit codes; exit code 6 (`Managed`) is new.
+- GUI category pages: **Scan** reads which entries this PC already has and badges each one
+  (In place, Not applied, Managed), with a filter for the ones not applied yet. The level dial
+  now selects what the named profile at that level would (Verified entries, mutually exclusive
+  variants settled); Draft entries stay listed, carry a Draft badge, and can be ticked by hand.
+- GUI History: the selected run's entries, revert of a single entry, **Undo everything**, a
+  "reverted" marker on runs a later revert undid, and a warning on runs whose journal does not
+  verify (they cannot be reverted). A refused revert shows the engine's reason.
+- GUI Updates: hold feature updates at a chosen release and clear the hold, the supervised
+  Windows Update repair (after a confirmation), and an outcome line for every action, including
+  when organisation policy blocked it. The controls stay disabled until the status has been
+  read, so a managed device is never treated as unmanaged.
+- GUI Profiles: **Capture this PC** saves the Verified settings this PC already has as a
+  profile file, like `otw profile capture`.
+- GUI review-and-apply: the plan is built off the UI thread behind a progress bar, and Advanced
+  entries are acknowledged together before applying (Breaking entries still need their id
+  typed).
+- An unexpected GUI fault is written to `%LocalAppData%\OpenTheWindows\gui-errors.log` and shown
+  in a message instead of closing the window.
+- Accessibility: list items announce their content to screen readers, status lines are live
+  regions, and the main buttons have access keys.
 
 ### Security
 
@@ -114,6 +134,10 @@ All notable changes to this project are documented here. The format follows
   run (non-interactive) must pass `--yes` instead of waiting for input.
 - `updates hide`/`unhide` now re-read the Windows Update Agent after the change and report an
   update that did not take the new state.
+- `updates resume` (CLI and GUI) also ends a pause set in the Settings app, which it used to
+  leave in place while reporting that updates were not paused.
+- GUI: reading the update status, previewing a run and loading history no longer block the
+  window, and a fault in any of them is reported on the page instead of crashing the app.
 
 ### Changed
 

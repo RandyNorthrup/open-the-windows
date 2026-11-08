@@ -7,7 +7,7 @@
              xmlns:vm="clr-namespace:OpenTheWindows.App.ViewModels"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:HistoryViewModel}"
-             d:DesignWidth="800"
+             d:DesignWidth="900"
              d:DesignHeight="560">
     <Grid>
         <Grid.RowDefinitions>
@@ -27,58 +27,135 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0"
                        VerticalAlignment="Center"
                        Opacity="0.75"
                        Text="{Binding Status}"
+                       AutomationProperties.LiveSetting="Polite"
                        AutomationProperties.AutomationId="History_Status" />
             <Button Grid.Column="1"
-                    Content="Refresh"
+                    Content="Re_fresh"
                     Padding="14,5"
                     Margin="0,0,8,0"
                     Command="{Binding RefreshCommand}"
                     ToolTip="Reload the list of previous change runs from this PC's journal."
                     AutomationProperties.AutomationId="History_Refresh" />
             <Button Grid.Column="2"
-                    Content="Revert selected"
+                    Content="_Revert run…"
                     Padding="14,5"
+                    Margin="0,0,8,0"
                     Command="{Binding RevertCommand}"
                     ToolTipService.ShowOnDisabled="True"
-                    ToolTip="Undo the selected run — restore the exact values it changed. Select a revertable run first."
+                    ToolTip="Undo the selected run — restore the exact values it changed. Entries an earlier revert already undid are skipped. Select a revertable run first."
                     AutomationProperties.AutomationId="History_Revert" />
+            <Button Grid.Column="3"
+                    Content="_Undo everything…"
+                    Padding="14,5"
+                    Command="{Binding UndoEverythingCommand}"
+                    ToolTipService.ShowOnDisabled="True"
+                    ToolTip="Revert every run this app made that is not already reverted, newest first, restoring this PC to how it was before. You are asked to confirm."
+                    AutomationProperties.AutomationId="History_UndoEverything" />
         </Grid>
 
-        <ListBox Grid.Row="2"
-                 ItemsSource="{Binding Runs}"
-                 SelectedItem="{Binding SelectedRun, Mode=TwoWay}"
-                 HorizontalContentAlignment="Stretch"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                 VirtualizingPanel.IsVirtualizing="True"
-                 VirtualizingPanel.VirtualizationMode="Recycling"
-                 AutomationProperties.Name="Runs"
-                 AutomationProperties.AutomationId="History_List">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Grid Margin="0,4">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="{Binding StartedAtLabel}" FontFamily="Consolas" VerticalAlignment="Center" Margin="0,0,16,0" />
-                        <StackPanel Grid.Column="1">
-                            <TextBlock Text="{Binding Profile}" FontWeight="SemiBold" TextWrapping="Wrap" />
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding ResultLabel}" FontSize="12" Opacity="0.75" />
-                                <TextBlock Text="{Binding EntryCount, StringFormat={}{0} entries}" FontSize="12" Opacity="0.75" Margin="10,0,0,0" />
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.2*" MinWidth="220" />
+                <ColumnDefinition Width="18" />
+                <ColumnDefinition Width="*" MinWidth="220" />
+            </Grid.ColumnDefinitions>
+
+            <ListBox Grid.Column="0"
+                     ItemsSource="{Binding Runs}"
+                     SelectedItem="{Binding SelectedRun, Mode=TwoWay}"
+                     HorizontalContentAlignment="Stretch"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     VirtualizingPanel.IsVirtualizing="True"
+                     VirtualizingPanel.VirtualizationMode="Recycling"
+                     AutomationProperties.Name="Runs"
+                     AutomationProperties.AutomationId="History_List">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding StartedAtLabel}" FontFamily="Consolas" VerticalAlignment="Center" Margin="0,0,16,0" />
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="{Binding Profile}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <WrapPanel>
+                                    <TextBlock Text="{Binding ResultLabel}" FontSize="12" Opacity="0.75" />
+                                    <TextBlock Text="{Binding EntryCount, StringFormat={}{0} entries}" FontSize="12" Opacity="0.75" Margin="10,0,0,0" />
+                                    <TextBlock Text="{Binding IntegrityLabel}" FontSize="12" Margin="10,0,0,0"
+                                               Foreground="{DynamicResource LinkBrush}"
+                                               ToolTip="This run's journal did not verify or could not be read, so it is never replayed."
+                                               Visibility="{Binding IsUntrusted, Converter={StaticResource BoolToVisibility}}" />
+                                </WrapPanel>
                             </StackPanel>
-                        </StackPanel>
-                        <TextBlock Grid.Column="2" Text="revert" FontSize="11" Opacity="0.6" VerticalAlignment="Center"
-                                   Visibility="{Binding IsRevert, Converter={StaticResource BoolToVisibility}}" />
-                    </Grid>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                <TextBlock Text="revert" FontSize="11" Opacity="0.6"
+                                           Visibility="{Binding IsRevert, Converter={StaticResource BoolToVisibility}}" />
+                                <TextBlock Text="reverted" FontSize="11" Opacity="0.6"
+                                           ToolTip="A later revert undid some or all of this run."
+                                           Visibility="{Binding IsReverted, Converter={StaticResource BoolToVisibility}}" />
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <!-- Detail pane: the selected run's entries, with per-entry revert -->
+            <Border Grid.Column="2"
+                    Padding="12"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    BorderBrush="{DynamicResource CardBorderBrush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <DockPanel Grid.Row="0" Margin="0,0,0,8">
+                        <Button DockPanel.Dock="Right"
+                                Content="Revert _entry…"
+                                Padding="12,4"
+                                Command="{Binding RevertEntryCommand}"
+                                ToolTipService.ShowOnDisabled="True"
+                                ToolTip="Undo only the selected entry of the selected run; the rest of the run stays applied. Select an applied entry first."
+                                AutomationProperties.AutomationId="History_RevertEntry" />
+                        <TextBlock Text="Entries in this run" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    </DockPanel>
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding DetailStatus}"
+                               TextWrapping="Wrap"
+                               Opacity="0.75"
+                               Margin="0,0,0,6"
+                               AutomationProperties.AutomationId="History_DetailStatus" />
+                    <ListBox Grid.Row="2"
+                             ItemsSource="{Binding Entries}"
+                             SelectedItem="{Binding SelectedEntry, Mode=TwoWay}"
+                             HorizontalContentAlignment="Stretch"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             AutomationProperties.Name="Entries in the selected run"
+                             AutomationProperties.AutomationId="History_Entries">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="0,3">
+                                    <TextBlock Text="{Binding Id}" TextWrapping="Wrap" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding ResultLabel}" FontSize="12" Opacity="0.75" />
+                                        <TextBlock Text="{Binding RiskLabel}" FontSize="12" Opacity="0.75" Margin="10,0,0,0" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

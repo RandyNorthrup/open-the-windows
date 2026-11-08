@@ -142,9 +142,19 @@ internal static class UpdatesCommand
         }
 
         ResumeOutcome outcome = services.CreateUpdateControl().Resume(whatIf);
+        if (outcome.EndedPause is { } ended)
+        {
+            bool failed = ended.State is RunState.Failed or RunState.RolledBack;
+            string endVerb = whatIf ? "Would end" : "Ended";
+            stdout.WriteLine(failed
+                ? "Resume failed: could not end the pause set in Settings."
+                : string.Create(CultureInfo.InvariantCulture, $"{endVerb} the Windows Update pause set in Settings."));
+            return failed ? ExitCodes.Error : ExitCodes.Success;
+        }
+
         if (!outcome.WasPaused)
         {
-            stdout.WriteLine("Updates are not paused by Open the Windows; nothing to clear.");
+            stdout.WriteLine("Updates are not paused; nothing to clear.");
             stdout.WriteLine(outcome.ScanTriggered ? "Triggered an update scan." : "Update scan not triggered.");
             return ExitCodes.Success;
         }

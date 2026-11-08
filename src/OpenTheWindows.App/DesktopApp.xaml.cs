@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net.Http;
 using System.Windows;
 using System.Windows.Threading;
@@ -57,16 +58,15 @@ internal sealed partial class DesktopApp : Application, IDisposable
         services.AddSingleton<IExplorerRestarter, WindowsExplorerRestarter>();
         services.AddSingleton<IInteractiveUserResolver, WindowsInteractiveUserResolver>();
         services.AddSingleton<Func<ApplyEngine>>(_ => static () => WindowsApplyEngineFactory.Create());
+        services.AddSingleton<Func<ScanEngine>>(_ => static () => WindowsScanEngineFactory.Create());
         services.AddSingleton<IApplyCoordinator, ApplyCoordinator>();
         services.AddTransient<ApplyFlowViewModel>();
         services.AddSingleton<Func<ApplyFlowViewModel>>(sp => sp.GetRequiredService<ApplyFlowViewModel>);
         services.AddSingleton<IApplyFlowLauncher, ApplyFlowLauncher>();
         services.AddSingleton<IFileDialogService, FileDialogService>();
-        services.AddSingleton<Func<UpdateControlService>>(_ => static () => WindowsUpdateControlFactory.Create());
-        services.AddSingleton<Func<IUpdateHideService>>(_ => static () => WindowsUpdateHideFactory.Create());
         services.AddSingleton(_ => GitHubAppReleaseChecker.CreateClient());
         services.AddSingleton<IAppReleaseChecker>(sp => new GitHubAppReleaseChecker(sp.GetRequiredService<HttpClient>()));
-        services.AddSingleton<IUpdateCoordinator, UpdateCoordinator>();
+        RegisterUpdates(services);
         RegisterProfileTrust(services);
         RegisterAudit(services);
 
@@ -101,6 +101,17 @@ internal sealed partial class DesktopApp : Application, IDisposable
         return services;
     }
 
+    // Windows Update control: pause/resume, per-update hide, the feature-update hold and the
+    // supervised repair, each built lazily by the coordinator off the DI-validation path.
+    private static void RegisterUpdates(IServiceCollection services)
+    {
+        services.AddSingleton<Func<UpdateControlService>>(_ => static () => WindowsUpdateControlFactory.Create());
+        services.AddSingleton<Func<IUpdateHideService>>(_ => static () => WindowsUpdateHideFactory.Create());
+        services.AddSingleton<Func<UpdateTargetService>>(_ => static () => WindowsUpdateControlFactory.CreateTarget());
+        services.AddSingleton<Func<IUpdateRepair>>(_ => static () => WindowsUpdateControlFactory.CreateRepair());
+        services.AddSingleton<IUpdateCoordinator, UpdateCoordinator>();
+    }
+
     // Audit (read-only): the built-in baselines, the health probe, and the audit
     // engine built lazily by the coordinator off the DI-validation path.
     private static void RegisterAudit(IServiceCollection services)
@@ -123,6 +134,11 @@ internal sealed partial class DesktopApp : Application, IDisposable
     {
         base.OnStartup(e);
 
+        // An unexpected fault is logged and shown instead of closing the window under the user.
+        DispatcherUnhandledException += OnDispatcherUnhandledException;
+        TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+        AppDomain.CurrentDomain.UnhandledException += OnDomainUnhandledException;
+
         _services?.Dispose();
         _services = ConfigureServices(new ServiceCollection()).BuildServiceProvider(
             new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
@@ -133,6 +149,36 @@ internal sealed partial class DesktopApp : Application, IDisposable
         MainWindow window = _services.GetRequiredService<MainWindow>();
         MainWindow = window;
         window.Show();
+    }
+
+    private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+        bool logged = GuiErrorLog.Append(GuiErrorLog.DefaultPath, TimeProvider.System.GetUtcNow(), e.Exception);
+        string details = logged
+            ? string.Create(CultureInfo.CurrentCulture, $"Details were saved to {GuiErrorLog.DefaultPath}.")
+            : "The details could not be saved.";
+        MessageBox.Show(
+            MainWindow,
+            string.Create(CultureInfo.CurrentCulture,
+                $"Something went wrong: {e.Exception.Message}{Environment.NewLine}{Environment.NewLine}Every change this app makes is journaled, and a run that did not finish is rolled back the next time you apply or revert. {details}"),
+            "Open the Windows",
+            MessageBoxButton.OK,
+            MessageBoxImage.Error);
+        e.Handled = true;
+    }
+
+    private static void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+        GuiErrorLog.Append(GuiErrorLog.DefaultPath, TimeProvider.System.GetUtcNow(), e.Exception);
+        e.SetObserved();
+    }
+
+    private static void OnDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        if (e.ExceptionObject is Exception exception)
+        {
+            GuiErrorLog.Append(GuiErrorLog.DefaultPath, TimeProvider.System.GetUtcNow(), exception);
+        }
     }
 
     protected override void OnExit(ExitEventArgs e)

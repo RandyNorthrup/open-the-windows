@@ -1060,4 +1060,74 @@ public sealed class ApplyEngineTests
         Assert.Equal(RunState.Completed, result.State);
         Assert.Equal(1, ReadDword(machine, "A"));
     }
+
+    [Fact]
+    public void Revert_everything_reverts_every_apply_run_newest_first()
+    {
+        var machine = new FakeMachine();
+        var time = new MutableTimeProvider(FakeApplyEngine.DefaultInstant);
+        ApplyHarness h = FakeApplyEngine.Create(machine, time: time);
+        ApplyResult first = h.Engine.Apply([Entry("privacy.test.first", [Reg("A", 1)])], Opts());
+        time.Advance(TimeSpan.FromMinutes(1));
+        ApplyResult second = h.Engine.Apply([Entry("privacy.test.second", [Reg("B", 1)])], Opts());
+        time.Advance(TimeSpan.FromMinutes(1));
+
+        IReadOnlyList<(JournalSummary Run, RevertResult Result)> results = h.Engine.RevertEverything(new RevertOptions(false, false));
+
+        Assert.Equal([second.RunId, first.RunId], results.Select(r => r.Run.RunId));
+        Assert.All(results, r => Assert.Equal(RunState.Completed, r.Result.State));
+        Assert.False(Exists(machine, "A"));
+        Assert.False(Exists(machine, "B"));
+    }
+
+    [Fact]
+    public void Revert_everything_skips_runs_already_reverted_and_revert_runs()
+    {
+        var time = new MutableTimeProvider(FakeApplyEngine.DefaultInstant);
+        ApplyHarness h = FakeApplyEngine.Create(new FakeMachine(), time: time);
+        ApplyResult applied = h.Engine.Apply([Entry("privacy.test.first", [Reg("A", 1)])], Opts());
+        time.Advance(TimeSpan.FromMinutes(1));
+        h.Engine.Revert(applied.RunId, new RevertOptions(false, false));
+        time.Advance(TimeSpan.FromMinutes(1));
+
+        Assert.Empty(h.Engine.RevertEverything(new RevertOptions(false, false)));
+    }
+
+    [Fact]
+    public void Revert_everything_reports_a_journal_that_fails_verification_and_reverts_nothing_past_it()
+    {
+        var machine = new FakeMachine();
+        var time = new MutableTimeProvider(FakeApplyEngine.DefaultInstant);
+        ApplyHarness h = FakeApplyEngine.Create(machine, time: time);
+        ApplyResult earlier = h.Engine.Apply([Entry("privacy.test.earlier", [Reg("A", 1)])], Opts());
+        time.Advance(TimeSpan.FromMinutes(1));
+        ApplyResult forged = h.Engine.Apply([Entry("privacy.test.forged", [Reg("B", 1)])], Opts());
+        time.Advance(TimeSpan.FromMinutes(1));
+        h.Journal.FailVerification.Add(forged.RunId);
+
+        IReadOnlyList<(JournalSummary Run, RevertResult Result)> results = h.Engine.RevertEverything(new RevertOptions(false, false));
+
+        // The forged run is refused with the integrity reason, and the earlier run is not reverted
+        // either: whether the later run overlaps it cannot be checked without trusting its journal.
+        (JournalSummary _, RevertResult refused) = Assert.Single(results, r => r.Run.RunId == forged.RunId);
+        Assert.Equal(RunState.Failed, refused.State);
+        Assert.Equal(ApplyState.Refused, Assert.Single(refused.Entries).Result);
+        Assert.Contains("does not verify", refused.Entries[0].Note, StringComparison.Ordinal);
+        Assert.Equal(RunState.Failed, Assert.Single(results, r => r.Run.RunId == earlier.RunId).Result.State);
+        Assert.True(Exists(machine, "A"));
+        Assert.True(Exists(machine, "B"));
+    }
+
+    [Fact]
+    public void A_run_journal_loads_by_id_and_revert_everything_rejects_null_options()
+    {
+        ApplyHarness h = FakeApplyEngine.Create(new FakeMachine());
+        ApplyResult applied = h.Engine.Apply([Entry("privacy.test.first", [Reg("A", 1)])], Opts());
+
+        JournalRecord record = h.Engine.LoadRun(applied.RunId);
+
+        Assert.Equal("privacy.test.first", Assert.Single(record.Entries).Id);
+        Assert.Equal(ApplyState.Applied, record.Entries[0].Result);
+        Assert.Throws<ArgumentNullException>(() => h.Engine.RevertEverything(null!));
+    }
 }

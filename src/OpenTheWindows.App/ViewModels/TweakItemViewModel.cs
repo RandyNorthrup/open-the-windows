@@ -2,6 +2,7 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using OpenTheWindows.App.Resources;
 using OpenTheWindows.Core.Catalog;
+using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Model;
 
 namespace OpenTheWindows.App.ViewModels;
@@ -9,13 +10,18 @@ namespace OpenTheWindows.App.ViewModels;
 /// <summary>
 /// One catalogue entry as shown in a category list and detail pane: its
 /// selection checkbox, risk / restart badges and the detail fields (rationale,
-/// side effects, human-readable actions, sources). Read-only over the
-/// <see cref="TweakDefinition"/>; only <see cref="IsSelected"/> is mutable.
+/// side effects, human-readable actions, sources) and, once the page has been
+/// scanned, what this PC currently has. Read-only over the <see cref="TweakDefinition"/>;
+/// only <see cref="IsSelected"/> and the scanned <see cref="State"/> change.
 /// </summary>
 internal sealed partial class TweakItemViewModel : ObservableObject
 {
     [ObservableProperty]
     private bool _isSelected;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasState), nameof(StateLabel), nameof(IsInPlace), nameof(IsDrift))]
+    private ComplianceState? _state;
 
     /// <summary>Wraps a catalogue entry.</summary>
     public TweakItemViewModel(TweakDefinition entry)
@@ -82,6 +88,23 @@ internal sealed partial class TweakItemViewModel : ObservableObject
 
     /// <summary>True when the entry is still a Draft (not yet verified for release).</summary>
     public bool IsDraft => Definition.Status == TweakStatus.Draft;
+
+    /// <summary>True once a scan has reported this entry's state on this PC.</summary>
+    public bool HasState => State is not null;
+
+    /// <summary>The localised scanned state (empty before a scan).</summary>
+    public string StateLabel => State is { } state ? DisplayLabels.For(state) : string.Empty;
+
+    /// <summary>True when the scan found this entry already in its desired state.</summary>
+    public bool IsInPlace => State == ComplianceState.Compliant;
+
+    /// <summary>True when the scan found this entry not yet applied.</summary>
+    public bool IsDrift => State == ComplianceState.Drift;
+
+    /// <summary>Spoken by screen readers for the list item.</summary>
+    public override string ToString() => HasState
+        ? string.Create(CultureInfo.CurrentCulture, $"{Title}, {RiskLabel}, {StateLabel}")
+        : string.Create(CultureInfo.CurrentCulture, $"{Title}, {RiskLabel}");
 
     /// <summary>True when <paramref name="term"/> matches the id, title, description, rationale or a tag.</summary>
     public bool Matches(string term) => IdText.Contains(term, StringComparison.OrdinalIgnoreCase)

@@ -21,17 +21,30 @@ public sealed class ApplyFlowViewModelTests
 
     private static PlannedEntry Planned(string id, PlanDisposition disposition, RiskTier risk = RiskTier.Safe, RestartRequirement requires = RestartRequirement.None) => new(new TweakId(id), disposition, risk, requires, [], null);
 
+    // Plans one entry of the given risk, lets the confirmation dialogs answer yes, and applies.
+    private async Task<ApplyFlowViewModel> ApplyConfirmedAsync(string id, RiskTier risk)
+    {
+        _coordinator.PlanToReturn = new PlanResult("t", [Planned(id, PlanDisposition.Apply, risk)], []);
+        _coordinator.ResultToReturn = Result(RunState.Completed, RestartRequirement.None);
+        _dialog.ConfirmResult = true;
+        _dialog.ConfirmTypedResult = true;
+        ApplyFlowViewModel flow = Build();
+        await flow.StartAsync("Privacy", NoEntries, Options).ConfigureAwait(false);
+        await flow.ApplyCommand.ExecuteAsync(null).ConfigureAwait(false);
+        return flow;
+    }
+
     private static ApplyResult Result(RunState state, RestartRequirement requires, params EntryOutcome[] outcomes) => new(
         Guid.Empty, state, requires, new RestorePointResult(RestorePointStatus.NotRequested, null, "t"),
         new PreflightReport([]), new PlanResult("t", [], []), outcomes);
 
     [Fact]
-    public void Start_shows_the_plan_and_enables_apply_when_something_will_change()
+    public async Task Start_shows_the_plan_and_enables_apply_when_something_will_change()
     {
         _coordinator.PlanToReturn = new PlanResult("t", [Planned("a.b.one", PlanDisposition.Apply)], []);
         ApplyFlowViewModel flow = Build();
 
-        flow.Start("Privacy", NoEntries, Options);
+        await flow.StartAsync("Privacy", NoEntries, Options);
 
         Assert.Equal(ApplyFlowStage.Preview, flow.Stage);
         Assert.Single(flow.PlanEntries);
@@ -39,12 +52,12 @@ public sealed class ApplyFlowViewModelTests
     }
 
     [Fact]
-    public void A_plan_with_errors_cannot_be_applied()
+    public async Task A_plan_with_errors_cannot_be_applied()
     {
         _coordinator.PlanToReturn = new PlanResult("t", [Planned("a.b.one", PlanDisposition.Conflict)], ["conflict"]);
         ApplyFlowViewModel flow = Build();
 
-        flow.Start("Privacy", NoEntries, Options);
+        await flow.StartAsync("Privacy", NoEntries, Options);
 
         Assert.False(flow.CanApply);
     }
@@ -56,7 +69,7 @@ public sealed class ApplyFlowViewModelTests
         _coordinator.ResultToReturn = Result(RunState.Completed, RestartRequirement.None,
             new EntryOutcome(new TweakId("a.b.one"), ApplyState.Applied, RiskTier.Safe, RestartRequirement.None, null));
         ApplyFlowViewModel flow = Build();
-        flow.Start("Privacy", NoEntries, Options);
+        await flow.StartAsync("Privacy", NoEntries, Options);
 
         await flow.ApplyCommand.ExecuteAsync(null);
 
@@ -71,7 +84,7 @@ public sealed class ApplyFlowViewModelTests
         _coordinator.PlanToReturn = new PlanResult("t", [Planned("a.b.break", PlanDisposition.Apply, RiskTier.Breaking)], []);
         _dialog.ConfirmTypedResult = false;
         ApplyFlowViewModel flow = Build();
-        flow.Start("Privacy", NoEntries, Options);
+        await flow.StartAsync("Privacy", NoEntries, Options);
 
         await flow.ApplyCommand.ExecuteAsync(null);
 
@@ -84,14 +97,10 @@ public sealed class ApplyFlowViewModelTests
     [Fact]
     public async Task A_confirmed_breaking_entry_is_applied()
     {
-        _coordinator.PlanToReturn = new PlanResult("t", [Planned("a.b.break", PlanDisposition.Apply, RiskTier.Breaking)], []);
-        _coordinator.ResultToReturn = Result(RunState.Completed, RestartRequirement.None);
-        _dialog.ConfirmTypedResult = true;
-        ApplyFlowViewModel flow = Build();
-        flow.Start("Privacy", NoEntries, Options);
+        ApplyFlowViewModel flow = await ApplyConfirmedAsync("a.b.break", RiskTier.Breaking);
 
-        await flow.ApplyCommand.ExecuteAsync(null);
-
+        Assert.Equal(1, _dialog.ConfirmTypedCount);
+        Assert.Equal(0, _dialog.ConfirmCount);
         Assert.Equal(1, _coordinator.ApplyCount);
         Assert.Equal(ApplyFlowStage.Completed, flow.Stage);
     }
@@ -102,7 +111,7 @@ public sealed class ApplyFlowViewModelTests
         _coordinator.PlanToReturn = new PlanResult("t", [Planned("a.b.one", PlanDisposition.Apply)], []);
         _coordinator.ResultToReturn = Result(RunState.RolledBack, RestartRequirement.None);
         ApplyFlowViewModel flow = Build();
-        flow.Start("Privacy", NoEntries, Options);
+        await flow.StartAsync("Privacy", NoEntries, Options);
 
         await flow.ApplyCommand.ExecuteAsync(null);
 
@@ -115,7 +124,7 @@ public sealed class ApplyFlowViewModelTests
         _coordinator.PlanToReturn = new PlanResult("t", [Planned("a.b.one", PlanDisposition.Apply, RiskTier.Safe, RestartRequirement.ExplorerRestart)], []);
         _coordinator.ResultToReturn = Result(RunState.Completed, RestartRequirement.ExplorerRestart);
         ApplyFlowViewModel flow = Build();
-        flow.Start("Shell", NoEntries, Options);
+        await flow.StartAsync("Shell", NoEntries, Options);
         flow.RestartExplorer = false;
 
         await flow.ApplyCommand.ExecuteAsync(null);
@@ -127,12 +136,12 @@ public sealed class ApplyFlowViewModelTests
     }
 
     [Fact]
-    public void A_fault_while_previewing_is_shown_as_a_failed_stage()
+    public async Task A_fault_while_previewing_is_shown_as_a_failed_stage()
     {
         _coordinator.ThrowOnPreview = true;
         ApplyFlowViewModel flow = Build();
 
-        flow.Start("Privacy", NoEntries, Options);
+        await flow.StartAsync("Privacy", NoEntries, Options);
 
         Assert.Equal(ApplyFlowStage.Failed, flow.Stage);
         Assert.False(flow.CanApply);
@@ -145,7 +154,7 @@ public sealed class ApplyFlowViewModelTests
         _coordinator.PlanToReturn = new PlanResult("t", [Planned("a.b.one", PlanDisposition.Apply)], []);
         _coordinator.ThrowOnApply = true;
         ApplyFlowViewModel flow = Build();
-        flow.Start("Privacy", NoEntries, Options);
+        await flow.StartAsync("Privacy", NoEntries, Options);
 
         await flow.ApplyCommand.ExecuteAsync(null);
 
@@ -157,6 +166,65 @@ public sealed class ApplyFlowViewModelTests
     public void The_restart_explorer_default_comes_from_settings()
     {
         ApplyFlowViewModel flow = new(_coordinator, _dialog, new AppSettings { RestartExplorerAutomatically = true });
+
+        Assert.True(flow.RestartExplorer);
+    }
+
+    [Fact]
+    public void A_new_flow_starts_in_the_planning_stage_and_cannot_apply()
+    {
+        ApplyFlowViewModel flow = Build();
+
+        Assert.Equal(ApplyFlowStage.Planning, flow.Stage);
+        Assert.False(flow.CanApply);
+    }
+
+    [Fact]
+    public async Task Advanced_entries_need_an_acknowledgement_before_applying()
+    {
+        _coordinator.PlanToReturn = new PlanResult("t", [Planned("a.b.adv", PlanDisposition.Apply, RiskTier.Advanced), Planned("a.b.adv2", PlanDisposition.Apply, RiskTier.Advanced)], []);
+        _dialog.ConfirmResult = false;
+        ApplyFlowViewModel flow = Build();
+        await flow.StartAsync("Privacy", NoEntries, Options);
+
+        await flow.ApplyCommand.ExecuteAsync(null);
+
+        Assert.Equal(1, _dialog.ConfirmCount);
+        Assert.Equal(0, _dialog.ConfirmTypedCount);
+        Assert.Equal(0, _coordinator.ApplyCount);
+        Assert.Equal(ApplyFlowStage.Preview, flow.Stage);
+    }
+
+    [Fact]
+    public async Task Acknowledged_advanced_entries_are_applied()
+    {
+        ApplyFlowViewModel flow = await ApplyConfirmedAsync("a.b.adv", RiskTier.Advanced);
+
+        Assert.Equal(1, _dialog.ConfirmCount);
+        Assert.Equal(0, _dialog.ConfirmTypedCount);
+        Assert.Equal(1, _coordinator.ApplyCount);
+        Assert.Equal(ApplyFlowStage.Completed, flow.Stage);
+    }
+
+    [Fact]
+    public async Task A_safe_only_run_asks_nothing()
+    {
+        _coordinator.PlanToReturn = new PlanResult("t", [Planned("a.b.one", PlanDisposition.Apply)], []);
+        ApplyFlowViewModel flow = Build();
+        await flow.StartAsync("Privacy", NoEntries, Options);
+
+        await flow.ApplyCommand.ExecuteAsync(null);
+
+        Assert.Equal(0, _dialog.ConfirmCount);
+        Assert.Equal(0, _dialog.ConfirmTypedCount);
+    }
+
+    [Fact]
+    public async Task A_profile_asking_for_an_explorer_restart_pre_ticks_it()
+    {
+        ApplyFlowViewModel flow = Build();
+
+        await flow.StartAsync("Profile", NoEntries, Options with { RestartExplorer = true });
 
         Assert.True(flow.RestartExplorer);
     }

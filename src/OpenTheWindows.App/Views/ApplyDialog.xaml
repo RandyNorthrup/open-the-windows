@@ -61,11 +61,10 @@
             </ListBox>
         </Grid>
 
-        <!-- Applying -->
+        <!-- Planning / applying (the summary above says which) -->
         <StackPanel Grid.Row="1"
                     VerticalAlignment="Center"
-                    Visibility="{Binding Stage, Converter={StaticResource EnumToVisibility}, ConverterParameter=Applying}">
-            <TextBlock Text="Applying changes…" HorizontalAlignment="Center" Margin="0,0,0,12" />
+                    Visibility="{Binding Stage, Converter={StaticResource EnumToVisibility}, ConverterParameter='Planning,Applying'}">
             <ProgressBar IsIndeterminate="True" Height="6" Width="300"
                          AutomationProperties.AutomationId="ApplyDialog_Progress" />
         </StackPanel>
@@ -106,7 +105,7 @@
                       Visibility="{Binding ExplorerRestartWouldBeNeeded, Converter={StaticResource BoolToVisibility}}"
                       AutomationProperties.AutomationId="ApplyDialog_RestartCheck" />
 
-            <Button Content="Apply"
+            <Button Content="_Apply"
                     MinWidth="96"
                     Padding="12,4"
                     Command="{Binding ApplyCommand}"
@@ -118,16 +117,16 @@
                     Padding="12,4"
                     IsCancel="True"
                     Click="Close_Click"
-                    Visibility="{Binding Stage, Converter={StaticResource EnumToVisibility}, ConverterParameter=Preview}"
+                    Visibility="{Binding Stage, Converter={StaticResource EnumToVisibility}, ConverterParameter='Planning,Preview'}"
                     AutomationProperties.AutomationId="ApplyDialog_Cancel" />
 
-            <Button Content="Restart Explorer now"
+            <Button Content="_Restart Explorer now"
                     MinWidth="96"
                     Padding="12,4"
                     Command="{Binding RestartExplorerNowCommand}"
                     Visibility="{Binding ExplorerRestartAvailable, Converter={StaticResource BoolToVisibility}}"
                     AutomationProperties.AutomationId="ApplyDialog_RestartNow" />
-            <Button Content="Close"
+            <Button Content="_Close"
                     MinWidth="96"
                     Margin="8,0,0,0"
                     Padding="12,4"

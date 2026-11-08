@@ -6,12 +6,14 @@ using OpenTheWindows.App.Tests.Fakes;
 using OpenTheWindows.App.ViewModels;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
+using OpenTheWindows.Core.Engine;
+using OpenTheWindows.Core.Model;
 using OpenTheWindows.Core.Profiles;
 using OpenTheWindows.TestSupport.Fakes;
 
 namespace OpenTheWindows.App.Tests.ViewModels;
 
-/// <summary>The Profiles page: built-in list, apply, export and import with validation and signing state.</summary>
+/// <summary>The Profiles page: built-in list, apply, export, import with validation and signing state, and capture.</summary>
 public sealed class ProfilesViewModelTests
 {
     private static readonly TweakCatalog Catalog = CatalogLoader.LoadBuiltIn().Catalog!;
@@ -20,13 +22,14 @@ public sealed class ProfilesViewModelTests
     private readonly FakeApplyFlowLauncher _launcher = new();
     private readonly FakeFileDialogService _fileDialog = new();
     private readonly AppSettings _settings = new();
+    private readonly FakeApplyCoordinator _coordinator = new();
 
     private readonly string _trustStore = Directory.CreateTempSubdirectory("otw-gui-trust").FullName;
     private ProfilePolicy _policy = ProfilePolicy.Unrestricted;
 
     private DirectoryTrustedKeySource Keys => new(_trustStore);
 
-    private ProfilesViewModel Build() => new(Catalog, Facts, _launcher, _fileDialog, _settings, Keys, _policy);
+    private ProfilesViewModel Build() => new(Catalog, Facts, _launcher, _fileDialog, _settings, Keys, _policy, _coordinator);
 
     private static string TempPath() => Path.Combine(Path.GetTempPath(), $"otw-{Guid.NewGuid():N}.json");
 
@@ -154,12 +157,13 @@ public sealed class ProfilesViewModelTests
     [Fact]
     public void Rejects_null_dependencies()
     {
-        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(null!, Facts, _launcher, _fileDialog, _settings, Keys, _policy));
-        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, null!, _fileDialog, _settings, Keys, _policy));
-        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, _launcher, null!, _settings, Keys, _policy));
-        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, _launcher, _fileDialog, null!, Keys, _policy));
-        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, _launcher, _fileDialog, _settings, null!, _policy));
-        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, _launcher, _fileDialog, _settings, Keys, null!));
+        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(null!, Facts, _launcher, _fileDialog, _settings, Keys, _policy, _coordinator));
+        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, null!, _fileDialog, _settings, Keys, _policy, _coordinator));
+        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, _launcher, null!, _settings, Keys, _policy, _coordinator));
+        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, _launcher, _fileDialog, null!, Keys, _policy, _coordinator));
+        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, _launcher, _fileDialog, _settings, null!, _policy, _coordinator));
+        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, _launcher, _fileDialog, _settings, Keys, null!, _coordinator));
+        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, _launcher, _fileDialog, _settings, Keys, _policy, null!));
     }
 
     [Fact]
@@ -223,5 +227,61 @@ public sealed class ProfilesViewModelTests
         ProfilesViewModel page = Build();
         page.ImportCommand.Execute(null);
         return page;
+    }
+
+    [Fact]
+    public async Task Capture_scans_verified_entries_and_saves_a_loadable_profile_of_what_is_in_place()
+    {
+        TweakDefinition inPlace = Catalog.Entries.First(e => e.Status == TweakStatus.Verified && e.Risk == RiskTier.Safe && e.AppliesTo.Matches(Facts));
+        TweakDefinition missing = Catalog.Entries.Last(e => e.Status == TweakStatus.Verified && e.Risk == RiskTier.Safe && e.AppliesTo.Matches(Facts));
+        _coordinator.ScanToReturn = new ScanReport(new DateTimeOffset(2026, 11, 7, 9, 0, 0, TimeSpan.Zero), Facts, "capture",
+        [
+            new TweakObservation(inPlace.Id, ComplianceState.Compliant, inPlace.Risk, []),
+            new TweakObservation(missing.Id, ComplianceState.Drift, missing.Risk, []),
+        ]);
+        string path = TempPath();
+        _fileDialog.SavePath = path;
+        ProfilesViewModel page = Build();
+
+        try
+        {
+            await page.CaptureCommand.ExecuteAsync(null);
+
+            Assert.All(_coordinator.LastScanned!, e => Assert.Equal(TweakStatus.Verified, e.Status));
+            ProfileLoadResult loaded = ProfileLoader.LoadText(path, await File.ReadAllTextAsync(path, TestContext.Current.CancellationToken));
+            Assert.NotNull(loaded.Profile);
+            Assert.Equal("captured-20261107", loaded.Profile.Id);
+            Assert.Equal([inPlace.Id], loaded.Profile.Include);
+            Assert.Contains("Captured 1 setting", page.Status, StringComparison.Ordinal);
+            Assert.True(page.CanCapture);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public async Task Cancelling_the_capture_dialog_scans_nothing()
+    {
+        _fileDialog.SavePath = null;
+        ProfilesViewModel page = Build();
+
+        await page.CaptureCommand.ExecuteAsync(null);
+
+        Assert.Null(_coordinator.LastScanned);
+    }
+
+    [Fact]
+    public async Task A_capture_fault_is_reported()
+    {
+        _coordinator.ThrowOnScan = true;
+        _fileDialog.SavePath = TempPath();
+        ProfilesViewModel page = Build();
+
+        await page.CaptureCommand.ExecuteAsync(null);
+
+        Assert.Contains("Capture failed", page.Status, StringComparison.Ordinal);
+        Assert.False(File.Exists(_fileDialog.SavePath));
     }
 }

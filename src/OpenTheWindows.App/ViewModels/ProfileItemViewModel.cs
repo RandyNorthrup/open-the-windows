@@ -162,4 +162,7 @@ internal sealed class ProfileItemViewModel
 
     /// <summary>Plain-language lines for how the profile applies (risk ceiling, Draft, restore point, includes/excludes).</summary>
     public IReadOnlyList<string> OptionLines { get; }
+
+    /// <summary>Spoken by screen readers for the list item.</summary>
+    public override string ToString() => string.Create(CultureInfo.CurrentCulture, $"{Name}, {SignatureLabel}");
 }

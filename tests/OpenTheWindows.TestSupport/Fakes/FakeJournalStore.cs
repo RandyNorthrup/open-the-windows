@@ -21,6 +21,9 @@ public sealed class FakeJournalStore : IJournalStore
     /// <summary>How many times <see cref="Update"/> was called.</summary>
     public int UpdateCount { get; private set; }
 
+    /// <summary>Runs whose journal fails verification when loaded (as a file changed after it was listed would).</summary>
+    public ISet<Guid> FailVerification { get; } = new HashSet<Guid>();
+
     /// <inheritdoc />
     public void Begin(JournalRecord record)
     {
@@ -55,6 +58,8 @@ public sealed class FakeJournalStore : IJournalStore
 
     /// <inheritdoc />
     public JournalRecord Load(Guid runId)
-        => _records.Find(r => r.RunId == runId)
-            ?? throw new KeyNotFoundException(string.Create(CultureInfo.InvariantCulture, $"No journal for run {runId}."));
+        => FailVerification.Contains(runId)
+            ? throw new JournalIntegrityException(string.Create(CultureInfo.InvariantCulture, $"The journal for run {runId} does not verify."))
+            : _records.Find(r => r.RunId == runId)
+                ?? throw new KeyNotFoundException(string.Create(CultureInfo.InvariantCulture, $"No journal for run {runId}."));
 }

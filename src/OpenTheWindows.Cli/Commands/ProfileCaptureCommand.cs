@@ -53,12 +53,11 @@ internal static class ProfileCaptureCommand
         TweakCatalog catalog = services.LoadCatalog(null).Catalog
             ?? throw new InvalidOperationException("The built-in catalogue failed validation.");
         bool includeDraft = parseResult.GetValue(options.IncludeDraft);
-        List<TweakDefinition> candidates = [.. catalog.Entries.Where(e =>
-            e.Status != TweakStatus.Deprecated && (includeDraft || e.Status == TweakStatus.Verified) && e.AppliesTo.Matches(facts))];
+        IReadOnlyList<TweakDefinition> candidates = ProfileCapture.Candidates(catalog, facts, includeDraft);
 
         ScanReport report = services.CreateScanEngine().Scan(candidates, requestedId ?? "capture");
-        string id = requestedId ?? string.Create(CultureInfo.InvariantCulture, $"captured-{report.At.UtcDateTime:yyyyMMdd}");
-        string displayName = parseResult.GetValue(options.Name) ?? string.Create(CultureInfo.InvariantCulture, $"Captured from {Environment.MachineName}");
+        string id = requestedId ?? ProfileCapture.DefaultId(report.At);
+        string displayName = parseResult.GetValue(options.Name) ?? ProfileCapture.DefaultName(Environment.MachineName);
         Profile profile = ProfileCapture.FromScan(report, catalog, id, displayName);
 
         string path = parseResult.GetValue(options.Output)!;

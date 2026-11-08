@@ -10,8 +10,13 @@ namespace OpenTheWindows.Core.Updates;
 /// <param name="RevertedRunId">The newest pause run that was reverted, if any (resume unwinds every active pause).</param>
 /// <param name="Revert">The revert run result: the first failure if any revert failed, otherwise the last revert.</param>
 /// <param name="ScanTriggered">Whether the post-resume update scan was triggered successfully.</param>
+/// <param name="EndedPause">
+/// When the pause in force was set outside this product (the Settings app), the journaled
+/// run that ended it; <see langword="null"/> otherwise.
+/// </param>
 public sealed record ResumeOutcome(
     bool WasPaused,
     Guid? RevertedRunId,
     RevertResult? Revert,
-    bool ScanTriggered);
+    bool ScanTriggered,
+    ApplyResult? EndedPause = null);

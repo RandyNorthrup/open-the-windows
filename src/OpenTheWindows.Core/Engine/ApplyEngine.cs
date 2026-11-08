@@ -28,6 +28,9 @@ public sealed class ApplyEngine
     /// <summary>How long a run waits for another apply, revert or recovery on this machine to finish.</summary>
     private static readonly TimeSpan RunLockTimeout = TimeSpan.FromSeconds(30);
 
+    /// <summary>The pseudo-entry a revert reports when the run's journal itself could not be verified.</summary>
+    private static readonly TweakId UnverifiedJournalEntry = new("journal.unverified");
+
     private const string RunLockBusy = "Another apply or revert is running on this machine; try again when it finishes.";
 
     private readonly ScanEngine _scan;
@@ -65,6 +68,43 @@ public sealed class ApplyEngine
 
     /// <summary>Lists prior runs, newest first.</summary>
     public IReadOnlyList<JournalSummary> History() => _services.Journal.List();
+
+    /// <summary>Loads a prior run's verified journal (its entries and per-action outcomes).</summary>
+    /// <exception cref="JournalIntegrityException">The journal does not verify.</exception>
+    public JournalRecord LoadRun(Guid runId) => _services.Journal.Load(runId);
+
+    /// <summary>
+    /// Undoes everything: reverts every verified apply run not already reverted, newest
+    /// first, so later changes are unwound before the earlier ones they built on. Runs
+    /// already reverted are skipped; a run whose journal does not verify is reported with
+    /// a failed result rather than stopping the rest.
+    /// </summary>
+    public IReadOnlyList<(JournalSummary Run, RevertResult Result)> RevertEverything(RevertOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        List<(JournalSummary, RevertResult)> results = [];
+        foreach (JournalSummary run in History().Where(s =>
+                     s.Integrity == JournalIntegrity.Verified && s.RevertOf is null && s.Result is RunState.Completed or RunState.Failed))
+        {
+            RevertResult result;
+            try
+            {
+                result = Revert(run.RunId, options);
+            }
+            catch (JournalIntegrityException ex)
+            {
+                result = new RevertResult(Guid.Empty, run.RunId, RunState.Failed,
+                    [new EntryOutcome(UnverifiedJournalEntry, ApplyState.Refused, RiskTier.Safe, RestartRequirement.None, ex.Message)]);
+            }
+
+            if (!result.AlreadyReverted)
+            {
+                results.Add((run, result));
+            }
+        }
+
+        return results;
+    }
 
     /// <summary>
     /// Settles any run a crash or power loss left in progress (rolling it back to its

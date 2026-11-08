@@ -67,13 +67,17 @@ attestations you can verify with `gh attestation verify` (see
 opens on a **Dashboard** (system health) with a left navigation rail to the
 category pages (**Privacy**, **Updates**, **Security**, **Performance**,
 **Debloat**, **Shell**), **Profiles**, **History**, **Settings** and **About**. A
-category page has a level dial, search, a risk filter and a per-entry detail
-pane; **Review & apply…** opens a modal flow that previews the what-if plan,
-confirms Breaking entries by typing their id, applies transactionally on a
-background thread, and lets you revert from **History**. **Updates**
-pauses/resumes Windows Update (with an extended pause behind a warning, a
-per-update hide/unhide, and a read-only mode when it is managed by policy);
-**Profiles** applies, imports and exports profiles with their signing state.
+category page has a level dial (Verified entries, as the named profiles pick
+them), search, risk and "not applied" filters, **Scan** to badge what this PC
+already has, and a per-entry detail pane; **Review & apply…** opens a modal flow
+that previews the what-if plan, asks you to acknowledge Advanced entries and to
+type the id of each Breaking one, and applies transactionally on a background
+thread. **History** shows each run's entries and reverts a whole run, a single
+entry, or everything the app has changed. **Updates** pauses/resumes Windows
+Update (with an extended pause behind a warning), holds feature updates at a
+release, runs the supervised Windows Update repair, hides/unhides single
+updates, and is read-only when updates are managed by policy. **Profiles**
+applies, imports, exports and captures profiles with their signing state.
 **About** can check GitHub Releases for a newer version when you ask.
 
 ## Using the CLI (`otw`)

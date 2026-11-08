@@ -27,20 +27,24 @@
 
         <DockPanel Grid.Row="2" Margin="0,16,0,14">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                <Button Content="Import…" Padding="14,5" Margin="0,0,8,0" Command="{Binding ImportCommand}"
+                <Button Content="_Capture this PC…" Padding="14,5" Margin="0,0,8,0" Command="{Binding CaptureCommand}"
+                        ToolTipService.ShowOnDisabled="True"
+                        ToolTip="Scan this PC and save the Verified settings it already has as a profile file, to apply them on another PC. Nothing on this PC changes."
+                        AutomationProperties.AutomationId="Profiles_Capture" />
+                <Button Content="_Import…" Padding="14,5" Margin="0,0,8,0" Command="{Binding ImportCommand}"
                         ToolTip="Load a profile from a .json file and check its signature."
                         AutomationProperties.AutomationId="Profiles_Import" />
-                <Button Content="Export…" Padding="14,5" Margin="0,0,8,0" Command="{Binding ExportCommand}"
+                <Button Content="_Export…" Padding="14,5" Margin="0,0,8,0" Command="{Binding ExportCommand}"
                         ToolTipService.ShowOnDisabled="True"
                         ToolTip="Save the selected profile to a .json file you can share or import elsewhere. Select a profile first."
                         AutomationProperties.AutomationId="Profiles_Export" />
-                <Button Content="Review &amp; apply…" Padding="14,5" Command="{Binding ApplySelectedCommand}"
+                <Button Content="_Review &amp; apply…" Padding="14,5" Command="{Binding ApplySelectedCommand}"
                         ToolTipService.ShowOnDisabled="True"
                         ToolTip="Review the selected profile's entries and apply them in one step. Nothing changes until you confirm. Select a valid profile first."
                         AutomationProperties.AutomationId="Profiles_Apply" />
             </StackPanel>
             <TextBlock VerticalAlignment="Center" Opacity="0.75" TextWrapping="Wrap"
-                       Text="{Binding Status}" AutomationProperties.AutomationId="Profiles_Status" />
+                       Text="{Binding Status}" AutomationProperties.LiveSetting="Polite" AutomationProperties.AutomationId="Profiles_Status" />
         </DockPanel>
 
         <Grid Grid.Row="3">

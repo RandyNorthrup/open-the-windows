@@ -1,3 +1,4 @@
+using System.Globalization;
 using OpenTheWindows.App.Resources;
 using OpenTheWindows.Core.Engine;
 
@@ -27,4 +28,7 @@ internal sealed class ApplyOutcomeEntryViewModel
 
     /// <summary>An explanatory note, if any.</summary>
     public string? Note { get; }
+
+    /// <summary>Spoken by screen readers for the list item.</summary>
+    public override string ToString() => string.Create(CultureInfo.CurrentCulture, $"{ResultLabel}, {Id}");
 }

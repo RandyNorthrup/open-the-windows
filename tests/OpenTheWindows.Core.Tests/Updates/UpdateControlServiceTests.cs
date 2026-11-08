@@ -234,4 +234,45 @@ public sealed class UpdateControlServiceTests
         Assert.Null(status.EndOfServiceDate);
         Assert.False(status.CurrentVersionWithinWarning);
     }
+
+    [Fact]
+    public void Resume_ends_a_pause_set_in_the_settings_app_reversibly()
+    {
+        var machine = new FakeMachine();
+        string until = PauseCalculator.Format(FakeApplyEngine.DefaultInstant.AddDays(10));
+        machine.SetRegistry(
+            RegistryHive.LocalMachine, null, WindowsUpdateSettings.UxSettingsPath,
+            WindowsUpdateSettings.PauseUpdatesExpiryTime, RegistryValueType.Sz, CatalogTestData.Text(until));
+        (UpdateControlService service, ApplyHarness harness) = FakeUpdateControl.Create(machine);
+
+        ResumeOutcome outcome = service.Resume();
+
+        Assert.True(outcome.WasPaused);
+        Assert.Null(outcome.RevertedRunId);
+        Assert.Equal(RunState.Completed, outcome.EndedPause!.State);
+        Assert.False(service.Status().IsPaused);
+        JournalSummary run = Assert.Single(harness.Engine.History());
+        Assert.Equal(UpdateControlService.ResumeProfileName, run.Profile);
+
+        // The ended pause is journaled, so reverting the resume puts the Settings-app pause back.
+        harness.Engine.Revert(run.RunId, new Core.Engine.RevertOptions(false, false));
+        Assert.Equal(until, ReadUx(machine, WindowsUpdateSettings.PauseUpdatesExpiryTime));
+    }
+
+    [Fact]
+    public void Resume_what_if_of_a_settings_app_pause_changes_nothing()
+    {
+        var machine = new FakeMachine();
+        string until = PauseCalculator.Format(FakeApplyEngine.DefaultInstant.AddDays(10));
+        machine.SetRegistry(
+            RegistryHive.LocalMachine, null, WindowsUpdateSettings.UxSettingsPath,
+            WindowsUpdateSettings.PauseUpdatesExpiryTime, RegistryValueType.Sz, CatalogTestData.Text(until));
+        (UpdateControlService service, _) = FakeUpdateControl.Create(machine);
+
+        ResumeOutcome outcome = service.Resume(whatIf: true);
+
+        Assert.True(outcome.WasPaused);
+        Assert.False(outcome.ScanTriggered);
+        Assert.Equal(until, ReadUx(machine, WindowsUpdateSettings.PauseUpdatesExpiryTime));
+    }
 }

@@ -8,8 +8,8 @@ namespace OpenTheWindows.App.Services;
 
 /// <summary>
 /// <see cref="IApplyFlowLauncher"/> that builds a fresh <see cref="ApplyFlowViewModel"/>
-/// per launch, primes it with the plan and shows the modal
-/// <see cref="ApplyDialog"/> owned by the main window.
+/// per launch, starts its plan on a background thread and shows the modal
+/// <see cref="ApplyDialog"/> owned by the main window while the plan loads.
 /// </summary>
 internal sealed class ApplyFlowLauncher : IApplyFlowLauncher
 {
@@ -26,7 +26,11 @@ internal sealed class ApplyFlowLauncher : IApplyFlowLauncher
     public void Launch(string title, IReadOnlyList<TweakDefinition> entries, ApplyOptions options)
     {
         ApplyFlowViewModel flow = _flowFactory();
-        flow.Start(title, entries, options);
+
+        // StartAsync never faults (a planning error lands the flow in its Failed stage), and
+        // its continuation runs on the dialog's message loop, so the dialog opens at once
+        // with a progress bar and fills in when the plan is ready.
+        _ = flow.StartAsync(title, entries, options);
         ApplyDialog dialog = new()
         {
             DataContext = flow,

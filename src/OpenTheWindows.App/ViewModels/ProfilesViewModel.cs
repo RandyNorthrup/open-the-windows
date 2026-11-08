@@ -9,6 +9,7 @@ using OpenTheWindows.App.Resources;
 using OpenTheWindows.App.Services;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
+using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Profiles;
 
 namespace OpenTheWindows.App.ViewModels;
@@ -16,8 +17,9 @@ namespace OpenTheWindows.App.ViewModels;
 /// <summary>
 /// The Profiles page: the built-in profiles (each shown with the entries it
 /// resolves to on this machine), a one-click apply that reuses the review-and-
-/// apply flow, export of a profile to a file, and import of a profile file with
-/// its validation result and signing state.
+/// apply flow, export of a profile to a file, import of a profile file with its
+/// validation result and signing state, and capture of this PC's current settings as a
+/// profile file to apply elsewhere.
 /// </summary>
 internal sealed partial class ProfilesViewModel : ObservableObject, IPageViewModel, IActivatable
 {
@@ -31,6 +33,7 @@ internal sealed partial class ProfilesViewModel : ObservableObject, IPageViewMod
     private readonly AppSettings _settings;
     private readonly ITrustedKeySource _trustedKeys;
     private readonly ProfilePolicy _policy;
+    private readonly IApplyCoordinator _coordinator;
     private readonly List<ProfileItemViewModel> _imported = [];
 
     [ObservableProperty]
@@ -39,14 +42,19 @@ internal sealed partial class ProfilesViewModel : ObservableObject, IPageViewMod
     [ObservableProperty]
     private string _status = string.Empty;
 
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(CaptureCommand))]
+    private bool _isCapturing;
+
     /// <summary>
     /// Creates the page and loads the built-in profiles. <paramref name="trustedKeys"/>
     /// and <paramref name="policy"/> decide an imported file's signing state and whether
-    /// the machine's <c>RequireSignedProfiles</c> policy lets it be applied.
+    /// the machine's <c>RequireSignedProfiles</c> policy lets it be applied;
+    /// <paramref name="coordinator"/> scans this PC for a capture.
     /// </summary>
     public ProfilesViewModel(
         TweakCatalog catalog, OperatingSystemFacts facts, IApplyFlowLauncher applyFlow, IFileDialogService fileDialog, AppSettings settings,
-        ITrustedKeySource trustedKeys, ProfilePolicy policy)
+        ITrustedKeySource trustedKeys, ProfilePolicy policy, IApplyCoordinator coordinator)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(facts);
@@ -55,6 +63,7 @@ internal sealed partial class ProfilesViewModel : ObservableObject, IPageViewMod
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(trustedKeys);
         ArgumentNullException.ThrowIfNull(policy);
+        ArgumentNullException.ThrowIfNull(coordinator);
         _catalog = catalog;
         _facts = facts;
         _applyFlow = applyFlow;
@@ -62,6 +71,7 @@ internal sealed partial class ProfilesViewModel : ObservableObject, IPageViewMod
         _settings = settings;
         _trustedKeys = trustedKeys;
         _policy = policy;
+        _coordinator = coordinator;
 
         LoadProfiles();
     }
@@ -142,6 +152,43 @@ internal sealed partial class ProfilesViewModel : ObservableObject, IPageViewMod
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException)
         {
             Status = ex.Message;
+        }
+    }
+
+    /// <summary>Whether a capture can start (none is running).</summary>
+    public bool CanCapture => !IsCapturing;
+
+    /// <summary>
+    /// Scans this PC for the Verified catalogue settings it already has and saves them as a
+    /// profile file that reproduces them on another PC. Nothing on this PC changes.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanCapture))]
+    private async Task CaptureAsync()
+    {
+        string? path = _fileDialog.SaveProfile("captured-profile.json");
+        if (path is null)
+        {
+            return;
+        }
+
+        IsCapturing = true;
+        Status = "Scanning this PC…";
+        try
+        {
+            IReadOnlyList<TweakDefinition> candidates = ProfileCapture.Candidates(_catalog, _facts, includeDraft: false);
+            ScanReport report = await _coordinator.ScanAsync(candidates).ConfigureAwait(true);
+            Profile profile = ProfileCapture.FromScan(report, _catalog, ProfileCapture.DefaultId(report.At), ProfileCapture.DefaultName(Environment.MachineName));
+            await File.WriteAllTextAsync(path, JsonSerializer.Serialize(profile, ProfileJsonContext.Default.Profile)).ConfigureAwait(true);
+            Status = string.Create(CultureInfo.CurrentCulture,
+                $"Captured {profile.Include.Count} setting(s) already in place, of {candidates.Count} scanned, to {path}.");
+        }
+        catch (Exception ex) when (UiFaults.IsReportable(ex))
+        {
+            Status = string.Create(CultureInfo.CurrentCulture, $"Capture failed: {ex.Message}");
+        }
+        finally
+        {
+            IsCapturing = false;
         }
     }
 

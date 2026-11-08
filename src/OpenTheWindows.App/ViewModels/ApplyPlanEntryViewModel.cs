@@ -37,4 +37,7 @@ internal sealed class ApplyPlanEntryViewModel
 
     /// <summary>The per-action lines (kind, target and current compliance state).</summary>
     public IReadOnlyList<string> Actions { get; }
+
+    /// <summary>Spoken by screen readers for the list item.</summary>
+    public override string ToString() => string.Create(CultureInfo.CurrentCulture, $"{DispositionLabel}, {Id}, {RiskLabel}");
 }

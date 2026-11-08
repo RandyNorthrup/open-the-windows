@@ -50,10 +50,24 @@
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Pause" Opacity="0.7" Margin="0,0,16,6" />
                     <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding PauseState}" AutomationProperties.AutomationId="Updates_PauseState" />
 
-                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Pinned release" Opacity="0.7" Margin="0,0,16,6" />
-                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding TargetRelease}" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Feature-update hold" Opacity="0.7" Margin="0,0,16,6" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding TargetRelease}" AutomationProperties.AutomationId="Updates_Hold" />
                 </Grid>
             </Border>
+
+            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                <Button Content="_Refresh status" Padding="14,5"
+                        Command="{Binding RefreshCommand}"
+                        ToolTip="Read the current update, pause and end-of-servicing status from this PC. Nothing is loaded — and the controls below stay disabled — until you do this."
+                        AutomationProperties.AutomationId="Updates_Refresh" />
+                <ProgressBar IsIndeterminate="True" Width="120" Height="6" Margin="12,0,0,0" VerticalAlignment="Center"
+                             Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}"
+                             AutomationProperties.Name="Working"
+                             AutomationProperties.AutomationId="Updates_Busy" />
+            </StackPanel>
+            <TextBlock Text="{Binding OperationStatus}" Margin="0,8,0,0" TextWrapping="Wrap"
+                       AutomationProperties.LiveSetting="Polite"
+                       AutomationProperties.AutomationId="Updates_OperationStatus" />
 
             <TextBlock Text="Pause updates" FontSize="16" FontWeight="SemiBold" Margin="0,20,0,8" />
             <WrapPanel>
@@ -75,10 +89,10 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <Button Content="Resume now" Padding="14,5" Margin="8,0,0,0"
+                <Button Content="Res_ume now" Padding="14,5" Margin="8,0,0,0"
                         Command="{Binding ResumeCommand}"
                         ToolTipService.ShowOnDisabled="True"
-                        ToolTip="Resume Windows Update now and clear every active pause. Enabled only while updates are paused."
+                        ToolTip="Resume Windows Update now and clear every active pause, including one set in the Settings app. Enabled only while updates are paused."
                         AutomationProperties.AutomationId="Updates_Resume" />
             </WrapPanel>
 
@@ -97,10 +111,36 @@
                         AutomationProperties.AutomationId="Updates_ExtendedPause" />
             </StackPanel>
 
-            <Button Content="Refresh status" Padding="14,5" Margin="0,20,0,0" HorizontalAlignment="Left"
-                    Command="{Binding RefreshCommand}"
-                    ToolTip="Read the current update, pause and end-of-servicing status from this PC. Nothing is loaded until you do this."
-                    AutomationProperties.AutomationId="Updates_Refresh" />
+            <TextBlock Text="Hold feature updates at a release" FontSize="16" FontWeight="SemiBold" Margin="0,20,0,8" />
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,8" Opacity="0.75"
+                       Text="Stays on the chosen Windows 11 release while monthly quality and security updates keep arriving. Uses the Windows Update for Business target-release policy. Reversible." />
+            <StackPanel Orientation="Horizontal">
+                <ComboBox MinWidth="110" VerticalContentAlignment="Center"
+                          ItemsSource="{Binding HoldVersions}"
+                          SelectedItem="{Binding SelectedHoldVersion, Mode=TwoWay}"
+                          ToolTip="The Windows 11 release to stay on. Listed after you refresh the status."
+                          AutomationProperties.Name="Release to hold at"
+                          AutomationProperties.AutomationId="Updates_HoldVersion" />
+                <Button Content="_Hold…" Padding="14,5" Margin="8,0,0,0"
+                        Command="{Binding HoldCommand}"
+                        ToolTipService.ShowOnDisabled="True"
+                        ToolTip="Hold feature updates at the chosen release. You are asked to confirm. Disabled until the status is loaded, or when updates are managed."
+                        AutomationProperties.AutomationId="Updates_HoldApply" />
+                <Button Content="C_lear hold" Padding="14,5" Margin="8,0,0,0"
+                        Command="{Binding ClearHoldCommand}"
+                        ToolTipService.ShowOnDisabled="True"
+                        ToolTip="Remove the feature-update hold this app set. Enabled only while a hold is in place."
+                        AutomationProperties.AutomationId="Updates_HoldClear" />
+            </StackPanel>
+
+            <TextBlock Text="Repair Windows Update" FontSize="16" FontWeight="SemiBold" Margin="0,20,0,8" />
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,8" Opacity="0.75"
+                       Text="For updates stuck downloading or failing to install: stops the update services, renames the download cache and catalogue database aside (nothing is deleted) and starts the services again." />
+            <Button Content="Re_pair…" Padding="14,5" HorizontalAlignment="Left"
+                    Command="{Binding RepairCommand}"
+                    ToolTipService.ShowOnDisabled="True"
+                    ToolTip="Run the supervised Windows Update repair. You are asked to confirm first."
+                    AutomationProperties.AutomationId="Updates_Repair" />
 
             <TextBlock Text="Hide a specific update" FontSize="16" FontWeight="SemiBold" Margin="0,20,0,8" />
             <TextBlock TextWrapping="Wrap" Margin="0,0,0,8" Opacity="0.75"

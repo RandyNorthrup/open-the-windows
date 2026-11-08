@@ -76,7 +76,7 @@ internal static class RevertCommand
                 return ExitCodes.InvalidInput;
             }
 
-            return RevertAll(engine, options, stdout, stderr);
+            return RevertAll(engine, options, stdout);
         }
 
         return RevertOne(engine, token ?? string.Empty, options, parseResult.GetValue(flags.Json), stdout, stderr);
@@ -172,41 +172,25 @@ internal static class RevertCommand
             [],
             [.. result.Entries.Select(e => new ApplyJsonEntry(e.Id.Value, e.Result.ToString(), e.Risk.ToString(), e.Requires.ToString(), e.Note))]);
 
-    /// <summary>
-    /// Reverts every apply run that is not already fully reverted, newest first, so later
-    /// changes are unwound before the earlier ones they built on. A run already reverted is
-    /// skipped; any other refusal or failure is reported and makes the exit code non-zero.
-    /// </summary>
-    private static int RevertAll(ApplyEngine engine, RevertOptions options, TextWriter stdout, TextWriter stderr)
+    /// <summary>Undoes every change the product made (see <see cref="ApplyEngine.RevertEverything"/>) and reports each run.</summary>
+    private static int RevertAll(ApplyEngine engine, RevertOptions options, TextWriter stdout)
     {
-        List<JournalSummary> runs = [.. engine.History().Where(s =>
-            s.Integrity == JournalIntegrity.Verified && s.RevertOf is null && s.Result is RunState.Completed or RunState.Failed)];
         int problems = 0;
-        foreach (JournalSummary run in runs)
+        foreach ((JournalSummary run, RevertResult result) in engine.RevertEverything(options))
         {
-            RevertResult result;
-            try
-            {
-                result = engine.Revert(run.RunId, options);
-            }
-            catch (JournalIntegrityException ex)
-            {
-                stderr.WriteLine(ex.Message);
-                problems++;
-                continue;
-            }
-
-            if (result.AlreadyReverted)
-            {
-                continue;
-            }
-
             stdout.WriteLine(string.Create(CultureInfo.InvariantCulture,
                 $"{(options.WhatIf ? "Would revert" : "Reverted")} {run.RunId} ({run.Profile}): {result.State}."));
+            foreach (EntryOutcome entry in result.Entries.Where(e => e.Note is not null && result.State != RunState.Completed))
+            {
+                stdout.WriteLine(string.Create(CultureInfo.InvariantCulture, $"    {entry.Id.Value}: {entry.Note}"));
+            }
+
             problems += result.State == RunState.Completed ? 0 : 1;
         }
 
-        stdout.WriteLine(problems == 0 ? "Every change this product made has been reverted." : string.Create(CultureInfo.InvariantCulture, $"{problems} run(s) could not be reverted; see above."));
+        stdout.WriteLine(problems == 0
+            ? "Every change this product made has been reverted."
+            : string.Create(CultureInfo.InvariantCulture, $"{problems} run(s) could not be reverted; see above."));
         return problems == 0 ? ExitCodes.Success : ExitCodes.Error;
     }
 

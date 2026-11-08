@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OpenTheWindows.App.Navigation;
@@ -8,17 +9,18 @@ using OpenTheWindows.App.Services;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Audit;
 using OpenTheWindows.Core.Catalog;
+using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Model;
 
 namespace OpenTheWindows.App.ViewModels;
 
 /// <summary>
 /// The shared page for a tweak category (Privacy, Security, Performance,
-/// Debloat, Shell). A level dial pre-selects the entries a profile at that level
-/// would apply; the user then toggles individual entries. Search and the risk /
-/// draft filters narrow the visible list without changing the selection. The
-/// selected row drives the detail pane. Scan-driven drift state is layered on in
-/// a later part.
+/// Debloat, Shell). A level dial pre-selects the Verified entries a named profile at
+/// that level would apply (conflicting variants settled the same way); the user then
+/// toggles individual entries, Drafts included. Scan reads what this PC already has and
+/// badges each entry; search and the risk / baseline / not-applied filters narrow the
+/// visible list without changing the selection. The selected row drives the detail pane.
 /// </summary>
 internal sealed partial class CategoryPageViewModel : ObservableObject, IPageViewModel
 {
@@ -26,6 +28,7 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
     private readonly TweakCatalog _catalog;
     private readonly IApplyFlowLauncher _applyFlow;
     private readonly AppSettings _settings;
+    private readonly IApplyCoordinator _coordinator;
     private bool _updatingSelection;
     private HashSet<TweakId> _baselineTweakIds = [];
 
@@ -50,18 +53,31 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
     [ObservableProperty]
     private string _emptyMessage = string.Empty;
 
-    /// <summary>Builds the page for one category over the catalogue, machine facts, the baselines, the apply launcher and settings.</summary>
-    public CategoryPageViewModel(Category category, TweakCatalog catalog, OperatingSystemFacts facts, IReadOnlyList<Baseline> baselines, IApplyFlowLauncher applyFlow, AppSettings settings)
+    [ObservableProperty]
+    private bool _driftOnly;
+
+    [ObservableProperty]
+    private bool _isScanning;
+
+    [ObservableProperty]
+    private string _scanSummary = "Not scanned — select “Scan” to see which of these this PC already has.";
+
+    /// <summary>Builds the page for one category over the catalogue, machine facts, the baselines, the apply launcher, settings and the scan coordinator.</summary>
+    public CategoryPageViewModel(
+        Category category, TweakCatalog catalog, OperatingSystemFacts facts, IReadOnlyList<Baseline> baselines, IApplyFlowLauncher applyFlow, AppSettings settings,
+        IApplyCoordinator coordinator)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(facts);
         ArgumentNullException.ThrowIfNull(baselines);
         ArgumentNullException.ThrowIfNull(applyFlow);
         ArgumentNullException.ThrowIfNull(settings);
+        ArgumentNullException.ThrowIfNull(coordinator);
         _category = category;
         _catalog = catalog;
         _applyFlow = applyFlow;
         _settings = settings;
+        _coordinator = coordinator;
 
         AllItems = [.. catalog.InCategory(category)
             .Where(e => e.Status != TweakStatus.Deprecated && e.AppliesTo.Matches(facts))
@@ -123,6 +139,9 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
     /// <summary>The entries currently selected for apply.</summary>
     public IReadOnlyList<TweakItemViewModel> SelectedItems => [.. AllItems.Where(i => i.IsSelected)];
 
+    /// <summary>Whether a scan can start (none is running).</summary>
+    public bool CanScan => !IsScanning;
+
     /// <summary>True when at least one entry is selected.</summary>
     public bool HasSelection => AllItems.Any(i => i.IsSelected);
 
@@ -139,6 +158,43 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
         GuiApply.Launch(_applyFlow, Title, entries, $"GUI {Title}", Scope.Machine, _settings.CreateRestorePoint);
     }
 
+    /// <summary>Reads, without changing anything, which entries on this page are already in place on this PC.</summary>
+    [RelayCommand(CanExecute = nameof(CanScan))]
+    private async Task ScanAsync()
+    {
+        IsScanning = true;
+        ScanSummary = "Scanning…";
+        try
+        {
+            ScanReport report = await _coordinator.ScanAsync([.. AllItems.Select(i => i.Definition)]).ConfigureAwait(true);
+            var states = report.Results.ToDictionary(r => r.Id, r => r.State);
+            foreach (TweakItemViewModel item in AllItems)
+            {
+                item.State = states.TryGetValue(item.Id, out ComplianceState state) ? state : null;
+            }
+
+            ScanSummary = string.Create(CultureInfo.CurrentCulture,
+                $"{report.CompliantCount} in place, {report.DriftCount} not applied, {report.ManagedCount} managed by your organisation (scanned {report.At.LocalDateTime:t}).");
+            RebuildItems();
+        }
+        catch (Exception ex) when (UiFaults.IsReportable(ex))
+        {
+            ScanSummary = string.Create(CultureInfo.CurrentCulture, $"The scan failed: {ex.Message}");
+        }
+        finally
+        {
+            IsScanning = false;
+        }
+    }
+
+    partial void OnIsScanningChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanScan));
+        ScanCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnDriftOnlyChanged(bool value) => RebuildItems();
+
     partial void OnLevelChanged(Level value) => ApplyLevelSelection();
 
     partial void OnSearchTextChanged(string value) => RebuildItems();
@@ -153,10 +209,12 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
 
     private void ApplyLevelSelection()
     {
-        // The browse UI shows and selects every applicable entry regardless of
-        // verification status (verified-only gating belongs to built-in profiles,
-        // not to hand-picking on this page).
-        HashSet<TweakId> selectedIds = [.. _catalog.Select(_category, Level, includeDraft: true).Select(e => e.Id)];
+        // The dial selects what the named profile at this level would (Verified entries only,
+        // mutually exclusive variants settled), so a dial selection always plans cleanly.
+        // Draft entries stay listed and can still be ticked by hand.
+        HashSet<TweakId> selectedIds = [.. NamedProfile.Select(_catalog, Level, includeDraft: false)
+            .Where(e => e.Category == _category)
+            .Select(e => e.Id)];
         _updatingSelection = true;
         try
         {
@@ -185,6 +243,11 @@ internal sealed partial class CategoryPageViewModel : ObservableObject, IPageVie
             }
 
             if (BaselineFilter is not null && !_baselineTweakIds.Contains(item.Id))
+            {
+                continue;
+            }
+
+            if (DriftOnly && !item.IsDrift)
             {
                 continue;
             }

@@ -25,6 +25,12 @@ public sealed class UpdateControlService
     /// <summary>The synthetic catalogue id of the runtime pause entry.</summary>
     public const string PauseEntryId = "updates.pause.session";
 
+    /// <summary>The profile name a run that ends a Settings-app pause is journaled under.</summary>
+    public const string ResumeProfileName = "updates-resume";
+
+    /// <summary>The entry id of a run that ends a Settings-app pause.</summary>
+    public const string ResumeEntryId = "updates.pause.end";
+
     /// <summary>The allow-listed executable and argument that triggers a fresh update scan.</summary>
     public const string ScanExecutable = "usoclient.exe";
 
@@ -109,7 +115,10 @@ public sealed class UpdateControlService
         IReadOnlyList<JournalSummary> pauses = FindActivePauses();
         if (pauses.Count == 0)
         {
-            return new ResumeOutcome(false, null, null, !whatIf && TriggerScan());
+            // A pause set in the Settings app has no run to revert: end it now, journaled, so
+            // "resume" means resume whoever paused, and the change can itself be reverted.
+            ApplyResult? ended = ReadPauseState(_time.GetUtcNow()).Paused ? EndForeignPause(whatIf) : null;
+            return new ResumeOutcome(ended is not null, null, null, !whatIf && TriggerScan(), ended);
         }
 
         RevertResult? firstFailure = null;
@@ -151,6 +160,42 @@ public sealed class UpdateControlService
     }
 
     private IReadOnlyList<JournalSummary> FindActivePauses() => ActiveRuns.For(_engine.History(), PauseProfileName);
+
+    private ApplyResult EndForeignPause(bool whatIf)
+    {
+        string now = PauseCalculator.Format(_time.GetUtcNow());
+        List<ITweakAction> actions = [.. new[]
+            {
+                WindowsUpdateSettings.PauseUpdatesExpiryTime,
+                WindowsUpdateSettings.PauseFeatureUpdatesEndTime,
+                WindowsUpdateSettings.PauseQualityUpdatesEndTime,
+            }
+            .Select(name => (ITweakAction)new RegistryAction(
+                RegistryHive.LocalMachine, WindowsUpdateSettings.UxSettingsPath, name, RegistryValueType.Sz,
+                UpdateJson.String(now), UpdateJson.Null, RegistryValueKind.Preference))];
+
+        var entry = new TweakDefinition(
+            new TweakId(ResumeEntryId),
+            "End the Windows Update pause",
+            "Ends a pause set in the Settings app by moving its end time to now.",
+            "Resuming must clear whichever pause is in force, not only one this product set.",
+            Category.Updates,
+            Level.Basic,
+            RiskTier.Safe,
+            Scope.Machine,
+            TweakStatus.Verified,
+            Applicability.Any,
+            actions,
+            RestartRequirement.None,
+            [],
+            [],
+            null,
+            [],
+            PauseSources,
+            [],
+            ["windows-update", "pause"]);
+        return _engine.Apply([entry], new ApplyOptions(whatIf, false, false, false, false, ResumeProfileName, false));
+    }
 
     private bool TriggerScan()
     {

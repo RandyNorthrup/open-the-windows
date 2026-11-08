@@ -5,14 +5,15 @@ using OpenTheWindows.App.ViewModels;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Audit;
 using OpenTheWindows.Core.Catalog;
+using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Model;
 using OpenTheWindows.TestSupport.Fakes;
 
 namespace OpenTheWindows.App.Tests.ViewModels;
 
 /// <summary>
-/// The shared category page: level dial selection, search, risk/draft filters
-/// and the detail selection. Driven against the real built-in catalogue and a
+/// The shared category page: level dial selection (Verified, conflict-resolved), search,
+/// the risk / baseline / not-applied filters, scan state badges and the detail selection. Driven against the real built-in catalogue and a
 /// fixed machine so the behaviour is exercised end to end (no UI thread).
 /// </summary>
 public sealed class CategoryPageViewModelTests
@@ -25,7 +26,20 @@ public sealed class CategoryPageViewModelTests
 
     private static CategoryPageViewModel Build(Category category, IApplyFlowLauncher launcher) => Build(category, launcher, new AppSettings());
 
-    private static CategoryPageViewModel Build(Category category, IApplyFlowLauncher launcher, AppSettings settings) => new(category, Catalog, Facts, Baselines, launcher, settings);
+    private static CategoryPageViewModel Build(Category category, IApplyFlowLauncher launcher, AppSettings settings)
+        => new(category, Catalog, Facts, Baselines, launcher, settings, new FakeApplyCoordinator());
+
+    private static CategoryPageViewModel Build(FakeApplyCoordinator coordinator)
+        => new(Category.Privacy, Catalog, Facts, Baselines, new FakeApplyFlowLauncher(), new AppSettings(), coordinator);
+
+    // A scan of the page's first three entries: in place, not applied, managed.
+    private static ScanReport ScanOf(CategoryPageViewModel page) => new(
+        new DateTimeOffset(2026, 11, 7, 9, 0, 0, TimeSpan.Zero), Facts, "GUI scan",
+        [
+            new TweakObservation(page.AllItems[0].Id, ComplianceState.Compliant, RiskTier.Safe, []),
+            new TweakObservation(page.AllItems[1].Id, ComplianceState.Drift, RiskTier.Safe, []),
+            new TweakObservation(page.AllItems[2].Id, ComplianceState.Managed, RiskTier.Safe, []),
+        ]);
 
     [Fact]
     public void Is_the_matching_page_with_applicable_entries()
@@ -58,7 +72,69 @@ public sealed class CategoryPageViewModelTests
         {
             Assert.NotEqual(Level.Off, item.Level);
             Assert.True(item.Level <= Level.Paranoid);
+            Assert.Equal(TweakStatus.Verified, item.Status);
         });
+    }
+
+    [Fact]
+    public void The_level_dial_selects_what_the_named_profile_would()
+    {
+        CategoryPageViewModel page = Build();
+
+        page.Level = Level.Strict;
+
+        HashSet<TweakId> expected = [.. NamedProfile.Select(Catalog, Level.Strict, includeDraft: false)
+            .Where(e => e.Category == Category.Privacy && e.AppliesTo.Matches(Facts))
+            .Select(e => e.Id)];
+        Assert.Equal(expected, [.. page.SelectedItems.Select(i => i.Id)]);
+    }
+
+    [Fact]
+    public async Task Scan_badges_each_entry_and_summarises_the_result()
+    {
+        FakeApplyCoordinator coordinator = new();
+        CategoryPageViewModel page = Build(coordinator);
+        coordinator.ScanToReturn = ScanOf(page);
+
+        await page.ScanCommand.ExecuteAsync(null);
+
+        Assert.Equal(page.AllItems.Count, coordinator.LastScanned!.Count);
+        Assert.True(page.AllItems[0].IsInPlace);
+        Assert.True(page.AllItems[1].IsDrift);
+        Assert.Equal(ComplianceState.Managed, page.AllItems[2].State);
+        Assert.False(page.AllItems[3].HasState);
+        Assert.Equal(string.Empty, page.AllItems[3].StateLabel);
+        Assert.Contains("1 in place, 1 not applied, 1 managed", page.ScanSummary, StringComparison.Ordinal);
+        Assert.Contains(page.AllItems[1].StateLabel, page.AllItems[1].ToString(), StringComparison.Ordinal);
+        Assert.True(page.CanScan);
+    }
+
+    [Fact]
+    public async Task The_not_applied_filter_lists_only_drift_after_a_scan()
+    {
+        FakeApplyCoordinator coordinator = new();
+        CategoryPageViewModel page = Build(coordinator);
+        coordinator.ScanToReturn = ScanOf(page);
+        await page.ScanCommand.ExecuteAsync(null);
+
+        page.DriftOnly = true;
+
+        Assert.Equal(page.AllItems[1], Assert.Single(page.Items));
+        page.DriftOnly = false;
+        Assert.Equal(page.AllItems.Count, page.Items.Count);
+    }
+
+    [Fact]
+    public async Task A_scan_fault_is_reported_in_the_summary()
+    {
+        FakeApplyCoordinator coordinator = new() { ThrowOnScan = true };
+        CategoryPageViewModel page = Build(coordinator);
+
+        await page.ScanCommand.ExecuteAsync(null);
+
+        Assert.Contains("scan failed", page.ScanSummary, StringComparison.Ordinal);
+        Assert.False(page.IsScanning);
+        Assert.All(page.AllItems, i => Assert.False(i.HasState));
     }
 
     [Fact]

@@ -80,6 +80,28 @@ internal static class DisplayLabels
         ApplyState.Managed => "Managed",
         ApplyState.Refused => "Refused",
         ApplyState.NotApplicable => "Not applicable",
+        ApplyState.NotReversible => "Not reversible",
+        _ => state.ToString(),
+    };
+
+    /// <summary>A human-readable label for whether a run's journal can be trusted.</summary>
+    public static string For(JournalIntegrity integrity) => integrity switch
+    {
+        JournalIntegrity.Verified => "Verified",
+        JournalIntegrity.Unverified => "Not yet verified",
+        JournalIntegrity.Tampered => "Journal does not verify",
+        JournalIntegrity.Unreadable => "Journal unreadable",
+        _ => integrity.ToString(),
+    };
+
+    /// <summary>A human-readable label for what a scan found for an entry on this PC.</summary>
+    public static string For(ComplianceState state) => state switch
+    {
+        ComplianceState.Compliant => "In place",
+        ComplianceState.Drift => "Not applied",
+        ComplianceState.Managed => "Managed",
+        ComplianceState.NotApplicable => "Not applicable",
+        ComplianceState.Unknown => "Unknown",
         _ => state.ToString(),
     };
 

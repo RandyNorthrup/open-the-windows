@@ -83,6 +83,7 @@ public sealed class PauseCalculator
         return new PausePlan(start, expiry, days, extended && total > DefaultMaxDays, values);
     }
 
-    private static string Format(DateTimeOffset instant)
+    /// <summary>Formats an instant the way the Settings app writes the pause values (<c>yyyy-MM-ddTHH:mm:ssZ</c>, UTC).</summary>
+    public static string Format(DateTimeOffset instant)
         => instant.UtcDateTime.ToString(IsoUtcFormat, CultureInfo.InvariantCulture);
 }
