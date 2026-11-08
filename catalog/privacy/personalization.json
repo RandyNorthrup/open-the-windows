@@ -163,7 +163,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -216,7 +216,13 @@
         "https://learn.microsoft.com/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-textinput"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "input"
       ]
@@ -230,7 +236,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -263,7 +269,13 @@
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-search",
         "https://learn.microsoft.com/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "search",
         "bing"

@@ -151,6 +151,17 @@ All notable changes to this project are documented here. The format follows
   Windows 11 ships enrolled "Deploy Authority", "Cloud Authority" and "Local Authority" entries,
   which made every unmanaged PC look MDM-enrolled, so pre-existing UAC and logon policy values
   were refused as managed. Found on Windows 11 Pro 25H2 hardware.
+- Reverting a catalogue command now restores what it changed instead of running a fixed revert:
+  the prior audit setting of each subcategory (a fixed `/success:disable` turned off auditing
+  Windows does by default), the prior hibernation state and file type (a fixed `/hibernate on`
+  turned hibernation on where it had been off), the prior 8.3 name setting and the prior active
+  power scheme. The state is captured before the command runs and journaled; journals written
+  before this keep the fixed revert.
+- Reverting a policy value that Windows had set directly (such as the UAC prompt behaviour)
+  restores the value and takes this product's entry back out of the Local Group Policy store,
+  instead of leaving the old value "configured" there.
+- `apply --only` with an entry that does not apply to this edition no longer applies its
+  dependencies on its behalf (Credential Guard on Pro applied virtualization-based security).
 - A rollback or revert of a change that never happened (the write was refused, for example on a
   key administrators may not write) now finds the setting already at its prior value and
   reports it rolled back, instead of failing the same way and reporting a failed rollback.
@@ -161,6 +172,16 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+- 171 Draft catalogue entries are now Verified (323 of 458 in all) after an apply, re-read and
+  revert of each on Windows 11 Pro 25H2 (build 26200) hardware, with the prior value checked
+  after the revert. Entries that failed there stay Draft: three scheduled tasks whose paths
+  moved in 25H2, two values Windows' User Choice Protection driver blocks (the taskbar Widgets
+  button and its policy), two keys administrators cannot write (Teams chat auto-install,
+  classic search indexing), the Ultimate Performance plan, whose scheme copy gets a new GUID,
+  six UAC and logon policy entries (the lab PC is MDM-enrolled, so they were rightly left
+  alone), and two optional-feature removals (WMIC's revert failed; Fax and Scan waited on a
+  pending reboot). Command entries (power, 8.3 names, audit policy) wait for a re-check of the
+  new command revert below.
 - `privacy.defender.never-submit-samples` moved to Paranoid / Advanced risk and now declares a
   conflict with `security.defender.submit-samples-safe`: "never send" also turns off Defender's
   Block at First Sight, which the entry now says plainly.

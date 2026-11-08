@@ -10,7 +10,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -39,7 +39,13 @@
       "sources": [
         "https://github.com/ChrisTitusTech/winutil"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "visual-effects",
         "unverified-ms"
@@ -54,7 +60,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -93,7 +99,13 @@
       "sources": [
         "https://github.com/Raphire/Win11Debloat"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "visual-effects",
         "unverified-ms"
@@ -108,7 +120,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -135,7 +147,13 @@
       "sources": [
         "https://github.com/ChrisTitusTech/winutil"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "visual-effects",
         "unverified-ms"
@@ -150,7 +168,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -177,7 +195,13 @@
       "sources": [
         "https://github.com/farag2/Sophia-Script-for-Windows"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "visual-effects",
         "unverified-ms"
@@ -192,7 +216,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": 22621,
@@ -241,7 +265,13 @@
       "sources": [
         "https://github.com/Raphire/Win11Debloat"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "visual-effects",
         "unverified-ms"
@@ -256,7 +286,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -286,7 +316,13 @@
       "sources": [
         "https://github.com/ChrisTitusTech/winutil"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "visual-effects",
         "unverified-ms"
@@ -301,7 +337,7 @@
       "level": "Strict",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -339,7 +375,13 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsinkworkspace"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "visual-effects"
       ]

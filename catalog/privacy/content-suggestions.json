@@ -10,7 +10,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -42,7 +42,13 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "ads",
         "tracking"
@@ -57,7 +63,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -90,7 +96,13 @@
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://github.com/farag2/Sophia-Script-for-Windows"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "ads",
         "tracking",
@@ -106,7 +118,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -139,7 +151,13 @@
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-start"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "ads",
         "tracking",
@@ -155,7 +173,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": 22621,
@@ -198,7 +216,13 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://github.com/farag2/Sophia-Script-for-Windows"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "nags",
         "account",
@@ -214,7 +238,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -256,7 +280,13 @@
       "sources": [
         "https://github.com/Raphire/Win11Debloat"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "nags",
         "notifications",
@@ -272,7 +302,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -305,7 +335,13 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://github.com/farag2/Sophia-Script-for-Windows"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "nags",
         "explorer",
@@ -321,7 +357,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -353,7 +389,13 @@
       "sources": [
         "https://github.com/Raphire/Win11Debloat"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "nags",
         "unverified-ms"
@@ -368,7 +410,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -401,7 +443,13 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://github.com/farag2/Sophia-Script-for-Windows"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "nags",
         "scoobe",
@@ -474,7 +522,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -506,7 +554,13 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://github.com/farag2/Sophia-Script-for-Windows"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "nags",
         "suggestions"
@@ -573,7 +627,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -609,7 +663,13 @@
       "sources": [
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-wpn"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "nags",
         "notifications",
@@ -729,7 +789,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -771,7 +831,13 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://github.com/farag2/Sophia-Script-for-Windows"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "content",
         "tips",
@@ -787,7 +853,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -840,7 +906,13 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://github.com/farag2/Sophia-Script-for-Windows"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "content",
         "suggestions",
@@ -1084,7 +1156,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -1121,7 +1193,13 @@
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-experience"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "spotlight",
         "suggestions",
@@ -1137,7 +1215,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -1178,7 +1256,13 @@
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://github.com/Raphire/Win11Debloat"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "spotlight",
         "lockscreen"
@@ -1193,7 +1277,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -1226,7 +1310,13 @@
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://github.com/Raphire/Win11Debloat"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "spotlight",
         "lockscreen"

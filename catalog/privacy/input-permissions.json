@@ -184,7 +184,7 @@
       "level": "Basic",
       "risk": "Caution",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -217,7 +217,13 @@
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-speech"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "speech",
         "voice"
@@ -290,7 +296,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -327,7 +333,13 @@
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-speech"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "speech"
       ]
@@ -516,7 +528,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -560,7 +572,13 @@
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-textinput",
         "https://github.com/undergroundwires/privacy.sexy"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "input",
         "ime",
@@ -576,7 +594,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -625,7 +643,13 @@
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-system",
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-locationprovideradm"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "location",
         "sensors",
@@ -641,7 +665,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -678,7 +702,13 @@
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "camera",
         "permissions"
@@ -693,7 +723,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -730,7 +760,13 @@
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "microphone",
         "permissions"
@@ -1093,7 +1129,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -1130,7 +1166,13 @@
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "radios",
         "bluetooth",
@@ -1146,7 +1188,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -1179,7 +1221,13 @@
         "https://learn.microsoft.com/en-us/troubleshoot/windows-client/shell-experience/cannot-set-timezone-automatically",
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "location",
         "permissions"
@@ -1194,7 +1242,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -1228,7 +1276,13 @@
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://github.com/undergroundwires/privacy.sexy"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "camera",
         "permissions",
@@ -1244,7 +1298,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -1278,7 +1332,13 @@
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://github.com/undergroundwires/privacy.sexy"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "microphone",
         "permissions",
@@ -1294,7 +1354,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -1328,7 +1388,13 @@
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy",
         "https://github.com/undergroundwires/privacy.sexy"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "background",
         "permissions",

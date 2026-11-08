@@ -162,9 +162,9 @@ public sealed class CategoryPageViewModelTests
     }
 
     [Fact]
-    public void An_all_draft_section_still_lists_its_entries()
+    public void A_section_lists_its_draft_entries_beside_the_verified_ones()
     {
-        // Every Shell entry ships as Draft; they are shown, never hidden.
+        // Draft entries are listed (and badged), never hidden.
         CategoryPageViewModel page = Build(Category.Shell);
 
         Assert.NotEmpty(page.Items);

@@ -10,7 +10,7 @@
       "level": "Strict",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -43,7 +43,13 @@
         "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-browser-policies/diagnosticdata",
         "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "edge",
         "telemetry"
@@ -218,7 +224,7 @@
       "level": "Paranoid",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -251,7 +257,13 @@
         "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-browser-policies/experimentationandconfigurationservicecontrol",
         "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "edge",
         "telemetry",
@@ -458,7 +470,7 @@
       "level": "Strict",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -490,7 +502,13 @@
       "sources": [
         "https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "edge",
         "cloud"
@@ -755,7 +773,7 @@
       "level": "Strict",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -781,7 +799,13 @@
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://github.com/undergroundwires/privacy.sexy"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "task",
         "telemetry",
@@ -797,7 +821,7 @@
       "level": "Strict",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -829,7 +853,13 @@
         "https://learn.microsoft.com/en-us/windows/deployment/update/wufb-reports-prerequisites",
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "task",
         "telemetry",

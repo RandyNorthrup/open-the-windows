@@ -10,7 +10,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -69,7 +69,13 @@
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
         "https://github.com/scipag/HardeningKitty"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "boot",
         "bitlocker",
@@ -87,7 +93,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -136,7 +142,13 @@
         "https://techcommunity.microsoft.com/blog/microsoft-security-baselines/windows-11-version-24h2-security-baseline/4252801",
         "https://github.com/scipag/HardeningKitty"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "boot",
         "bitlocker",

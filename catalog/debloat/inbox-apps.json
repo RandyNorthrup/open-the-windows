@@ -71,7 +71,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -127,7 +127,9 @@
         "https://learn.microsoft.com/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-experience"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-07" }
+      ],
       "tags": ["ads", "start"]
     },
     {

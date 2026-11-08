@@ -57,7 +57,7 @@
       "level": "Strict",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": 26100,
@@ -87,7 +87,9 @@
         "https://github.com/mxk/windows-secure-group-policy",
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-07" }
+      ],
       "tags": ["sync", "resume", "cross-device"]
     }
   ]

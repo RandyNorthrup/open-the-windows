@@ -75,7 +75,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": 22000,
@@ -108,7 +108,13 @@
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-search",
         "https://github.com/farag2/Sophia-Script-for-Windows"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "search",
         "bing"
@@ -181,7 +187,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -214,7 +220,13 @@
         "https://github.com/undergroundwires/privacy.sexy",
         "https://github.com/Raphire/Win11Debloat"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "search",
         "history"
@@ -287,7 +299,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -324,7 +336,13 @@
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai",
         "https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "ai",
         "copilot"
@@ -339,7 +357,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": 22621,
@@ -372,7 +390,13 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "ai",
         "copilot"
@@ -578,7 +602,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -615,7 +639,13 @@
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai",
         "https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "ai",
         "copilot"

@@ -99,7 +99,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "User",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -139,7 +139,13 @@
       "sources": [
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-applicationmanagement"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "gamer",
         "gaming"

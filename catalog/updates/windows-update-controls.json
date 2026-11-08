@@ -154,7 +154,7 @@
       "level": "Strict",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -206,7 +206,13 @@
         "https://learn.microsoft.com/windows/deployment/update/waas-configure-wufb",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "windows-update",
         "feature-updates",
@@ -222,7 +228,7 @@
       "level": "Strict",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -274,7 +280,13 @@
         "https://learn.microsoft.com/windows/deployment/update/waas-configure-wufb",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "windows-update",
         "feature-updates",
@@ -290,7 +302,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -337,7 +349,13 @@
         "https://learn.microsoft.com/windows/deployment/update/waas-configure-wufb",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "windows-update",
         "quality-updates",
@@ -626,7 +644,7 @@
       "level": "Strict",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -666,7 +684,13 @@
         "https://learn.microsoft.com/windows/deployment/do/waas-delivery-optimization-reference",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-deliveryoptimization"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "windows-update",
         "delivery-optimization",
@@ -731,7 +755,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -767,7 +791,13 @@
       "sources": [
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-admx-windowsstore"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "windows-update",
         "store",
@@ -831,7 +861,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -886,7 +916,13 @@
         "https://learn.microsoft.com/windows/deployment/update/waas-restart",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "windows-update",
         "restart",
@@ -1340,7 +1376,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [
           "Pro",
@@ -1409,7 +1445,13 @@
         "https://learn.microsoft.com/windows/deployment/update/waas-wu-settings",
         "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-update"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "windows-update",
         "automatic-updates",

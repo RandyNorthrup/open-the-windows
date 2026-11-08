@@ -89,7 +89,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -120,7 +120,13 @@
         "https://stigaview.com/products/win11/v2r8/",
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "audit",
         "baseline",
@@ -1177,7 +1183,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -1212,7 +1218,13 @@
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
         "https://github.com/scipag/HardeningKitty"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "media",
         "removable-media"
@@ -1506,7 +1518,7 @@
       "level": "Balanced",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -1539,7 +1551,13 @@
         "https://stigaview.com/products/win11/v2r8/",
         "https://learn.microsoft.com/en-us/windows/security/operating-system-security/device-management/windows-security-configuration-framework/security-compliance-toolkit-10"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "media",
         "dma",
@@ -1606,7 +1624,7 @@
       "level": "Strict",
       "risk": "Breaking",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -1669,7 +1687,13 @@
         "https://learn.microsoft.com/en-us/windows/win32/secauthn/tls-10-11-deprecation-in-windows",
         "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "crypto",
         "tls",
@@ -1685,7 +1709,7 @@
       "level": "Strict",
       "risk": "Breaking",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -1748,7 +1772,13 @@
         "https://learn.microsoft.com/en-us/windows/win32/secauthn/tls-10-11-deprecation-in-windows",
         "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "crypto",
         "tls",
@@ -1764,7 +1794,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -1827,7 +1857,13 @@
         "https://learn.microsoft.com/en-us/windows/win32/secauthn/tls-10-11-deprecation-in-windows",
         "https://www.cyber.gov.au/business-government/secure-design/hardening-technology/hardening-microsoft-windows-11-workstations"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "crypto",
         "tls",
@@ -1843,7 +1879,7 @@
       "level": "Paranoid",
       "risk": "Breaking",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -1876,7 +1912,13 @@
         "https://stigaview.com/products/win11/v2r8/",
         "https://cyber.trackr.live/stig/Windows_11/2/8"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "crypto",
         "fips",

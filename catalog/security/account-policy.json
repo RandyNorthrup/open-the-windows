@@ -10,7 +10,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -40,7 +40,13 @@
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
         "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/enforce-password-history"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "account",
         "password",
@@ -57,7 +63,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -87,7 +93,13 @@
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
         "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/minimum-password-age"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "account",
         "password",
@@ -104,7 +116,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -135,7 +147,13 @@
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
         "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/minimum-password-length"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "account",
         "password",
@@ -152,7 +170,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -183,7 +201,13 @@
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
         "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/password-must-meet-complexity-requirements"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "account",
         "password",
@@ -200,7 +224,7 @@
       "level": "Balanced",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": {
         "editions": [],
         "minBuild": null,
@@ -245,7 +269,13 @@
         "https://www.cisecurity.org/benchmark/microsoft_windows_desktop",
         "https://learn.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/account-lockout-policy"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        {
+          "build": 26200,
+          "edition": "Pro",
+          "date": "2026-11-07"
+        }
+      ],
       "tags": [
         "account",
         "lockout",
