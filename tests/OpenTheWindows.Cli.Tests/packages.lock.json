@@ -231,13 +231,13 @@
       "openthewindows.testsupport": {
         "type": "Project",
         "dependencies": {
-          "OpenTheWindows.Core": "[0.1.0-local, )"
+          "OpenTheWindows.Core": "[0.3.0, )"
         }
       },
       "openthewindows.windows": {
         "type": "Project",
         "dependencies": {
-          "OpenTheWindows.Core": "[0.1.0-local, )",
+          "OpenTheWindows.Core": "[0.3.0, )",
           "System.Diagnostics.EventLog": "[10.0.11, )",
           "System.Management": "[10.0.11, )",
           "System.ServiceProcess.ServiceController": "[10.0.11, )",
@@ -247,8 +247,8 @@
       "otw": {
         "type": "Project",
         "dependencies": {
-          "OpenTheWindows.Core": "[0.1.0-local, )",
-          "OpenTheWindows.Windows": "[0.1.0-local, )",
+          "OpenTheWindows.Core": "[0.3.0, )",
+          "OpenTheWindows.Windows": "[0.3.0, )",
           "System.CommandLine": "[2.0.11, )"
         }
       },

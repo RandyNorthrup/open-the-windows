@@ -98,7 +98,7 @@
       "openthewindows.windows": {
         "type": "Project",
         "dependencies": {
-          "OpenTheWindows.Core": "[0.1.0-local, )",
+          "OpenTheWindows.Core": "[0.3.0, )",
           "System.Management": "[10.0.11, )",
           "System.ServiceProcess.ServiceController": "[10.0.11, )",
           "TaskScheduler": "[2.12.2, )"

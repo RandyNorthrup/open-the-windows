@@ -61,7 +61,7 @@ function Get-VersionPrefix {
     $props = Join-Path $repoRoot 'Directory.Build.props'
     $match = Select-String -Path $props -Pattern '<VersionPrefix>([^<]+)</VersionPrefix>' | Select-Object -First 1
     if ($match) { return $match.Matches[0].Groups[1].Value }
-    return '0.2.0'
+    return '0.3.0'
 }
 
 if ($Version) {

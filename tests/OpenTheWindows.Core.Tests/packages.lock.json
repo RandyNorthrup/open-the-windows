@@ -226,7 +226,7 @@
       "openthewindows.testsupport": {
         "type": "Project",
         "dependencies": {
-          "OpenTheWindows.Core": "[0.1.0-local, )"
+          "OpenTheWindows.Core": "[0.3.0, )"
         }
       },
       "JsonSchema.Net": {

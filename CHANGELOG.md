@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-08
+
 ### Added
 
 - Release signing with Azure Artifact Signing (formerly Trusted Signing), publisher Randy
@@ -222,19 +224,27 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
-- 184 Draft catalogue entries are now Verified (336 of 458 in all) after an apply, re-read and
+- 277 Draft catalogue entries are now Verified (429 of 455 in all) after an apply, re-read and
   revert of each on Windows 11 Pro 25H2 (build 26200) hardware, with the prior value checked
-  after the revert. Entries that failed there stay Draft: three scheduled tasks whose paths
-  moved in 25H2, two values Windows' User Choice Protection driver blocks (the taskbar Widgets
-  button and its policy), two keys administrators cannot write (Teams chat auto-install,
-  classic search indexing), the Ultimate Performance plan, whose scheme copy gets a new GUID,
-  and two optional-feature removals (WMIC's revert failed; Fax and Scan waited on a pending
-  reboot). The six UAC and logon policy entries were verified once the lab PC was taken out of
-  MDM, with apply and revert repeated twice and each value checked after a forced Group Policy
-  refresh. The command entries (power plan, hibernation, 8.3 names, audit policy) were
-  re-checked with the new command revert below, with every audit subcategory, the power scheme,
-  hibernation and the 8.3 setting compared before and after; "reduced hibernation file" stays
-  Draft because on a PC with hibernation off it turns hibernation on.
+  after the revert. Settings already compliant on the lab PC were first set to their
+  non-compliant value. The six UAC and logon policy entries were verified once the lab PC was
+  taken out of MDM, with apply and revert repeated twice and each value checked after a forced
+  Group Policy refresh. The command entries (power plan, hibernation, 8.3 names, audit policy)
+  were compared before and after. Optional-feature removals went through a full remove, restart,
+  re-add, restart cycle. App removals cannot be undone, so for the 44 of those Verified means the
+  app was gone for every user and deprovisioned, the scan agreed, and the revert reported it as
+  not reversible; apps the lab PC did not have were installed from the Microsoft Store first.
+  Level dials and built-in profiles select Verified entries, so they now include these app and
+  feature removals at their levels: 15 app removals at Basic, 14 more at Balanced and 15 more at
+  Strict (Advanced risk still needs `--allow-advanced`).
+- 26 entries stay Draft because they could not be proven on the lab PC: 12 policies that Windows
+  applies only on Enterprise and Education; five apps that are no longer in the Store or could
+  not be reinstalled (Cortana, Xbox Game Bar Plugin, Remote Desktop, Whiteboard, Candy Crush Saga);
+  six components absent from 25H2 (PowerShell 2.0, WordPad, AllJoyn Router, Mixed Reality services,
+  PNRP, the ProgramDataUpdater task); USB selective suspend, which this hardware does not have;
+  Internet Explorer 11, which Windows Update does not offer back once removed, so a revert cannot
+  restore it (the entry now says so); and Defender real-time protection, which can only be tested
+  from the off state with Tamper Protection turned off in Windows Security.
 - Reverting a policy value that Windows had set directly (such as the UAC prompt behaviour)
   restores the old value through Local Group Policy, where it then shows as configured. Taking
   the entry out of Registry.pol instead makes Group Policy delete the live value at its next

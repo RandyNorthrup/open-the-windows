@@ -5,7 +5,7 @@
 .DESCRIPTION
         pwsh build/publish.ps1                       # win-x64 + win-arm64, self-contained
         pwsh build/publish.ps1 -Runtime win-x64      # one runtime
-        pwsh build/publish.ps1 -Version 0.2.0        # stamp a release version
+        pwsh build/publish.ps1 -Version 0.3.0        # stamp a release version
 
     Output: artifacts/publish/<runtime>/cli/otw.exe (single-file, self-contained, NOT trimmed: ~100 MB)
             artifacts/publish/<runtime>/app/OpenTheWindows.exe (+ files; WPF cannot single-file trim)

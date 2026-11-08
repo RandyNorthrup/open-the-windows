@@ -95,7 +95,7 @@
       "openthewindows.windows": {
         "type": "Project",
         "dependencies": {
-          "OpenTheWindows.Core": "[0.2.0, )",
+          "OpenTheWindows.Core": "[0.3.0, )",
           "System.Diagnostics.EventLog": "[10.0.11, )",
           "System.Management": "[10.0.11, )",
           "System.ServiceProcess.ServiceController": "[10.0.11, )",
