@@ -147,6 +147,13 @@ All notable changes to this project are documented here. The format follows
   run (non-interactive) must pass `--yes` instead of waiting for input.
 - `updates hide`/`unhide` now re-read the Windows Update Agent after the change and report an
   update that did not take the new state.
+- MDM enrolment is detected only from an enrollment that names a management server. Stock
+  Windows 11 ships enrolled "Deploy Authority", "Cloud Authority" and "Local Authority" entries,
+  which made every unmanaged PC look MDM-enrolled, so pre-existing UAC and logon policy values
+  were refused as managed. Found on Windows 11 Pro 25H2 hardware.
+- A rollback or revert of a change that never happened (the write was refused, for example on a
+  key administrators may not write) now finds the setting already at its prior value and
+  reports it rolled back, instead of failing the same way and reporting a failed rollback.
 - `updates resume` (CLI and GUI) also ends a pause set in the Settings app, which it used to
   leave in place while reporting that updates were not paused.
 - GUI: reading the update status, previewing a run and loading history no longer block the

@@ -1130,4 +1130,20 @@ public sealed class ApplyEngineTests
         Assert.Equal(ApplyState.Applied, record.Entries[0].Result);
         Assert.Throws<ArgumentNullException>(() => h.Engine.RevertEverything(null!));
     }
+
+    [Fact]
+    public void A_write_that_was_refused_and_never_happened_rolls_back_without_writing()
+    {
+        // Every write is refused (as for a key administrators may not write): the apply fails,
+        // and the rollback finds the value already at its prior state instead of failing the same way.
+        var machine = new FakeMachine { ThrowFromWrite = 1 };
+        ApplyHarness h = FakeApplyEngine.Create(machine);
+
+        ApplyResult result = h.Engine.Apply([Entry("privacy.test.denied", [Reg("A", 1)])], Opts());
+
+        Assert.Equal(RunState.RolledBack, result.State);
+        Assert.Equal(ApplyState.Failed, Assert.Single(result.Entries).Result);
+        Assert.False(Exists(machine, "A"));
+        Assert.Equal(1, machine.WriteCount);
+    }
 }

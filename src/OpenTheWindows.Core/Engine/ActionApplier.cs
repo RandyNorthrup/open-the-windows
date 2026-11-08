@@ -261,6 +261,11 @@ public sealed class ActionApplier
             throw new RefusedOperationException(refusal);
         }
 
+        if (AlreadyRestored(action, prior, userSid))
+        {
+            return;
+        }
+
         switch (action)
         {
             case RegistryAction r:
@@ -456,6 +461,31 @@ public sealed class ActionApplier
         return snapshot is { Exists: true, Type: { } actualType, Data: { } actualData }
             && actualType == type
             && StateComparison.RegistryEquals(actualData, data, type);
+    }
+
+    /// <summary>
+    /// Whether the machine already holds <paramref name="prior"/> for <paramref name="action"/>, so a
+    /// restore has nothing to write — for example when the apply's write was refused (access denied,
+    /// a protected value) and never happened; writing anyway would fail the same way and report a
+    /// failed rollback for a change that was never made. Only kinds whose prior state is fully
+    /// re-read qualify: a service's running state, an app package and a command are always restored.
+    /// A read that fails means "not known to be restored".
+    /// </summary>
+    private bool AlreadyRestored(ITweakAction action, JournalActionState? prior, string? userSid)
+    {
+        if (action is ServiceAction or AppxAction or CommandAction)
+        {
+            return false;
+        }
+
+        try
+        {
+            return VerifyRestored(action, prior, userSid);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException or InvalidOperationException)
+        {
+            return false;
+        }
     }
 
     private void RestoreRegistry(RegistryAction action, JournalActionState? prior, string? userSid)

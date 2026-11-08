@@ -16,6 +16,7 @@ internal static partial class DeviceManagement
     private const string EnrollmentsKey = @"SOFTWARE\Microsoft\Enrollments";
     private const string EnrollmentStateValue = "EnrollmentState";
     private const string ProviderIdValue = "ProviderID";
+    private const string DiscoveryUrlValue = "DiscoveryServiceFullURL";
     private const int EnrolledState = 1;
     private const int NetSetupDomainName = 3;
     private const int Success = 0;
@@ -43,8 +44,11 @@ internal static partial class DeviceManagement
         foreach (string name in enrollments.GetSubKeyNames())
         {
             using RegistryKey? enrollment = enrollments.OpenSubKey(name, writable: false);
+            // Stock Windows ships enrolled "Deploy/Cloud/Local Authority" entries with a provider id
+            // but no management server; only a real MDM enrollment records the server it found.
             if (enrollment?.GetValue(EnrollmentStateValue) is int state && state == EnrolledState
-                && enrollment.GetValue(ProviderIdValue) is string provider && provider.Length > 0)
+                && enrollment.GetValue(ProviderIdValue) is string provider && provider.Length > 0
+                && enrollment.GetValue(DiscoveryUrlValue) is string discovery && discovery.Length > 0)
             {
                 return true;
             }
