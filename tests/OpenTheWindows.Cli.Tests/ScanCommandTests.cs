@@ -35,13 +35,13 @@ public sealed class ScanCommandTests
     }
 
     [Fact]
-    public void Unknown_profile_exits_2()
+    public void Unknown_profile_exits_4()
     {
         var (root, stdout, stderr) = Build();
 
         int code = CliTestHost.Invoke(root, stdout, stderr, "scan", "--profile", "nope");
 
-        Assert.Equal(ExitCodes.Error, code);
+        Assert.Equal(ExitCodes.InvalidInput, code);
         Assert.Contains("Unknown profile", stderr.ToString(), StringComparison.Ordinal);
     }
 
@@ -98,7 +98,7 @@ public sealed class ScanCommandTests
 
         int code = CliTestHost.Invoke(root, stdout, stderr, "scan");
 
-        Assert.Equal(ExitCodes.Error, code);
+        Assert.Equal(ExitCodes.InvalidInput, code);
         Assert.Contains("--profile' is required", stderr.ToString(), StringComparison.Ordinal);
     }
 
@@ -170,7 +170,7 @@ public sealed class ScanCommandTests
 
             int code = CliTestHost.Invoke(root, stdout, stderr, "scan", "--profile", path, "--json");
 
-            Assert.Equal(ExitCodes.Error, code);
+            Assert.Equal(ExitCodes.InvalidInput, code);
             Assert.Contains(ProfilePolicy.RequireSignedProfilesValueName, stderr.ToString(), StringComparison.Ordinal);
         }
         finally

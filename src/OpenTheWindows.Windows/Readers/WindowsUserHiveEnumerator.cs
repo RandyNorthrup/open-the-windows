@@ -16,6 +16,8 @@ namespace OpenTheWindows.Windows.Readers;
 [SupportedOSPlatform("windows")]
 public sealed class WindowsUserHiveEnumerator : IUserHiveEnumerator
 {
+    private const string HiveFileName = "NTUSER.DAT";
+    private const string StaleProfileSuffix = ".bak";
     private const string ProfileListPath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList";
     private const string ProfileImagePathValue = "ProfileImagePath";
 
@@ -45,8 +47,17 @@ public sealed class WindowsUserHiveEnumerator : IUserHiveEnumerator
                 continue;
             }
 
+            string expanded = Environment.ExpandEnvironmentVariables(profilePath);
             using RegistryKey? loadedHive = users.OpenSubKey(sid, writable: false);
-            profiles.Add(new UserProfile(sid, Environment.ExpandEnvironmentVariables(profilePath), loadedHive is not null));
+
+            // A profile whose hive file is gone (a deleted or half-removed account) cannot be
+            // loaded; it is not a user to re-enforce.
+            if (loadedHive is null && !File.Exists(Path.Combine(expanded, HiveFileName)))
+            {
+                continue;
+            }
+
+            profiles.Add(new UserProfile(sid, expanded, loadedHive is not null));
         }
 
         profiles.Sort(static (a, b) => string.CompareOrdinal(a.Sid, b.Sid));
@@ -55,7 +66,9 @@ public sealed class WindowsUserHiveEnumerator : IUserHiveEnumerator
 
     // Real accounts are S-1-5-21-<authority>-<rid> (local + AD) or S-1-12-1-<...> (Azure AD).
     // Everything else in ProfileList (S-1-5-18/19/20 service accounts, .DEFAULT) is not a real user.
+    // A '.bak' key is the stale copy Windows leaves after a profile was re-created.
     private static bool IsRealUserSid(string sid)
-        => sid.StartsWith("S-1-5-21-", StringComparison.OrdinalIgnoreCase)
-            || sid.StartsWith("S-1-12-1-", StringComparison.OrdinalIgnoreCase);
+        => (sid.StartsWith("S-1-5-21-", StringComparison.OrdinalIgnoreCase)
+                || sid.StartsWith("S-1-12-1-", StringComparison.OrdinalIgnoreCase))
+            && !sid.EndsWith(StaleProfileSuffix, StringComparison.OrdinalIgnoreCase);
 }

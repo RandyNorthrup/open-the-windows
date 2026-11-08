@@ -54,4 +54,18 @@ public sealed class ActiveSetupFallbackTests
     [InlineData("   ")]
     public void For_rejects_a_blank_id(string id)
         => Assert.Throws<ArgumentException>(() => ActiveSetupFallback.For(id, "name", Exe));
+
+    [Fact]
+    public void For_names_a_staged_profile_file_by_its_quoted_path()
+    {
+        const string Staged = @"C:\ProgramData\OpenTheWindows\profiles\custom.json";
+
+        ActiveSetupComponent component = ActiveSetupFallback.For("custom", "OTW Custom", Exe, Staged);
+
+        Assert.EndsWith("--profile \"" + Staged + "\"", component.StubPath, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void For_rejects_a_path_with_a_quote()
+        => Assert.Throws<ArgumentException>(() => ActiveSetupFallback.For("custom", "OTW", Exe, "C:\\x\" --evil"));
 }

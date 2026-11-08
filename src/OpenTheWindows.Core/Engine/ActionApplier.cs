@@ -36,18 +36,19 @@ public sealed class ActionApplier
     public string? CheckRefusal(ITweakAction action)
     {
         ArgumentNullException.ThrowIfNull(action);
-        return action switch
-        {
-            ServiceAction s => ServiceRefusal(s.Name),
-            CommandAction c => CommandAction.AllowedExecutables.Contains(c.Executable)
-                ? null
-                : string.Create(CultureInfo.InvariantCulture, $"Executable '{c.Executable}' is not on the command allow-list."),
-            RegistryAction r when DefenderSafety.RefusesRegistry(r) =>
-                string.Create(CultureInfo.InvariantCulture, $"Writing under '{DefenderSafety.SignatureUpdatesPathFragment}' would interfere with Defender security-intelligence updates."),
-            DefenderPreferenceAction d when DefenderSafety.RefusesDefender(d) =>
-                string.Create(CultureInfo.InvariantCulture, $"Defender preference '{d.Property}' would disable a protection and must not be changed."),
-            _ => null,
-        };
+        return action is ServiceAction service ? ServiceRefusal(service.Name) : ActionSafety.ApplyRefusal(action);
+    }
+
+    /// <summary>
+    /// Returns why restoring <paramref name="prior"/> through <paramref name="action"/>
+    /// (rollback or revert) is refused, or <see langword="null"/> when it is permitted.
+    /// Revert checks every action with this before it changes anything, so a journal
+    /// can never drive a write into a protected location.
+    /// </summary>
+    public static string? CheckRestoreRefusal(ITweakAction action, JournalActionState? prior)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        return ActionSafety.RestoreRefusal(action, prior);
     }
 
     /// <summary>Reads the current on-machine state for the journal's <c>prior</c>; <see langword="null"/> for kinds with no revertible prior.</summary>
@@ -67,6 +68,20 @@ public sealed class ActionApplier
             CommandAction => null,
             _ => null,
         };
+    }
+
+    /// <summary>
+    /// Whether the action would overwrite an existing registry value whose type the
+    /// reader cannot represent (for example <c>REG_NONE</c> or <c>REG_RESOURCE_LIST</c>).
+    /// Such a value cannot be captured for revert — restoring it would delete it — so
+    /// the planner refuses the action instead of destroying the original.
+    /// </summary>
+    public bool HasUncapturablePrior(ITweakAction action, string? userSid)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        return action is RegistryAction r
+            && (r.Hive != RegistryHive.User || userSid is not null)
+            && _readers.Registry.Read(r.Hive, HiveSid(r.Hive, userSid), r.Path, r.Name) is { Exists: true, Type: null };
     }
 
     /// <summary>The desired state as a journal state, for the journal's <c>desired</c>.</summary>
@@ -112,6 +127,17 @@ public sealed class ActionApplier
     }
 
     /// <summary>
+    /// Whether the action cannot run without a specific user's SID: a user-hive registry
+    /// value or a current-user app removal. An all-users app removal deprovisions the
+    /// package machine-wide and needs no user.
+    /// </summary>
+    public static bool RequiresUser(ITweakAction action)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        return action is RegistryAction { Hive: RegistryHive.User } or AppxAction { Mode: AppxRemovalMode.CurrentUser };
+    }
+
+    /// <summary>
     /// The user SID an action actually writes under: the target user's SID for a
     /// user-scoped action, and <see langword="null"/> for a machine-scope action
     /// that ignores the SID. Journaled per action so revert and rollback restore
@@ -124,6 +150,11 @@ public sealed class ActionApplier
     public void Apply(ITweakAction action, string? userSid)
     {
         ArgumentNullException.ThrowIfNull(action);
+        if (ActionSafety.ApplyRefusal(action) is { } refusal)
+        {
+            throw new RefusedOperationException(refusal);
+        }
+
         switch (action)
         {
             case RegistryAction r:
@@ -198,17 +229,45 @@ public sealed class ActionApplier
         };
     }
 
+    /// <summary>
+    /// Whether <see cref="Restore"/> can put <paramref name="prior"/> back for
+    /// <paramref name="action"/>. A removed app package (its files are gone) and a
+    /// setting whose prior value could not be read cannot be restored; rollback and
+    /// revert report those as not reversible instead of claiming success.
+    /// </summary>
+    public static bool CanRestore(ITweakAction action, JournalActionState? prior)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        return action switch
+        {
+            RegistryAction or CommandAction => true,
+            ServiceAction => prior is { StartType: not null },
+            ScheduledTaskAction => prior is { Exists: true, Enabled: not null },
+            AppxAction => prior is { InstalledForAnyUser: false },
+            OptionalFeatureAction => prior is { Exists: true, Enabled: not null },
+            DefenderPreferenceAction => prior is { Data: not null },
+            PowerSettingAction => prior is { Ac: not null, Dc: not null },
+            SecurityPolicyAction => prior is { SecurityValue: not null },
+            _ => false,
+        };
+    }
+
     /// <summary>Restores a captured prior state (revert/rollback). For commands this runs the revert arguments.</summary>
     public void Restore(ITweakAction action, JournalActionState? prior, string? userSid)
     {
         ArgumentNullException.ThrowIfNull(action);
+        if (ActionSafety.RestoreRefusal(action, prior) is { } refusal)
+        {
+            throw new RefusedOperationException(refusal);
+        }
+
         switch (action)
         {
             case RegistryAction r:
                 RestoreRegistry(r, prior, userSid);
                 break;
             case ServiceAction s when prior is { StartType: { } startType }:
-                _writers.Services.SetStartType(s.Name, startType);
+                RestoreService(s.Name, startType, prior.Running == true);
                 break;
             case ScheduledTaskAction t when prior is { Exists: true, Enabled: { } enabled }:
                 _writers.Tasks.SetEnabled(t.Path, enabled);
@@ -276,12 +335,25 @@ public sealed class ActionApplier
         }
     }
 
+    /// <summary>
+    /// Restores a service's start type and, when it was running before the change
+    /// (an apply with <c>stopIfRunning</c> stopped it), starts it again so a revert
+    /// does not leave the service down until the next reboot.
+    /// </summary>
+    private void RestoreService(string name, ServiceStartType startType, bool wasRunning)
+    {
+        _writers.Services.SetStartType(name, startType);
+        if (wasRunning && startType != ServiceStartType.Disabled && _readers.Services.Read(name) is { IsRunning: false })
+        {
+            _writers.Services.StartService(name, ServiceStopTimeout);
+        }
+    }
+
     private void RunCommand(CommandAction action, IReadOnlyList<string> arguments)
     {
-        if (!CommandAction.AllowedExecutables.Contains(action.Executable))
+        if (CommandArgumentPolicy.Refusal(action.Executable, arguments) is { } refusal)
         {
-            throw new RefusedOperationException(
-                string.Create(CultureInfo.InvariantCulture, $"Executable '{action.Executable}' is not on the command allow-list."));
+            throw new RefusedOperationException(refusal);
         }
 
         CommandResult result = _writers.Commands.Run(action.Executable, arguments, CommandTimeout);

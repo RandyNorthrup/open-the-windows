@@ -6,6 +6,85 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Security
+
+- `%ProgramData%\OpenTheWindows` is now kept owned by Administrators and writable only by
+  Administrators and SYSTEM (standard users read; `keys` is administrators-only). Windows
+  lets any user create folders under %ProgramData%, so before this a standard user could
+  pre-create `journal`, `reports`, `audit` or `trusted-keys`, plant a journal that an
+  elevated revert would replay, add a trusted signing key, or junction the reports folder so
+  the SYSTEM task overwrote a file of their choosing. An elevated run repairs the folders
+  (removing links and files a non-administrator planted); an unelevated run refuses an unsafe
+  folder. Verified on Windows 11 Pro 25H2 hardware.
+- Machine journals are sealed with an HMAC-SHA256 under a 256-bit key only administrators and
+  SYSTEM can read, written atomically (temporary file, flush, move), and verified (MAC, owner)
+  before any revert; `otw history` shows each journal's integrity. Revert also re-checks every
+  action against the code-level safety rules before changing anything.
+- New code-level safety rules hold for every catalogue, operator `--catalog-dir`, profile and
+  journal: no write or delete under code-execution and persistence locations (IFEO, Run keys,
+  Winlogon shell, LSA packages, COM server paths, service binaries, Defender exclusions,
+  hosts path), no change to protected services' start configuration, no disabling of Windows
+  Update, Defender, BitLocker or TPM scheduled tasks, and no apply of a value that turns off
+  UAC, Defender, SmartScreen, the firewall or Windows Update access. Catalogue commands are
+  limited to `powercfg`, `auditpol` and `fsutil` with exact argument shapes; the command runner
+  has its own allow-list and refuses rooted paths; `secedit` template values must be plain
+  integers.
+- `otw task install` and the Active Setup logon fallback refuse to register an `otw.exe` that a
+  non-administrator could replace or side-load (for example a portable copy under Downloads or
+  a folder made directly under `C:\`), and copy a profile file into a protected folder first so
+  SYSTEM and other users never read a file a standard user can edit.
+- `RequireSignedProfiles` now also applies to the GUI's imported profiles and to `--catalog-dir`
+  files; a trusted key must live in the protected trust store and be owned by an administrator;
+  the signature is checked over exactly the text that is then parsed; a signed document with a
+  duplicate JSON property never verifies.
+- SeBackupPrivilege and SeRestorePrivilege are enabled only for the duration of a hive load or
+  unload. Startup hooks (`DOTNET_STARTUP_HOOKS`) are disabled in the CLI and GUI. CSV reports
+  neutralise cells that would start a spreadsheet formula. The release workflow anchors its
+  version check and passes the version through the environment.
+
+### Fixed
+
+- Rollback and revert now also restore an action that failed part-way (for example a service
+  whose start type changed before stopping it timed out), and report a change that cannot be
+  put back (a removed app) as `NotReversible` instead of claiming it was undone.
+- A run interrupted by a crash or power loss is rolled back (or, if every action had finished,
+  marked completed) before the next apply or revert. Apply, revert and recovery are serialised
+  machine-wide, so the GUI, CLI and SYSTEM task never interleave. A journal or audit write
+  failure no longer aborts a run half-way.
+- Policy values written through the Local GPO by this product are no longer reported as
+  "managed by Group Policy" on the next run (an ownership ledger tracks them), so switching
+  profiles and remediating drift work. On an MDM-enrolled or domain-joined device, a live
+  policy value from the organisation is now detected as managed and left alone.
+- The `strict` and `paranoid` levels (CLI and GUI dial) settle mutually exclusive entries the
+  way profiles do instead of failing with conflicts.
+- `dependsOn` is a requirement: an entry whose dependency is excluded or not applied is blocked.
+  `--only` brings in the entries it depends on.
+- Per-user entries are reported not applicable when nobody is signed in, instead of failing the
+  run. Under the SYSTEM task or an SSH logon the console user is targeted. Explorer restarts in
+  the target user's own session (RDP included), never another user's.
+- Windows Home: machine policy values are written directly to the live policy key, since Home
+  has no Group Policy engine.
+- Windows capabilities (`~~~~` names such as WMIC, VBScript, WordPad, Steps Recorder) are read
+  and removed through DISM; optional-feature changes pending a reboot verify correctly.
+- Re-pausing Windows Update counts from the start of the pause already in force, so the
+  35-day limit cannot be stepped around. A pause whose revert failed is retried by resume.
+  `updates pause` reports exit code 6 (`Managed`) and changes nothing when policy manages
+  Windows Update, instead of reporting success.
+- Revert refuses, unless `--force`, a run already reverted or one whose settings a later run
+  changed; its record captures offline users' hives after they are loaded; reverting restarts
+  a service the apply had stopped. An existing registry value of a type that cannot be
+  captured is refused rather than destroyed on revert. Stale `.bak` and hive-less user profiles
+  are skipped by all-users runs. `--if-build-changed` compares against the same profile's last
+  completed apply.
+- `scan` with an unknown or refused `--profile` exits with 4 (invalid input), like `apply` and
+  `remediate`. `--json` apply reports include pre-flight blocks.
+
+### Changed
+
+- `privacy.defender.never-submit-samples` moved to Paranoid / Advanced risk and now declares a
+  conflict with `security.defender.submit-samples-safe`: "never send" also turns off Defender's
+  Block at First Sight, which the entry now says plainly.
+
 ## [0.2.0] - 2026-09-06
 
 ### Added

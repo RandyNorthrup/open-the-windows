@@ -74,4 +74,30 @@ public sealed class PauseCalculatorTests
     [Fact]
     public void A_ceiling_below_the_default_cap_is_rejected()
         => Assert.Throws<ArgumentOutOfRangeException>(() => new PauseCalculator(new FixedTimeProvider(At), 10));
+
+    [Fact]
+    public void A_re_pause_keeps_the_original_start_so_the_cap_covers_the_whole_pause()
+    {
+        PausePlan plan = Calc().Calculate(20, continuingFrom: At.AddDays(-10));
+
+        Assert.Equal("2026-08-07T00:00:00Z", Value(plan, WindowsUpdateSettings.PauseUpdatesStartTime));
+        Assert.Equal("2026-09-06T00:00:00Z", Value(plan, WindowsUpdateSettings.PauseUpdatesExpiryTime));
+    }
+
+    [Fact]
+    public void Re_pausing_cannot_hold_updates_beyond_the_cap()
+    {
+        // Paused 30 days ago: another 10 days would make 40 in a row.
+        ArgumentOutOfRangeException error = Assert.Throws<ArgumentOutOfRangeException>(() => Calc().Calculate(10, continuingFrom: At.AddDays(-30)));
+
+        Assert.Contains("in a row", error.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void An_extended_re_pause_is_measured_against_the_extended_ceiling()
+    {
+        PausePlan plan = Calc().Calculate(30, extended: true, continuingFrom: At.AddDays(-30));
+
+        Assert.True(plan.Extended);
+    }
 }

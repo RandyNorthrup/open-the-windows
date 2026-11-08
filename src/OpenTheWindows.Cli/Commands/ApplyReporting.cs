@@ -54,7 +54,7 @@ internal static class ApplyReporting
     /// changes the run's exit code — the machine state was already decided.
     /// </summary>
     public static void RegisterLogonFallback(
-        CliServices services, Profile? profile, ApplyOptions options, ApplyResult result, bool whatIf, TextWriter notices)
+        CliServices services, Profile? profile, string? profileSource, ApplyOptions options, ApplyResult result, bool whatIf, TextWriter notices)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(options);
@@ -73,10 +73,20 @@ internal static class ApplyReporting
             return;
         }
 
-        ActiveSetupComponent component = ActiveSetupFallback.For(
-            profile.Id, string.Create(CultureInfo.InvariantCulture, $"{AppInfo.Title} - {profile.Name}"), executable);
+        // Every user's sign-in runs this file: refuse when a standard user could swap or side-load it.
+        if (services.Hardening.ExecutableGuard.FindWeakness(executable) is { } weakness)
+        {
+            notices.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Applied, but the per-user logon fallback was not registered: {weakness}"));
+            return;
+        }
+
         try
         {
+            string? stagedProfile = profileSource is not null && File.Exists(profileSource)
+                ? ProfileStaging.Stage(profileSource, services.Hardening)
+                : null;
+            ActiveSetupComponent component = ActiveSetupFallback.For(
+                profile.Id, string.Create(CultureInfo.InvariantCulture, $"{AppInfo.Title} - {profile.Name}"), executable, stagedProfile);
             ActiveSetupResult registration = services.CreateActiveSetupRegistrar().Register(component);
             notices.WriteLine(registration.Outcome == ActiveSetupOutcome.SkippedDuringOobe
                 ? string.Create(CultureInfo.InvariantCulture, $"Skipped the per-user logon fallback {registration.ComponentKey} (Windows setup / OOBE in progress).")
@@ -136,7 +146,7 @@ internal static class ApplyReporting
             result.State.ToString(),
             result.Requires.ToString(),
             new ApplyJsonRestore(result.RestorePoint.Status.ToString(), result.RestorePoint.SequenceNumber),
-            result.Plan.Errors,
+            [.. result.Plan.Errors, .. result.Preflight.Blocking.Select(i => string.Create(CultureInfo.InvariantCulture, $"{i.Check}: {i.Detail}"))],
             [.. result.Entries.Select(e => new ApplyJsonEntry(e.Id.Value, e.Result.ToString(), e.Risk.ToString(), e.Requires.ToString(), e.Note))]);
     }
 

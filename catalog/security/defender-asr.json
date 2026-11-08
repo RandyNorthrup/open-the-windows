@@ -204,7 +204,9 @@
       ],
       "requires": "None",
       "dependsOn": [],
-      "conflictsWith": [],
+      "conflictsWith": [
+        "privacy.defender.never-submit-samples"
+      ],
       "managedBy": {
         "policyCsp": "Defender/SubmitSamplesConsent",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\MAPS\\Send file samples when further analysis is required"

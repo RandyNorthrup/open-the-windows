@@ -1,6 +1,8 @@
 using System.Globalization;
 using System.Text;
+using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Catalog.Actions;
+using OpenTheWindows.Core.Engine;
 
 namespace OpenTheWindows.Windows.Writers;
 
@@ -66,6 +68,13 @@ internal static class SecurityTemplate
     /// </summary>
     internal static string BuildMinimal(SecurityPolicySection section, string setting, string value)
     {
+        // An INI line break, bracket or equals sign in either part would smuggle extra
+        // settings (group membership, user rights) into the template; refuse it here too.
+        if (SecurityPolicyValues.Refusal(setting, value) is { } refusal)
+        {
+            throw new RefusedOperationException(refusal);
+        }
+
         var builder = new StringBuilder();
         builder.Append("[Unicode]\r\n");
         builder.Append("Unicode=yes\r\n");

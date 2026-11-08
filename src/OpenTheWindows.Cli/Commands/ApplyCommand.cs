@@ -53,7 +53,7 @@ internal static class ApplyCommand
         var policy = ProfilePolicy.Read(services.CreateRegistryReader());
         if (!CommandSupport.TrySelectEntries(
             catalog, facts, parseResult.GetValue(options.Common.Profile), parseResult.GetValue(options.Common.Only),
-            parseResult.GetValue(options.Common.IncludeDraft), policy, ProfileTrust.DefaultTrustStoreDirectory, ExitCodes.InvalidInput, stderr,
+            parseResult.GetValue(options.Common.IncludeDraft), policy, services.CreateTrustedKeys(), ExitCodes.InvalidInput, stderr,
             out IReadOnlyList<TweakDefinition> entries, out string profileName, out int selectExit, out Profile? selectedProfile))
         {
             return selectExit;
@@ -78,7 +78,7 @@ internal static class ApplyCommand
         }
 
         ApplyResult result = engine.Apply(entries, applyOptions);
-        ApplyReporting.RegisterLogonFallback(services, selectedProfile, applyOptions, result, whatIf, stderr);
+        ApplyReporting.RegisterLogonFallback(services, selectedProfile, parseResult.GetValue(options.Common.Profile), applyOptions, result, whatIf, stderr);
         return Report(result, whatIf, parseResult.GetValue(options.Json), stdout);
     }
 

@@ -196,4 +196,28 @@ public sealed class UpdatesCommandTests
         Assert.Contains("5063878", stdout.ToString(), StringComparison.Ordinal);
         Assert.Contains("Cumulative", stdout.ToString(), StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Pause_on_a_policy_managed_device_reports_managed_and_changes_nothing()
+    {
+        var (root, stdout, stderr, machine) = Build(seed: m =>
+        {
+            foreach (string name in new[]
+            {
+                WindowsUpdateSettings.PauseUpdatesStartTime, WindowsUpdateSettings.PauseUpdatesExpiryTime,
+                WindowsUpdateSettings.PauseFeatureUpdatesStartTime, WindowsUpdateSettings.PauseFeatureUpdatesEndTime,
+                WindowsUpdateSettings.PauseQualityUpdatesStartTime, WindowsUpdateSettings.PauseQualityUpdatesEndTime,
+            })
+            {
+                m.SetManaged(RegistryHive.LocalMachine, WindowsUpdateSettings.UxSettingsPath, name);
+            }
+        });
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "updates", "pause", "--days", "7");
+
+        Assert.Equal(ExitCodes.Managed, code);
+        Assert.DoesNotContain("Paused Windows Update", stdout.ToString(), StringComparison.Ordinal);
+        Assert.False(((IRegistryReader)machine).Read(
+            RegistryHive.LocalMachine, null, WindowsUpdateSettings.UxSettingsPath, WindowsUpdateSettings.PauseUpdatesExpiryTime).Exists);
+    }
 }

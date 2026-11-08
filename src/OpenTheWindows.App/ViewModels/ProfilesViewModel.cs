@@ -29,6 +29,8 @@ internal sealed partial class ProfilesViewModel : ObservableObject, IPageViewMod
     private readonly IApplyFlowLauncher _applyFlow;
     private readonly IFileDialogService _fileDialog;
     private readonly AppSettings _settings;
+    private readonly ITrustedKeySource _trustedKeys;
+    private readonly ProfilePolicy _policy;
     private readonly List<ProfileItemViewModel> _imported = [];
 
     [ObservableProperty]
@@ -37,19 +39,29 @@ internal sealed partial class ProfilesViewModel : ObservableObject, IPageViewMod
     [ObservableProperty]
     private string _status = string.Empty;
 
-    /// <summary>Creates the page and loads the built-in profiles.</summary>
-    public ProfilesViewModel(TweakCatalog catalog, OperatingSystemFacts facts, IApplyFlowLauncher applyFlow, IFileDialogService fileDialog, AppSettings settings)
+    /// <summary>
+    /// Creates the page and loads the built-in profiles. <paramref name="trustedKeys"/>
+    /// and <paramref name="policy"/> decide an imported file's signing state and whether
+    /// the machine's <c>RequireSignedProfiles</c> policy lets it be applied.
+    /// </summary>
+    public ProfilesViewModel(
+        TweakCatalog catalog, OperatingSystemFacts facts, IApplyFlowLauncher applyFlow, IFileDialogService fileDialog, AppSettings settings,
+        ITrustedKeySource trustedKeys, ProfilePolicy policy)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(facts);
         ArgumentNullException.ThrowIfNull(applyFlow);
         ArgumentNullException.ThrowIfNull(fileDialog);
         ArgumentNullException.ThrowIfNull(settings);
+        ArgumentNullException.ThrowIfNull(trustedKeys);
+        ArgumentNullException.ThrowIfNull(policy);
         _catalog = catalog;
         _facts = facts;
         _applyFlow = applyFlow;
         _fileDialog = fileDialog;
         _settings = settings;
+        _trustedKeys = trustedKeys;
+        _policy = policy;
 
         LoadProfiles();
     }
@@ -98,7 +110,12 @@ internal sealed partial class ProfilesViewModel : ObservableObject, IPageViewMod
             return;
         }
 
-        GuiApply.Launch(_applyFlow, item.Name, item.ResolvedEntries, $"profile {item.Profile.Id}", item.Profile.Scope, _settings.CreateRestorePoint);
+        // The profile's own options seed the run, as on the command line; the restore-point
+        // setting can still turn the restore point off.
+        ProfileOptions options = item.Profile.Options;
+        GuiApply.Launch(
+            _applyFlow, item.Name, item.ResolvedEntries, $"profile {item.Profile.Id}", item.Profile.Scope,
+            _settings.CreateRestorePoint && options.RestorePoint, options.RestartExplorer);
     }
 
     /// <summary>Exports the selected profile to a file.</summary>
@@ -138,7 +155,19 @@ internal sealed partial class ProfilesViewModel : ObservableObject, IPageViewMod
             return;
         }
 
-        ProfileLoadResult loaded = ProfileLoader.LoadFile(path);
+        // Read once: the signature is checked over exactly the text that is parsed.
+        string text;
+        try
+        {
+            text = File.ReadAllText(path);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Status = string.Create(CultureInfo.CurrentCulture, $"Import failed: {ex.Message}");
+            return;
+        }
+
+        ProfileLoadResult loaded = ProfileLoader.LoadText(path, text);
         List<string> errors = [.. loaded.Errors.Select(e => e.Message)];
         if (loaded.Profile is null)
         {
@@ -150,14 +179,21 @@ internal sealed partial class ProfilesViewModel : ObservableObject, IPageViewMod
             .Where(i => i.Severity == CatalogIssueSeverity.Error)
             .Select(i => i.Message));
 
-        ProfileItemViewModel item = new(loaded.Profile, _catalog, _facts, InspectSignature(path), isBuiltIn: false, errors);
+        ProfileSignatureStatus signature = InspectSignature(path, text, _trustedKeys);
+        if (_policy.RequireSignedProfiles && signature != ProfileSignatureStatus.Trusted)
+        {
+            errors.Add(string.Create(CultureInfo.CurrentCulture,
+                $"This computer's {ProfilePolicy.RequireSignedProfilesValueName} policy only allows profile files signed by a trusted key."));
+        }
+
+        ProfileItemViewModel item = new(loaded.Profile, _catalog, _facts, signature, isBuiltIn: false, errors);
         _imported.Add(item);
         Profiles.Add(item);
         SelectedProfile = item;
         Status = string.Create(CultureInfo.CurrentCulture, $"Imported “{item.Name}” — {item.SignatureLabel}.");
     }
 
-    private static ProfileSignatureStatus InspectSignature(string profilePath)
+    private static ProfileSignatureStatus InspectSignature(string profilePath, string text, ITrustedKeySource trustedKeys)
     {
         string signaturePath = profilePath + ProfileTrust.SignatureSuffix;
         if (!File.Exists(signaturePath))
@@ -170,17 +206,9 @@ internal sealed partial class ProfilesViewModel : ObservableObject, IPageViewMod
             return ProfileSignatureStatus.Invalid;
         }
 
-        try
-        {
-            string json = File.ReadAllText(profilePath);
-            return ProfileTrust.VerifyAgainstTrustStore(json, signature, ProfileTrust.DefaultTrustStoreDirectory)
-                ? ProfileSignatureStatus.Trusted
-                : ProfileSignatureStatus.Untrusted;
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            return ProfileSignatureStatus.Invalid;
-        }
+        return ProfileTrust.VerifyAgainstTrustStore(text, signature, trustedKeys)
+            ? ProfileSignatureStatus.Trusted
+            : ProfileSignatureStatus.Untrusted;
     }
 
     partial void OnSelectedProfileChanged(ProfileItemViewModel? value)

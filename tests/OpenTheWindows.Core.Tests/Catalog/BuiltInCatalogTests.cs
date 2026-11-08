@@ -88,8 +88,23 @@ public sealed class BuiltInCatalogTests
     }
 
     [Fact]
-    public void Usoclient_is_on_the_command_allow_list()
-        => Assert.Contains("usoclient.exe", CommandAction.AllowedExecutables, StringComparer.OrdinalIgnoreCase);
+    public void The_catalogue_command_allow_list_is_only_the_tools_tweaks_use()
+        => Assert.Equal(
+            ["auditpol.exe", "fsutil.exe", "powercfg.exe"],
+            CommandAction.AllowedExecutables.Order(StringComparer.OrdinalIgnoreCase),
+            StringComparer.OrdinalIgnoreCase);
+
+    [Fact]
+    public void No_built_in_entry_trips_a_code_level_safety_rule()
+    {
+        foreach (TweakDefinition entry in Load().Entries)
+        {
+            foreach (ITweakAction action in entry.Actions)
+            {
+                Assert.Null(ActionSafety.ApplyRefusal(action));
+            }
+        }
+    }
 
     [Fact]
     public void Catalogue_meets_the_M4_total_minimum()
@@ -164,6 +179,31 @@ public sealed class BuiltInCatalogTests
                     default:
                         break;
                 }
+            }
+        }
+    }
+
+    [Fact]
+    public void Only_a_paranoid_opt_in_may_stop_defender_sample_submission()
+    {
+        // "Never send" (2) disables Block at First Sight, so it may never ride in on a default level.
+        const int NeverSend = 2;
+        foreach (TweakDefinition entry in Load().Entries)
+        {
+            bool neverSend = entry.Actions.Any(a => a switch
+            {
+                RegistryAction r => string.Equals(r.Name, "SubmitSamplesConsent", StringComparison.OrdinalIgnoreCase)
+                    && r.Value.ValueKind == System.Text.Json.JsonValueKind.Number && r.Value.GetInt32() == NeverSend,
+                DefenderPreferenceAction d => string.Equals(d.Property, "SubmitSamplesConsent", StringComparison.OrdinalIgnoreCase)
+                    && d.Value.ValueKind == System.Text.Json.JsonValueKind.Number && d.Value.GetInt32() == NeverSend,
+                _ => false,
+            });
+
+            if (neverSend)
+            {
+                Assert.Equal(Level.Paranoid, entry.Level);
+                Assert.True(entry.Risk >= RiskTier.Advanced, entry.Id.Value);
+                Assert.NotEmpty(entry.ConflictsWith);
             }
         }
     }

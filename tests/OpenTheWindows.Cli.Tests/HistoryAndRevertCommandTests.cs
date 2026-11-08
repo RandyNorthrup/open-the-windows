@@ -55,7 +55,7 @@ public sealed class HistoryAndRevertCommandTests
         ApplyEngine engine = harness.Engine;
 
         var (applyRoot, applyOut, applyErr) = Build(engine);
-        int applyCode = CliTestHost.Invoke(applyRoot, applyOut, applyErr, "apply", "--profile", "basic", "--include-draft", "--yes", "--no-restore-point");
+        int applyCode = CliTestHost.Invoke(applyRoot, applyOut, applyErr, "apply", "--only", "privacy.diagnostic-data.required-only", "--yes", "--no-restore-point");
         Assert.True(applyCode is ExitCodes.Success or ExitCodes.RebootRequired);
 
         var (historyRoot, historyOut, historyErr) = Build(engine);

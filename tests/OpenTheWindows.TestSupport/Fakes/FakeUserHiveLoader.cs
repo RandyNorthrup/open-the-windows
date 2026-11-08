@@ -19,7 +19,18 @@ public sealed class FakeUserHiveLoader : IUserHiveLoader
     public bool FailUnload { get; init; }
 
     /// <inheritdoc />
-    public void Load(string mountKey, string hivePath) => _loaded.Add(mountKey);
+    public void Load(string mountKey, string hivePath)
+    {
+        if (FailLoadFor.Contains(mountKey))
+        {
+            throw new IOException(string.Create(CultureInfo.InvariantCulture, $"Load failed for {mountKey}."));
+        }
+
+        _loaded.Add(mountKey);
+    }
+
+    /// <summary>SIDs whose hive fails to load (a missing or locked NTUSER.DAT).</summary>
+    public ISet<string> FailLoadFor { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
     /// <inheritdoc />
     public void Unload(string mountKey)

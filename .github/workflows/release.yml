@@ -67,7 +67,8 @@ jobs:
           else {
             $v = $env:REF_NAME -replace '^v', ''
           }
-          if ($v -notmatch '^\d+\.\d+\.\d+') { throw "Version '$v' is not major.minor.build." }
+          # Anchored at both ends: the value is later used in file names and release titles.
+          if ($v -notmatch '^\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?$') { throw "Version '$v' is not major.minor.build[-prerelease]." }
           "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           Write-Host "Releasing version $v"
 
@@ -99,7 +100,10 @@ jobs:
           "minimumCoverageThresholds:branchCoverage=80"
 
       - name: Package (ZIPs + MSIs + SBOM + SHA256SUMS)
-        run: pwsh build/package.ps1 -Version ${{ steps.ver.outputs.version }}
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        shell: pwsh
+        run: pwsh build/package.ps1 -Version $env:VERSION
 
       - name: Attest build provenance
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
@@ -110,9 +114,11 @@ jobs:
             artifacts/publish/sbom.cdx.json
 
       - name: Extract release notes from CHANGELOG
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
         shell: pwsh
         run: |
-          $version = '${{ steps.ver.outputs.version }}'
+          $version = $env:VERSION
           $lines = Get-Content CHANGELOG.md
           $headings = @("## [$version]", '## [Unreleased]')
           $start = -1
@@ -132,9 +138,10 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.ver.outputs.version }}
         shell: pwsh
         run: |
-          $version = '${{ steps.ver.outputs.version }}'
+          $version = $env:VERSION
           $tag = "v$version"
           $assets = Get-ChildItem artifacts/publish -File |
             Where-Object { $_.Extension -in '.msi', '.zip', '.txt', '.json' } |

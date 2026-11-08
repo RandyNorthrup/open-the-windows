@@ -179,9 +179,25 @@ public sealed class ApplyEngineTests
 
         Assert.Equal(RunState.RolledBack, result.State);
         Assert.Equal(0, ReadDword(machine, "A")); // first entry rolled back
-        JournalAction bAction = h.Journal.Records[0].Entries[1].Actions[0];
-        Assert.False(bAction.Verified);
-        Assert.Equal(ApplyState.Failed, bAction.Result);
+        JournalEntry bEntry = h.Journal.Records[0].Entries[1];
+        Assert.False(bEntry.Actions[0].Verified);
+        Assert.Equal(ApplyState.Failed, bEntry.Result); // the entry that failed stays reported as failed
+        Assert.Equal(ApplyState.RolledBack, bEntry.Actions[0].Result); // and its own write is restored too
+    }
+
+    [Fact]
+    public void A_failed_action_that_had_already_changed_something_is_restored()
+    {
+        var machine = new FakeMachine();
+        machine.SetService(new ServiceSnapshot("Fax", ServiceStartType.Manual, IsRunning: true, IsProtectedProcess: false));
+
+        // Write 1 (start type) succeeds, write 2 (stopping the service) throws: the action is half-applied.
+        machine.ThrowOnWrite = 2;
+        ApplyHarness h = FakeApplyEngine.Create(machine);
+        ApplyResult result = h.Engine.Apply([Entry("test.fax", [new ServiceAction("Fax", ServiceStartType.Disabled, ServiceStartType.Manual, true)])], Opts());
+
+        Assert.Equal(RunState.RolledBack, result.State);
+        Assert.Equal(ServiceStartType.Manual, ((IServiceReader)machine).Read("Fax")!.StartType);
     }
 
     [Fact]
@@ -622,11 +638,23 @@ public sealed class ApplyEngineTests
     {
         var machine = new FakeMachine();
 
-        (ApplyHarness harness, Guid runId) = ApplyOne(machine, new CommandAction("powercfg.exe", ["/x", "on"], ["/x", "off"]));
+        (ApplyHarness harness, Guid runId) = ApplyOne(machine, new CommandAction("powercfg.exe", ["/hibernate", "off"], ["/hibernate", "on"]));
 
-        Assert.Contains(machine.Commands, c => c.Arguments.Contains("on", StringComparer.Ordinal));
-        harness.Engine.Revert(runId, new RevertOptions(false, false));
         Assert.Contains(machine.Commands, c => c.Arguments.Contains("off", StringComparer.Ordinal));
+        harness.Engine.Revert(runId, new RevertOptions(false, false));
+        Assert.Contains(machine.Commands, c => c.Arguments.Contains("on", StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public void A_command_outside_its_permitted_argument_shapes_is_refused_and_never_run()
+    {
+        var machine = new FakeMachine();
+        ApplyHarness h = FakeApplyEngine.Create(machine);
+
+        ApplyResult result = h.Engine.Apply([Entry("test.cmd", [new CommandAction("powercfg.exe", ["/import", @"C:\evil.pow"], ["/hibernate", "on"])])], Opts());
+
+        Assert.Equal(ApplyState.Refused, Assert.Single(result.Entries).Result);
+        Assert.Empty(machine.Commands);
     }
 
     [Fact]
@@ -728,5 +756,263 @@ public sealed class ApplyEngineTests
         Assert.Equal(0, machine.WriteCount);
         Assert.Equal(ApplyState.Skipped, result.Entries[0].Result);
         Assert.Equal(PlanDisposition.Blocked, result.Plan.Entries[0].Disposition);
+    }
+
+    [Fact]
+    public void A_run_lock_held_by_another_process_fails_the_apply_without_writing()
+    {
+        var machine = new FakeMachine();
+        SeedDword(machine, "A", 0);
+        ApplyHarness h = FakeApplyEngine.Create(machine, runLock: new FakeRunLock { HeldElsewhere = true });
+
+        ApplyResult result = h.Engine.Apply([Entry("test.alpha", [Reg("A", 1)])], Opts());
+
+        Assert.Equal(RunState.Failed, result.State);
+        Assert.Contains(result.Plan.Errors, e => e.Contains("Another apply", StringComparison.Ordinal));
+        Assert.Equal(0, machine.WriteCount);
+        Assert.Empty(h.Journal.Records);
+    }
+
+    [Fact]
+    public void A_run_interrupted_mid_write_is_rolled_back_before_the_next_apply()
+    {
+        (ApplyHarness h, FakeMachine machine) = SeededAb();
+        h.Engine.Apply([Entry("test.alpha", [Reg("A", 1)])], Opts());
+
+        // Simulate a crash: the write landed but the journal still says the run and the action are in flight.
+        JournalRecord interrupted = h.Journal.Records[0];
+        interrupted.Result = RunState.InProgress;
+        interrupted.Entries[0].Actions[0].Result = ApplyState.Pending;
+
+        h.Engine.Apply([Entry("test.beta", [Reg("B", 1)])], Opts());
+
+        Assert.Equal(RunState.RolledBack, interrupted.Result);
+        Assert.Equal(0, ReadDword(machine, "A"));
+        Assert.Equal(1, ReadDword(machine, "B"));
+    }
+
+    [Fact]
+    public void A_run_interrupted_after_every_action_finished_is_marked_completed_not_undone()
+    {
+        (ApplyHarness h, FakeMachine machine) = SeededAb();
+        h.Engine.Apply([Entry("test.alpha", [Reg("A", 1)])], Opts());
+        JournalRecord interrupted = h.Journal.Records[0];
+        interrupted.Result = RunState.InProgress;
+
+        IReadOnlyList<Guid>? recovered = h.Engine.RecoverInterrupted();
+
+        Assert.Equal(interrupted.RunId, Assert.Single(recovered!));
+        Assert.Equal(RunState.Completed, interrupted.Result);
+        Assert.Equal(1, ReadDword(machine, "A"));
+    }
+
+    [Fact]
+    public void A_journal_update_failure_rolls_the_run_back()
+    {
+        (ApplyHarness h, FakeMachine machine) = SeededAb();
+        h.Journal.FailUpdateNumber = 1;
+
+        ApplyResult result = h.Engine.Apply([Entry("test.alpha", [Reg("A", 1)]), Entry("test.beta", [Reg("B", 1)])], Opts());
+
+        Assert.Equal(RunState.RolledBack, result.State);
+        Assert.Equal(0, ReadDword(machine, "A"));
+        Assert.Equal(0, ReadDword(machine, "B"));
+    }
+
+    [Fact]
+    public void An_unavailable_audit_trail_does_not_interrupt_a_run()
+    {
+        (ApplyHarness h, FakeMachine machine) = SeededAb();
+        h.Audit.FailWrites = true;
+
+        ApplyResult result = h.Engine.Apply([Entry("test.alpha", [Reg("A", 1)])], Opts());
+
+        Assert.Equal(RunState.Completed, result.State);
+        Assert.Equal(1, ReadDword(machine, "A"));
+    }
+
+    [Fact]
+    public void Reverting_a_run_twice_is_refused_unless_forced()
+    {
+        (ApplyHarness h, FakeMachine machine) = SeededAb();
+        ApplyResult applied = h.Engine.Apply([Entry("test.alpha", [Reg("A", 1)])], Opts());
+        Assert.Equal(RunState.Completed, h.Engine.Revert(applied.RunId, new RevertOptions(false, false)).State);
+        SeedDword(machine, "A", 5);
+
+        RevertResult again = h.Engine.Revert(applied.RunId, new RevertOptions(false, false));
+
+        Assert.Equal(RunState.Failed, again.State);
+        Assert.Contains("already reverted", Assert.Single(again.Entries).Note, StringComparison.Ordinal);
+        Assert.Equal(5, ReadDword(machine, "A"));
+        Assert.Equal(RunState.Completed, h.Engine.Revert(applied.RunId, new RevertOptions(false, false, Force: true)).State);
+        Assert.Equal(0, ReadDword(machine, "A"));
+    }
+
+    [Fact]
+    public void Reverting_an_older_run_that_a_later_run_changed_again_is_refused_unless_forced()
+    {
+        var time = new MutableTimeProvider(FakeApplyEngine.DefaultInstant);
+        var machine = new FakeMachine();
+        SeedDword(machine, "A", 0);
+        ApplyHarness h = FakeApplyEngine.Create(machine, time: time);
+        ApplyResult first = h.Engine.Apply([Entry("test.alpha", [Reg("A", 1)])], Opts());
+        time.Advance(TimeSpan.FromMinutes(1));
+        h.Engine.Apply([Entry("test.alpha-two", [Reg("A", 2)])], Opts());
+        time.Advance(TimeSpan.FromMinutes(1));
+
+        RevertResult refused = h.Engine.Revert(first.RunId, new RevertOptions(false, false));
+
+        Assert.Equal(RunState.Failed, refused.State);
+        Assert.Equal(2, ReadDword(machine, "A"));
+        Assert.Equal(RunState.Completed, h.Engine.Revert(first.RunId, new RevertOptions(false, false, Force: true)).State);
+        Assert.Equal(0, ReadDword(machine, "A"));
+    }
+
+    [Fact]
+    public void Revert_refuses_a_journal_that_would_write_a_code_execution_hook()
+    {
+        var machine = new FakeMachine();
+        ApplyHarness h = FakeApplyEngine.Create(machine);
+        var hook = new RegistryAction(
+            RegistryHive.LocalMachine, @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\sethc.exe",
+            "Debugger", RegistryValueType.Sz, Text("x"), Text(string.Empty),
+            RegistryValueKind.Preference);
+        var forged = new JournalRecord
+        {
+            RunId = Guid.NewGuid(),
+            StartedAt = FakeApplyEngine.DefaultInstant,
+            AppVersion = "0.0.0",
+            Os = new JournalOs(26200, 0, "Professional"),
+            Profile = "forged",
+            Operator = "attacker",
+            RestorePoint = new JournalRestorePoint(false, false, "NotRequested", null),
+            Result = RunState.Completed,
+            Entries =
+            [
+                new JournalEntry
+                {
+                    Id = "forged.entry",
+                    Actions =
+                    [
+                        new JournalAction
+                        {
+                            Kind = hook.Kind,
+                            Target = "ifeo",
+                            Action = hook,
+                            Prior = new JournalActionState { Exists = true, Type = RegistryValueType.Sz, Data = Text("cmd.exe") },
+                            Desired = new JournalActionState(),
+                            Result = ApplyState.Applied,
+                        },
+                    ],
+                    Result = ApplyState.Applied,
+                },
+            ],
+        };
+        h.Journal.Begin(forged);
+
+        RevertResult result = h.Engine.Revert(forged.RunId, new RevertOptions(false, false, Force: true));
+
+        Assert.Equal(RunState.Failed, result.State);
+        Assert.Equal(ApplyState.Refused, Assert.Single(result.Entries).Result);
+        Assert.Equal(0, machine.WriteCount);
+    }
+
+    [Fact]
+    public void Reverting_a_per_user_app_removal_reports_it_not_reversible()
+    {
+        const string Pfn = "Microsoft.Sample_8wekyb3d8bbwe";
+        var machine = new FakeMachine { User = new InteractiveUser("S-1-5-21-U", "PC\\u", true) };
+        machine.SetAppx(Pfn, new AppxSnapshot(InstalledForUser: true, InstalledForAnyUser: true, Provisioned: true, Deprovisioned: false));
+
+        (ApplyHarness harness, Guid runId) = ApplyOne(machine, new AppxAction(Pfn, AppxRemovalMode.CurrentUser, "Reinstall from the Store."));
+        RevertResult reverted = harness.Engine.Revert(runId, new RevertOptions(false, false));
+
+        Assert.Equal(RunState.Failed, reverted.State);
+        Assert.Equal(ApplyState.NotReversible, Assert.Single(reverted.Entries).Result);
+    }
+
+    [Fact]
+    public void An_entry_whose_dependency_is_not_in_the_run_is_blocked()
+    {
+        (ApplyHarness h, FakeMachine machine) = SeededAb();
+
+        ApplyResult result = h.Engine.Apply(
+            [Entry("test.beta", [Reg("B", 1)], dependsOn: [new TweakId("test.alpha")])], Opts());
+
+        EntryOutcome outcome = Assert.Single(result.Entries);
+        Assert.Equal(ApplyState.Skipped, outcome.Result);
+        Assert.Contains("requires test.alpha", outcome.Note, StringComparison.Ordinal);
+        Assert.Equal(0, ReadDword(machine, "B"));
+    }
+
+    [Fact]
+    public void An_entry_whose_dependency_is_applied_in_the_same_run_proceeds()
+    {
+        (ApplyHarness h, FakeMachine machine) = SeededAb();
+
+        ApplyResult result = h.Engine.Apply(
+            [Entry("test.beta", [Reg("B", 1)], dependsOn: [new TweakId("test.alpha")]), Entry("test.alpha", [Reg("A", 1)])], Opts());
+
+        Assert.Equal(RunState.Completed, result.State);
+        Assert.Equal(1, ReadDword(machine, "A"));
+        Assert.Equal(1, ReadDword(machine, "B"));
+    }
+
+    [Fact]
+    public void A_per_user_entry_with_nobody_signed_in_is_not_applicable_instead_of_failing()
+    {
+        var machine = new FakeMachine { User = null };
+        ApplyHarness h = FakeApplyEngine.Create(machine);
+
+        ApplyResult result = h.Engine.Apply([Entry("test.user", [Reg("U", 1, hive: RegistryHive.User)])], Opts());
+
+        Assert.Equal(RunState.Completed, result.State);
+        Assert.Equal(ApplyState.NotApplicable, Assert.Single(result.Entries).Result);
+        Assert.Equal(0, machine.WriteCount);
+    }
+
+    [Fact]
+    public void An_existing_value_of_an_uncapturable_type_is_refused_rather_than_destroyed()
+    {
+        var machine = new FakeMachine();
+        machine.SetUncapturableRegistry(RegistryHive.LocalMachine, null, Path, "A");
+        ApplyHarness h = FakeApplyEngine.Create(machine);
+
+        ApplyResult result = h.Engine.Apply([Entry("test.alpha", [Reg("A", 1)])], Opts());
+
+        Assert.Equal(ApplyState.Refused, Assert.Single(result.Entries).Result);
+        Assert.Equal(0, machine.WriteCount);
+    }
+
+    [Fact]
+    public void A_user_whose_hive_cannot_be_loaded_is_skipped_and_the_rest_are_applied()
+    {
+        var machine = new FakeMachine();
+        var loader = new FakeUserHiveLoader();
+        loader.FailLoadFor.Add("S-1-5-21-STALE");
+        ApplyHarness h = FakeApplyEngine.Create(
+            machine, userHives: new FakeUserHiveEnumerator(UserHive("S-1-5-21-A"), UserHive("S-1-5-21-STALE", loaded: false)), hiveLoader: loader);
+
+        ApplyResult result = h.Engine.Apply([Entry("test.user", [Reg("U", 1, hive: RegistryHive.User)])], Opts(scope: Scope.AllUsers));
+
+        Assert.Equal(RunState.Completed, result.State);
+        Assert.Equal(1, ReadUserDword(machine, "S-1-5-21-A", "U"));
+        Assert.Contains(h.Audit.Events, e => e.Message.Contains("S-1-5-21-STALE", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Revert_starts_again_a_service_the_apply_stopped()
+    {
+        var machine = new FakeMachine();
+        machine.SetService(new ServiceSnapshot("Fax", ServiceStartType.Manual, IsRunning: true, IsProtectedProcess: false));
+
+        (ApplyHarness harness, Guid runId) = ApplyOne(machine, new ServiceAction("Fax", ServiceStartType.Disabled, ServiceStartType.Manual, StopIfRunning: true));
+        Assert.False(((IServiceReader)machine).Read("Fax")!.IsRunning);
+
+        harness.Engine.Revert(runId, new RevertOptions(false, false));
+
+        ServiceSnapshot restored = ((IServiceReader)machine).Read("Fax")!;
+        Assert.Equal(ServiceStartType.Manual, restored.StartType);
+        Assert.True(restored.IsRunning);
     }
 }

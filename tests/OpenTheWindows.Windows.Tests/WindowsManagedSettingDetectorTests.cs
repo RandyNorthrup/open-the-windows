@@ -77,4 +77,110 @@ public sealed class WindowsManagedSettingDetectorTests : IDisposable
             Directory.Delete(_root, recursive: true);
         }
     }
+
+    private Windows.Security.PolicyOwnershipLedger Ledger() => new(Path.Combine(_root, "state"), guard: null);
+
+    private static Core.Journal.JournalRecord AppliedPolicyRun(Guid runId, string name, int value, Guid? revertOf = null) => new()
+    {
+        RunId = runId,
+        StartedAt = DateTimeOffset.UnixEpoch,
+        AppVersion = "0.0.0",
+        Os = new Core.Journal.JournalOs(26200, 0, "Professional"),
+        Profile = "test",
+        Operator = "test",
+        RestorePoint = new Core.Journal.JournalRestorePoint(false, false, "NotRequested", null),
+        Result = Core.Journal.RunState.Completed,
+        RevertOf = revertOf,
+        Entries =
+        [
+            new Core.Journal.JournalEntry
+            {
+                Id = "test.policy",
+                Result = Core.Journal.ApplyState.Applied,
+                Actions =
+                [
+                    new Core.Journal.JournalAction
+                    {
+                        Kind = "Registry",
+                        Target = name,
+                        Action = new Core.Catalog.Actions.RegistryAction(
+                            RegistryHive.LocalMachine, PolicyKey, name, RegistryValueType.Dword,
+                            System.Text.Json.JsonSerializer.SerializeToElement(value), System.Text.Json.JsonSerializer.SerializeToElement(0),
+                            RegistryValueKind.Policy),
+                        Desired = new Core.Journal.JournalActionState(),
+                        Result = Core.Journal.ApplyState.Applied,
+                    },
+                ],
+            },
+        ],
+    };
+
+    private static TestSupport.Fakes.FakeMachine LiveFlag(int value)
+    {
+        var machine = new TestSupport.Fakes.FakeMachine();
+        machine.SetRegistry(RegistryHive.LocalMachine, null, PolicyKey, "Flag", RegistryValueType.Dword, System.Text.Json.JsonSerializer.SerializeToElement(value));
+        return machine;
+    }
+
+    [Fact]
+    public void A_local_policy_value_this_product_wrote_is_not_treated_as_managed()
+    {
+        WriteMachinePolicy((PolicyKey, "Flag", 4u, [1, 0, 0, 0]));
+        Windows.Security.PolicyOwnershipLedger ledger = Ledger();
+        ledger.Record(AppliedPolicyRun(Guid.NewGuid(), "Flag", 1));
+
+        var detector = new WindowsManagedSettingDetector(_root, ledger, LiveFlag(1), static () => null);
+
+        Assert.Equal(ManagedState.NotManaged, detector.Detect(RegistryHive.LocalMachine, PolicyKey, "Flag"));
+    }
+
+    [Fact]
+    public void A_local_policy_value_an_administrator_changed_afterwards_is_managed_again()
+    {
+        WriteMachinePolicy((PolicyKey, "Flag", 4u, [2, 0, 0, 0]));
+        Windows.Security.PolicyOwnershipLedger ledger = Ledger();
+        ledger.Record(AppliedPolicyRun(Guid.NewGuid(), "Flag", 1));
+
+        var detector = new WindowsManagedSettingDetector(_root, ledger, LiveFlag(2), static () => null);
+
+        Assert.Equal(ManagedState.GroupPolicy, detector.Detect(RegistryHive.LocalMachine, PolicyKey, "Flag"));
+    }
+
+    [Fact]
+    public void Reverting_the_run_gives_up_ownership()
+    {
+        WriteMachinePolicy((PolicyKey, "Flag", 4u, [1, 0, 0, 0]));
+        Windows.Security.PolicyOwnershipLedger ledger = Ledger();
+        var applied = Guid.NewGuid();
+        ledger.Record(AppliedPolicyRun(applied, "Flag", 1));
+        ledger.Record(AppliedPolicyRun(Guid.NewGuid(), "Flag", 0, revertOf: applied));
+
+        Assert.False(ledger.IsOwned(PolicyKey, "Flag", System.Text.Json.JsonSerializer.SerializeToElement(1)));
+    }
+
+    [Fact]
+    public void On_an_organisation_managed_device_a_live_policy_value_from_elsewhere_is_managed()
+    {
+        var detector = new WindowsManagedSettingDetector(_root, Ledger(), LiveFlag(1), static () => ManagedState.Mdm);
+
+        Assert.Equal(ManagedState.Mdm, detector.Detect(RegistryHive.LocalMachine, PolicyKey, "Flag"));
+        Assert.Equal(ManagedState.NotManaged, detector.Detect(RegistryHive.LocalMachine, PolicyKey, "Absent"));
+    }
+
+    [Fact]
+    public void On_an_unmanaged_device_a_live_policy_value_from_another_tool_is_not_managed()
+    {
+        var detector = new WindowsManagedSettingDetector(_root, Ledger(), LiveFlag(1), static () => null);
+
+        Assert.Equal(ManagedState.NotManaged, detector.Detect(RegistryHive.LocalMachine, PolicyKey, "Flag"));
+    }
+
+    [Fact]
+    public void An_unreadable_ledger_owns_nothing()
+    {
+        Directory.CreateDirectory(Path.Combine(_root, "state"));
+        File.WriteAllText(Path.Combine(_root, "state", "owned-policies.json"), "{ not json");
+
+        Assert.False(Ledger().IsOwned(PolicyKey, "Flag", System.Text.Json.JsonSerializer.SerializeToElement(1)));
+    }
 }

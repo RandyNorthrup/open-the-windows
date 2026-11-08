@@ -63,7 +63,17 @@ public static class ProfileSignature
             return false;
         }
 
-        byte[] canonical = Canonicalize(profileJson);
+        byte[] canonical;
+        try
+        {
+            canonical = Canonicalize(profileJson);
+        }
+        catch (Exception ex) when (ex is JsonException or ArgumentException)
+        {
+            // Not JSON, or JSON with a duplicate property name (ambiguous to any parser): never verifies.
+            return false;
+        }
+
         return publicKey.VerifyData(canonical, raw, HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence);
     }
 

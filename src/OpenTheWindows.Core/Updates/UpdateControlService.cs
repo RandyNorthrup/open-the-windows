@@ -73,7 +73,7 @@ public sealed class UpdateControlService
     /// </summary>
     public PauseOutcome Pause(int days, bool extended = false, bool whatIf = false)
     {
-        PausePlan plan = _pause.Calculate(days, extended);
+        PausePlan plan = _pause.Calculate(days, extended, ActivePauseStart(_time.GetUtcNow()));
 
         if (plan.Extended && !whatIf)
         {
@@ -155,7 +155,8 @@ public sealed class UpdateControlService
     private IReadOnlyList<JournalSummary> FindActivePauses()
     {
         IReadOnlyList<JournalSummary> history = _engine.History();
-        HashSet<Guid> reverted = [.. history.Where(h => h.RevertOf is not null).Select(h => h.RevertOf!.Value)];
+        // Only a revert that completed ends a pause; one that failed leaves it in force, so resume retries it.
+        HashSet<Guid> reverted = [.. history.Where(h => h.RevertOf is not null && h.Result == RunState.Completed).Select(h => h.RevertOf!.Value)];
         return
         [
             .. history
@@ -174,22 +175,24 @@ public sealed class UpdateControlService
     }
 
     private (bool Paused, DateTimeOffset? Until) ReadPauseState(DateTimeOffset now)
+        => ReadInstant(WindowsUpdateSettings.PauseUpdatesExpiryTime) is { } until ? (until > now, until) : (false, null);
+
+    /// <summary>The start of the pause in force now (set by this tool or the Settings app), or <see langword="null"/>.</summary>
+    private DateTimeOffset? ActivePauseStart(DateTimeOffset now)
+        => ReadPauseState(now).Paused ? ReadInstant(WindowsUpdateSettings.PauseUpdatesStartTime) : null;
+
+    private DateTimeOffset? ReadInstant(string valueName)
     {
-        RegistryValueSnapshot snapshot = _registry.Read(
-            RegistryHive.LocalMachine, null, WindowsUpdateSettings.UxSettingsPath, WindowsUpdateSettings.PauseUpdatesExpiryTime);
+        RegistryValueSnapshot snapshot = _registry.Read(RegistryHive.LocalMachine, null, WindowsUpdateSettings.UxSettingsPath, valueName);
         if (snapshot is not { Exists: true, Data: { } data } || data.ValueKind != JsonValueKind.String)
         {
-            return (false, null);
+            return null;
         }
 
-        string text = data.GetString() ?? string.Empty;
-        if (!DateTimeOffset.TryParse(text, CultureInfo.InvariantCulture,
-                DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out DateTimeOffset until))
-        {
-            return (false, null);
-        }
-
-        return (until > now, until);
+        return DateTimeOffset.TryParse(data.GetString() ?? string.Empty, CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out DateTimeOffset instant)
+            ? instant
+            : null;
     }
 
     private string? ReadTargetVersion()

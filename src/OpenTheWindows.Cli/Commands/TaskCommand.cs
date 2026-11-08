@@ -87,6 +87,13 @@ internal static class TaskCommand
             return ExitCodes.Error;
         }
 
+        // The task runs this file as SYSTEM: refuse when a standard user could swap or side-load it.
+        if (services.Hardening.ExecutableGuard.FindWeakness(executable) is { } weakness)
+        {
+            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Refusing to schedule a SYSTEM task: {weakness}"));
+            return ExitCodes.Error;
+        }
+
         return auditBaseline is not null
             ? InstallAuditTask(services, auditBaseline, parseResult.GetValue(outOption), trigger, executable, stdout, stderr)
             : InstallRemediationTask(services, profile, trigger, executable, stdout, stderr);
@@ -102,10 +109,11 @@ internal static class TaskCommand
             return ExitCodes.InvalidInput;
         }
 
-        ScheduledTaskSpec spec = RemediationTask.Build(profile, trigger, executable, RemediationTask.DefaultReportPath);
+        string staged = ProfileStaging.Stage(profile, services.Hardening);
+        ScheduledTaskSpec spec = RemediationTask.Build(staged, trigger, executable, RemediationTask.DefaultReportPath);
         services.CreateTaskInstaller().Install(spec);
         stdout.WriteLine(string.Create(CultureInfo.InvariantCulture,
-            $"Installed task '{spec.TaskPath}' ({trigger}) for profile '{profile}'. Reports: {RemediationTask.DefaultReportPath}"));
+            $"Installed task '{spec.TaskPath}' ({trigger}) for profile '{staged}'. Reports: {RemediationTask.DefaultReportPath}"));
         return ExitCodes.Success;
     }
 
@@ -124,6 +132,8 @@ internal static class TaskCommand
             return ExitCodes.InvalidInput;
         }
 
+        // A relative path would resolve against the task's working folder (System32) at run time.
+        outPath = Path.GetFullPath(outPath);
         ScheduledTaskSpec spec = AuditReportTask.Build(baselineId, trigger, executable, outPath);
         services.CreateTaskInstaller().Install(spec);
         stdout.WriteLine(string.Create(CultureInfo.InvariantCulture,

@@ -212,4 +212,17 @@ public sealed class ReportWriterTests
     }
 
     private sealed record FakeAction(string Kind) : ITweakAction;
+
+    [Theory]
+    [InlineData("=HYPERLINK(\"http://evil\")")]
+    [InlineData("+cmd|' /C calc'!A0")]
+    [InlineData("-2+3")]
+    [InlineData("@SUM(A1)")]
+    public void Csv_never_lets_a_field_start_a_spreadsheet_formula(string value)
+    {
+        string escaped = CsvWriting.Escape(value);
+
+        Assert.DoesNotMatch("^\"?[=+\\-@]", escaped);
+        Assert.Contains(value.Replace("\"", "\"\"", StringComparison.Ordinal), escaped, StringComparison.Ordinal);
+    }
 }

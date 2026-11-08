@@ -52,6 +52,17 @@ public sealed class JournalRecord
     /// <summary>Hash of the newest earlier journal in the directory, or <see langword="null"/> for the first.</summary>
     public string? PreviousHash { get; set; }
 
-    /// <summary>SHA-256 (lowercase hex) of this document with the hash field itself omitted.</summary>
+    /// <summary>
+    /// SHA-256 (lowercase hex) of this document with the hash field itself omitted,
+    /// or, when <see cref="Keyed"/> is set, an HMAC-SHA256 under the machine journal
+    /// key that only administrators and SYSTEM can read.
+    /// </summary>
     public string? Hash { get; set; }
+
+    /// <summary>
+    /// <see langword="true"/> when <see cref="Hash"/> is a machine-keyed HMAC rather
+    /// than a plain hash, so a forged journal cannot be given a valid hash by someone
+    /// who cannot read the key. Omitted (plain hash) for older and per-user journals.
+    /// </summary>
+    public bool? Keyed { get; set; }
 }

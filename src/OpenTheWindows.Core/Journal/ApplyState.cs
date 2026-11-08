@@ -26,4 +26,11 @@ public enum ApplyState
 
     /// <summary>Does not apply to this machine (absent service/task/feature).</summary>
     NotApplicable = 7,
+
+    /// <summary>
+    /// Applied, but rollback or revert cannot put the prior state back (a removed app
+    /// package, or a setting whose prior value could not be read). Reported instead of
+    /// claiming the change was undone.
+    /// </summary>
+    NotReversible = 8,
 }

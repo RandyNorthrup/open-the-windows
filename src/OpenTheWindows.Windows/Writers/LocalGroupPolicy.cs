@@ -27,6 +27,24 @@ internal static class LocalGroupPolicy
     private const uint GpoOpenLoadRegistry = 0x00000001;
     private const uint GpoSectionMachine = 2;
 
+    private static readonly Lazy<bool> Available = new(DetectGroupPolicyEngine);
+
+    /// <summary>
+    /// Whether this edition has the Local Group Policy engine (the GPClass COM server,
+    /// which Windows Home does not ship). Without it there is no Registry.pol and no
+    /// gpupdate to undo a policy value, so machine policy is written to the live
+    /// <c>Software\Policies</c> key directly.
+    /// </summary>
+    public static bool IsAvailable => Available.Value;
+
+    private static bool DetectGroupPolicyEngine()
+    {
+        using var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+        using RegistryKey? server = hklm.OpenSubKey(
+            string.Create(CultureInfo.InvariantCulture, $@"SOFTWARE\Classes\CLSID\{{{GpClass}}}\InprocServer32"), writable: false);
+        return server is not null;
+    }
+
     /// <summary>Writes one machine-policy value into the Local GPO and saves it.</summary>
     /// <remarks>Retried on a brief <c>Registry.pol</c> sharing violation (see <see cref="LocalGroupPolicyRetry"/>).</remarks>
     public static void Write(string path, string name, object value, RegistryValueKind kind)

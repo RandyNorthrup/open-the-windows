@@ -42,8 +42,19 @@ public static class CatalogLoader
     /// built-in entries with the same id; duplicates within the directory are errors.
     /// </summary>
     public static CatalogLoadResult LoadWithDirectory(string directory)
+        => LoadWithDirectory(directory, static _ => []);
+
+    /// <summary>
+    /// As <see cref="LoadWithDirectory(string)"/>, but every directory file is first
+    /// passed to <paramref name="gate"/> with the exact text that will be parsed; a file
+    /// the gate rejects (for example an unsigned file under a signing policy) fails the
+    /// load with the gate's issues. Verifying the parsed text itself means the file
+    /// cannot be swapped between the check and its use.
+    /// </summary>
+    public static CatalogLoadResult LoadWithDirectory(string directory, Func<CatalogSource, IReadOnlyList<CatalogIssue>> gate)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(directory);
+        ArgumentNullException.ThrowIfNull(gate);
         if (!Directory.Exists(directory))
         {
             return new CatalogLoadResult(null,
@@ -54,13 +65,22 @@ public static class CatalogLoader
         }
 
         List<CatalogSource> sources = [.. BuiltInSources()];
+        List<CatalogIssue> rejected = [];
         foreach (string file in Directory.EnumerateFiles(directory, "*" + JsonExtension, SearchOption.AllDirectories)
                      .Order(StringComparer.OrdinalIgnoreCase))
         {
-            sources.Add(new CatalogSource(file, File.ReadAllText(file), CatalogOrigin.Override));
+            var source = new CatalogSource(file, File.ReadAllText(file), CatalogOrigin.Override);
+            IReadOnlyList<CatalogIssue> issues = gate(source);
+            if (issues.Count > 0)
+            {
+                rejected.AddRange(issues);
+                continue;
+            }
+
+            sources.Add(source);
         }
 
-        return Load(sources);
+        return rejected.Count > 0 ? new CatalogLoadResult(null, rejected) : Load(sources);
     }
 
     /// <summary>Loads and validates arbitrary sources (tests, custom hosts).</summary>

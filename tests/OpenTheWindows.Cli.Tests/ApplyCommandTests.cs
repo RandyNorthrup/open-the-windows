@@ -1,4 +1,5 @@
 using System.CommandLine;
+using System.Globalization;
 using System.Text.Json;
 using OpenTheWindows.Core;
 using OpenTheWindows.Core.Abstractions;
@@ -198,7 +199,7 @@ public sealed class ApplyCommandTests
     {
         OperatingSystemFacts facts = FakeOperatingSystemInfo.Windows11Pro24H2();
         string advId = CatalogLoader.LoadBuiltIn().Catalog!.Entries
-            .First(e => e.Risk == RiskTier.Advanced && e.AppliesTo.Matches(facts)).Id.Value;
+            .First(e => e.Risk == RiskTier.Advanced && e.AppliesTo.Matches(facts) && e.Scope == Scope.Machine && e.DependsOn.Count == 0).Id.Value;
         // include forces the Advanced entry into the selection regardless of level; the profile's
         // allowAdvanced then decides whether apply plans it or blocks it.
         string included = ProfileFixtures.ValidProfile.Replace("\"include\": []", $"\"include\": [\"{advId}\"]", StringComparison.Ordinal);
@@ -227,7 +228,11 @@ public sealed class ApplyCommandTests
             Assert.True(code is ExitCodes.Success or ExitCodes.RebootRequired);
             ActiveSetupComponent component = Assert.Single(registrar.Registered);
             Assert.Equal("{OTW-custom-all-users}", component.ComponentKey);
-            Assert.Contains("remediate --user-scope --profile custom-all-users", component.StubPath, StringComparison.Ordinal);
+            // A profile file is staged into the protected folder and the stub names the staged copy,
+            // never the operator's original (which a standard user might be able to edit).
+            string staged = Path.Combine(TestCli.StagingDirectory, Path.GetFileName(path));
+            Assert.Contains(string.Create(CultureInfo.InvariantCulture, $"remediate --user-scope --profile \"{staged}\""), component.StubPath, StringComparison.Ordinal);
+            Assert.True(File.Exists(staged));
         }
         finally
         {

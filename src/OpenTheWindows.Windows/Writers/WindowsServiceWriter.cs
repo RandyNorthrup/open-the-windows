@@ -45,6 +45,22 @@ public sealed class WindowsServiceWriter : IServiceWriter
         controller.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
     }
 
+    /// <inheritdoc />
+    public void StartService(string name, TimeSpan timeout)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        Guard(name);
+
+        using var controller = new ServiceController(name);
+        if (controller.Status is ServiceControllerStatus.Running or ServiceControllerStatus.StartPending)
+        {
+            return;
+        }
+
+        controller.Start();
+        controller.WaitForStatus(ServiceControllerStatus.Running, timeout);
+    }
+
     private static void Guard(string name)
     {
         if (ProtectedServices.IsProtected(name) || ServiceConfig.IsLaunchProtected(name))

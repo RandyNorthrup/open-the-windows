@@ -15,4 +15,7 @@ public interface IServiceWriter
 
     /// <summary>Stops the service if it is running, waiting up to <paramref name="timeout"/>.</summary>
     void StopService(string name, TimeSpan timeout);
+
+    /// <summary>Starts the service if it is stopped, waiting up to <paramref name="timeout"/> (used when a revert restores a service an apply stopped).</summary>
+    void StartService(string name, TimeSpan timeout);
 }

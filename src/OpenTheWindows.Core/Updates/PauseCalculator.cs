@@ -40,12 +40,15 @@ public sealed class PauseCalculator
     }
 
     /// <summary>
-    /// Computes the pause values for <paramref name="days"/> days. Without
+    /// Computes the pause values for <paramref name="days"/> days from now. Without
     /// <paramref name="extended"/> the cap is <see cref="DefaultMaxDays"/>; with it,
-    /// the cap rises to the configured ceiling. Throws
-    /// <see cref="ArgumentOutOfRangeException"/> when the request is out of range.
+    /// the cap rises to the configured ceiling. When a pause is already active,
+    /// <paramref name="continuingFrom"/> is its start: the new pause keeps that start and
+    /// the cap applies to the whole uninterrupted pause, so re-pausing every few days
+    /// cannot hold updates off indefinitely. Throws <see cref="ArgumentOutOfRangeException"/>
+    /// when the request is out of range.
     /// </summary>
-    public PausePlan Calculate(int days, bool extended = false)
+    public PausePlan Calculate(int days, bool extended = false, DateTimeOffset? continuingFrom = null)
     {
         int cap = extended ? _extendedCeilingDays : DefaultMaxDays;
         if (days < MinDays || days > cap)
@@ -54,8 +57,16 @@ public sealed class PauseCalculator
                 string.Create(CultureInfo.InvariantCulture, $"Pause must be between {MinDays} and {cap} days{(extended ? " (extended)" : string.Empty)}."));
         }
 
-        DateTimeOffset start = _time.GetUtcNow();
-        DateTimeOffset expiry = start.AddDays(days);
+        DateTimeOffset now = _time.GetUtcNow();
+        DateTimeOffset start = continuingFrom is { } existing && existing < now ? existing : now;
+        DateTimeOffset expiry = now.AddDays(days);
+        double total = (expiry - start).TotalDays;
+        if (total > cap)
+        {
+            throw new ArgumentOutOfRangeException(nameof(days), days, string.Create(CultureInfo.InvariantCulture,
+                $"Updates have been paused since {start.UtcDateTime:yyyy-MM-dd}; pausing {days} more days would make {Math.Ceiling(total)} days in a row, over the {cap}-day limit{(extended ? " (extended)" : string.Empty)}. Resume and install updates first."));
+        }
+
         string startText = Format(start);
         string expiryText = Format(expiry);
 
@@ -69,7 +80,7 @@ public sealed class PauseCalculator
             new(WindowsUpdateSettings.PauseQualityUpdatesEndTime, expiryText),
         ];
 
-        return new PausePlan(start, expiry, days, extended && days > DefaultMaxDays, values);
+        return new PausePlan(start, expiry, days, extended && total > DefaultMaxDays, values);
     }
 
     private static string Format(DateTimeOffset instant)

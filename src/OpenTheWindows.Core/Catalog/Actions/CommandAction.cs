@@ -13,16 +13,18 @@ public sealed record CommandAction(
     IReadOnlyList<string> Arguments,
     IReadOnlyList<string> RevertArguments) : ITweakAction
 {
-    /// <summary>The closed allow-list of executables a catalogue command may invoke.</summary>
+    /// <summary>
+    /// The closed allow-list of executables a catalogue command may invoke. Each one
+    /// is further limited to specific argument shapes by
+    /// <see cref="CommandArgumentPolicy"/>. Engine-internal tools (<c>dism</c>,
+    /// <c>secedit</c>, <c>usoclient</c>) are run by their own writers, never by a
+    /// catalogue command.
+    /// </summary>
     public static IReadOnlySet<string> AllowedExecutables { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         "powercfg.exe",
-        "netsh.exe",
         "auditpol.exe",
-        "secedit.exe",
-        "dism.exe",
         "fsutil.exe",
-        "usoclient.exe",
     };
 
     /// <inheritdoc />

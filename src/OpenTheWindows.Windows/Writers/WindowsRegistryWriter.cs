@@ -14,7 +14,8 @@ namespace OpenTheWindows.Windows.Writers;
 /// <summary>
 /// Writes and deletes registry values in the 64-bit view. Machine-scope policy
 /// values are written through the Local GPO (so they survive <c>gpupdate</c>)
-/// and mirrored into the live hive for immediate effect; preference values and
+/// and mirrored into the live hive for immediate effect — or, on Windows Home, which
+/// has no Group Policy engine, straight to the live policy key; preference values and
 /// user-scope values are written directly. User-hive writes target
 /// <c>HKEY_USERS\&lt;sid&gt;</c>, never <c>HKEY_CURRENT_USER</c>.
 /// </summary>
@@ -33,7 +34,7 @@ public sealed class WindowsRegistryWriter : IRegistryWriter
         ArgumentNullException.ThrowIfNull(name);
 
         (object value, Win32ValueKind valueKind) = ToRegistryValue(type, data);
-        if (kind == CatalogValueKind.Policy && hive == CatalogHive.LocalMachine)
+        if (kind == CatalogValueKind.Policy && hive == CatalogHive.LocalMachine && LocalGroupPolicy.IsAvailable)
         {
             LocalGroupPolicy.Write(path, name, value, valueKind);
         }
@@ -47,7 +48,7 @@ public sealed class WindowsRegistryWriter : IRegistryWriter
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentNullException.ThrowIfNull(name);
 
-        if (kind == CatalogValueKind.Policy && hive == CatalogHive.LocalMachine)
+        if (kind == CatalogValueKind.Policy && hive == CatalogHive.LocalMachine && LocalGroupPolicy.IsAvailable)
         {
             LocalGroupPolicy.Delete(path, name);
         }

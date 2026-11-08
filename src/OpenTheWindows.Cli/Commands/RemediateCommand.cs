@@ -76,7 +76,7 @@ internal static class RemediateCommand
         var policy = ProfilePolicy.Read(services.CreateRegistryReader());
         if (!CommandSupport.TrySelectEntries(
             catalog, facts, parseResult.GetValue(options.Profile), onlyId: null,
-            parseResult.GetValue(options.IncludeDraft), policy, ProfileTrust.DefaultTrustStoreDirectory, ExitCodes.InvalidInput, stderr,
+            parseResult.GetValue(options.IncludeDraft), policy, services.CreateTrustedKeys(), ExitCodes.InvalidInput, stderr,
             out IReadOnlyList<TweakDefinition> entries, out string profileName, out int selectExit, out Profile? selectedProfile))
         {
             return selectExit;
@@ -84,7 +84,7 @@ internal static class RemediateCommand
 
         if (parseResult.GetValue(options.IfBuildChanged))
         {
-            BuildChangeStatus change = BuildChange.Detect(facts, LatestJournalOs(services));
+            BuildChangeStatus change = BuildChange.Detect(facts, LatestJournalOs(services, profileName));
             if (!change.Changed)
             {
                 stdout.WriteLine(string.Create(CultureInfo.InvariantCulture, $"OS build unchanged ({change.Current}); '{profileName}' not re-applied."));
@@ -98,9 +98,12 @@ internal static class RemediateCommand
         }
 
         ApplyOptions applyOptions = RemediateOptions(parseResult, options, profileName, selectedProfile, whatIf, userScope);
-        ApplyResult result = services.CreateApplyEngine().Apply(entries, applyOptions);
-        ApplyReporting.RegisterLogonFallback(services, selectedProfile, applyOptions, result, whatIf, stderr);
-        WriteReport(result, whatIf, parseResult.GetValue(options.Out), parseResult.GetValue(options.Json), stdout, stderr);
+        // A per-user run writes only the caller's own hive, so it journals under the caller's
+        // profile rather than the administrator-only machine journal.
+        ApplyEngine engine = userScope ? services.Hardening.CreateUserScopeApplyEngine() : services.CreateApplyEngine();
+        ApplyResult result = engine.Apply(entries, applyOptions);
+        ApplyReporting.RegisterLogonFallback(services, selectedProfile, parseResult.GetValue(options.Profile), applyOptions, result, whatIf, stderr);
+        WriteReport(result, whatIf, parseResult.GetValue(options.Out), parseResult.GetValue(options.Json), services.Hardening.DataDirectories, stdout, stderr);
         return ApplyReporting.ExitCode(result, whatIf);
     }
 
@@ -133,14 +136,20 @@ internal static class RemediateCommand
         => [.. entries.Where(ActionApplier.IsUserScoped)];
 
     /// <summary>
-    /// The OS recorded in the most recent journal, or <see langword="null"/> when
-    /// there is no prior run to compare the live build against.
+    /// The OS recorded when <paramref name="profileName"/> was last applied to completion
+    /// (from a verified journal), or <see langword="null"/> when there is no such run to
+    /// compare the live build against. Other runs (an update pause, a revert, another
+    /// profile) are ignored, so they cannot hide a feature update from this check.
     /// </summary>
-    private static JournalOs? LatestJournalOs(CliServices services)
+    private static JournalOs? LatestJournalOs(CliServices services, string profileName)
     {
         IJournalStore journal = services.CreateJournalStore();
-        IReadOnlyList<JournalSummary> history = journal.List();
-        return history.Count == 0 ? null : journal.Load(history[0].RunId).Os;
+        JournalSummary? last = journal.List().FirstOrDefault(s =>
+            s.Integrity == JournalIntegrity.Verified
+            && s.RevertOf is null
+            && s.Result == RunState.Completed
+            && string.Equals(s.Profile, profileName, StringComparison.Ordinal));
+        return last is null ? null : journal.Load(last.RunId).Os;
     }
 
     /// <summary>
@@ -149,7 +158,8 @@ internal static class RemediateCommand
     /// failed file write is reported but does not change the remediation's exit code
     /// — the machine state has already been decided.
     /// </summary>
-    private static void WriteReport(ApplyResult result, bool whatIf, string? outPath, bool json, TextWriter stdout, TextWriter stderr)
+    private static void WriteReport(
+        ApplyResult result, bool whatIf, string? outPath, bool json, ISecureDirectory directories, TextWriter stdout, TextWriter stderr)
     {
         if (outPath is null)
         {
@@ -167,10 +177,12 @@ internal static class RemediateCommand
 
         try
         {
-            string? directory = Path.GetDirectoryName(outPath);
+            // The drift task writes here as SYSTEM: inside the product data folder the
+            // directory is kept administrator-only and link-free before the write.
+            string? directory = Path.GetDirectoryName(Path.GetFullPath(outPath));
             if (!string.IsNullOrEmpty(directory))
             {
-                Directory.CreateDirectory(directory);
+                directories.EnsureSafeForWrite(directory);
             }
 
             File.WriteAllText(outPath, JsonSerializer.Serialize(ApplyReporting.ToJson(result), CliJsonContext.Default.ApplyJsonReport));

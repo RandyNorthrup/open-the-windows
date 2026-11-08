@@ -204,4 +204,43 @@ public sealed class TaskCommandTests
         Assert.Equal(ExitCodes.ElevationRequired, code);
         Assert.Empty(installer.Removed);
     }
+
+    [Fact]
+    public void Install_refuses_an_executable_a_standard_user_could_replace()
+    {
+        var installer = new FakeScheduledTaskInstaller();
+        var guard = new FakeExecutableLocationGuard { Weakness = "'C:\\Tools' can be changed by non-administrators" };
+        var (root, stdout, stderr) = TestCli.ApplyHost(
+            taskInstaller: installer, hardening: TestCli.Hardening(() => FakeApplyEngine.Create(new FakeMachine()).Engine, guard));
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "task", "install", "--profile", "home");
+
+        Assert.Equal(ExitCodes.Error, code);
+        Assert.Empty(installer.Installed);
+        Assert.Contains("non-administrators", stderr.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Install_points_the_task_at_a_protected_copy_of_a_profile_file()
+    {
+        string path = Path.Combine(Path.GetTempPath(), "otw-task-profile-" + Guid.NewGuid().ToString("N") + ".json");
+        File.WriteAllText(path, ProfileFixtures.ValidProfile);
+        try
+        {
+            var installer = new FakeScheduledTaskInstaller();
+            var (root, stdout, stderr) = Build(installer);
+
+            int code = CliTestHost.Invoke(root, stdout, stderr, "task", "install", "--profile", path);
+
+            Assert.Equal(ExitCodes.Success, code);
+            string staged = Path.Combine(TestCli.StagingDirectory, Path.GetFileName(path));
+            Assert.True(File.Exists(staged));
+            Assert.Contains(staged, Assert.Single(installer.Installed).Arguments, StringComparison.Ordinal);
+            Assert.DoesNotContain(path, Assert.Single(installer.Installed).Arguments, StringComparison.Ordinal);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
 }

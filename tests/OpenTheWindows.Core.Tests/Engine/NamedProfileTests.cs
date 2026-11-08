@@ -53,4 +53,17 @@ public sealed class NamedProfileTests
             .ToHashSet(StringComparer.Ordinal);
         Assert.Contains("cat.a.strict-verified", atStrict);
     }
+
+    [Theory]
+    [InlineData(Level.Strict)]
+    [InlineData(Level.Paranoid)]
+    public void Every_level_selects_a_conflict_free_set(Level level)
+    {
+        TweakCatalog catalog = CatalogLoader.LoadBuiltIn().Catalog!;
+
+        IReadOnlyList<TweakDefinition> selected = NamedProfile.Select(catalog, level, includeDraft: true);
+
+        HashSet<TweakId> ids = [.. selected.Select(e => e.Id)];
+        Assert.DoesNotContain(selected, e => e.ConflictsWith.Any(ids.Contains));
+    }
 }

@@ -17,6 +17,7 @@ namespace OpenTheWindows.Core.Engine;
 /// <param name="InteractiveUser">Resolver for the interactive user's SID.</param>
 /// <param name="UserHives">Enumerator of the real user profiles an all-users apply targets.</param>
 /// <param name="HiveLoader">Loads/unloads the hive of a user who is not logged on (all-users apply).</param>
+/// <param name="RunLock">Machine-wide lock serialising apply, revert and crash recovery across processes.</param>
 public sealed record ApplyServices(
     IJournalStore Journal,
     IRestorePointService RestorePoint,
@@ -26,4 +27,5 @@ public sealed record ApplyServices(
     IElevationContext Elevation,
     IInteractiveUserResolver InteractiveUser,
     IUserHiveEnumerator UserHives,
-    IUserHiveLoader HiveLoader);
+    IUserHiveLoader HiveLoader,
+    IRunLock RunLock);

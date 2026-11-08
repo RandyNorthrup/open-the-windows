@@ -95,22 +95,30 @@ Every command takes `--help` for its full options and exit codes, and most take
   `--allow-advanced` / `--allow-breaking`. An all-users profile also reaches
   users who are logged off or added later.
 - **`otw revert <runId|last>`** — restore the exact state captured before a prior
-  run. `otw history` lists past apply and revert runs.
+  run. It refuses a run that was already reverted, or whose settings a later run
+  changed again, unless you pass `--force`; a change that cannot be undone
+  automatically (a removed app) is reported as not reversible. `otw history`
+  lists past apply and revert runs and whether each journal verifies.
 - **`otw remediate --profile <…>`** — the unattended form of apply, for
   automation: it re-applies only the drifted entries, never prompting and never
   overriding a managed (MDM/GPO) setting.
 - **`otw task install --profile <…>`** — register a scheduled task that runs
   `remediate` on a schedule (daily, weekly, at logon, or after a feature update)
-  to keep the machine on-profile. `otw task remove` deletes it.
+  to keep the machine on-profile. `otw task remove` deletes it. The task runs as
+  SYSTEM, so it is refused unless `otw.exe` sits in a folder only administrators
+  can change (the MSI's Program Files install qualifies; a portable copy in
+  Downloads does not), and a profile file is copied to a protected folder first.
 - **`otw audit run --baseline <stig|cis|microsoft|file>`** — score the machine
   against a security baseline (DISA STIG, CIS, or Microsoft), read-only, with a
   0–100 result and a Pass / Fail / Manual verdict per control. Export with
   `--json`, `--csv`, `--html` or `--sarif`.
 - **`otw profile`** — inspect, validate and sign profiles: `list`, `show`,
   `validate`, and `sign` / `verify` (detached ES256 signatures). A machine can be
-  set by policy to require signed profiles.
+  set by policy to require signed profiles; the policy then also covers the GUI
+  and any extra catalogue loaded with `--catalog-dir`.
 - **`otw updates`** — control Windows Update safely and reversibly: `pause --days
-  <1-35>` (with an opt-in extended pause), `resume`, `status` (running version,
+  <1-35>` (with an opt-in extended pause; re-pausing counts from the first day of
+  the pause in force, so the limit cannot be stepped around), `resume`, `status` (running version,
   days to end-of-servicing, and pause state), `hidden`, `hide --kb <id>` and
   `unhide --kb <id>` (per-update hide through the Windows Update Agent).
 - **`otw check-update`** — opt-in query of GitHub Releases for a newer version

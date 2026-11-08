@@ -10,11 +10,13 @@ namespace OpenTheWindows.Core.Engine;
 
 /// <summary>
 /// Transactional apply engine (PLAN §5.3). Plans a run (ordering by dependency,
-/// flagging conflicts, managed and not-applicable entries), then applies it
-/// journal-first: every prior state is written to the journal before the first
-/// machine change, each action is verified after it is applied, and any failure
-/// rolls back every already-applied action of the run in reverse. Revert replays
-/// a prior run's captured state from the journal alone.
+/// flagging conflicts, unmet dependencies, managed and not-applicable entries), then
+/// applies it journal-first: every prior state is written to the journal before the
+/// first machine change, each action is verified after it is applied, and any
+/// failure — including a failed journal update — rolls back every action of the run
+/// that was applied or part-applied, in reverse. Runs are serialised machine-wide,
+/// and a run a crash interrupted is rolled back before the next one starts. Revert
+/// replays a prior run's captured state from the (verified) journal alone.
 /// </summary>
 public sealed class ApplyEngine
 {
@@ -23,11 +25,18 @@ public sealed class ApplyEngine
 
     private static readonly PreflightReport PassingPreflight = new([]);
 
+    /// <summary>How long a run waits for another apply, revert or recovery on this machine to finish.</summary>
+    private static readonly TimeSpan RunLockTimeout = TimeSpan.FromSeconds(30);
+
+    private const string RunLockBusy = "Another apply or revert is running on this machine; try again when it finishes.";
+
     private readonly ScanEngine _scan;
     private readonly ActionApplier _applier;
     private readonly ApplyServices _services;
     private readonly IOperatingSystemInfo _os;
     private readonly TimeProvider _time;
+    private readonly RunJournal _journal;
+    private readonly RunRollback _rollback;
 
     /// <summary>Creates the engine with its scan engine, action applier and services.</summary>
     public ApplyEngine(
@@ -42,6 +51,8 @@ public sealed class ApplyEngine
         _services = services ?? throw new ArgumentNullException(nameof(services));
         _os = os ?? throw new ArgumentNullException(nameof(os));
         _time = time ?? throw new ArgumentNullException(nameof(time));
+        _journal = new RunJournal(services, time);
+        _rollback = new RunRollback(applier, _journal);
     }
 
     /// <summary>Plans an apply run without changing anything (the <c>--what-if</c> output).</summary>
@@ -54,6 +65,18 @@ public sealed class ApplyEngine
 
     /// <summary>Lists prior runs, newest first.</summary>
     public IReadOnlyList<JournalSummary> History() => _services.Journal.List();
+
+    /// <summary>
+    /// Settles any run a crash or power loss left in progress (rolling it back to its
+    /// pre-run state), under the machine run lock. Apply and revert do this first on
+    /// their own; this entry point lets a front end do it on demand. Returns the ids
+    /// of the runs recovered, or <see langword="null"/> when another run holds the lock.
+    /// </summary>
+    public IReadOnlyList<Guid>? RecoverInterrupted()
+    {
+        using IDisposable? held = _services.RunLock.TryAcquire(RunLockTimeout);
+        return held is null ? null : _rollback.RecoverInterrupted();
+    }
 
     /// <summary>Applies a run transactionally, journaling before the first change and rolling back on any failure.</summary>
     public ApplyResult Apply(IEnumerable<TweakDefinition> entries, ApplyOptions options)
@@ -85,10 +108,24 @@ public sealed class ApplyEngine
         PreflightReport preflight = _services.Preflight.Run(options.Scope);
         if (!preflight.CanProceed)
         {
-            Audit(AuditEventId.Error, "Pre-flight blocked the apply run.", null, null);
+            _journal.Audit(AuditEventId.Error, "Pre-flight blocked the apply run.", null, null);
             return new ApplyResult(Guid.Empty, RunState.Failed, RestartRequirement.None, NoRestorePoint, preflight, plan, Outcomes(run, null));
         }
 
+        using IDisposable? held = _services.RunLock.TryAcquire(RunLockTimeout);
+        if (held is null)
+        {
+            PlanResult busy = plan with { Errors = [.. plan.Errors, RunLockBusy] };
+            return new ApplyResult(Guid.Empty, RunState.Failed, RestartRequirement.None, NoRestorePoint, preflight, busy, Outcomes(run, null));
+        }
+
+        _rollback.RecoverInterrupted();
+        return ApplyLocked(run, options, plan, preflight);
+    }
+
+    /// <summary>The part of an apply that runs while holding the machine run lock.</summary>
+    private ApplyResult ApplyLocked(PlannedRun run, ApplyOptions options, PlanResult plan, PreflightReport preflight)
+    {
         RestorePointResult restorePoint = options.CreateRestorePoint
             ? _services.RestorePoint.Create(RestoreDescription(options.ProfileName))
             : NoRestorePoint;
@@ -97,11 +134,12 @@ public sealed class ApplyEngine
 
         // For an all-users run, load the hives of users who are not logged on so their
         // prior state can be captured and written; unload them again in the finally.
-        IReadOnlyList<UserProfile> targetUsers = options.Scope == Scope.AllUsers ? _services.UserHives.Enumerate() : [];
+        // A profile whose hive cannot be loaded is skipped (and audited), not fatal.
+        IReadOnlyList<UserProfile> candidates = options.Scope == Scope.AllUsers ? _services.UserHives.Enumerate() : [];
         List<UserProfile> loadedHives = [];
         try
         {
-            LoadHives(targetUsers, loadedHives, runId);
+            IReadOnlyList<UserProfile> targetUsers = LoadHives(candidates, loadedHives, runId);
             return RunApply(run, options, restorePoint, runId, targetUsers, plan, preflight);
         }
         finally
@@ -118,14 +156,14 @@ public sealed class ApplyEngine
         JournalRecord record = BuildJournalRecord(run, options, restorePoint, runId, user, targetUsers);
 
         _services.Journal.Begin(record);
-        Audit(AuditEventId.ApplyStarted,
+        _journal.Audit(AuditEventId.ApplyStarted,
             string.Create(CultureInfo.InvariantCulture, $"Apply '{options.ProfileName}' started ({record.Entries.Count} entr(y/ies))."),
             runId, null);
 
         RunState state = ExecuteApply(record, runId);
         record.Result = state;
         record.Requires = AggregateRequires(record);
-        _services.Journal.Update(record);
+        _journal.TryUpdate(record);
 
         if (state == RunState.Completed)
         {
@@ -135,14 +173,32 @@ public sealed class ApplyEngine
         return new ApplyResult(runId, state, record.Requires, restorePoint, preflight, plan, Outcomes(run, record));
     }
 
-    private void LoadHives(IReadOnlyList<UserProfile> targetUsers, List<UserProfile> loaded, Guid runId)
+    private List<UserProfile> LoadHives(IReadOnlyList<UserProfile> candidates, List<UserProfile> loaded, Guid runId)
     {
-        foreach (UserProfile profile in targetUsers.Where(u => !u.HiveLoaded))
+        List<UserProfile> reachable = [];
+        foreach (UserProfile profile in candidates)
         {
-            _services.HiveLoader.Load(profile.Sid, Path.Combine(profile.ProfilePath, "NTUSER.DAT"));
-            loaded.Add(profile);
-            Audit(AuditEventId.ApplyStarted, string.Create(CultureInfo.InvariantCulture, $"Loaded user hive {profile.Sid}."), runId, null);
+            if (profile.HiveLoaded)
+            {
+                reachable.Add(profile);
+                continue;
+            }
+
+            Exception? failure = Capture(() => _services.HiveLoader.Load(profile.Sid, Path.Combine(profile.ProfilePath, "NTUSER.DAT")));
+            if (failure is null)
+            {
+                loaded.Add(profile);
+                reachable.Add(profile);
+                _journal.Audit(AuditEventId.ApplyStarted, string.Create(CultureInfo.InvariantCulture, $"Loaded user hive {profile.Sid}."), runId, null);
+            }
+            else
+            {
+                _journal.Audit(AuditEventId.Error,
+                    string.Create(CultureInfo.InvariantCulture, $"Skipped user {profile.Sid}: their hive could not be loaded ({failure.Message})."), runId, null);
+            }
         }
+
+        return reachable;
     }
 
     private void UnloadHives(List<UserProfile> loaded, Guid runId)
@@ -157,11 +213,12 @@ public sealed class ApplyEngine
     /// Loads the offline hives a revert needs: the profiles whose SID appears on a
     /// journalled action but whose hive is not currently loaded (their owner logged
     /// off since the apply). Machine actions (no SID) and hives already loaded need
-    /// nothing. The caller unloads whatever this loads.
+    /// nothing. A hive that cannot be loaded leaves its restores to fail and be
+    /// reported. The caller unloads whatever this loads.
     /// </summary>
-    private void LoadHivesForRevert(JournalRecord record, List<UserProfile> loaded, Guid runId)
+    private void LoadHivesForRevert(JournalRecord original, List<UserProfile> loaded, Guid runId)
     {
-        HashSet<string> sids = [.. record.Entries
+        HashSet<string> sids = [.. original.Entries
             .SelectMany(e => e.Actions)
             .Select(a => a.Sid)
             .Where(s => s is not null)
@@ -173,9 +230,12 @@ public sealed class ApplyEngine
 
         foreach (UserProfile profile in _services.UserHives.Enumerate().Where(p => !p.HiveLoaded && sids.Contains(p.Sid)))
         {
-            _services.HiveLoader.Load(profile.Sid, Path.Combine(profile.ProfilePath, "NTUSER.DAT"));
-            loaded.Add(profile);
-            Audit(AuditEventId.RevertStarted, string.Create(CultureInfo.InvariantCulture, $"Loaded user hive {profile.Sid} for revert."), runId, null);
+            Exception? failure = Capture(() => _services.HiveLoader.Load(profile.Sid, Path.Combine(profile.ProfilePath, "NTUSER.DAT")));
+            if (failure is null)
+            {
+                loaded.Add(profile);
+                _journal.Audit(AuditEventId.RevertStarted, string.Create(CultureInfo.InvariantCulture, $"Loaded user hive {profile.Sid} for revert."), runId, null);
+            }
         }
     }
 
@@ -186,21 +246,31 @@ public sealed class ApplyEngine
         Exception? failure = Capture(() => _services.HiveLoader.Unload(profile.Sid));
         if (failure is not null)
         {
-            Audit(AuditEventId.Error, string.Create(CultureInfo.InvariantCulture, $"Failed to unload user hive {profile.Sid}: {failure.Message}"), runId, null);
+            _journal.Audit(AuditEventId.Error, string.Create(CultureInfo.InvariantCulture, $"Failed to unload user hive {profile.Sid}: {failure.Message}"), runId, null);
         }
     }
 
-    /// <summary>Reverts a prior run, restoring each applied action's captured prior state in reverse order.</summary>
+    /// <summary>
+    /// Reverts a prior run, restoring each applied action's captured prior state in
+    /// reverse order. Refused without changing anything when the journal does not
+    /// verify, when a restore would touch a protected location, or — unless
+    /// <see cref="RevertOptions.Force"/> — when the run was already reverted or a
+    /// later run changed the same settings.
+    /// </summary>
     public RevertResult Revert(Guid runId, RevertOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
 
         JournalRecord original = _services.Journal.Load(runId);
-        string? sid = original.TargetUser?.Sid;
+        List<JournalEntry> revertable = [.. original.Entries.Where(e => e.Actions.Any(IsRevertable)).Reverse()];
 
-        List<JournalEntry> revertable = [.. original.Entries
-            .Where(e => e.Actions.Any(a => a.Result == ApplyState.Applied))
-            .Reverse()];
+        string? refusal = RevertGuard.Check(original, _services.Journal, options.Force) ?? FirstRestoreRefusal(revertable);
+        if (refusal is not null)
+        {
+            _journal.Audit(AuditEventId.Refusal, string.Create(CultureInfo.InvariantCulture, $"Revert of {runId} refused: {refusal}"), null, null);
+            return new RevertResult(Guid.Empty, runId, RunState.Failed,
+                [.. revertable.Select(e => new EntryOutcome(new TweakId(e.Id), ApplyState.Refused, e.Risk, e.Requires, refusal))]);
+        }
 
         if (options.WhatIf)
         {
@@ -209,19 +279,33 @@ public sealed class ApplyEngine
             return new RevertResult(Guid.Empty, runId, RunState.Completed, preview);
         }
 
-        var newRunId = Guid.NewGuid();
-        JournalRecord record = BuildRevertRecord(original, revertable, newRunId);
+        using IDisposable? held = _services.RunLock.TryAcquire(RunLockTimeout);
+        if (held is null)
+        {
+            return new RevertResult(Guid.Empty, runId, RunState.Failed,
+                [.. revertable.Select(e => new EntryOutcome(new TweakId(e.Id), ApplyState.Skipped, e.Risk, e.Requires, RunLockBusy))]);
+        }
 
-        _services.Journal.Begin(record);
-        Audit(AuditEventId.RevertStarted, string.Create(CultureInfo.InvariantCulture, $"Revert of {runId} started."), newRunId, null);
+        _rollback.RecoverInterrupted();
+        return RunRevert(original, revertable, options);
+    }
+
+    private RevertResult RunRevert(JournalRecord original, List<JournalEntry> revertable, RevertOptions options)
+    {
+        var newRunId = Guid.NewGuid();
 
         // An all-users apply may have written user hives whose owners have since logged off.
-        // Load those offline hives so their prior state can be restored, then unload them.
+        // Load those offline hives first so the revert record captures their real current
+        // state (making the revert itself revertible), then restore and unload them.
         List<UserProfile> loadedHives = [];
+        JournalRecord record;
         RunState state;
         try
         {
-            LoadHivesForRevert(record, loadedHives, newRunId);
+            LoadHivesForRevert(original, loadedHives, newRunId);
+            record = BuildRevertRecord(original, revertable, newRunId);
+            _services.Journal.Begin(record);
+            _journal.Audit(AuditEventId.RevertStarted, string.Create(CultureInfo.InvariantCulture, $"Revert of {original.RunId} started."), newRunId, null);
             state = ExecuteRevert(record, newRunId);
         }
         finally
@@ -230,15 +314,30 @@ public sealed class ApplyEngine
         }
 
         record.Result = state;
-        _services.Journal.Update(record);
+        _journal.TryUpdate(record);
 
-        Audit(AuditEventId.RevertCompleted, string.Create(CultureInfo.InvariantCulture, $"Revert of {runId} completed ({state})."), newRunId, null);
-        MaybeRestartExplorer(record, sid, new ApplyOptions(false, false, false, false, false, original.Profile, options.RestartExplorer));
+        _journal.Audit(AuditEventId.RevertCompleted, string.Create(CultureInfo.InvariantCulture, $"Revert of {original.RunId} completed ({state})."), newRunId, null);
+        MaybeRestartExplorer(record, original.TargetUser?.Sid, new ApplyOptions(false, false, false, false, false, original.Profile, options.RestartExplorer));
 
         IReadOnlyList<EntryOutcome> outcomes =
-            [.. record.Entries.Select(e => new EntryOutcome(new TweakId(e.Id), e.Result, e.Risk, e.Requires, null))];
-        return new RevertResult(newRunId, runId, state, outcomes);
+            [.. record.Entries.Select(e => new EntryOutcome(new TweakId(e.Id), e.Result, e.Risk, e.Requires, RevertNote(e)))];
+        return new RevertResult(newRunId, original.RunId, state, outcomes);
     }
+
+    private static bool IsRevertable(JournalAction action) => action.Result is ApplyState.Applied or ApplyState.Failed;
+
+    private static string? FirstRestoreRefusal(List<JournalEntry> revertable)
+        => revertable
+            .SelectMany(e => e.Actions.Where(IsRevertable))
+            .Select(a => ActionApplier.CheckRestoreRefusal(a.Action, a.Prior))
+            .FirstOrDefault(reason => reason is not null);
+
+    private static string? RevertNote(JournalEntry entry) => entry.Result switch
+    {
+        ApplyState.NotReversible => "the prior state cannot be put back automatically (see the entry's reinstall or manual steps)",
+        ApplyState.Failed => "restoring the prior state failed; see the audit log",
+        _ => null,
+    };
 
     private PlannedRun BuildPlan(IEnumerable<TweakDefinition> entries, ApplyOptions options)
     {
@@ -251,40 +350,23 @@ public sealed class ApplyEngine
         {
             TweakDefinition entry = list[i];
             TweakObservation observation = report.Results[i];
-            (PlanDisposition disposition, string? note) = Classify(entry, observation, options);
+            (PlanDisposition disposition, string? note) = Classify(entry, observation, options, sid);
             items.Add(new PlannedItem(entry, observation, disposition, note));
         }
 
         List<string> errors = [];
         items = OrderByDependency(items, errors);
         items = DetectConflicts(items, errors);
+        items = RequireDependencies(items);
         return new PlannedRun(options.ProfileName, sid, items, errors);
     }
 
     private (PlanDisposition Disposition, string? Note) Classify(
-        TweakDefinition entry, TweakObservation observation, ApplyOptions options)
+        TweakDefinition entry, TweakObservation observation, ApplyOptions options, string? sid)
     {
-        if (observation.State == ComplianceState.NotApplicable)
+        if (Gate(entry, observation, options, sid) is { } gated)
         {
-            return (PlanDisposition.NotApplicable, null);
-        }
-
-        if (entry.Risk >= RiskTier.Breaking && !options.AllowBreaking)
-        {
-            return (PlanDisposition.Blocked, "requires --allow-breaking (Breaking risk)");
-        }
-
-        if (entry.Risk >= RiskTier.Advanced && !options.AllowAdvanced)
-        {
-            return (PlanDisposition.Blocked, "requires --allow-advanced (Advanced risk)");
-        }
-
-        foreach (ITweakAction action in entry.Actions)
-        {
-            if (_applier.CheckRefusal(action) is { } reason)
-            {
-                return (PlanDisposition.Refused, reason);
-            }
+            return gated;
         }
 
         if (observation.Actions.Any(a => a.Managed != ManagedState.NotManaged))
@@ -305,6 +387,50 @@ public sealed class ApplyEngine
         }
 
         return (PlanDisposition.Apply, null);
+    }
+
+    /// <summary>
+    /// The checks that rule an entry out before its compliance matters: not applicable
+    /// here, per-user with nobody signed in, risk-gated, refused by a safety rule, or
+    /// targeting an existing registry value whose type cannot be captured for revert.
+    /// </summary>
+    private (PlanDisposition Disposition, string? Note)? Gate(
+        TweakDefinition entry, TweakObservation observation, ApplyOptions options, string? sid)
+    {
+        if (observation.State == ComplianceState.NotApplicable)
+        {
+            return (PlanDisposition.NotApplicable, null);
+        }
+
+        if (sid is null && options.Scope != Scope.AllUsers && entry.Actions.Any(ActionApplier.RequiresUser))
+        {
+            return (PlanDisposition.NotApplicable, "no signed-in user to apply per-user settings to");
+        }
+
+        if (entry.Risk >= RiskTier.Breaking && !options.AllowBreaking)
+        {
+            return (PlanDisposition.Blocked, "requires --allow-breaking (Breaking risk)");
+        }
+
+        if (entry.Risk >= RiskTier.Advanced && !options.AllowAdvanced)
+        {
+            return (PlanDisposition.Blocked, "requires --allow-advanced (Advanced risk)");
+        }
+
+        foreach (ITweakAction action in entry.Actions)
+        {
+            if (_applier.CheckRefusal(action) is { } reason)
+            {
+                return (PlanDisposition.Refused, reason);
+            }
+
+            if (_applier.HasUncapturablePrior(action, sid))
+            {
+                return (PlanDisposition.Refused, "an existing value has a registry type that cannot be captured for revert");
+            }
+        }
+
+        return null;
     }
 
     private static List<PlannedItem> OrderByDependency(List<PlannedItem> items, List<string> errors)
@@ -368,6 +494,53 @@ public sealed class ApplyEngine
         return conflicted.Count == 0
             ? items
             : [.. items.Select(i => conflicted.Contains(i.Entry.Id) ? i.As(PlanDisposition.Conflict, "conflicts with another selected entry") : i)];
+    }
+
+    /// <summary>
+    /// Treats <c>dependsOn</c> as a requirement, not just an ordering: an entry is
+    /// blocked unless each dependency is in the run and will be applied, is already
+    /// compliant, or is compliant under a managing policy. Repeats until stable so a
+    /// chain (shadow stacks → memory integrity → VBS) blocks end to end.
+    /// </summary>
+    private static List<PlannedItem> RequireDependencies(List<PlannedItem> items)
+    {
+        bool changed = true;
+        while (changed)
+        {
+            changed = false;
+            var byId = items.ToDictionary(i => i.Entry.Id);
+            for (int i = 0; i < items.Count; i++)
+            {
+                PlannedItem item = items[i];
+                if (item.Disposition is not (PlanDisposition.Apply or PlanDisposition.ManagedBreakGlass))
+                {
+                    continue;
+                }
+
+                string? unmet = item.Entry.DependsOn.Select(d => UnmetDependency(d, byId)).FirstOrDefault(n => n is not null);
+                if (unmet is not null)
+                {
+                    items[i] = item.As(PlanDisposition.Blocked, unmet);
+                    changed = true;
+                }
+            }
+        }
+
+        return items;
+    }
+
+    private static string? UnmetDependency(TweakId dependency, Dictionary<TweakId, PlannedItem> byId)
+    {
+        if (!byId.TryGetValue(dependency, out PlannedItem? required))
+        {
+            return string.Create(CultureInfo.InvariantCulture, $"requires {dependency.Value}, which is not part of this run");
+        }
+
+        bool satisfied = required.Disposition is PlanDisposition.Apply or PlanDisposition.ManagedBreakGlass or PlanDisposition.AlreadyCompliant
+            || required.Observation.State is ComplianceState.Compliant or ComplianceState.Managed;
+        return satisfied
+            ? null
+            : string.Create(CultureInfo.InvariantCulture, $"requires {dependency.Value}, which will not be applied ({required.Disposition})");
     }
 
     private static PlanResult ToPlanResult(PlannedRun run)
@@ -449,11 +622,12 @@ public sealed class ApplyEngine
 
     private JournalRecord BuildRevertRecord(JournalRecord original, List<JournalEntry> revertable, Guid newRunId)
     {
+        OperatingSystemFacts facts = _os.GetFacts();
         List<JournalEntry> entries = [];
         foreach (JournalEntry entry in revertable)
         {
             List<JournalAction> actions = [.. entry.Actions
-                .Where(a => a.Result == ApplyState.Applied)
+                .Where(IsRevertable)
                 .Reverse()
                 .Select(a => new JournalAction
                 {
@@ -483,7 +657,7 @@ public sealed class ApplyEngine
             RunId = newRunId,
             StartedAt = _time.GetUtcNow(),
             AppVersion = AppInfo.Version,
-            Os = original.Os,
+            Os = new JournalOs(facts.Build, facts.Revision, facts.EditionId),
             Profile = original.Profile,
             Operator = _services.Elevation.ProcessUserName,
             TargetUser = original.TargetUser,
@@ -501,27 +675,29 @@ public sealed class ApplyEngine
             foreach (JournalAction action in entry.Actions.Where(a => a.Result == ApplyState.Pending))
             {
                 Exception? failure = ApplyAndVerify(action);
+                action.Result = failure is null ? ApplyState.Applied : ApplyState.Failed;
+
+                // The journal is the recovery record: an action is only kept once the journal says so.
+                failure ??= _journal.TryUpdate(record);
                 if (failure is not null)
                 {
-                    action.Result = ApplyState.Failed;
-                    entry.Result = ApplyState.Failed;
-                    _services.Journal.Update(record);
-                    Audit(AuditEventId.TweakFailed, string.Create(CultureInfo.InvariantCulture, $"{entry.Id}: {failure.Message}"), runId, entry.Id);
-                    return RollBack(record, runId);
+                    _journal.Audit(AuditEventId.TweakFailed, string.Create(CultureInfo.InvariantCulture, $"{entry.Id}: {failure.Message}"), runId, entry.Id);
+                    return _rollback.RollBack(record, runId, entry, inFlight: null);
                 }
-
-                action.Result = ApplyState.Applied;
-                _services.Journal.Update(record);
             }
 
-            entry.Result = EntryAggregate(entry);
+            entry.Result = RunRollback.Aggregate(entry);
             if (entry.BreakGlass)
             {
-                Audit(AuditEventId.BreakGlass, string.Create(CultureInfo.InvariantCulture, $"{entry.Id} applied over a managed setting (break-glass)."), runId, entry.Id);
+                _journal.Audit(AuditEventId.BreakGlass, string.Create(CultureInfo.InvariantCulture, $"{entry.Id} applied over a managed setting (break-glass)."), runId, entry.Id);
             }
 
-            Audit(AuditEventId.TweakApplied, string.Create(CultureInfo.InvariantCulture, $"{entry.Id} applied."), runId, entry.Id);
-            _services.Journal.Update(record);
+            _journal.Audit(AuditEventId.TweakApplied, string.Create(CultureInfo.InvariantCulture, $"{entry.Id} applied."), runId, entry.Id);
+            if (_journal.TryUpdate(record) is { } journalFailure)
+            {
+                _journal.Audit(AuditEventId.Error, string.Create(CultureInfo.InvariantCulture, $"Journal update failed: {journalFailure.Message}"), runId, entry.Id);
+                return _rollback.RollBack(record, runId, entry, inFlight: null);
+            }
         }
 
         return RunState.Completed;
@@ -547,33 +723,6 @@ public sealed class ApplyEngine
         return failure;
     }
 
-    private RunState RollBack(JournalRecord record, Guid runId)
-    {
-        bool clean = true;
-        foreach (JournalEntry entry in Enumerable.Reverse(record.Entries))
-        {
-            foreach (JournalAction action in Enumerable.Reverse(entry.Actions).Where(a => a.Result == ApplyState.Applied))
-            {
-                Exception? failure = Capture(() => _applier.Restore(action.Action, action.Prior, action.Sid));
-                if (failure is null)
-                {
-                    action.Result = ApplyState.RolledBack;
-                    Audit(AuditEventId.Rollback, string.Create(CultureInfo.InvariantCulture, $"Rolled back {action.Target}."), runId, entry.Id);
-                }
-                else
-                {
-                    clean = false;
-                    Audit(AuditEventId.Error, string.Create(CultureInfo.InvariantCulture, $"Rollback failed for {action.Target}: {failure.Message}"), runId, entry.Id);
-                }
-
-                _services.Journal.Update(record);
-            }
-        }
-
-        Audit(AuditEventId.RunRolledBack, "Apply run rolled back after a failure.", runId, null);
-        return clean ? RunState.RolledBack : RunState.Failed;
-    }
-
     private RunState ExecuteRevert(JournalRecord record, Guid runId)
     {
         bool clean = true;
@@ -581,37 +730,49 @@ public sealed class ApplyEngine
         {
             foreach (JournalAction action in entry.Actions.Where(a => a.Result == ApplyState.Pending))
             {
-                Exception? failure = Capture(() => _applier.Restore(action.Action, action.Desired, action.Sid));
-                action.AppliedAt = _time.GetUtcNow();
-                if (failure is null)
-                {
-                    bool verified = false;
-                    failure = Capture(() => verified = _applier.VerifyRestored(action.Action, action.Desired, action.Sid));
-                    action.Verified = verified;
-                    if (failure is null && !verified)
-                    {
-                        failure = new InvalidOperationException(string.Create(CultureInfo.InvariantCulture, $"Revert verification failed for {action.Target}."));
-                    }
-                }
-
-                if (failure is null)
-                {
-                    action.Result = ApplyState.Applied;
-                }
-                else
-                {
-                    action.Result = ApplyState.Failed;
-                    clean = false;
-                    Audit(AuditEventId.TweakFailed, string.Create(CultureInfo.InvariantCulture, $"Revert of {action.Target} failed: {failure.Message}"), runId, entry.Id);
-                }
-
-                _services.Journal.Update(record);
+                action.Result = RevertOne(action, runId, entry.Id);
+                clean &= action.Result == ApplyState.Applied;
+                _journal.TryUpdate(record);
             }
 
-            entry.Result = EntryAggregate(entry);
+            entry.Result = RunRollback.Aggregate(entry);
         }
 
         return clean ? RunState.Completed : RunState.Failed;
+    }
+
+    private ApplyState RevertOne(JournalAction action, Guid runId, string entryId)
+    {
+        if (!ActionApplier.CanRestore(action.Action, action.Desired))
+        {
+            // Do what can be done (an all-users app removal is reprovisioned for future users),
+            // but never report the change as undone.
+            Capture(() => _applier.Restore(action.Action, action.Desired, action.Sid));
+            _journal.Audit(AuditEventId.TweakFailed,
+                string.Create(CultureInfo.InvariantCulture, $"Revert of {action.Target}: the prior state cannot be put back automatically."), runId, entryId);
+            return ApplyState.NotReversible;
+        }
+
+        Exception? failure = Capture(() => _applier.Restore(action.Action, action.Desired, action.Sid));
+        action.AppliedAt = _time.GetUtcNow();
+        if (failure is null)
+        {
+            bool verified = false;
+            failure = Capture(() => verified = _applier.VerifyRestored(action.Action, action.Desired, action.Sid));
+            action.Verified = verified;
+            if (failure is null && !verified)
+            {
+                failure = new InvalidOperationException(string.Create(CultureInfo.InvariantCulture, $"Revert verification failed for {action.Target}."));
+            }
+        }
+
+        if (failure is null)
+        {
+            return ApplyState.Applied;
+        }
+
+        _journal.Audit(AuditEventId.TweakFailed, string.Create(CultureInfo.InvariantCulture, $"Revert of {action.Target} failed: {failure.Message}"), runId, entryId);
+        return ApplyState.Failed;
     }
 
     private void MaybeRestartExplorer(JournalRecord record, string? sid, ApplyOptions options)
@@ -630,7 +791,7 @@ public sealed class ApplyEngine
 
     private static RestartRequirement AggregateRequires(JournalRecord record)
         => record.Entries
-            .Where(e => e.Result == ApplyState.Applied)
+            .Where(e => e.Result is ApplyState.Applied or ApplyState.NotReversible)
             .Select(e => e.Requires)
             .DefaultIfEmpty(RestartRequirement.None)
             .Max();
@@ -654,12 +815,9 @@ public sealed class ApplyEngine
     {
         foreach (PlannedItem refused in run.Items.Where(i => i.Disposition == PlanDisposition.Refused))
         {
-            Audit(AuditEventId.Refusal, string.Create(CultureInfo.InvariantCulture, $"Refused {refused.Entry.Id}: {refused.Note}"), null, refused.Entry.Id.Value);
+            _journal.Audit(AuditEventId.Refusal, string.Create(CultureInfo.InvariantCulture, $"Refused {refused.Entry.Id}: {refused.Note}"), null, refused.Entry.Id.Value);
         }
     }
-
-    private void Audit(AuditEventId id, string message, Guid? runId, string? entryId)
-        => _services.Audit.Write(new AuditEvent(id, _time.GetUtcNow(), message, runId, entryId));
 
     private static (ApplyState Initial, bool WillWrite) InitialActionState(ComplianceState current) => current switch
     {
@@ -697,11 +855,15 @@ public sealed class ApplyEngine
             // A user's Software Classes subtree lives in UsrClass.dat, which a force-loaded
             // NTUSER.DAT does not carry, so writing it into that hive would not take effect at
             // the user's next logon. Mark it not-applicable for an offline user rather than
-            // falsely report success. Logged-on users apply it normally. Full offline
-            // UsrClass.dat support is a follow-up.
+            // falsely report success. Logged-on users apply it normally.
             if (sid is not null && offlineSids.Contains(sid) && IsUserClassesWrite(action))
             {
                 return (ApplyState.NotApplicable, false);
+            }
+
+            if (_applier.HasUncapturablePrior(action, sid))
+            {
+                return (ApplyState.Refused, false);
             }
 
             return _applier.Verify(action, sid) ? (ApplyState.Skipped, false) : (ApplyState.Pending, true);
@@ -717,21 +879,6 @@ public sealed class ApplyEngine
     private static bool IsUserClassesWrite(ITweakAction action)
         => action is RegistryAction { Hive: RegistryHive.User } registry
             && registry.Path.StartsWith(@"Software\Classes", StringComparison.OrdinalIgnoreCase);
-
-    private static ApplyState EntryAggregate(JournalEntry entry)
-    {
-        if (entry.Actions.Any(a => a.Result == ApplyState.Failed))
-        {
-            return ApplyState.Failed;
-        }
-
-        if (entry.Actions.Any(a => a.Result == ApplyState.Applied))
-        {
-            return ApplyState.Applied;
-        }
-
-        return entry.Actions.Any(a => a.Result == ApplyState.Skipped) ? ApplyState.Skipped : ApplyState.NotApplicable;
-    }
 
     private static ApplyState DispositionToState(PlanDisposition disposition) => disposition switch
     {
@@ -750,12 +897,13 @@ public sealed class ApplyEngine
     private static string RestoreDescription(string profileName)
         => string.Create(CultureInfo.InvariantCulture, $"{AppInfo.Title}: apply {profileName}");
 
+    /// <summary>Runs <paramref name="operation"/> and returns the exception it threw, or <see langword="null"/>.</summary>
     [SuppressMessage(
         "Design",
         "CA1031:Do not catch general exception types",
         Justification = "Transactional apply/revert boundary: any writer failure (Win32/COM/WMI/IO) must be caught so the run " +
             "can journal it and roll back, rather than propagate a partially-applied run.")]
-    private static Exception? Capture(Action operation)
+    internal static Exception? Capture(Action operation)
     {
         try
         {

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Catalog.Actions;
 
 namespace OpenTheWindows.Core.Engine;
@@ -37,7 +38,7 @@ public static class DefenderSafety
     public static bool RefusesRegistry(RegistryAction action)
     {
         ArgumentNullException.ThrowIfNull(action);
-        return action.Path.Contains(SignatureUpdatesPathFragment, StringComparison.OrdinalIgnoreCase);
+        return ProtectedRegistryTargets.Normalize(action.Path).Contains(SignatureUpdatesPathFragment, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>Whether a Defender-preference action would disable a protection or signature updates.</summary>

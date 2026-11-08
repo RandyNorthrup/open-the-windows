@@ -21,6 +21,7 @@ public sealed class FakeMachine :
     ISecurityPolicyWriter
 {
     private readonly Dictionary<string, (RegistryValueType Type, JsonElement Data)> _registry = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _uncapturable = new(StringComparer.Ordinal);
     private readonly Dictionary<string, ServiceSnapshot> _services = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, ScheduledTaskSnapshot> _tasks = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, AppxSnapshot> _appx = new(StringComparer.OrdinalIgnoreCase);
@@ -60,6 +61,10 @@ public sealed class FakeMachine :
     public void SetRegistry(RegistryHive hive, string? sid, string path, string name, RegistryValueType type, JsonElement data)
         => _registry[RegistryKey(hive, sid, path, name)] = (type, data);
 
+    /// <summary>Seeds a value that exists but whose type the reader cannot represent (for example REG_NONE).</summary>
+    public void SetUncapturableRegistry(RegistryHive hive, string? sid, string path, string name)
+        => _uncapturable.Add(RegistryKey(hive, sid, path, name));
+
     /// <summary>Seeds a service.</summary>
     public void SetService(ServiceSnapshot snapshot) => _services[snapshot.Name] = snapshot;
 
@@ -88,9 +93,17 @@ public sealed class FakeMachine :
     // ---- Readers ----------------------------------------------------------
 
     RegistryValueSnapshot IRegistryReader.Read(RegistryHive hive, string? userSid, string path, string name)
-        => _registry.TryGetValue(RegistryKey(hive, userSid, path, name), out (RegistryValueType Type, JsonElement Data) value)
+    {
+        string key = RegistryKey(hive, userSid, path, name);
+        if (_uncapturable.Contains(key))
+        {
+            return new RegistryValueSnapshot(true, null, null);
+        }
+
+        return _registry.TryGetValue(key, out (RegistryValueType Type, JsonElement Data) value)
             ? new RegistryValueSnapshot(true, value.Type, value.Data)
             : new RegistryValueSnapshot(false, null, null);
+    }
 
     ServiceSnapshot? IServiceReader.Read(string name) => _services.GetValueOrDefault(name);
 
@@ -142,12 +155,16 @@ public sealed class FakeMachine :
         }
     }
 
-    void IServiceWriter.StopService(string name, TimeSpan timeout)
+    void IServiceWriter.StopService(string name, TimeSpan timeout) => SetRunning(name, running: false, "service-stop");
+
+    void IServiceWriter.StartService(string name, TimeSpan timeout) => SetRunning(name, running: true, "service-start-run");
+
+    private void SetRunning(string name, bool running, string tag)
     {
-        Mutate(string.Create(CultureInfo.InvariantCulture, $"service-stop:{name}"));
+        Mutate(string.Create(CultureInfo.InvariantCulture, $"{tag}:{name}"));
         if (_services.TryGetValue(name, out ServiceSnapshot? snapshot))
         {
-            _services[name] = snapshot with { IsRunning = false };
+            _services[name] = snapshot with { IsRunning = running };
         }
     }
 

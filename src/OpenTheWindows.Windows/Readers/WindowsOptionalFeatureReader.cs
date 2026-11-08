@@ -25,11 +25,59 @@ public sealed class WindowsOptionalFeatureReader : IOptionalFeatureReader
 {
     private const int InstallStateEnabled = 1;
     private const int InstallStateDisabled = 2;
+    private const string Dism = "dism.exe";
+    private static readonly TimeSpan DismTimeout = TimeSpan.FromMinutes(2);
+
+    private readonly ICommandRunner? _dism;
+    private readonly bool _privileged;
+
+    /// <summary>Reads optional features through WMI only (unelevated scans).</summary>
+    public WindowsOptionalFeatureReader()
+    {
+    }
+
+    /// <summary>
+    /// Also uses <c>dism.exe</c> through <paramref name="dism"/>: always for Windows
+    /// capabilities (names carrying <c>~~~~</c>, which WMI does not list), and, when this
+    /// process is elevated, for optional features too, because DISM reports a change that
+    /// is pending a reboot while WMI still shows the old state.
+    /// </summary>
+    public WindowsOptionalFeatureReader(ICommandRunner dism)
+    {
+        _dism = dism ?? throw new ArgumentNullException(nameof(dism));
+        _privileged = Security.WindowsSecureDirectory.IsPrivilegedProcess();
+    }
 
     /// <inheritdoc />
     public bool? IsEnabled(string featureName)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(featureName);
+        if (DismState.IsCapability(featureName))
+        {
+            return QueryDism("/Get-CapabilityInfo", "/CapabilityName:", featureName);
+        }
+
+        if (_privileged && QueryDism("/Get-FeatureInfo", "/FeatureName:", featureName) is { } viaDism)
+        {
+            return viaDism;
+        }
+
+        return QueryWmi(featureName);
+    }
+
+    private bool? QueryDism(string verb, string nameSwitch, string name)
+    {
+        if (_dism is null)
+        {
+            return null;
+        }
+
+        CommandResult result = _dism.Run(Dism, ["/online", "/English", verb, nameSwitch + name], DismTimeout);
+        return result.ExitCode == 0 && !result.TimedOut ? DismState.Parse(result.StandardOutput) : null;
+    }
+
+    private static bool? QueryWmi(string featureName)
+    {
 
         // Feature names are catalogue-controlled and never contain quotes, but
         // double any single quote defensively so the WQL literal stays well-formed.

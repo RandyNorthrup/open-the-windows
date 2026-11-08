@@ -34,13 +34,16 @@ public static class NamedProfile
     /// Selects the catalogue entries a named profile applies: every entry whose
     /// declared level is on (not <see cref="Level.Off"/>) and at or below
     /// <paramref name="level"/>. Deprecated entries are never selected; draft
-    /// entries are excluded unless <paramref name="includeDraft"/> is set.
+    /// entries are excluded unless <paramref name="includeDraft"/> is set. Mutually
+    /// exclusive variants (for example two feature-update deferral lengths) are
+    /// settled the same way a profile settles them — the higher level wins, then the
+    /// earlier entry — so every level yields an applicable plan.
     /// </summary>
     public static IReadOnlyList<TweakDefinition> Select(TweakCatalog catalog, Level level, bool includeDraft)
     {
         ArgumentNullException.ThrowIfNull(catalog);
 
-        return
+        List<TweakDefinition> selected =
         [
             .. catalog.Entries.Where(entry =>
                 entry.Level != Level.Off
@@ -48,5 +51,7 @@ public static class NamedProfile
                 && entry.Status != TweakStatus.Deprecated
                 && (includeDraft || entry.Status == TweakStatus.Verified)),
         ];
+        Profiles.ProfileResolver.ResolveConflicts(selected, []);
+        return selected;
     }
 }

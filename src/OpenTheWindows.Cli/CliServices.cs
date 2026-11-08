@@ -3,10 +3,12 @@ using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Journal;
+using OpenTheWindows.Core.Profiles;
 using OpenTheWindows.Core.Releases;
 using OpenTheWindows.Core.Updates;
 using OpenTheWindows.Windows;
 using OpenTheWindows.Windows.Readers;
+using OpenTheWindows.Windows.Security;
 using OpenTheWindows.Windows.Writers;
 
 namespace OpenTheWindows.Cli;
@@ -30,6 +32,7 @@ namespace OpenTheWindows.Cli;
 /// <param name="CreateEventLogInstaller">Builds the Event Log source installer (the <c>otw eventlog</c> command and MSI custom action).</param>
 /// <param name="Health">The read-only machine health probe.</param>
 /// <param name="Elevation">The process elevation context.</param>
+/// <param name="Hardening">The safeguards for privileged writes and trust decisions.</param>
 internal sealed record CliServices(
     DoctorService Doctor,
     Func<string?, CatalogLoadResult> LoadCatalog,
@@ -45,13 +48,17 @@ internal sealed record CliServices(
     Func<IActiveSetupRegistrar> CreateActiveSetupRegistrar,
     Func<IEventLogInstaller> CreateEventLogInstaller,
     IMachineHealthProbe Health,
-    IElevationContext Elevation)
+    IElevationContext Elevation,
+    CliHardening Hardening)
 {
+    /// <summary>Builds the trusted-key source (shortcut for <see cref="CliHardening.CreateTrustedKeys"/>).</summary>
+    public ITrustedKeySource CreateTrustedKeys() => Hardening.CreateTrustedKeys();
+
     /// <summary>Production services.</summary>
     public static CliServices CreateDefault()
         => new(
             new DoctorService(new WindowsOperatingSystemInfo(), new WindowsElevationContext()),
-            directory => directory is null ? CatalogLoader.LoadBuiltIn() : CatalogLoader.LoadWithDirectory(directory),
+            LoadDefaultCatalog,
             CreateDefaultScanEngine,
             CreateDefaultApplyEngine,
             static () => WindowsUpdateControlFactory.Create(),
@@ -64,7 +71,30 @@ internal sealed record CliServices(
             static () => new WindowsActiveSetupRegistrar(),
             static () => new WindowsEventLogInstaller(),
             new WindowsMachineHealthProbe(),
-            new WindowsElevationContext());
+            new WindowsElevationContext(),
+            new CliHardening(
+                static () => new WindowsTrustedKeySource(),
+                new WindowsSecureDirectory(),
+                new WindowsExecutableLocationGuard(),
+                static () => WindowsApplyEngineFactory.CreateForCurrentUser(),
+                WindowsDataPaths.Profiles));
+
+    /// <summary>
+    /// Loads the built-in catalogue, plus an operator <c>--catalog-dir</c>. When the
+    /// machine requires signed profiles, every operator catalogue file must carry a
+    /// signature from the trust store over exactly the text that is loaded.
+    /// </summary>
+    private static CatalogLoadResult LoadDefaultCatalog(string? directory)
+    {
+        if (directory is null)
+        {
+            return CatalogLoader.LoadBuiltIn();
+        }
+
+        var policy = ProfilePolicy.Read(new WindowsRegistryReader());
+        var keys = new WindowsTrustedKeySource();
+        return CatalogLoader.LoadWithDirectory(directory, source => ProfileTrust.Enforce(source.Name, source.Json, policy, keys));
+    }
 
     private static ScanEngine CreateDefaultScanEngine() => WindowsScanEngineFactory.Create();
 

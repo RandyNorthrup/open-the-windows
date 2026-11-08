@@ -5,104 +5,82 @@ using OpenTheWindows.Core.Catalog;
 namespace OpenTheWindows.Core.Profiles;
 
 /// <summary>
-/// Decides whether a profile <em>file</em> is trusted enough to use, and holds the
-/// shared trust-store verification the <c>profile verify</c> command and the
-/// <see cref="ProfilePolicy.RequireSignedProfiles"/> gate both rely on. A file is
-/// trusted when a detached signature (<c>&lt;file&gt;.sig</c>) verifies against a
-/// public key pinned in the machine trust store. Built-in profiles ship inside the
-/// product and are never subject to this check.
+/// Decides whether a signed JSON file (a profile, or an operator catalogue file) is
+/// trusted enough to use, and holds the shared trust-store verification the
+/// <c>profile verify</c> command and the <see cref="ProfilePolicy.RequireSignedProfiles"/>
+/// gate both rely on. A file is trusted when a detached signature
+/// (<c>&lt;file&gt;.sig</c>) verifies against a key from the machine's
+/// <see cref="ITrustedKeySource"/>. Callers pass the text they already read and then
+/// parse that same text, so a file cannot be swapped between verification and use.
+/// Built-in profiles ship inside the product and are never subject to this check.
 /// </summary>
 public static class ProfileTrust
 {
-    /// <summary>The suffix of a profile's detached signature file.</summary>
+    /// <summary>The suffix of a file's detached signature file.</summary>
     public const string SignatureSuffix = ".sig";
 
     /// <summary>
-    /// The machine trust store: every <c>*.pem</c> public key here is a signer the
-    /// machine trusts (<c>%ProgramData%\OpenTheWindows\trusted-keys</c>).
+    /// Enforces <paramref name="policy"/> for the file at <paramref name="path"/>,
+    /// whose already-read content is <paramref name="text"/>. Returns an empty list when
+    /// the text may be used (the policy is off, or a valid trusted signature covers
+    /// exactly this text) and one <see cref="CatalogIssueSeverity.Error"/> issue
+    /// explaining why not when it may not.
     /// </summary>
-    public static string DefaultTrustStoreDirectory { get; } = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-        "OpenTheWindows",
-        "trusted-keys");
-
-    /// <summary>
-    /// Enforces <paramref name="policy"/> for the profile file at
-    /// <paramref name="profilePath"/>. Returns an empty list when the file may be
-    /// used (the policy is off, or the file carries a valid trusted signature) and
-    /// one <see cref="CatalogIssueSeverity.Error"/> issue explaining why not when it
-    /// may not. The caller is expected to have confirmed the file exists.
-    /// </summary>
-    public static IReadOnlyList<CatalogIssue> Enforce(string profilePath, ProfilePolicy policy, string trustStoreDirectory)
+    public static IReadOnlyList<CatalogIssue> Enforce(string path, string text, ProfilePolicy policy, ITrustedKeySource keys)
     {
-        ArgumentNullException.ThrowIfNull(profilePath);
+        ArgumentNullException.ThrowIfNull(path);
+        ArgumentNullException.ThrowIfNull(text);
         ArgumentNullException.ThrowIfNull(policy);
-        ArgumentNullException.ThrowIfNull(trustStoreDirectory);
+        ArgumentNullException.ThrowIfNull(keys);
 
         if (!policy.RequireSignedProfiles)
         {
             return [];
         }
 
-        string signaturePath = profilePath + SignatureSuffix;
+        string signaturePath = path + SignatureSuffix;
         if (!File.Exists(signaturePath))
         {
-            return [Reject(profilePath, "unsigned-profile",
-                $"policy {ProfilePolicy.RequireSignedProfilesValueName} is enabled but no signature file '{signaturePath}' accompanies this profile.")];
+            return [Reject(path, "unsigned-profile",
+                $"policy {ProfilePolicy.RequireSignedProfilesValueName} is enabled but no signature file '{signaturePath}' accompanies this file.")];
         }
 
         if (!TryReadSignature(signaturePath, out ProfileSignatureDocument signature))
         {
-            return [Reject(profilePath, "unreadable-signature",
+            return [Reject(path, "unreadable-signature",
                 $"signature file '{signaturePath}' is not a valid signature document.")];
         }
 
-        string profileJson;
-        try
-        {
-            profileJson = File.ReadAllText(profilePath);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            return [Reject(profilePath, "signature-read-failed", $"could not read the profile to verify its signature: {ex.Message}")];
-        }
-
-        return VerifyAgainstTrustStore(profileJson, signature, trustStoreDirectory)
+        return VerifyAgainstTrustStore(text, signature, keys)
             ? []
-            : [Reject(profilePath, "untrusted-profile",
-                $"the signature does not verify against any key in the trust store '{trustStoreDirectory}'.")];
+            : [Reject(path, "untrusted-profile",
+                $"the signature does not verify against any key in the trust store '{keys.Description}'.")];
     }
 
     /// <summary>
     /// Returns <see langword="true"/> when <paramref name="signature"/> verifies
-    /// <paramref name="profileJson"/> against some <c>*.pem</c> key in
-    /// <paramref name="trustStoreDirectory"/>. A missing directory or an empty store
-    /// never verifies; an unreadable key file is skipped, not fatal.
+    /// <paramref name="json"/> against some key from <paramref name="keys"/>. An empty
+    /// store never verifies; an unparseable key is skipped, not fatal.
     /// </summary>
-    public static bool VerifyAgainstTrustStore(string profileJson, ProfileSignatureDocument signature, string trustStoreDirectory)
+    public static bool VerifyAgainstTrustStore(string json, ProfileSignatureDocument signature, ITrustedKeySource keys)
     {
-        ArgumentNullException.ThrowIfNull(profileJson);
+        ArgumentNullException.ThrowIfNull(json);
         ArgumentNullException.ThrowIfNull(signature);
-        ArgumentNullException.ThrowIfNull(trustStoreDirectory);
+        ArgumentNullException.ThrowIfNull(keys);
 
-        if (!Directory.Exists(trustStoreDirectory))
-        {
-            return false;
-        }
-
-        foreach (string pem in Directory.EnumerateFiles(trustStoreDirectory, "*.pem"))
+        foreach (string pem in keys.ReadPublicKeysPem())
         {
             using var key = ECDsa.Create();
             try
             {
-                key.ImportFromPem(File.ReadAllText(pem));
+                key.ImportFromPem(pem);
             }
-            catch (Exception ex) when (ex is ArgumentException or CryptographicException or IOException)
+            catch (Exception ex) when (ex is ArgumentException or CryptographicException)
             {
                 continue;
             }
 
-            if (ProfileSignature.Verify(profileJson, signature, key))
+            if (ProfileSignature.Verify(json, signature, key))
             {
                 return true;
             }
@@ -134,6 +112,6 @@ public static class ProfileTrust
         }
     }
 
-    private static CatalogIssue Reject(string profilePath, string rule, string message)
-        => new(CatalogIssueSeverity.Error, profilePath, "/", rule, message);
+    private static CatalogIssue Reject(string path, string rule, string message)
+        => new(CatalogIssueSeverity.Error, path, "/", rule, message);
 }

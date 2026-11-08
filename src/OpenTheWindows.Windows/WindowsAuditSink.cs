@@ -6,6 +6,7 @@ using System.Security;
 using System.Text;
 using System.Text.Json;
 using OpenTheWindows.Core.Abstractions;
+using OpenTheWindows.Windows.Security;
 
 namespace OpenTheWindows.Windows;
 
@@ -23,20 +24,35 @@ public sealed class WindowsAuditSink : IAuditSink
     private const string SourceName = WindowsEventLogInstaller.DefaultSourceName;
 
     private readonly string _auditDirectory;
+    private readonly ISecureDirectory? _guard;
 
-    /// <summary>Creates a sink writing to the default ProgramData audit directory.</summary>
+    /// <summary>
+    /// Creates a sink writing to the default ProgramData audit directory, which is kept
+    /// administrator-owned and administrator-writable so a standard user can neither
+    /// forge audit lines nor redirect the privileged append elsewhere.
+    /// </summary>
     public WindowsAuditSink()
-        : this(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "OpenTheWindows", "audit"))
+        : this(WindowsDataPaths.Audit, new WindowsSecureDirectory())
     {
     }
 
-    /// <summary>Creates a sink writing to <paramref name="auditDirectory"/> (injectable for tests).</summary>
+    /// <summary>Creates a sink writing to <paramref name="auditDirectory"/> (a per-user trail, or tests).</summary>
     public WindowsAuditSink(string auditDirectory)
+        : this(auditDirectory, null)
+    {
+    }
+
+    private WindowsAuditSink(string auditDirectory, ISecureDirectory? guard)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(auditDirectory);
         _auditDirectory = auditDirectory;
+        _guard = guard;
         EventLogAvailable = new WindowsEventLogInstaller().TryEnsureRegistered();
     }
+
+    /// <summary>The per-user audit folder (<c>%LocalAppData%\OpenTheWindows\audit</c>) used by unelevated per-user runs.</summary>
+    public static string UserDirectory { get; } = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OpenTheWindows", "audit");
 
     /// <summary><see langword="true"/> when the Event Log source is available for writing.</summary>
     public bool EventLogAvailable { get; }
@@ -69,7 +85,15 @@ public sealed class WindowsAuditSink : IAuditSink
 
     private void WriteJsonl(AuditEvent auditEvent)
     {
-        Directory.CreateDirectory(_auditDirectory);
+        if (_guard is null)
+        {
+            Directory.CreateDirectory(_auditDirectory);
+        }
+        else
+        {
+            _guard.EnsureSafeForWrite(_auditDirectory);
+        }
+
         string month = auditEvent.At.UtcDateTime.ToString("yyyyMM", CultureInfo.InvariantCulture);
         string file = Path.Combine(_auditDirectory, string.Create(CultureInfo.InvariantCulture, $"otw-{month}.jsonl"));
         string line = JsonSerializer.Serialize(auditEvent, AuditJsonContext.Default.AuditEvent);

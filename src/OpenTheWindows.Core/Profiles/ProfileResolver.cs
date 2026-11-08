@@ -79,7 +79,7 @@ public static class ProfileResolver
     /// yields an applicable plan (the engine would otherwise reject the run). <paramref name="entries"/>
     /// is in catalogue order; the survivor of each conflict is decided by <see cref="LoserIndex"/>.
     /// </summary>
-    private static void ResolveConflicts(List<TweakDefinition> entries, HashSet<TweakId> included)
+    internal static void ResolveConflicts(List<TweakDefinition> entries, HashSet<TweakId> included)
     {
         int loser = FindLoserIndex(entries, included);
         while (loser >= 0)

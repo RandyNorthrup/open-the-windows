@@ -28,12 +28,21 @@ public sealed class WindowsOptionalFeatureWriter : IOptionalFeatureWriter
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
-        string verb = enabled ? "/enable-feature" : "/disable-feature";
+        // A name carrying ~~~~ is a Windows capability (Feature on Demand), managed with the capability verbs.
+        bool capability = Readers.DismState.IsCapability(name);
+        string verb = (capability, enabled) switch
+        {
+            (true, true) => "/add-capability",
+            (true, false) => "/remove-capability",
+            (false, true) => "/enable-feature",
+            (false, false) => "/disable-feature",
+        };
+        string nameSwitch = capability ? "/capabilityname:" : "/featurename:";
         IReadOnlyList<string> args =
         [
             "/online",
             verb,
-            string.Create(CultureInfo.InvariantCulture, $"/featurename:{name}"),
+            string.Create(CultureInfo.InvariantCulture, $"{nameSwitch}{name}"),
             "/norestart",
         ];
 

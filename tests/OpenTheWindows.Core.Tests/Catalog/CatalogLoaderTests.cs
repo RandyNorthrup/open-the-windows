@@ -142,4 +142,37 @@ public sealed class CatalogLoaderTests
 
         Assert.NotEmpty(exception.Issues);
     }
+
+    [Fact]
+    public void A_directory_file_the_gate_rejects_fails_the_load_with_the_gate_issue()
+    {
+        string dir = Directory.CreateTempSubdirectory("otw-catalog-gate").FullName;
+        try
+        {
+            File.WriteAllText(Path.Combine(dir, "override.json"), DocumentJson(EntryJson("privacy.advertising-id.disable", "X")));
+
+            CatalogLoadResult result = CatalogLoader.LoadWithDirectory(dir, source =>
+                [new CatalogIssue(CatalogIssueSeverity.Error, source.Name, "/", "untrusted-profile", "unsigned")]);
+
+            Assert.False(result.IsValid);
+            Assert.True(HasRule(result, "untrusted-profile"));
+        }
+        finally
+        {
+            Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void A_directory_entry_pointing_at_a_code_execution_hook_fails_validation()
+    {
+        string hook = EntryJson("test.hook", "Hook").Replace(
+            @"SOFTWARE\\Policies\\OpenTheWindows\\Test",
+            @"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\x.exe",
+            StringComparison.Ordinal);
+        CatalogLoadResult result = LoadWithFiles(("hook.json", DocumentJson(hook)));
+
+        Assert.False(result.IsValid);
+        Assert.True(HasRule(result, "unsafe-action"));
+    }
 }

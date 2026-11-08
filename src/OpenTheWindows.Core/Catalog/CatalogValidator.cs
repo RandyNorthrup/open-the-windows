@@ -161,6 +161,7 @@ public static class CatalogValidator
         for (int index = 0; index < entry.Actions.Count; index++)
         {
             string location = $"{entry.Id}/actions/{index}";
+            ValidateSafety(source, location, entry.Actions[index], issues);
             switch (entry.Actions[index])
             {
                 case RegistryAction registry:
@@ -175,10 +176,9 @@ public static class CatalogValidator
 
                     break;
                 case CommandAction command:
-                    if (!CommandAction.AllowedExecutables.Contains(command.Executable))
+                    if (ActionSafety.CommandRefusal(command) is { } commandRefusal)
                     {
-                        issues.Add(new CatalogIssue(CatalogIssueSeverity.Error, source, location, "command-allowlist",
-                            $"Executable '{command.Executable}' is not on the command allow-list."));
+                        issues.Add(new CatalogIssue(CatalogIssueSeverity.Error, source, location, "command-allowlist", commandRefusal));
                     }
 
                     if (command.Arguments.Count == 0 || command.RevertArguments.Count == 0)
@@ -207,6 +207,26 @@ public static class CatalogValidator
                 default:
                     break;
             }
+        }
+    }
+
+    /// <summary>
+    /// Applies the code-level <see cref="ActionSafety"/> rules to every kind except
+    /// services and commands, which report under their own rule ids. A security-policy
+    /// default is templated on revert, so it must be as safe as the value.
+    /// </summary>
+    private static void ValidateSafety(string source, string location, ITweakAction action, List<CatalogIssue> issues)
+    {
+        if (action is ServiceAction or CommandAction)
+        {
+            return;
+        }
+
+        string? refusal = ActionSafety.ApplyRefusal(action)
+            ?? (action is SecurityPolicyAction policy ? SecurityPolicyValues.Refusal(policy.Setting, policy.Default) : null);
+        if (refusal is not null)
+        {
+            issues.Add(new CatalogIssue(CatalogIssueSeverity.Error, source, location, "unsafe-action", refusal));
         }
     }
 

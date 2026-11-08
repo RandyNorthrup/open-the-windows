@@ -109,9 +109,7 @@ public sealed class RemediateCommandTests
 
         int code = CliTestHost.Invoke(root, stdout, stderr, "remediate", "--profile", "basic", "--include-draft", "--no-restore-point", "--json");
 
-        Assert.True(code is ExitCodes.Success or ExitCodes.RebootRequired);
-        using var document = JsonDocument.Parse(stdout.ToString());
-        Assert.Equal("Completed", document.RootElement.GetProperty("state").GetString());
+        AssertCompletedJson(code, stdout);
     }
 
     [Fact]
@@ -204,6 +202,65 @@ public sealed class RemediateCommandTests
         int code = CliTestHost.Invoke(
             root, stdout, stderr, "remediate", "--profile", "basic", "--include-draft", "--no-restore-point", "--if-build-changed", "--json");
 
+        AssertCompletedJson(code, stdout);
+    }
+
+    [Fact]
+    public void User_scope_remediate_journals_through_the_per_user_engine_not_the_machine_one()
+    {
+        // The machine journal is administrator-only; an unelevated per-user run must use its own.
+        string path = WriteTempProfile(ProfileFixtures.AllUsersProfile());
+        try
+        {
+            bool machineEngineBuilt = false;
+            bool userEngineBuilt = false;
+            CliHardening hardening = TestCli.Hardening(() =>
+            {
+                userEngineBuilt = true;
+                return FakeApplyEngine.Create(new FakeMachine()).Engine;
+            });
+            var doctor = new Core.Diagnostics.DoctorService(
+                new FakeOperatingSystemInfo(FakeOperatingSystemInfo.Windows11Pro24H2()), new FakeElevationContext(isElevated: false));
+            var (root, stdout, stderr) = CliTestHost.Host(TestCli.Services(
+                doctor,
+                _ => Core.Catalog.CatalogLoader.LoadBuiltIn(),
+                createApplyEngine: () =>
+                {
+                    machineEngineBuilt = true;
+                    return FakeApplyEngine.Create(new FakeMachine()).Engine;
+                },
+                elevation: new FakeElevationContext(isElevated: false),
+                hardening: hardening));
+
+            int code = CliTestHost.Invoke(root, stdout, stderr, "remediate", "--profile", path, "--user-scope", "--json");
+
+            Assert.True(code is ExitCodes.Success or ExitCodes.RebootRequired);
+            Assert.True(userEngineBuilt);
+            Assert.False(machineEngineBuilt);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void A_report_that_cannot_be_written_safely_is_reported_without_changing_the_exit_code()
+    {
+        var directories = new FakeSecureDirectory { RefuseAll = true };
+        var (root, stdout, stderr) = TestCli.ApplyHost(
+            hardening: TestCli.Hardening(() => FakeApplyEngine.Create(new FakeMachine()).Engine, directories: directories));
+        string outPath = Path.Combine(Path.GetTempPath(), "otw-report-" + Guid.NewGuid().ToString("N"), "last.json");
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "remediate", "--profile", "basic", "--what-if", "--out", outPath);
+
+        Assert.Equal(ExitCodes.Success, code);
+        Assert.False(File.Exists(outPath));
+        Assert.Contains("could not be written", stderr.ToString(), StringComparison.Ordinal);
+    }
+
+    private static void AssertCompletedJson(int code, StringWriter stdout)
+    {
         Assert.True(code is ExitCodes.Success or ExitCodes.RebootRequired);
         using var document = JsonDocument.Parse(stdout.ToString());
         Assert.Equal("Completed", document.RootElement.GetProperty("state").GetString());

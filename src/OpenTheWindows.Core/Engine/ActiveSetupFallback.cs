@@ -32,8 +32,15 @@ public static class ActiveSetupFallback
     /// <param name="profileId">The profile's kebab-case id; validated to <c>[a-z0-9-]</c> only.</param>
     /// <param name="displayName">The component's display name (the key's default value).</param>
     /// <param name="executablePath">The full path to <c>otw.exe</c> (quoted in the stub).</param>
-    /// <exception cref="ArgumentException">The id is empty or holds a character outside <c>[a-z0-9-]</c>.</exception>
-    public static ActiveSetupComponent For(string profileId, string displayName, string executablePath)
+    /// <param name="profilePath">
+    /// For a profile that came from a file, the full path of its protected staged copy
+    /// (quoted in the stub); <see langword="null"/> for a built-in profile, which the
+    /// stub names by id.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    /// The id is empty or holds a character outside <c>[a-z0-9-]</c>, or a path holds a quote.
+    /// </exception>
+    public static ActiveSetupComponent For(string profileId, string displayName, string executablePath, string? profilePath = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(profileId);
         ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
@@ -47,8 +54,14 @@ public static class ActiveSetupFallback
                 nameof(profileId));
         }
 
+        if (executablePath.Contains('"', StringComparison.Ordinal) || (profilePath?.Contains('"', StringComparison.Ordinal) ?? false))
+        {
+            throw new ArgumentException("A path in the Active Setup stub cannot contain a quote character.", nameof(profilePath));
+        }
+
         string componentKey = string.Create(CultureInfo.InvariantCulture, $"{ComponentKeyPrefix}{profileId}}}");
-        string stubPath = string.Create(CultureInfo.InvariantCulture, $"\"{executablePath}\" remediate --user-scope --profile {profileId}");
+        string profileArgument = profilePath is null ? profileId : string.Create(CultureInfo.InvariantCulture, $"\"{profilePath}\"");
+        string stubPath = string.Create(CultureInfo.InvariantCulture, $"\"{executablePath}\" remediate --user-scope --profile {profileArgument}");
         return new ActiveSetupComponent(componentKey, displayName, stubPath);
     }
 

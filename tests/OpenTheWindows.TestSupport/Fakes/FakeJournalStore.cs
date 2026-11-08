@@ -35,10 +35,18 @@ public sealed class FakeJournalStore : IJournalStore
     public void Update(JournalRecord record)
     {
         ArgumentNullException.ThrowIfNull(record);
-        record.Hash = JournalSerializer.ComputeHash(record);
         UpdateCount++;
+        if (UpdateCount == FailUpdateNumber)
+        {
+            throw new IOException(string.Create(CultureInfo.InvariantCulture, $"Injected journal failure on update {UpdateCount}."));
+        }
+
+        record.Hash = JournalSerializer.ComputeHash(record);
         Trace?.Add("journal:update");
     }
+
+    /// <summary>When set, the <see cref="Update"/> call with this 1-based number throws (a full disk or a sharing violation).</summary>
+    public int? FailUpdateNumber { get; set; }
 
     /// <inheritdoc />
     public IReadOnlyList<JournalSummary> List()

@@ -25,6 +25,13 @@ public static class ExitCodes
     /// <summary>The command needs an elevated token and the process does not have one.</summary>
     public const int ElevationRequired = 5;
 
+    /// <summary>
+    /// Nothing was changed because the setting is managed by MDM or Group Policy (for
+    /// example a Windows Update pause on a policy-managed machine). Distinct from success
+    /// so automation never mistakes "skipped" for "done".
+    /// </summary>
+    public const int Managed = 6;
+
     /// <summary>Changes applied; a reboot is required to complete them (same value Windows Installer uses).</summary>
     public const int RebootRequired = 3010;
 }

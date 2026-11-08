@@ -1,6 +1,9 @@
 using System.Runtime.Versioning;
+using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Engine;
+using OpenTheWindows.Core.Journal;
 using OpenTheWindows.Windows.Readers;
+using OpenTheWindows.Windows.Security;
 using OpenTheWindows.Windows.Writers;
 
 namespace OpenTheWindows.Windows;
@@ -14,11 +17,31 @@ namespace OpenTheWindows.Windows;
 public static class WindowsApplyEngineFactory
 {
     /// <summary>
-    /// Builds the apply engine. Pass a <paramref name="journalDirectory"/> /
-    /// <paramref name="auditDirectory"/> to redirect the journal and audit trail
-    /// (tests); leave them null to use the default ProgramData locations.
+    /// Builds the machine apply engine: the hardened ProgramData journal and audit
+    /// trail and the machine-wide run lock. Pass a <paramref name="journalDirectory"/> /
+    /// <paramref name="auditDirectory"/> to redirect the journal and audit trail to an
+    /// unprotected folder (tests).
     /// </summary>
     public static ApplyEngine Create(string? journalDirectory = null, string? auditDirectory = null)
+        => Build(
+            journalDirectory is null
+                ? new OwnershipTrackingJournalStore(new WindowsJournalStore(), new PolicyOwnershipLedger())
+                : new WindowsJournalStore(journalDirectory),
+            auditDirectory is null ? new WindowsAuditSink() : new WindowsAuditSink(auditDirectory),
+            new WindowsRunLock());
+
+    /// <summary>
+    /// Builds the engine for an unelevated per-user run (the Active Setup logon fallback),
+    /// which writes only the caller's own hive: its journal and audit trail live under the
+    /// caller's <c>%LocalAppData%</c>, and it serialises on a per-session lock.
+    /// </summary>
+    public static ApplyEngine CreateForCurrentUser()
+        => Build(
+            new WindowsJournalStore(WindowsJournalStore.UserDirectory),
+            new WindowsAuditSink(WindowsAuditSink.UserDirectory),
+            new WindowsRunLock(WindowsRunLock.SessionLockName));
+
+    private static ApplyEngine Build(IJournalStore journal, IAuditSink audit, IRunLock runLock)
     {
         var runner = new WindowsCommandRunner();
         var securityPolicy = new WindowsSecurityPolicyManager(runner);
@@ -28,7 +51,7 @@ public static class WindowsApplyEngineFactory
             new WindowsServiceReader(),
             new WindowsScheduledTaskReader(),
             new WindowsAppxReader(),
-            new WindowsOptionalFeatureReader(),
+            new WindowsOptionalFeatureReader(runner),
             new WindowsDefenderPreferenceReader(),
             new WindowsPowerSettingReader(),
             securityPolicy);
@@ -48,15 +71,16 @@ public static class WindowsApplyEngineFactory
         var elevation = new WindowsElevationContext();
         var interactiveUser = new WindowsInteractiveUserResolver();
         var services = new ApplyServices(
-            journalDirectory is null ? new WindowsJournalStore() : new WindowsJournalStore(journalDirectory),
+            journal,
             new WindowsRestorePointService(),
             new WindowsExplorerRestarter(),
             new WindowsPreflight(elevation, os),
-            auditDirectory is null ? new WindowsAuditSink() : new WindowsAuditSink(auditDirectory),
+            audit,
             elevation,
             interactiveUser,
             new WindowsUserHiveEnumerator(),
-            new WindowsUserHiveLoader());
+            new WindowsUserHiveLoader(),
+            runLock);
 
         var scan = new ScanEngine(
             readers.Registry, readers.Services, readers.Tasks, readers.Appx, readers.Features, readers.Defender,

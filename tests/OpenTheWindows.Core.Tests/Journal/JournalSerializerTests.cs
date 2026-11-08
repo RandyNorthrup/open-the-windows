@@ -106,4 +106,30 @@ public sealed class JournalSerializerTests
         Assert.False(json.Contains("startType", StringComparison.Ordinal));
         Assert.False(json.Contains("\"ac\"", StringComparison.Ordinal));
     }
+
+    [Fact]
+    public void A_keyed_record_verifies_only_under_its_key()
+    {
+        byte[] key = [.. Enumerable.Range(0, 32).Select(i => (byte)i)];
+        JournalRecord record = Record();
+        record.Keyed = true;
+        record.Hash = JournalSerializer.ComputeMac(record, key);
+
+        Assert.True(JournalSerializer.Verify(record, key));
+        Assert.False(JournalSerializer.Verify(record, [.. key.Reverse()]));
+        Assert.False(JournalSerializer.Verify(record, []));
+    }
+
+    [Fact]
+    public void A_keyed_record_whose_plain_hash_was_recomputed_does_not_verify()
+    {
+        // Someone without the key rewrites the record and recomputes a plain SHA-256: still rejected.
+        byte[] key = [.. Enumerable.Range(0, 32).Select(i => (byte)(i * 3))];
+        JournalRecord record = Record();
+        record.Keyed = true;
+        record.Entries[0].Result = ApplyState.Failed;
+        record.Hash = JournalSerializer.ComputeHash(record);
+
+        Assert.False(JournalSerializer.Verify(record, key));
+    }
 }

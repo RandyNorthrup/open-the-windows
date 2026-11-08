@@ -1,7 +1,10 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.Versioning;
 using System.Text;
 using OpenTheWindows.Core.Abstractions;
+using OpenTheWindows.Core.Catalog.Actions;
+using OpenTheWindows.Core.Engine;
 
 namespace OpenTheWindows.Windows.Writers;
 
@@ -15,6 +18,15 @@ namespace OpenTheWindows.Windows.Writers;
 public sealed class WindowsCommandRunner : ICommandRunner
 {
     private const int TimedOutExitCode = -1;
+
+    /// <summary>
+    /// Every executable the product may start: the catalogue's command allow-list plus the
+    /// tools the engine's own writers drive (DISM for optional features, secedit for
+    /// security policy, the Update Session Orchestrator client for a scan after resume).
+    /// Anything else, or any rooted path, is refused here as well as upstream.
+    /// </summary>
+    public static IReadOnlySet<string> AllowedExecutables { get; } =
+        new HashSet<string>(CommandAction.AllowedExecutables.Concat(["dism.exe", "secedit.exe", "usoclient.exe"]), StringComparer.OrdinalIgnoreCase);
 
     /// <inheritdoc />
     public CommandResult Run(string executable, IReadOnlyList<string> args, TimeSpan timeout)
@@ -72,9 +84,12 @@ public sealed class WindowsCommandRunner : ICommandRunner
 
     private static string ResolveExecutable(string executable)
     {
-        if (Path.IsPathRooted(executable))
+        if (Path.IsPathRooted(executable) || executable.Contains(Path.DirectorySeparatorChar, StringComparison.Ordinal)
+            || executable.Contains(Path.AltDirectorySeparatorChar, StringComparison.Ordinal)
+            || !AllowedExecutables.Contains(executable))
         {
-            return executable;
+            throw new RefusedOperationException(string.Create(CultureInfo.InvariantCulture,
+                $"Executable '{executable}' is not on the product's allow-list of System32 tools."));
         }
 
         // Bare file names resolve to System32 so a spoofed executable on PATH cannot be run.

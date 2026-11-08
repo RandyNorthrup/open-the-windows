@@ -1,71 +1,47 @@
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Security.Principal;
 using Microsoft.Win32;
 using OpenTheWindows.Core.Abstractions;
+using OpenTheWindows.Windows.Interop;
 
 namespace OpenTheWindows.Windows.Readers;
 
 /// <summary>
-/// Resolves the interactive (console/RDP) session's logged-on user through the
-/// Terminal Services API (<c>WTSQuerySessionInformation</c>) — never the process
-/// token, which for an elevated app is the elevating administrator rather than
-/// the signed-in user whose per-user hive must be targeted. Read-only.
+/// Resolves the interactive user through the Remote Desktop Services session API —
+/// never the process token, which for an elevated app is the elevating administrator
+/// rather than the signed-in user whose per-user hive must be targeted. Read-only.
 /// </summary>
 /// <remarks>
-/// The user name and domain come from <c>WTS_CURRENT_SESSION</c>; the SID is
-/// resolved from them with the managed <see cref="NTAccount"/> translation (no
-/// <c>LookupAccountName</c> P/Invoke needed). <see cref="InteractiveUser.HiveLoaded"/>
-/// reflects whether <c>HKEY_USERS\&lt;sid&gt;</c> is present. When there is no
-/// interactive user (e.g. a session-0 service) or the account cannot be mapped
-/// to a SID, the resolver returns <see langword="null"/>. Declared with the
-/// <see cref="LibraryImportAttribute"/> source generator (see PLAN §7.1).
+/// The session is this process's own desktop session; when the process has none (the
+/// SYSTEM remediation task, or an SSH logon, both in session 0) it is the active console
+/// session, so per-user settings still reach the person at the machine. The SID is
+/// resolved from the session's domain and user name; <see cref="InteractiveUser.HiveLoaded"/>
+/// reflects whether <c>HKEY_USERS\&lt;sid&gt;</c> is present. When nobody is signed in
+/// at all, or the account cannot be mapped to a SID, the resolver returns
+/// <see langword="null"/> and the engine treats per-user entries as not applicable.
 /// </remarks>
 [SupportedOSPlatform("windows")]
-public sealed partial class WindowsInteractiveUserResolver : IInteractiveUserResolver
+public sealed class WindowsInteractiveUserResolver : IInteractiveUserResolver
 {
-    private const uint WtsCurrentSession = 0xFFFFFFFF;
-    private const int WtsUserName = 5;
-    private const int WtsDomainName = 7;
-
     /// <inheritdoc />
     public InteractiveUser? Resolve()
     {
-        string? userName = QuerySessionString(WtsUserName);
+        if (WtsSessions.InteractiveSessionId() is not { } session)
+        {
+            return null;
+        }
+
+        (string? domain, string? userName) = WtsSessions.User(session);
         if (string.IsNullOrEmpty(userName))
         {
             return null;
         }
 
-        string? domain = QuerySessionString(WtsDomainName);
-        string? sid = TranslateToSid(domain, userName);
-        if (sid is null)
-        {
-            return null;
-        }
-
-        return new InteractiveUser(sid, Format(domain, userName), IsHiveLoaded(sid));
+        string? sid = WtsSessions.SidFor(domain, userName);
+        return sid is null ? null : new InteractiveUser(sid, Format(domain, userName), IsHiveLoaded(sid));
     }
 
     private static string Format(string? domain, string userName)
-    {
-        return string.IsNullOrEmpty(domain) ? userName : $@"{domain}\{userName}";
-    }
-
-    private static string? TranslateToSid(string? domain, string userName)
-    {
-        NTAccount account = string.IsNullOrEmpty(domain)
-            ? new NTAccount(userName)
-            : new NTAccount(domain, userName);
-        try
-        {
-            return ((SecurityIdentifier)account.Translate(typeof(SecurityIdentifier))).Value;
-        }
-        catch (IdentityNotMappedException)
-        {
-            return null;
-        }
-    }
+        => string.IsNullOrEmpty(domain) ? userName : $@"{domain}\{userName}";
 
     private static bool IsHiveLoaded(string sid)
     {
@@ -73,32 +49,4 @@ public sealed partial class WindowsInteractiveUserResolver : IInteractiveUserRes
         using RegistryKey? hive = users.OpenSubKey(sid, writable: false);
         return hive is not null;
     }
-
-    private static string? QuerySessionString(int infoClass)
-    {
-        if (!WTSQuerySessionInformation(nint.Zero, WtsCurrentSession, infoClass, out nint buffer, out _)
-            || buffer == nint.Zero)
-        {
-            return null;
-        }
-
-        try
-        {
-            return Marshal.PtrToStringUni(buffer);
-        }
-        finally
-        {
-            WTSFreeMemory(buffer);
-        }
-    }
-
-    [LibraryImport("wtsapi32.dll", EntryPoint = "WTSQuerySessionInformationW", SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool WTSQuerySessionInformation(
-        nint server, uint sessionId, int infoClass, out nint buffer, out uint bytesReturned);
-
-    [LibraryImport("wtsapi32.dll")]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    private static partial void WTSFreeMemory(nint memory);
 }

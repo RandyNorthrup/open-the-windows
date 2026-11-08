@@ -4,6 +4,7 @@ using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Journal;
+using OpenTheWindows.Core.Profiles;
 using OpenTheWindows.Core.Releases;
 using OpenTheWindows.Core.Updates;
 using OpenTheWindows.TestSupport.Fakes;
@@ -34,7 +35,8 @@ internal static class TestCli
         IJournalStore? journalStore = null,
         IUserHiveEnumerator? userHiveEnumerator = null,
         IActiveSetupRegistrar? activeSetupRegistrar = null,
-        IEventLogInstaller? eventLogInstaller = null)
+        IEventLogInstaller? eventLogInstaller = null,
+        CliHardening? hardening = null)
     {
         FakeReaders scanReaders = readers ?? new FakeReaders();
         FakeScheduledTaskInstaller defaultInstaller = new();
@@ -42,11 +44,12 @@ internal static class TestCli
         FakeUserHiveEnumerator defaultUsers = new();
         FakeActiveSetupRegistrar defaultRegistrar = new();
         FakeEventLogInstaller defaultEventLog = new();
+        Func<ApplyEngine> applyEngine = createApplyEngine ?? (() => FakeApplyEngine.Create(new FakeMachine()).Engine);
         return new CliServices(
             doctor,
             loadCatalog,
             () => FakeScanEngine.Create(scanReaders, FakeOperatingSystemInfo.Windows11Pro24H2(), FixedTime),
-            createApplyEngine ?? (() => FakeApplyEngine.Create(new FakeMachine()).Engine),
+            applyEngine,
             createUpdateControl ?? (() => FakeUpdateControl.Create(new FakeMachine()).Service),
             createUpdateHide ?? (() => new FakeUpdateHideService()),
             createReleaseChecker ?? (() => new FakeAppReleaseChecker()),
@@ -57,8 +60,29 @@ internal static class TestCli
             () => activeSetupRegistrar ?? defaultRegistrar,
             () => eventLogInstaller ?? defaultEventLog,
             health ?? new FakeHealthProbe([]),
-            elevation ?? new FakeElevationContext(isElevated: true));
+            elevation ?? new FakeElevationContext(isElevated: true),
+            hardening ?? Hardening(applyEngine));
     }
+
+    /// <summary>
+    /// Test hardening: an empty trust store, a folder preparer that just creates the
+    /// folder, a guard that reports every executable location safe (unless given one),
+    /// the same apply engine for per-user runs, and a temporary profile staging folder.
+    /// </summary>
+    public static CliHardening Hardening(
+        Func<ApplyEngine> userScopeEngine, FakeExecutableLocationGuard? guard = null, ISecureDirectory? directories = null)
+        => new(
+            () => new DirectoryTrustedKeySource(EmptyTrustStore),
+            directories ?? new FakeSecureDirectory(),
+            guard ?? new FakeExecutableLocationGuard(),
+            userScopeEngine,
+            StagingDirectory);
+
+    /// <summary>A trust store folder with no keys in it.</summary>
+    public static string EmptyTrustStore { get; } = Directory.CreateTempSubdirectory("otw-cli-trust").FullName;
+
+    /// <summary>The folder profile files are staged into for tasks and the logon fallback.</summary>
+    public static string StagingDirectory { get; } = Directory.CreateTempSubdirectory("otw-cli-staging").FullName;
 
     /// <summary>
     /// A command host wired for the write commands (apply/remediate): the built-in
@@ -69,7 +93,8 @@ internal static class TestCli
     public static (RootCommand Root, StringWriter Out, StringWriter Err) ApplyHost(
         bool supported = true, bool elevated = true, ApplyEngine? engine = null, FakeReaders? readers = null,
         IScheduledTaskInstaller? taskInstaller = null, IJournalStore? journalStore = null,
-        IActiveSetupRegistrar? activeSetupRegistrar = null, IEventLogInstaller? eventLogInstaller = null)
+        IActiveSetupRegistrar? activeSetupRegistrar = null, IEventLogInstaller? eventLogInstaller = null,
+        CliHardening? hardening = null)
     {
         var doctor = new DoctorService(
             new FakeOperatingSystemInfo(supported ? FakeOperatingSystemInfo.Windows11Pro24H2() : FakeOperatingSystemInfo.WindowsServer2025()),
@@ -83,7 +108,8 @@ internal static class TestCli
             taskInstaller: taskInstaller,
             journalStore: journalStore,
             activeSetupRegistrar: activeSetupRegistrar,
-            eventLogInstaller: eventLogInstaller));
+            eventLogInstaller: eventLogInstaller,
+            hardening: hardening));
     }
 
     /// <summary>A command host wired with a specific user-hive enumerator for <c>otw users</c> tests.</summary>

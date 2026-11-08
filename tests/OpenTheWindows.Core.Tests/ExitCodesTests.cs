@@ -17,6 +17,7 @@ public sealed class ExitCodesTests
         Assert.Equal(3, ExitCodes.UnsupportedPlatform);
         Assert.Equal(4, ExitCodes.InvalidInput);
         Assert.Equal(5, ExitCodes.ElevationRequired);
+        Assert.Equal(6, ExitCodes.Managed);
         Assert.Equal(3010, ExitCodes.RebootRequired);
     }
 
@@ -30,6 +31,6 @@ public sealed class ExitCodesTests
             .ToArray();
 
         Assert.Equal(values.Length, values.Distinct().Count());
-        Assert.Equal(7, values.Length);
+        Assert.Equal(8, values.Length);
     }
 }

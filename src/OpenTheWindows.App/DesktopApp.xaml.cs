@@ -11,10 +11,12 @@ using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Model;
+using OpenTheWindows.Core.Profiles;
 using OpenTheWindows.Core.Releases;
 using OpenTheWindows.Core.Updates;
 using OpenTheWindows.Windows;
 using OpenTheWindows.Windows.Readers;
+using OpenTheWindows.Windows.Security;
 
 namespace OpenTheWindows.App;
 
@@ -25,6 +27,16 @@ namespace OpenTheWindows.App;
 internal sealed partial class DesktopApp : Application, IDisposable
 {
     private ServiceProvider? _services;
+
+    /// <summary>
+    /// The machine trust store of profile-signing keys and the <c>RequireSignedProfiles</c>
+    /// policy, which together decide whether an imported profile file may be applied.
+    /// </summary>
+    private static void RegisterProfileTrust(IServiceCollection services)
+    {
+        services.AddSingleton<ITrustedKeySource, WindowsTrustedKeySource>();
+        services.AddSingleton(_ => ProfilePolicy.Read(new WindowsRegistryReader()));
+    }
 
     /// <summary>Registers every service the GUI needs. Internal so tests can validate the graph.</summary>
     public static IServiceCollection ConfigureServices(IServiceCollection services)
@@ -55,6 +67,7 @@ internal sealed partial class DesktopApp : Application, IDisposable
         services.AddSingleton(_ => GitHubAppReleaseChecker.CreateClient());
         services.AddSingleton<IAppReleaseChecker>(sp => new GitHubAppReleaseChecker(sp.GetRequiredService<HttpClient>()));
         services.AddSingleton<IUpdateCoordinator, UpdateCoordinator>();
+        RegisterProfileTrust(services);
         RegisterAudit(services);
 
         // Shell services.

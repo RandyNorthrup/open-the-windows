@@ -21,7 +21,12 @@ public sealed class ProfilesViewModelTests
     private readonly FakeFileDialogService _fileDialog = new();
     private readonly AppSettings _settings = new();
 
-    private ProfilesViewModel Build() => new(Catalog, Facts, _launcher, _fileDialog, _settings);
+    private readonly string _trustStore = Directory.CreateTempSubdirectory("otw-gui-trust").FullName;
+    private ProfilePolicy _policy = ProfilePolicy.Unrestricted;
+
+    private DirectoryTrustedKeySource Keys => new(_trustStore);
+
+    private ProfilesViewModel Build() => new(Catalog, Facts, _launcher, _fileDialog, _settings, Keys, _policy);
 
     private static string TempPath() => Path.Combine(Path.GetTempPath(), $"otw-{Guid.NewGuid():N}.json");
 
@@ -149,10 +154,59 @@ public sealed class ProfilesViewModelTests
     [Fact]
     public void Rejects_null_dependencies()
     {
-        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(null!, Facts, _launcher, _fileDialog, _settings));
-        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, null!, _fileDialog, _settings));
-        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, _launcher, null!, _settings));
-        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, _launcher, _fileDialog, null!));
+        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(null!, Facts, _launcher, _fileDialog, _settings, Keys, _policy));
+        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, null!, _fileDialog, _settings, Keys, _policy));
+        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, _launcher, null!, _settings, Keys, _policy));
+        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, _launcher, _fileDialog, null!, Keys, _policy));
+        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, _launcher, _fileDialog, _settings, null!, _policy));
+        Assert.Throws<ArgumentNullException>(() => new ProfilesViewModel(Catalog, Facts, _launcher, _fileDialog, _settings, Keys, null!));
+    }
+
+    [Fact]
+    public void Under_the_signing_policy_an_unsigned_import_cannot_be_applied()
+    {
+        string path = TempPath();
+        try
+        {
+            ExportFirstProfile(path);
+            _policy = new ProfilePolicy(RequireSignedProfiles: true);
+
+            ProfilesViewModel page = Reimport(path);
+
+            Assert.Equal(ProfileSignatureStatus.Unsigned, page.Profiles[^1].Signature);
+            Assert.False(page.CanApplySelected);
+            Assert.False(page.ApplySelectedCommand.CanExecute(null));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void Under_the_signing_policy_a_trusted_import_can_be_applied()
+    {
+        string path = TempPath();
+        try
+        {
+            ExportFirstProfile(path);
+            using var key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+            File.WriteAllText(Path.Combine(_trustStore, "signer.pem"), key.ExportSubjectPublicKeyInfoPem());
+            ProfileSignatureDocument doc = ProfileSignature.Sign(File.ReadAllText(path), key);
+            File.WriteAllText(path + ProfileTrust.SignatureSuffix,
+                JsonSerializer.Serialize(doc, ProfileJsonContext.Default.ProfileSignatureDocument));
+            _policy = new ProfilePolicy(RequireSignedProfiles: true);
+
+            ProfilesViewModel page = Reimport(path);
+
+            Assert.Equal(ProfileSignatureStatus.Trusted, page.Profiles[^1].Signature);
+            Assert.True(page.CanApplySelected);
+        }
+        finally
+        {
+            File.Delete(path);
+            File.Delete(path + ProfileTrust.SignatureSuffix);
+        }
     }
 
     private void ExportFirstProfile(string path)

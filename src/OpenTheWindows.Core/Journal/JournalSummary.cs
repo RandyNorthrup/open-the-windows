@@ -7,10 +7,12 @@ namespace OpenTheWindows.Core.Journal;
 /// <param name="Result">The run's overall state.</param>
 /// <param name="EntryCount">Number of entries in the run.</param>
 /// <param name="RevertOf">The run this run reverted, if any.</param>
+/// <param name="Integrity">Whether the journal file verifies; only verified journals are replayed.</param>
 public sealed record JournalSummary(
     Guid RunId,
     DateTimeOffset StartedAt,
     string Profile,
     RunState Result,
     int EntryCount,
-    Guid? RevertOf);
+    Guid? RevertOf,
+    JournalIntegrity Integrity = JournalIntegrity.Verified);

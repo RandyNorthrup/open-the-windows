@@ -22,6 +22,7 @@ public sealed partial class WindowsUserHiveLoader : IUserHiveLoader
     private const uint TokenAdjustPrivileges = 0x0020;
     private const uint TokenQuery = 0x0008;
     private const uint SePrivilegeEnabled = 0x00000002;
+    private const uint SePrivilegeDisabled = 0x00000000;
     private const string SeBackupPrivilege = "SeBackupPrivilege";
     private const string SeRestorePrivilege = "SeRestorePrivilege";
 
@@ -31,10 +32,7 @@ public sealed partial class WindowsUserHiveLoader : IUserHiveLoader
         ArgumentException.ThrowIfNullOrWhiteSpace(mountKey);
         ArgumentException.ThrowIfNullOrWhiteSpace(hivePath);
 
-        EnablePrivilege(SeBackupPrivilege);
-        EnablePrivilege(SeRestorePrivilege);
-
-        int status = RegLoadKey(HkeyUsers, mountKey, hivePath);
+        int status = WithHivePrivileges(() => RegLoadKey(HkeyUsers, mountKey, hivePath));
         if (status != 0)
         {
             throw new Win32Exception(status, $"RegLoadKey failed for '{hivePath}' at HKU\\{mountKey}.");
@@ -46,14 +44,40 @@ public sealed partial class WindowsUserHiveLoader : IUserHiveLoader
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(mountKey);
 
-        int status = RegUnLoadKey(HkeyUsers, mountKey);
+        int status = WithHivePrivileges(() => RegUnLoadKey(HkeyUsers, mountKey));
         if (status != 0)
         {
             throw new Win32Exception(status, $"RegUnLoadKey failed for HKU\\{mountKey}.");
         }
     }
 
-    private static void EnablePrivilege(string name)
+    /// <summary>
+    /// Runs a hive load or unload with SeBackupPrivilege and SeRestorePrivilege enabled,
+    /// then disables them again, so an elevated GUI does not keep backup/restore rights
+    /// (read or write any file, ignoring its permissions) for the rest of its lifetime.
+    /// </summary>
+    private static int WithHivePrivileges(Func<int> operation)
+    {
+        SetPrivilege(SeBackupPrivilege, enabled: true);
+        try
+        {
+            SetPrivilege(SeRestorePrivilege, enabled: true);
+            try
+            {
+                return operation();
+            }
+            finally
+            {
+                SetPrivilege(SeRestorePrivilege, enabled: false);
+            }
+        }
+        finally
+        {
+            SetPrivilege(SeBackupPrivilege, enabled: false);
+        }
+    }
+
+    private static void SetPrivilege(string name, bool enabled)
     {
         if (!OpenProcessToken(GetCurrentProcess(), TokenAdjustPrivileges | TokenQuery, out nint token))
         {
@@ -71,7 +95,7 @@ public sealed partial class WindowsUserHiveLoader : IUserHiveLoader
             {
                 PrivilegeCount = 1,
                 Luid = luid,
-                Attributes = SePrivilegeEnabled,
+                Attributes = enabled ? SePrivilegeEnabled : SePrivilegeDisabled,
             };
 
             if (!AdjustTokenPrivileges(token, false, ref privileges, 0, nint.Zero, nint.Zero))

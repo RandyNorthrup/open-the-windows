@@ -18,9 +18,10 @@ namespace OpenTheWindows.Cli.Commands;
 /// </summary>
 internal static class ProfileCommand
 {
-    public static Command Create(Func<string?, CatalogLoadResult> loadCatalog)
+    public static Command Create(Func<string?, CatalogLoadResult> loadCatalog, Func<ITrustedKeySource> trustedKeys)
     {
         ArgumentNullException.ThrowIfNull(loadCatalog);
+        ArgumentNullException.ThrowIfNull(trustedKeys);
 
         var jsonOption = new Option<bool>("--json")
         {
@@ -34,7 +35,7 @@ internal static class ProfileCommand
         command.Subcommands.Add(CreateShow(jsonOption));
         command.Subcommands.Add(CreateValidate(loadCatalog, jsonOption));
         command.Subcommands.Add(CreateSign());
-        command.Subcommands.Add(CreateVerify());
+        command.Subcommands.Add(CreateVerify(trustedKeys));
         return command;
     }
 
@@ -228,7 +229,7 @@ internal static class ProfileCommand
         return ExitCodes.Success;
     }
 
-    private static Command CreateVerify()
+    private static Command CreateVerify(Func<ITrustedKeySource> trustedKeys)
     {
         var profileArgument = new Argument<string>("profile") { Description = "Path to a signed profile .json file." };
         var keyOption = new Option<string?>("--key") { Description = "PEM public key to verify against (default: the machine trust store)." };
@@ -237,11 +238,12 @@ internal static class ProfileCommand
         command.Arguments.Add(profileArgument);
         command.Options.Add(keyOption);
         command.Options.Add(sigOption);
-        command.SetAction(parseResult => ExecuteVerify(parseResult, profileArgument, keyOption, sigOption));
+        command.SetAction(parseResult => ExecuteVerify(parseResult, profileArgument, keyOption, sigOption, trustedKeys));
         return command;
     }
 
-    private static int ExecuteVerify(ParseResult parseResult, Argument<string> profileArgument, Option<string?> keyOption, Option<string?> sigOption)
+    private static int ExecuteVerify(
+        ParseResult parseResult, Argument<string> profileArgument, Option<string?> keyOption, Option<string?> sigOption, Func<ITrustedKeySource> trustedKeys)
     {
         if (!TryBeginFileCommand(parseResult, profileArgument, out TextWriter stdout, out TextWriter stderr, out string profilePath))
         {
@@ -262,7 +264,7 @@ internal static class ProfileCommand
         }
 
         string profileJson = File.ReadAllText(profilePath);
-        if (!TryVerify(profileJson, signature, parseResult.GetValue(keyOption), stderr, out bool verified))
+        if (!TryVerify(profileJson, signature, parseResult.GetValue(keyOption), trustedKeys, stderr, out bool verified))
         {
             return ExitCodes.InvalidInput;
         }
@@ -285,7 +287,8 @@ internal static class ProfileCommand
     /// store); otherwise returns <see langword="true"/> and sets
     /// <paramref name="verified"/> to the cryptographic result.
     /// </summary>
-    private static bool TryVerify(string profileJson, ProfileSignatureDocument signature, string? keyPath, TextWriter stderr, out bool verified)
+    private static bool TryVerify(
+        string profileJson, ProfileSignatureDocument signature, string? keyPath, Func<ITrustedKeySource> trustedKeys, TextWriter stderr, out bool verified)
     {
         verified = false;
         if (keyPath is not null)
@@ -300,15 +303,15 @@ internal static class ProfileCommand
             return true;
         }
 
-        string directory = ProfileTrust.DefaultTrustStoreDirectory;
-        if (!Directory.Exists(directory) || !Directory.EnumerateFiles(directory, "*.pem").Any())
+        ITrustedKeySource keys = trustedKeys();
+        if (keys.ReadPublicKeysPem().Count == 0)
         {
             stderr.WriteLine(string.Create(CultureInfo.InvariantCulture,
-                $"No public key given (--key) and no trusted keys in '{directory}'."));
+                $"No public key given (--key) and no trusted keys in '{keys.Description}'."));
             return false;
         }
 
-        verified = ProfileTrust.VerifyAgainstTrustStore(profileJson, signature, directory);
+        verified = ProfileTrust.VerifyAgainstTrustStore(profileJson, signature, keys);
         return true;
     }
 

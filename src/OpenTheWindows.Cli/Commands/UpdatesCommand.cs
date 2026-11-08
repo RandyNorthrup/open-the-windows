@@ -13,7 +13,7 @@ namespace OpenTheWindows.Cli.Commands;
 /// <c>otw updates unhide --kb</c>: the Windows Update guardrails. Pause, resume,
 /// hide and unhide change machine state and need elevation; status and hidden are
 /// reads. Exit codes: 0 success, 2 error, 3 unsupported OS, 4 invalid input,
-/// 5 elevation required.
+/// 5 elevation required, 6 managed by policy (nothing changed).
 /// </summary>
 internal static class UpdatesCommand
 {
@@ -114,6 +114,14 @@ internal static class UpdatesCommand
         {
             stdout.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Pause failed: {outcome.Result.State}."));
             return ExitCodes.Error;
+        }
+
+        // A run that skipped every value because policy manages Windows Update changed nothing:
+        // say so rather than report a pause that never happened.
+        if (outcome.Result.Entries.Count > 0 && outcome.Result.Entries.All(e => e.Result == ApplyState.Managed))
+        {
+            stdout.WriteLine("Windows Update is managed by MDM or Group Policy on this device; the pause was not applied.");
+            return ExitCodes.Managed;
         }
 
         string verb = whatIf ? "Would pause" : "Paused";

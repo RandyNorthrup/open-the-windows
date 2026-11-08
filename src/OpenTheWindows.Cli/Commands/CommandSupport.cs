@@ -106,8 +106,9 @@ internal static class CommandSupport
 
     /// <summary>
     /// Selects the entries a scan/apply run operates on and the run/report label.
-    /// <c>--only &lt;id&gt;</c> wins and picks exactly that entry (regardless of level
-    /// or status). Otherwise <paramref name="profileValue"/> is resolved as, in
+    /// <c>--only &lt;id&gt;</c> wins and picks that entry plus the entries it depends on
+    /// (regardless of level or status), since a dependency is a requirement the
+    /// planner enforces. Otherwise <paramref name="profileValue"/> is resolved as, in
     /// order: a built-in level name (<c>basic</c>..<c>paranoid</c>, applied uniformly
     /// with <paramref name="includeDraft"/>); a built-in profile id or a path to a
     /// profile <c>.json</c> file (resolved through <see cref="ProfileResolver"/>,
@@ -116,7 +117,7 @@ internal static class CommandSupport
     /// <paramref name="unknownProfileExit"/>.
     /// When <paramref name="profileValue"/> is a file and <paramref name="policy"/>
     /// requires signed profiles, the file must carry a valid signature from a key in
-    /// <paramref name="trustStoreDirectory"/> or the selection is refused. Built-in
+    /// <paramref name="trustedKeys"/> or the selection is refused. Built-in
     /// ids and level names are never subject to that check.
     /// </summary>
     public static bool TrySelectEntries(
@@ -126,7 +127,7 @@ internal static class CommandSupport
         string? onlyId,
         bool includeDraft,
         ProfilePolicy policy,
-        string trustStoreDirectory,
+        ITrustedKeySource trustedKeys,
         int unknownProfileExit,
         TextWriter stderr,
         out IReadOnlyList<TweakDefinition> entries,
@@ -151,7 +152,7 @@ internal static class CommandSupport
                 return false;
             }
 
-            entries = [entry];
+            entries = WithDependencies(catalog, entry);
             label = string.Create(CultureInfo.InvariantCulture, $"only:{onlyId}");
             return true;
         }
@@ -171,7 +172,26 @@ internal static class CommandSupport
             return true;
         }
 
-        return TryResolveProfileEntries(catalog, facts, value, policy, trustStoreDirectory, unknownProfileExit, stderr, out entries, out label, out exitCode, out profile);
+        return TryResolveProfileEntries(catalog, facts, value, policy, trustedKeys, unknownProfileExit, stderr, out entries, out label, out exitCode, out profile);
+    }
+
+    /// <summary>
+    /// <paramref name="entry"/> preceded by every entry it (transitively) depends on, in
+    /// catalogue order, so a single-entry run satisfies its own requirements.
+    /// </summary>
+    private static List<TweakDefinition> WithDependencies(TweakCatalog catalog, TweakDefinition entry)
+    {
+        HashSet<TweakId> needed = [entry.Id];
+        Queue<TweakDefinition> pending = new([entry]);
+        while (pending.TryDequeue(out TweakDefinition? current))
+        {
+            foreach (TweakDefinition dependency in catalog.Entries.Where(e => current.DependsOn.Contains(e.Id) && needed.Add(e.Id)))
+            {
+                pending.Enqueue(dependency);
+            }
+        }
+
+        return [.. catalog.Entries.Where(e => needed.Contains(e.Id))];
     }
 
     /// <summary>Resolves a built-in profile id or a profile file through the profile engine, enforcing the signing policy for files.</summary>
@@ -180,7 +200,7 @@ internal static class CommandSupport
         OperatingSystemFacts facts,
         string value,
         ProfilePolicy policy,
-        string trustStoreDirectory,
+        ITrustedKeySource trustedKeys,
         int unknownProfileExit,
         TextWriter stderr,
         out IReadOnlyList<TweakDefinition> entries,
@@ -193,13 +213,25 @@ internal static class CommandSupport
         exitCode = ExitCodes.Success;
         profile = null;
 
-        bool isFile = File.Exists(value);
-        if (isFile && !EnforceSigningPolicy(value, policy, trustStoreDirectory, unknownProfileExit, stderr, out exitCode))
+        ProfileLoadResult? loaded;
+        if (File.Exists(value))
         {
-            return false;
+            // Read once: the signature is checked over exactly the text that is then parsed,
+            // so the file cannot be swapped between verification and use.
+            if (!TryReadProfileText(value, stderr, out string text)
+                || !EnforceSigningPolicy(value, text, policy, trustedKeys, stderr))
+            {
+                exitCode = unknownProfileExit;
+                return false;
+            }
+
+            loaded = ProfileLoader.LoadText(value, text);
+        }
+        else
+        {
+            loaded = ProfileLoader.TryLoadBuiltIn(value);
         }
 
-        ProfileLoadResult? loaded = isFile ? ProfileLoader.LoadFile(value) : ProfileLoader.TryLoadBuiltIn(value);
         if (loaded is null)
         {
             stderr.WriteLine(string.Create(CultureInfo.InvariantCulture,
@@ -227,18 +259,31 @@ internal static class CommandSupport
         return true;
     }
 
+    private static bool TryReadProfileText(string path, TextWriter stderr, out string text)
+    {
+        try
+        {
+            text = File.ReadAllText(path);
+            return true;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Could not read profile file '{path}': {ex.Message}"));
+            text = string.Empty;
+            return false;
+        }
+    }
+
     /// <summary>
-    /// Applies <see cref="ProfilePolicy.RequireSignedProfiles"/> to a profile file:
-    /// returns true (and <paramref name="exitCode"/> Success) when the file may be
-    /// used, or false (writing the reason and yielding
-    /// <paramref name="unknownProfileExit"/>) when the policy is on and the file is
-    /// unsigned or not signed by a trusted key.
+    /// Applies <see cref="ProfilePolicy.RequireSignedProfiles"/> to a profile file's
+    /// already-read <paramref name="text"/>: returns true when it may be used, or false
+    /// (writing the reason) when the policy is on and the text is unsigned or not signed
+    /// by a trusted key.
     /// </summary>
     private static bool EnforceSigningPolicy(
-        string profilePath, ProfilePolicy policy, string trustStoreDirectory, int unknownProfileExit, TextWriter stderr, out int exitCode)
+        string profilePath, string text, ProfilePolicy policy, ITrustedKeySource trustedKeys, TextWriter stderr)
     {
-        exitCode = ExitCodes.Success;
-        IReadOnlyList<CatalogIssue> issues = ProfileTrust.Enforce(profilePath, policy, trustStoreDirectory);
+        IReadOnlyList<CatalogIssue> issues = ProfileTrust.Enforce(profilePath, text, policy, trustedKeys);
         if (issues.Count == 0)
         {
             return true;
@@ -251,7 +296,6 @@ internal static class CommandSupport
 
         stderr.WriteLine(string.Create(CultureInfo.InvariantCulture,
             $"Refusing profile file '{profilePath}': policy {ProfilePolicy.RequireSignedProfilesValueName} requires a trusted signature."));
-        exitCode = unknownProfileExit;
         return false;
     }
 

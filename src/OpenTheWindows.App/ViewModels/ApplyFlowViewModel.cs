@@ -84,6 +84,9 @@ internal sealed partial class ApplyFlowViewModel : ObservableObject
         _entries = entries;
         _options = options;
 
+        // A profile that asks for an Explorer restart pre-ticks it; the user can still untick it.
+        RestartExplorer |= options.RestartExplorer;
+
         try
         {
             PlanResult plan = _coordinator.Preview(entries, options);

@@ -20,6 +20,9 @@
          setting them here would make test projects unable to reference this exe (NETSDK1151). -->
     <RollForward>LatestPatch</RollForward>
     <IsTrimmable>true</IsTrimmable>
+    <!-- An elevated tool must not load code named by the DOTNET_STARTUP_HOOKS environment
+         variable of whoever launched it (runtime feature switch, honoured at run time). -->
+    <StartupHookSupport>false</StartupHookSupport>
   </PropertyGroup>
 
   <ItemGroup>

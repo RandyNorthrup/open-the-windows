@@ -34,14 +34,51 @@ public static class JournalSerializer
     public static string ComputeHash(JournalRecord record)
     {
         ArgumentNullException.ThrowIfNull(record);
+        return Convert.ToHexStringLower(SHA256.HashData(UnhashedBytes(record)));
+    }
 
+    /// <summary>
+    /// Computes the HMAC-SHA256 (lowercase hex) of the record with its own
+    /// <c>hash</c> field omitted, under the machine journal <paramref name="key"/>.
+    /// Unlike <see cref="ComputeHash"/>, nobody without the key can produce a value
+    /// that verifies, so a forged journal is detected.
+    /// </summary>
+    public static string ComputeMac(JournalRecord record, ReadOnlySpan<byte> key)
+    {
+        ArgumentNullException.ThrowIfNull(record);
+        return Convert.ToHexStringLower(HMACSHA256.HashData(key, UnhashedBytes(record)));
+    }
+
+    /// <summary>Recomputes <paramref name="record"/>'s plain hash and returns whether it matches the stored <c>Hash</c>.</summary>
+    public static bool VerifyHash(JournalRecord record)
+    {
+        ArgumentNullException.ThrowIfNull(record);
+        return record.Hash is { } stored && FixedTimeEquals(stored, ComputeHash(record));
+    }
+
+    /// <summary>
+    /// Verifies <paramref name="record"/> under <paramref name="key"/>: a keyed record
+    /// must carry a matching MAC, an unkeyed one a matching plain hash. A keyed record
+    /// never verifies without the key.
+    /// </summary>
+    public static bool Verify(JournalRecord record, ReadOnlySpan<byte> key)
+    {
+        ArgumentNullException.ThrowIfNull(record);
+        if (record.Keyed != true)
+        {
+            return VerifyHash(record);
+        }
+
+        return !key.IsEmpty && record.Hash is { } stored && FixedTimeEquals(stored, ComputeMac(record, key));
+    }
+
+    private static byte[] UnhashedBytes(JournalRecord record)
+    {
         string? saved = record.Hash;
         try
         {
             record.Hash = null;
-            string json = JsonSerializer.Serialize(record, JournalJsonContext.Default.JournalRecord);
-            byte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes(json));
-            return Convert.ToHexStringLower(digest);
+            return Encoding.UTF8.GetBytes(JsonSerializer.Serialize(record, JournalJsonContext.Default.JournalRecord));
         }
         finally
         {
@@ -49,10 +86,6 @@ public static class JournalSerializer
         }
     }
 
-    /// <summary>Recomputes <paramref name="record"/>'s hash and returns whether it matches the stored <c>Hash</c>.</summary>
-    public static bool VerifyHash(JournalRecord record)
-    {
-        ArgumentNullException.ThrowIfNull(record);
-        return record.Hash is { } stored && string.Equals(stored, ComputeHash(record), StringComparison.Ordinal);
-    }
+    private static bool FixedTimeEquals(string left, string right)
+        => CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(left), Encoding.ASCII.GetBytes(right));
 }

@@ -6,10 +6,9 @@ namespace OpenTheWindows.Windows;
 
 /// <summary>
 /// Restarts <c>explorer.exe</c> so shell/taskbar settings take effect without a
-/// sign-out, by terminating the shell processes in the active console session;
-/// Winlogon relaunches the shell automatically. The interactive user is the
-/// active console session in the single-user case this targets; multi-session
-/// SID-precise restart is a later refinement.
+/// sign-out, by terminating the shell processes in the session the target user is
+/// signed in to (an RDP or fast-user-switched session included, so another user's
+/// desktop is never touched); Winlogon relaunches the shell automatically.
 /// </summary>
 [SupportedOSPlatform("windows")]
 public sealed partial class WindowsExplorerRestarter : IExplorerRestarter
@@ -24,7 +23,12 @@ public sealed partial class WindowsExplorerRestarter : IExplorerRestarter
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(userSid);
 
-        uint session = WTSGetActiveConsoleSessionId();
+        if (Interop.WtsSessions.SessionForSid(userSid) is not { } session)
+        {
+            // The user is not signed in anywhere: there is no shell to restart.
+            return;
+        }
+
         foreach (uint pid in ExplorerProcessIds(session))
         {
             Terminate(pid);
@@ -95,10 +99,6 @@ public sealed partial class WindowsExplorerRestarter : IExplorerRestarter
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
         public string ExeFile;
     }
-
-    [LibraryImport("kernel32.dll")]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    private static partial uint WTSGetActiveConsoleSessionId();
 
     [LibraryImport("kernel32.dll", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]

@@ -28,9 +28,9 @@
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[10.0.11, )",
-        "resolved": "10.0.11",
-        "contentHash": "IBf7lbovvjGWVWXZX5cJ/cO0WXbId0Zq4BuSeT94mGZuOAP66oMeH9PTBZ9Jpp3Jb6jtK0qm/NyUbPRo1gC/wQ=="
+        "requested": "[10.0.14, )",
+        "resolved": "10.0.14",
+        "contentHash": "YlTamXppEQls6DYWt7RdUuwWDb0lyw/vXCaGeQpLCpsLmfwGuCkOz/vIGgMTV7ECsJcavkCOkxZXv9s8rdAHkQ=="
       },
       "Microsoft.VisualStudio.Threading.Analyzers": {
         "type": "Direct",
@@ -95,7 +95,7 @@
       "openthewindows.windows": {
         "type": "Project",
         "dependencies": {
-          "OpenTheWindows.Core": "[0.1.0-local, )",
+          "OpenTheWindows.Core": "[0.2.0, )",
           "System.Diagnostics.EventLog": "[10.0.11, )",
           "System.Management": "[10.0.11, )",
           "System.ServiceProcess.ServiceController": "[10.0.11, )",

@@ -16,17 +16,20 @@ public static class WindowsScanEngineFactory
 {
     /// <summary>Builds the scan engine over the real Windows readers.</summary>
     public static ScanEngine Create()
-        => new(
+    {
+        var runner = new WindowsCommandRunner();
+        return new(
             new WindowsRegistryReader(),
             new WindowsServiceReader(),
             new WindowsScheduledTaskReader(),
             new WindowsAppxReader(),
-            new WindowsOptionalFeatureReader(),
+            new WindowsOptionalFeatureReader(runner),
             new WindowsDefenderPreferenceReader(),
             new WindowsPowerSettingReader(),
-            new WindowsSecurityPolicyManager(new WindowsCommandRunner()),
+            new WindowsSecurityPolicyManager(runner),
             new WindowsInteractiveUserResolver(),
             new WindowsManagedSettingDetector(),
             new WindowsOperatingSystemInfo(),
             TimeProvider.System);
+    }
 }

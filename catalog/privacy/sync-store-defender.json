@@ -399,11 +399,11 @@
     {
       "id": "privacy.defender.never-submit-samples",
       "title": "Never auto-submit file samples to Defender cloud",
-      "description": "Sets Microsoft Defender's automatic sample submission to 'Never send' so suspicious files are never uploaded, while cloud-delivered protection (MAPS) itself stays on.",
-      "rationale": "Cloud-delivered protection is kept enabled for security, but automatic sample submission can upload copies of files (which may contain personal data) to Microsoft. Setting it to 'Never send' is the privacy-respecting middle ground that keeps cloud verdicts while never uploading file samples.",
+      "description": "Sets Microsoft Defender's automatic sample submission to 'Never send' through policy, so suspicious files are never uploaded for analysis. Cloud lookups (MAPS) stay on, but Block at First Sight, which needs sample submission, stops working.",
+      "rationale": "Automatic sample submission can upload copies of files, which may contain personal data, to Microsoft. Turning it off is a real privacy gain but also a real protection loss: Microsoft documents that Block at First Sight requires sample submission to be enabled, so brand-new malware is no longer blocked within seconds of first being seen. That is why this is a Paranoid, Advanced-risk choice rather than a default.",
       "category": "Privacy",
-      "level": "Balanced",
-      "risk": "Caution",
+      "level": "Paranoid",
+      "risk": "Advanced",
       "scope": "Machine",
       "status": "Verified",
       "appliesTo": {
@@ -426,19 +426,23 @@
       ],
       "requires": "None",
       "dependsOn": [],
-      "conflictsWith": [],
+      "conflictsWith": [
+        "security.defender.submit-samples-safe"
+      ],
       "managedBy": {
         "policyCsp": "Defender/SubmitSamplesConsent",
         "groupPolicyPath": "Computer Configuration\\Administrative Templates\\Windows Components\\Microsoft Defender Antivirus\\MAPS\\Send file samples when further analysis is required"
       },
       "sideEffects": [
-        "Novel or unknown files are never uploaded for deep analysis, so protection against brand-new malware can be slightly slower; cloud-delivered protection (MAPS) itself stays on.",
-        "Tamper Protection (on by default) may block this change on unmanaged devices until it is turned off in Windows Security."
+        "Block at First Sight is disabled: a never-seen-before malicious file is no longer held and analysed in the cloud before it can run.",
+        "Windows Security shows a warning that automatic sample submission is off.",
+        "Overrides 'Send safe samples automatically' (security.defender.submit-samples-safe); the two are mutually exclusive."
       ],
       "sources": [
         "https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services",
         "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender",
-        "https://learn.microsoft.com/en-us/defender-endpoint/cloud-protection-microsoft-defender-antivirus"
+        "https://learn.microsoft.com/en-us/defender-endpoint/cloud-protection-microsoft-defender-antivirus",
+        "https://learn.microsoft.com/en-us/defender-endpoint/configure-block-at-first-sight-microsoft-defender-antivirus"
       ],
       "verifiedOn": [
         {
