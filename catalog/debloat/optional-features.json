@@ -323,7 +323,7 @@
     {
       "id": "debloat.features.remove-media-player-legacy",
       "title": "Remove legacy Windows Media Player",
-      "description": "Removes the legacy Windows Media Player capability and its optional-feature counterpart.",
+      "description": "Turns off the legacy Windows Media Player optional feature, then removes its capability. Reverting adds the capability back first, which brings the feature back with it.",
       "rationale": "The legacy Windows Media Player is superseded by the modern Media Player app. Removing it declutters the system; preinstalled by default.",
       "category": "Debloat",
       "level": "Balanced",
@@ -339,13 +339,13 @@
       "actions": [
         {
           "kind": "OptionalFeature",
-          "name": "Media.WindowsMediaPlayer~~~~0.0.12.0",
+          "name": "WindowsMediaPlayer",
           "enabled": false,
           "default": true
         },
         {
           "kind": "OptionalFeature",
-          "name": "WindowsMediaPlayer",
+          "name": "Media.WindowsMediaPlayer~~~~0.0.12.0",
           "enabled": false,
           "default": true
         }

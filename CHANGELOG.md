@@ -134,6 +134,14 @@ All notable changes to this project are documented here. The format follows
   and only the result form was treated as "already done". App removals are reported as not
   reversible on revert; the comments that said a revert reprovisions the app now say it can only
   do that while Windows still has the package staged, which an all-users removal ends.
+- Adding a Windows capability back (the revert of a capability removal such as WMIC or VBScript)
+  gets up to 60 minutes instead of 10: it downloads from Windows Update, and on the lab PC each
+  took 10 to 12 minutes, so the revert was stopped part-way and reported as failed. A DISM run
+  stopped for time now says so instead of reporting exit code -1.
+- `debloat.features.remove-media-player-legacy` turns the optional feature off before it removes
+  the capability. Removing the capability takes the feature with it, so the second step used to
+  fail on a feature Windows no longer had; turning off a feature Windows does not have now counts
+  as done, and the revert adds the capability back before it turns the feature on.
 - `debloat.apps.remove-tiktok` and `debloat.apps.remove-disney-plus` named package families that
   do not exist (wrong publisher IDs), so they never found the apps; they now use
   `BytedancePte.Ltd.TikTok_6yccndn6064se` and `Disney.37853FC22B2CE_6rarf9sa4v8jt`, the families

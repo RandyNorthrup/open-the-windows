@@ -44,7 +44,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -66,7 +66,9 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "debloat", "news"]
     },
     {
@@ -78,7 +80,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -100,7 +102,9 @@
         "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/",
         "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "debloat", "weather"]
     },
     {
@@ -112,7 +116,7 @@
       "level": "Balanced",
       "risk": "Caution",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": 26100, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -136,7 +140,9 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "debloat", "search"]
     },
     {
@@ -148,7 +154,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -170,7 +176,9 @@
         "https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot",
         "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "debloat", "copilot", "ai"]
     },
     {
@@ -182,7 +190,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -203,7 +211,9 @@
         "https://learn.microsoft.com/en-us/windows/configuration/policy-based-inbox-app-removal/policy-based-inbox-app-removal",
         "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "debloat", "clipchamp"]
     },
     {
@@ -503,7 +513,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -525,7 +535,9 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "debloat", "help"]
     },
     {
@@ -645,7 +657,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -667,7 +679,9 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "debloat", "clock"]
     },
     {
@@ -679,7 +693,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -702,7 +716,9 @@
         "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/",
         "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "debloat", "camera"]
     },
     {
@@ -714,7 +730,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -736,7 +752,9 @@
         "https://msendpointmgr.com/2025/10/29/how-to-remove-built-in-apps-for-windows-11-25h2/",
         "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "debloat", "calculator"]
     },
     {
@@ -1039,7 +1057,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -1062,7 +1080,9 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "debloat", "xbox", "gaming", "game-bar"]
     },
     {
@@ -1180,7 +1200,7 @@
       "level": "Strict",
       "risk": "Advanced",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -1202,7 +1222,9 @@
         "https://github.com/farag2/Sophia-Script-for-Windows",
         "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "debloat", "xbox", "gaming"]
     },
     {
@@ -1357,7 +1379,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -1379,7 +1401,9 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "debloat", "family-safety"]
     },
     {
@@ -1391,7 +1415,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -1413,7 +1437,9 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "debloat", "journal"]
     },
     {
@@ -1459,7 +1485,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -1481,7 +1507,9 @@
         "https://github.com/farag2/Sophia-Script-for-Windows",
         "https://learn.microsoft.com/en-us/windows/application-management/overview-windows-apps"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "debloat", "dev-home", "deprecated"]
     }
   ]

@@ -43,7 +43,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -61,7 +61,9 @@
       "sources": [
         "https://learn.microsoft.com/windows/application-management/provisioned-apps-windows-client-os"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "feedback"]
     },
     {
@@ -174,7 +176,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -193,7 +195,9 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://learn.microsoft.com/windows/application-management/provisioned-apps-windows-client-os"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "oem"]
     },
     {
@@ -205,7 +209,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -224,7 +228,9 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://learn.microsoft.com/windows/application-management/provisioned-apps-windows-client-os"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "oem"]
     },
     {
@@ -236,7 +242,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -255,7 +261,9 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://learn.microsoft.com/windows/application-management/provisioned-apps-windows-client-os"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "oem"]
     },
     {
@@ -267,7 +275,7 @@
       "level": "Balanced",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -286,7 +294,9 @@
         "https://github.com/Raphire/Win11Debloat",
         "https://learn.microsoft.com/windows/application-management/provisioned-apps-windows-client-os"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "oem"]
     }
   ]
