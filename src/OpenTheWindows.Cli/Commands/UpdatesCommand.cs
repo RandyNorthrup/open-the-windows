@@ -177,10 +177,7 @@ internal static class UpdatesCommand
 
     private static int ExecuteStatus(ParseResult parseResult, CliServices services, Option<bool> jsonOption)
     {
-        TextWriter stdout = parseResult.InvocationConfiguration.Output;
-        TextWriter stderr = parseResult.InvocationConfiguration.Error;
-
-        if (!CommandSupport.IsSupported(services.Doctor, stderr, out int exitCode))
+        if (!CommandSupport.TryBeginSupported(services, parseResult, out TextWriter stdout, out _, out int exitCode))
         {
             return exitCode;
         }
@@ -236,18 +233,22 @@ internal static class UpdatesCommand
     private static Command CreateHide(CliServices services)
     {
         var kb = new Option<string>("--kb") { Description = "Knowledge-base id to hide (KB5063878 or 5063878).", Required = true };
+        var json = new Option<bool>("--json") { Description = "Emit the outcome as JSON on stdout (stable schema)." };
         var command = new Command("hide", "Hide a discovered Windows update by knowledge-base id (reversible with unhide).");
+        command.Options.Add(json);
         command.Options.Add(kb);
-        command.SetAction(parseResult => ExecuteHide(parseResult, services, kb, hide: true));
+        command.SetAction(parseResult => ExecuteHide(parseResult, services, kb, json, hide: true));
         return command;
     }
 
     private static Command CreateUnhide(CliServices services)
     {
         var kb = new Option<string>("--kb") { Description = "Knowledge-base id to unhide (KB5063878 or 5063878).", Required = true };
+        var json = new Option<bool>("--json") { Description = "Emit the outcome as JSON on stdout (stable schema)." };
         var command = new Command("unhide", "Clear the hidden flag on a discovered Windows update by knowledge-base id.");
+        command.Options.Add(json);
         command.Options.Add(kb);
-        command.SetAction(parseResult => ExecuteHide(parseResult, services, kb, hide: false));
+        command.SetAction(parseResult => ExecuteHide(parseResult, services, kb, json, hide: false));
         return command;
     }
 
@@ -282,7 +283,7 @@ internal static class UpdatesCommand
         return ExitCodes.Success;
     }
 
-    private static int ExecuteHide(ParseResult parseResult, CliServices services, Option<string> kbOption, bool hide)
+    private static int ExecuteHide(ParseResult parseResult, CliServices services, Option<string> kbOption, Option<bool> jsonOption, bool hide)
     {
         if (!TryBeginElevatedCommand(parseResult, services, whatIf: false, hide ? "Hiding" : "Unhiding", out TextWriter stdout, out TextWriter stderr, out int exitCode))
         {
@@ -299,7 +300,9 @@ internal static class UpdatesCommand
         UpdateHideOutcome outcome = hide
             ? services.CreateUpdateHide().Hide(kb)
             : services.CreateUpdateHide().Unhide(kb);
-        stdout.WriteLine(outcome.Message);
+        stdout.WriteLine(parseResult.GetValue(jsonOption)
+            ? JsonSerializer.Serialize(outcome, CliJsonContext.Default.UpdateHideOutcome)
+            : outcome.Message);
         return outcome.Succeeded ? ExitCodes.Success : ExitCodes.Error;
     }
 }

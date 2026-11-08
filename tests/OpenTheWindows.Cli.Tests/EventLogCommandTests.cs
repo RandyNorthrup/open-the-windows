@@ -132,4 +132,19 @@ public sealed class EventLogCommandTests
         Assert.Equal(ExitCodes.Success, code);
         Assert.Contains("not registered", stdout.ToString(), StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void Status_json_reports_the_source_log_and_registration()
+    {
+        var installer = new FakeEventLogInstaller { Registered = true };
+        var (root, stdout, stderr) = Build(installer);
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "eventlog", "status", "--json");
+
+        Assert.Equal(ExitCodes.Success, code);
+        using var document = System.Text.Json.JsonDocument.Parse(stdout.ToString());
+        Assert.Equal("OTW", document.RootElement.GetProperty("source").GetString());
+        Assert.Equal("OpenTheWindows", document.RootElement.GetProperty("log").GetString());
+        Assert.True(document.RootElement.GetProperty("registered").GetBoolean());
+    }
 }

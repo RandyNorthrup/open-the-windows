@@ -243,4 +243,31 @@ public sealed class TaskCommandTests
             File.Delete(path);
         }
     }
+
+    [Fact]
+    public void Install_what_if_shows_the_task_without_registering_it_or_needing_elevation()
+    {
+        var installer = new FakeScheduledTaskInstaller();
+        var (root, stdout, stderr) = Build(installer, elevated: false);
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "task", "install", "--profile", "home", "--weekly", "--what-if");
+
+        Assert.Equal(ExitCodes.Success, code);
+        Assert.Empty(installer.Installed);
+        Assert.Contains($"Would install task '{RemediationTask.TaskPath}' (Weekly, as SYSTEM)", stdout.ToString(), StringComparison.Ordinal);
+        Assert.Contains("remediate --profile \"home\"", stdout.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Install_what_if_previews_an_audit_task()
+    {
+        var installer = new FakeScheduledTaskInstaller();
+        var (root, stdout, stderr) = Build(installer, elevated: false);
+
+        int code = CliTestHost.Invoke(root, stdout, stderr, "task", "install", "--audit", "ms-baseline-25h2", "--out", "report.json", "--what-if");
+
+        Assert.Equal(ExitCodes.Success, code);
+        Assert.Empty(installer.Installed);
+        Assert.Contains("Would install task", stdout.ToString(), StringComparison.Ordinal);
+    }
 }

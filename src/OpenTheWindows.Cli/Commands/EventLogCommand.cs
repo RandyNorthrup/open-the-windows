@@ -2,6 +2,7 @@ using System.CommandLine;
 using System.ComponentModel;
 using System.Globalization;
 using System.Security;
+using System.Text.Json;
 using OpenTheWindows.Core;
 using OpenTheWindows.Core.Abstractions;
 
@@ -44,8 +45,10 @@ internal static class EventLogCommand
 
     private static Command CreateStatus(CliServices services)
     {
+        var json = new Option<bool>("--json") { Description = "Emit the status as JSON on stdout (stable schema)." };
         var command = new Command("status", "Report the Event Log source and whether it is registered.");
-        command.SetAction(parseResult => ExecuteStatus(parseResult, services));
+        command.Options.Add(json);
+        command.SetAction(parseResult => ExecuteStatus(parseResult, services, json));
         return command;
     }
 
@@ -95,20 +98,23 @@ internal static class EventLogCommand
         }
     }
 
-    private static int ExecuteStatus(ParseResult parseResult, CliServices services)
+    private static int ExecuteStatus(ParseResult parseResult, CliServices services, Option<bool> jsonOption)
     {
-        TextWriter stdout = parseResult.InvocationConfiguration.Output;
-        TextWriter stderr = parseResult.InvocationConfiguration.Error;
-
-        if (!CommandSupport.IsSupported(services.Doctor, stderr, out int exitCode))
+        if (!CommandSupport.TryBeginSupported(services, parseResult, out TextWriter stdout, out _, out int exitCode))
         {
             return exitCode;
         }
 
         IEventLogInstaller installer = services.CreateEventLogInstaller();
         bool registered = installer.SourceExists();
-        stdout.WriteLine(string.Create(CultureInfo.InvariantCulture,
-            $"Event Log source '{installer.SourceName}' in log '{installer.LogName}': {(registered ? "registered" : "not registered")}."));
+        if (parseResult.GetValue(jsonOption))
+        {
+            stdout.WriteLine(JsonSerializer.Serialize(new EventLogStatusJson(installer.SourceName, installer.LogName, registered), CliJsonContext.Default.EventLogStatusJson));
+            return ExitCodes.Success;
+        }
+
+        string state = registered ? "registered" : "not registered";
+        stdout.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Event Log source '{installer.SourceName}' in log '{installer.LogName}': {state}."));
         return ExitCodes.Success;
     }
 

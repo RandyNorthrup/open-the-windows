@@ -25,7 +25,9 @@ All notable changes to this project are documented here. The format follows
   services are stopped for the repair only (start types are never touched), `SoftwareDistribution`
   and `catroot2` are renamed aside with a timestamp (never deleted), the services are started
   again, and the run is audited as Event 4005.
-- `otw updates status --json`.
+- `otw updates status --json`, `updates hide|unhide --json` and `eventlog status --json`.
+- `otw task install --what-if` shows the task that would be registered (path, trigger, account
+  and command line) without registering it or needing elevation.
 - `otw revert --entry <id>` reverts one entry of a run; `otw revert --all` undoes every change
   the tool has made, newest first, skipping runs already reverted.
 - `otw profile capture --out <file>`: writes a profile of the catalogue settings this PC

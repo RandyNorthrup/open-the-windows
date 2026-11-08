@@ -121,6 +121,7 @@ Every command takes `--help` for its full options and exit codes, and most take
   SYSTEM, so it is refused unless `otw.exe` sits in a folder only administrators
   can change (the MSI's Program Files install qualifies; a portable copy in
   Downloads does not), and a profile file is copied to a protected folder first.
+  `--what-if` shows the task it would register without changing anything.
 - **`otw audit run --baseline <stig|cis|microsoft|file>`** — score the machine
   against a security baseline (DISA STIG, CIS, or Microsoft), read-only, with a
   0–100 result and a Pass / Fail / Manual verdict per control. Export with

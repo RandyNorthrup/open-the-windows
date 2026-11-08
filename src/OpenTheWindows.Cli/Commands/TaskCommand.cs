@@ -37,6 +37,7 @@ internal static class TaskCommand
         var weekly = new Option<bool>("--weekly") { Description = "Run once a week." };
         var onLogon = new Option<bool>("--on-logon") { Description = "Run at every user logon." };
         var onBuildChange = new Option<bool>("--on-build-change") { Description = "Run at system start, re-applying only after a feature update (an OS build/UBR change)." };
+        var whatIf = new Option<bool>("--what-if") { Description = "Show the task that would be registered (path, trigger, command line); change nothing." };
 
         var command = new Command("install", "Register a remediation task for a profile, or an audit task for a baseline (replacing any existing one).");
         command.Options.Add(profile);
@@ -46,7 +47,8 @@ internal static class TaskCommand
         command.Options.Add(weekly);
         command.Options.Add(onLogon);
         command.Options.Add(onBuildChange);
-        command.SetAction(parseResult => ExecuteInstall(parseResult, services, profile, audit, outOption, daily, weekly, onLogon, onBuildChange));
+        command.Options.Add(whatIf);
+        command.SetAction(parseResult => ExecuteInstall(parseResult, services, profile, audit, outOption, new TriggerOptions(daily, weekly, onLogon, onBuildChange), whatIf));
         return command;
     }
 
@@ -59,9 +61,14 @@ internal static class TaskCommand
 
     private static int ExecuteInstall(
         ParseResult parseResult, CliServices services, Option<string> profileOption, Option<string?> auditOption, Option<string?> outOption,
-        Option<bool> dailyOption, Option<bool> weeklyOption, Option<bool> onLogonOption, Option<bool> onBuildChangeOption)
+        TriggerOptions triggers, Option<bool> whatIfOption)
     {
-        if (!CommandSupport.TryBeginElevated(services, parseResult, "Installing the scheduled task", out TextWriter stdout, out TextWriter stderr, out int exitCode))
+        bool whatIf = parseResult.GetValue(whatIfOption);
+        TextWriter stdout = parseResult.InvocationConfiguration.Output;
+        TextWriter stderr = parseResult.InvocationConfiguration.Error;
+        if (!(whatIf
+            ? CommandSupport.IsSupported(services.Doctor, stderr, out int exitCode)
+            : CommandSupport.TryBeginElevated(services, parseResult, "Installing the scheduled task", out stdout, out stderr, out exitCode)))
         {
             return exitCode;
         }
@@ -74,7 +81,7 @@ internal static class TaskCommand
             return ExitCodes.InvalidInput;
         }
 
-        if (!TryResolveTrigger(parseResult, dailyOption, weeklyOption, onLogonOption, onBuildChangeOption, out TaskTrigger trigger))
+        if (!TryResolveTrigger(parseResult, triggers.Daily, triggers.Weekly, triggers.OnLogon, triggers.OnBuildChange, out TaskTrigger trigger))
         {
             stderr.WriteLine("Choose at most one of --daily, --weekly, --on-logon, --on-build-change.");
             return ExitCodes.InvalidInput;
@@ -94,19 +101,27 @@ internal static class TaskCommand
             return ExitCodes.Error;
         }
 
+        var target = new TaskTarget(trigger, executable, whatIf, stdout, stderr);
         return auditBaseline is not null
-            ? InstallAuditTask(services, auditBaseline, parseResult.GetValue(outOption), trigger, executable, stdout, stderr)
-            : InstallRemediationTask(services, profile, trigger, executable, stdout, stderr);
+            ? InstallAuditTask(services, auditBaseline, parseResult.GetValue(outOption), target)
+            : InstallRemediationTask(services, profile, target);
     }
 
-    private static int InstallRemediationTask(CliServices services, string profile, TaskTrigger trigger, string executable, TextWriter stdout, TextWriter stderr)
+    private static int InstallRemediationTask(CliServices services, string profile, TaskTarget target)
     {
+        (TaskTrigger trigger, string executable, _, TextWriter stdout, TextWriter stderr) = target;
         if (!IsKnownProfile(profile))
         {
             stderr.WriteLine(string.Create(CultureInfo.InvariantCulture,
                 $"Unknown profile '{profile}'. Use a level ({string.Join(", ", NamedProfile.Names)}), a built-in profile id " +
                 $"({string.Join(", ", ProfileLoader.BuiltInIds)}), or a path to a profile .json file."));
             return ExitCodes.InvalidInput;
+        }
+
+        if (target.WhatIf)
+        {
+            ScheduledTaskSpec preview = RemediationTask.Build(profile, trigger, executable, RemediationTask.DefaultReportPath);
+            return Preview(preview, File.Exists(profile) ? "the profile file is copied to the protected profiles folder first" : null, stdout);
         }
 
         string staged = ProfileStaging.Stage(profile, services.Hardening);
@@ -117,8 +132,9 @@ internal static class TaskCommand
         return ExitCodes.Success;
     }
 
-    private static int InstallAuditTask(CliServices services, string baselineId, string? outPath, TaskTrigger trigger, string executable, TextWriter stdout, TextWriter stderr)
+    private static int InstallAuditTask(CliServices services, string baselineId, string? outPath, TaskTarget target)
     {
+        (TaskTrigger trigger, string executable, _, TextWriter stdout, TextWriter stderr) = target;
         if (BaselineLoader.TryLoadBuiltIn(baselineId) is null)
         {
             stderr.WriteLine(string.Create(CultureInfo.InvariantCulture,
@@ -135,9 +151,26 @@ internal static class TaskCommand
         // A relative path would resolve against the task's working folder (System32) at run time.
         outPath = Path.GetFullPath(outPath);
         ScheduledTaskSpec spec = AuditReportTask.Build(baselineId, trigger, executable, outPath);
+        if (target.WhatIf)
+        {
+            return Preview(spec, null, stdout);
+        }
+
         services.CreateTaskInstaller().Install(spec);
         stdout.WriteLine(string.Create(CultureInfo.InvariantCulture,
             $"Installed task '{spec.TaskPath}' ({trigger}) auditing baseline '{baselineId}'. Report: {outPath}"));
+        return ExitCodes.Success;
+    }
+
+    private static int Preview(ScheduledTaskSpec spec, string? note, TextWriter stdout)
+    {
+        stdout.WriteLine(string.Create(CultureInfo.InvariantCulture,
+            $"Would install task '{spec.TaskPath}' ({spec.Trigger}, {(spec.RunAsSystem ? "as SYSTEM" : "as the user")}): \"{spec.Executable}\" {spec.Arguments}"));
+        if (note is not null)
+        {
+            stdout.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Before that, {note}."));
+        }
+
         return ExitCodes.Success;
     }
 
@@ -205,4 +238,8 @@ internal static class TaskCommand
     private static bool IsKnownProfile(string value)
         => !string.IsNullOrEmpty(value)
             && (NamedProfile.TryResolve(value, out _) || ProfileLoader.TryLoadBuiltIn(value) is not null || File.Exists(value));
+
+    private sealed record TriggerOptions(Option<bool> Daily, Option<bool> Weekly, Option<bool> OnLogon, Option<bool> OnBuildChange);
+
+    private sealed record TaskTarget(TaskTrigger Trigger, string Executable, bool WhatIf, TextWriter Stdout, TextWriter Stderr);
 }

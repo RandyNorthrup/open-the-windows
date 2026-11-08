@@ -33,4 +33,6 @@ namespace OpenTheWindows.Cli;
 [JsonSerializable(typeof(IReadOnlyList<CapabilityUse>))]
 [JsonSerializable(typeof(WatchSnapshotJson))]
 [JsonSerializable(typeof(WatchDiffJson))]
+[JsonSerializable(typeof(UpdateHideOutcome))]
+[JsonSerializable(typeof(EventLogStatusJson))]
 internal sealed partial class CliJsonContext : JsonSerializerContext;

@@ -338,6 +338,20 @@ internal static class CommandSupport
         return true;
     }
 
+    /// <summary>
+    /// Shared preamble for a read-only command: yields the output and error writers and checks
+    /// the platform is supported; on failure writes the reason and yields the exit code.
+    /// </summary>
+    public static bool TryBeginSupported(
+        CliServices services, ParseResult parseResult, out TextWriter stdout, out TextWriter stderr, out int exitCode)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(parseResult);
+        stdout = parseResult.InvocationConfiguration.Output;
+        stderr = parseResult.InvocationConfiguration.Error;
+        return IsSupported(services.Doctor, stderr, out exitCode);
+    }
+
     /// <summary>Returns whether the platform is supported; on failure writes the reason and yields the exit code.</summary>
     public static bool IsSupported(DoctorService doctor, TextWriter stderr, out int exitCode)
         => IsSupported(doctor, stderr, out exitCode, out _);

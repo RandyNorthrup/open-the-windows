@@ -220,4 +220,21 @@ public sealed class UpdatesCommandTests
         Assert.False(((IRegistryReader)machine).Read(
             RegistryHive.LocalMachine, null, WindowsUpdateSettings.UxSettingsPath, WindowsUpdateSettings.PauseUpdatesExpiryTime).Exists);
     }
+
+    [Fact]
+    public void Hide_and_unhide_json_report_the_outcome()
+    {
+        var (root, stdout, stderr, _) = Build();
+        Assert.Equal(ExitCodes.Success, CliTestHost.Invoke(root, stdout, stderr, "updates", "hide", "--kb", "KB5063878", "--json"));
+        using (var document = System.Text.Json.JsonDocument.Parse(stdout.ToString()))
+        {
+            Assert.True(document.RootElement.GetProperty("succeeded").GetBoolean());
+            Assert.False(string.IsNullOrEmpty(document.RootElement.GetProperty("message").GetString()));
+        }
+
+        var (root2, stdout2, stderr2, _) = Build();
+        Assert.Equal(ExitCodes.Success, CliTestHost.Invoke(root2, stdout2, stderr2, "updates", "unhide", "--kb", "5063878", "--json"));
+        using var unhidden = System.Text.Json.JsonDocument.Parse(stdout2.ToString());
+        Assert.True(unhidden.RootElement.GetProperty("succeeded").GetBoolean());
+    }
 }
