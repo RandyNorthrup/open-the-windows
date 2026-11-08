@@ -122,7 +122,7 @@
       "actions": [
         {
           "kind": "ScheduledTask",
-          "path": "\\Microsoft\\Windows\\XblGameSave\\XblGameSaveTask",
+          "path": "\\Microsoft\\XblGameSave\\XblGameSaveTask",
           "enabled": false,
           "default": true
         }
@@ -166,7 +166,7 @@
       "actions": [
         {
           "kind": "ScheduledTask",
-          "path": "\\Microsoft\\Windows\\Speech\\SpeechModelDownload",
+          "path": "\\Microsoft\\Windows\\Speech\\SpeechModelDownloadTask",
           "enabled": false,
           "default": true
         }

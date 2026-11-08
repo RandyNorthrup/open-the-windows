@@ -117,6 +117,20 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- Ultimate Performance copies Windows' hidden template into a plan of its own (GUID
+  `3ff9831b-6f80-4830-8178-736cd4229e7b`) and its revert deletes only that copy; before, the
+  revert deleted the hidden template itself, so the plan could not be made again until
+  `powercfg -restoredefaultschemes`. A copy already on the PC is used, not duplicated, and is
+  left in place by the revert. Catalogue commands may no longer delete or copy over a scheme
+  Windows ships.
+- Reverting a hibernation change made while hibernation was off now gives back its file type
+  (full or reduced) as well as turning it off again.
+- Machine policies that only Group Policy itself may write (the Widgets policy, guarded by
+  Windows' User Choice Protection driver) are applied by asking Group Policy to refresh and
+  waiting for the value, instead of failing after the Local GPO write.
+- Three scheduled-task entries pointed at paths Windows 11 24H2/25H2 no longer uses:
+  `Microsoft Compatibility Appraiser Exp`, `\Microsoft\XblGameSave\XblGameSaveTask` and
+  `SpeechModelDownloadTask`.
 - Rollback and revert now also restore an action that failed part-way (for example a service
   whose start type changed before stopping it timed out), and report a change that cannot be
   put back (a removed app) as `NotReversible` instead of claiming it was undone.

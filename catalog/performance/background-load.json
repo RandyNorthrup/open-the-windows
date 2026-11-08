@@ -69,7 +69,7 @@
       "actions": [
         {
           "kind": "ScheduledTask",
-          "path": "\\Microsoft\\Windows\\Application Experience\\Microsoft Compatibility Appraiser",
+          "path": "\\Microsoft\\Windows\\Application Experience\\Microsoft Compatibility Appraiser Exp",
           "enabled": false,
           "default": true
         }

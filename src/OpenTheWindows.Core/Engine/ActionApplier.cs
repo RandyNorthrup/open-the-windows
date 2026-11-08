@@ -183,8 +183,11 @@ public sealed class ActionApplier
             case SecurityPolicyAction s:
                 _writers.SecurityPolicy.Configure(s.Section, s.Setting, s.Value);
                 break;
-            case CommandAction c:
+            case CommandAction c when !CommandStates.IsInPlace(c, _readers.Registry, _writers.Commands):
                 RunCommand(c, c.Arguments);
+                break;
+            case CommandAction:
+                // What it makes is already there (a scheme copy from before); nothing to run.
                 break;
             default:
                 throw new RefusedOperationException(
@@ -227,7 +230,7 @@ public sealed class ActionApplier
             // Appx reprovision cannot be verified by a subsequent read (staging is asynchronous); trust the writer.
             AppxAction => true,
             CommandAction c => prior?.CommandState is not { } state
-                || string.Equals(CommandStates.Capture(c, _readers.Registry, _writers.Commands), state, StringComparison.Ordinal),
+                || CommandStates.Matches(CommandStates.Capture(c, _readers.Registry, _writers.Commands), state),
             _ => false,
         };
     }

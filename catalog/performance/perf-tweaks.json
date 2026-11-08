@@ -446,7 +446,7 @@
     {
       "id": "performance.power.ultimate-performance",
       "title": "Add and activate the Ultimate Performance power plan",
-      "description": "Duplicates the built-in Ultimate Performance scheme and sets it active.",
+      "description": "Copies Windows' hidden Ultimate Performance scheme into a plan of its own (GUID 3ff9831b-6f80-4830-8178-736cd4229e7b) and makes it active. Reverting switches back to the plan that was active before and deletes only that copy; Windows' own template is never touched.",
       "rationale": "Microsoft's Ultimate Performance plan removes fine-grained power-management micro-latencies on top of High performance. The measurable benefit is limited to latency-sensitive workstation workloads; Windows hides this plan on battery-powered systems by design, so it is desktop-only.",
       "category": "Performance",
       "level": "Strict",
@@ -465,11 +465,12 @@
           "executable": "powercfg.exe",
           "arguments": [
             "-duplicatescheme",
-            "e9a42b02-d5df-448d-aa00-03f14749eb61"
+            "e9a42b02-d5df-448d-aa00-03f14749eb61",
+            "3ff9831b-6f80-4830-8178-736cd4229e7b"
           ],
           "revertArguments": [
             "-delete",
-            "e9a42b02-d5df-448d-aa00-03f14749eb61"
+            "3ff9831b-6f80-4830-8178-736cd4229e7b"
           ]
         },
         {
@@ -477,7 +478,7 @@
           "executable": "powercfg.exe",
           "arguments": [
             "/setactive",
-            "e9a42b02-d5df-448d-aa00-03f14749eb61"
+            "3ff9831b-6f80-4830-8178-736cd4229e7b"
           ],
           "revertArguments": [
             "/setactive",

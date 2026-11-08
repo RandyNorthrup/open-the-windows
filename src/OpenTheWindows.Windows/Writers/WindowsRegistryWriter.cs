@@ -27,6 +27,9 @@ namespace OpenTheWindows.Windows.Writers;
 [SupportedOSPlatform("windows")]
 public sealed class WindowsRegistryWriter : IRegistryWriter
 {
+    private static readonly TimeSpan GroupPolicyWait = TimeSpan.FromSeconds(90);
+    private static readonly TimeSpan GroupPolicyPoll = TimeSpan.FromMilliseconds(500);
+
     /// <inheritdoc />
     public void Write(CatalogHive hive, string? userSid, string path, string name, CatalogValueType type, JsonElement data, CatalogValueKind kind)
     {
@@ -37,6 +40,16 @@ public sealed class WindowsRegistryWriter : IRegistryWriter
         if (kind == CatalogValueKind.Policy && hive == CatalogHive.LocalMachine && LocalGroupPolicy.IsAvailable)
         {
             LocalGroupPolicy.Write(path, name, value, valueKind);
+            try
+            {
+                WriteLive(hive, userSid, path, name, value, valueKind);
+            }
+            catch (UnauthorizedAccessException) when (ApplyThroughGroupPolicy(path, name, live => Same(live, value)))
+            {
+                // A protected value only Group Policy itself may write (see ApplyThroughGroupPolicy).
+            }
+
+            return;
         }
 
         WriteLive(hive, userSid, path, name, value, valueKind);
@@ -51,11 +64,59 @@ public sealed class WindowsRegistryWriter : IRegistryWriter
         if (kind == CatalogValueKind.Policy && hive == CatalogHive.LocalMachine && LocalGroupPolicy.IsAvailable)
         {
             LocalGroupPolicy.Delete(path, name);
+            try
+            {
+                DeleteLive(hive, userSid, path, name);
+            }
+            catch (UnauthorizedAccessException) when (ApplyThroughGroupPolicy(path, name, live => live is null))
+            {
+                // Group Policy removes a value it applied once the entry is gone from the store.
+            }
+
+            return;
         }
 
+        DeleteLive(hive, userSid, path, name);
+    }
+
+    private static void DeleteLive(CatalogHive hive, string? userSid, string path, string name)
+    {
         using RegistryKey? key = OpenWritable(hive, userSid, path, create: false);
         key?.DeleteValue(name, throwOnMissingValue: false);
     }
+
+    /// <summary>
+    /// Some machine policy values (the Widgets policy among them, guarded by Windows' User Choice
+    /// Protection driver) refuse every writer except the Group Policy service itself. The Local GPO
+    /// store already holds the change, so ask Group Policy to apply it now and wait until the live
+    /// value reads as wanted. Returns <see langword="false"/> (so the original refusal stands) when it
+    /// does not within <see cref="GroupPolicyWait"/>.
+    /// </summary>
+    private static bool ApplyThroughGroupPolicy(string path, string name, Func<object?, bool> wanted)
+    {
+        Interop.GroupPolicyRefresh.Machine();
+        int checks = (int)(GroupPolicyWait / GroupPolicyPoll);
+        for (int check = 0; check < checks; check++)
+        {
+            using var hklm = RegistryKey.OpenBaseKey(Win32Hive.LocalMachine, RegistryView.Registry64);
+            using RegistryKey? key = hklm.OpenSubKey(path, writable: false);
+            if (wanted(key?.GetValue(name, null, RegistryValueOptions.DoNotExpandEnvironmentNames)))
+            {
+                return true;
+            }
+
+            Thread.Sleep(GroupPolicyPoll);
+        }
+
+        return false;
+    }
+
+    private static bool Same(object? live, object wanted) => (live, wanted) switch
+    {
+        (byte[] a, byte[] b) => a.AsSpan().SequenceEqual(b),
+        (string[] a, string[] b) => a.SequenceEqual(b, StringComparer.Ordinal),
+        _ => Equals(live, wanted),
+    };
 
     private static void WriteLive(CatalogHive hive, string? userSid, string path, string name, object value, Win32ValueKind valueKind)
     {

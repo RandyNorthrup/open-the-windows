@@ -17,12 +17,23 @@ public sealed class CommandStatesTests
 {
     private const string Balanced = "381b4222-f694-41f0-9685-ff5bb260df2e";
     private const string HighPerformance = "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c";
+    private const string UltimateTemplate = "e9a42b02-d5df-448d-aa00-03f14749eb61";
+    private const string UltimateCopy = "3ff9831b-6f80-4830-8178-736cd4229e7b";
+    private static readonly CommandAction CopyUltimate = new("powercfg.exe", ["-duplicatescheme", UltimateTemplate, UltimateCopy], ["-delete", UltimateCopy]);
     private static readonly ApplyOptions Options = new(false, false, false, true, true, "test", false);
 
     private static TweakDefinition Entry(CommandAction action) => CatalogTestData.ValidEntry("performance.test.command") with { Actions = [action] };
 
     private static void SetDword(FakeMachine machine, string path, string name, int value)
         => machine.SetRegistry(RegistryHive.LocalMachine, null, path, name, RegistryValueType.Dword, JsonSerializer.SerializeToElement(value));
+
+    // The commands that change something, leaving out the reads that capture a state.
+    private static List<string> Changes(IEnumerable<(string Executable, IReadOnlyList<string> Arguments)> commands)
+        => [.. commands
+            .Where(c => !c.Arguments.Contains("/r", StringComparer.Ordinal)
+                && !c.Arguments.Contains("/getactivescheme", StringComparer.Ordinal)
+                && !c.Arguments.Contains("/list", StringComparer.Ordinal))
+            .Select(c => string.Join(' ', c.Arguments))];
 
     // Applies the command, reverts the run, and returns the argument lists the revert ran.
     private static List<string> ApplyThenRevert(FakeMachine machine, CommandAction action)
@@ -35,20 +46,69 @@ public sealed class CommandStatesTests
         RevertResult reverted = h.Engine.Revert(applied.RunId, new RevertOptions(false, false));
 
         Assert.Equal(RunState.Completed, reverted.State);
-        return [.. machine.Commands.Skip(before)
-            .Where(c => !c.Arguments.Contains("/r", StringComparer.Ordinal) && !c.Arguments.Contains("/getactivescheme", StringComparer.Ordinal))
-            .Select(c => string.Join(' ', c.Arguments))];
+        return Changes(machine.Commands.Skip(before));
     }
 
-    [Fact]
-    public void Hibernation_that_was_off_is_turned_off_again_not_on()
+    private static FakeMachine SchemesListed(params string[] schemes) => new()
+    {
+        CommandOutput = (_, args) => args.Contains("/list", StringComparer.Ordinal)
+            ? string.Concat(schemes.Select(s => $"Power Scheme GUID: {s}  (Plan)\r\n"))
+            : string.Empty,
+    };
+
+    [Theory]
+    [InlineData(1, "/hibernate /type reduced")]
+    [InlineData(2, "/hibernate /type full")]
+    public void Hibernation_that_was_off_gets_its_file_type_back_and_is_turned_off_again(int fileType, string typeCommand)
     {
         var machine = new FakeMachine();
         SetDword(machine, CommandStates.PowerPath, CommandStates.HibernateEnabledValue, 0);
+        SetDword(machine, CommandStates.PowerPath, CommandStates.HiberFileTypeValue, fileType);
 
         List<string> revert = ApplyThenRevert(machine, new CommandAction("powercfg.exe", ["/hibernate", "/type", "reduced"], ["/hibernate", "/type", "full"]));
 
-        Assert.Equal(["/hibernate off"], revert);
+        Assert.Equal([typeCommand, "/hibernate off"], revert);
+    }
+
+    [Fact]
+    public void A_journal_from_before_the_file_type_was_kept_still_turns_hibernation_off()
+    {
+        var hibernate = new CommandAction("powercfg.exe", ["/hibernate", "/type", "reduced"], ["/hibernate", "/type", "full"]);
+
+        IReadOnlyList<IReadOnlyList<string>>? commands = CommandStates.RestoreCommands(hibernate, "hibernate:off");
+
+        Assert.Equal([["/hibernate", "off"]], commands);
+        Assert.True(CommandStates.Matches("hibernate:off:reduced", "hibernate:off"));
+        Assert.True(CommandStates.Matches("hibernate:off:full", "hibernate:off:full"));
+        Assert.False(CommandStates.Matches("hibernate:on:full", "hibernate:off"));
+        Assert.False(CommandStates.Matches("hibernate:off:reduced", "hibernate:off:full"));
+        Assert.False(CommandStates.Matches(null, "hibernate:off"));
+        Assert.Throws<ArgumentNullException>(() => CommandStates.Matches("x", null!));
+    }
+
+    [Fact]
+    public void A_scheme_copy_made_by_the_run_is_deleted_by_its_revert()
+    {
+        FakeMachine machine = SchemesListed(Balanced, UltimateTemplate);
+
+        List<string> revert = ApplyThenRevert(machine, CopyUltimate);
+
+        Assert.Contains($"-duplicatescheme {UltimateTemplate} {UltimateCopy}", Changes(machine.Commands), StringComparer.Ordinal);
+        Assert.Equal([$"-delete {UltimateCopy}"], revert);
+    }
+
+    [Fact]
+    public void A_scheme_copy_already_there_is_neither_made_again_nor_deleted()
+    {
+        FakeMachine machine = SchemesListed(Balanced, UltimateCopy);
+
+        List<string> revert = ApplyThenRevert(machine, CopyUltimate);
+
+        Assert.Empty(revert);
+        Assert.Empty(Changes(machine.Commands));
+        Assert.True(CommandStates.IsInPlace(CopyUltimate, machine, machine));
+        Assert.False(CommandStates.IsInPlace(CopyUltimate, new FakeMachine(), new FakeMachine()));
+        Assert.Throws<ArgumentNullException>(() => CommandStates.IsInPlace(null!, machine, machine));
     }
 
     [Theory]
@@ -133,6 +193,7 @@ public sealed class CommandStatesTests
         Assert.Null(CommandStates.RestoreCommands(audit, "audit:7"));
         Assert.Null(CommandStates.RestoreCommands(audit, "scheme:" + Balanced));
         Assert.Null(CommandStates.RestoreCommands(duplicate, "scheme:" + Balanced));
+        Assert.Null(CommandStates.RestoreCommands(CopyUltimate, "scheme:" + Balanced));
         Assert.Null(CommandStates.Capture(duplicate, new FakeMachine(), new FakeMachine()));
         Assert.Null(CommandStates.Capture(new CommandAction("cmd.exe", ["/c", "x"], []), new FakeMachine(), new FakeMachine()));
     }
@@ -161,6 +222,6 @@ public sealed class CommandStatesTests
         ApplyResult applied = h.Engine.Apply([Entry(new CommandAction("powercfg.exe", ["/hibernate", "off"], ["/hibernate", "on"]))], Options);
 
         JournalActionState? prior = h.Journal.Load(applied.RunId).Entries[0].Actions[0].Prior;
-        Assert.Equal("hibernate:off", prior?.CommandState);
+        Assert.Equal("hibernate:off:full", prior?.CommandState);
     }
 }

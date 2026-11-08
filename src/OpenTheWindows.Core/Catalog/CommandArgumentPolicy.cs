@@ -26,6 +26,23 @@ public static class CommandArgumentPolicy
         "/setactive", "-setactive", "/duplicatescheme", "-duplicatescheme", "/delete", "-delete",
     };
 
+    private static readonly HashSet<string> PowercfgDuplicateVerbs = new(StringComparer.OrdinalIgnoreCase) { "/duplicatescheme", "-duplicatescheme" };
+
+    private static readonly HashSet<string> PowercfgDeleteVerbs = new(StringComparer.OrdinalIgnoreCase) { "/delete", "-delete" };
+
+    /// <summary>
+    /// The schemes and the hidden template Windows ships (Balanced, High performance, Power saver,
+    /// Ultimate Performance). A catalogue command may activate or copy them but never delete one or
+    /// copy over one: deleting the hidden Ultimate Performance template removes it from the PC.
+    /// </summary>
+    private static readonly HashSet<Guid> BuiltInSchemes =
+    [
+        new("381b4222-f694-41f0-9685-ff5bb260df2e"),
+        new("8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c"),
+        new("a1841308-3541-4fab-bc81-f71556f20b4a"),
+        new("e9a42b02-d5df-448d-aa00-03f14749eb61"),
+    ];
+
     private static readonly HashSet<string> PowercfgHibernateVerbs = new(StringComparer.OrdinalIgnoreCase)
     {
         "/hibernate", "-hibernate", "/h", "-h",
@@ -77,7 +94,16 @@ public static class CommandArgumentPolicy
     {
         if (args.Count == VerbAndValue && PowercfgSchemeVerbs.Contains(args[0]))
         {
-            return Guid.TryParseExact(args[1], "D", out _);
+            return Guid.TryParseExact(args[1], "D", out Guid scheme)
+                && !(PowercfgDeleteVerbs.Contains(args[0]) && BuiltInSchemes.Contains(scheme));
+        }
+
+        if (args.Count == VerbTypeAndValue && PowercfgDuplicateVerbs.Contains(args[0]))
+        {
+            // A copy into a scheme GUID of the catalogue's own, so it can be activated and deleted again.
+            return Guid.TryParseExact(args[1], "D", out _)
+                && Guid.TryParseExact(args[2], "D", out Guid destination)
+                && !BuiltInSchemes.Contains(destination);
         }
 
         if (args.Count == VerbAndValue && PowercfgHibernateVerbs.Contains(args[0]))

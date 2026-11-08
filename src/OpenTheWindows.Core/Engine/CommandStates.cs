@@ -14,7 +14,11 @@ namespace OpenTheWindows.Core.Engine;
 /// on a PC where it was off). Each permitted command shape has one encoding:
 /// <list type="bullet">
 /// <item><c>powercfg /setactive</c>: <c>scheme:&lt;guid&gt;</c> (the active scheme).</item>
-/// <item><c>powercfg /hibernate …</c>: <c>hibernate:off</c>, <c>hibernate:on:full</c> or <c>hibernate:on:reduced</c>.</item>
+/// <item><c>powercfg /hibernate …</c>: <c>hibernate:off:full</c>, <c>hibernate:off:reduced</c>, <c>hibernate:on:full</c>
+/// or <c>hibernate:on:reduced</c> (the file type is kept while hibernation is off, as it decides what turning it
+/// on again gives; journals before it was recorded say just <c>hibernate:off</c>).</item>
+/// <item><c>powercfg /duplicatescheme &lt;template&gt; &lt;copy&gt;</c>: <c>copy:present</c> or <c>copy:absent</c> (a
+/// copy that was already there is neither made again nor deleted by the revert).</item>
 /// <item><c>fsutil behavior set disable8dot3</c>: <c>8dot3:&lt;0-3&gt;</c>.</item>
 /// <item><c>auditpol /set /subcategory:…</c>: <c>audit:&lt;0-3&gt;</c> (bit 1 success, bit 2 failure).</item>
 /// </list>
@@ -40,6 +44,10 @@ internal static partial class CommandStates
 
     private const string SchemePrefix = "scheme:";
     private const string HibernateOff = "hibernate:off";
+    private const string HibernateOffFull = "hibernate:off:full";
+    private const string HibernateOffReduced = "hibernate:off:reduced";
+    private const string CopyPresent = "copy:present";
+    private const string CopyAbsent = "copy:absent";
     private const string HibernateOnFull = "hibernate:on:full";
     private const string HibernateOnReduced = "hibernate:on:reduced";
     private const string ShortNamePrefix = "8dot3:";
@@ -70,6 +78,7 @@ internal static partial class CommandStates
         return Shape(action) switch
         {
             CommandShape.SetActiveScheme => ActiveScheme(runner),
+            CommandShape.DuplicateScheme => CopyState(action, runner),
             CommandShape.Hibernate => Hibernation(registry),
             CommandShape.ShortNames => Dword(registry, FileSystemPath, Disable8Dot3Value) is >= 0 and <= Max8Dot3Setting and var value
                 ? string.Create(CultureInfo.InvariantCulture, $"{ShortNamePrefix}{value}")
@@ -89,9 +98,17 @@ internal static partial class CommandStates
             CommandShape.SetActiveScheme when state.StartsWith(SchemePrefix, StringComparison.Ordinal)
                 && Guid.TryParseExact(state[SchemePrefix.Length..], "D", out Guid scheme)
                 => [["/setactive", scheme.ToString("D")]],
+            CommandShape.DuplicateScheme => state switch
+            {
+                CopyAbsent => [action.RevertArguments],
+                CopyPresent => [],
+                _ => null,
+            },
             CommandShape.Hibernate => state switch
             {
                 HibernateOff => [["/hibernate", "off"]],
+                HibernateOffFull => [["/hibernate", "/type", "full"], ["/hibernate", "off"]],
+                HibernateOffReduced => [["/hibernate", "/type", "reduced"], ["/hibernate", "off"]],
                 HibernateOnFull => [["/hibernate", "on"], ["/hibernate", "/type", "full"]],
                 HibernateOnReduced => [["/hibernate", "on"], ["/hibernate", "/type", "reduced"]],
                 _ => null,
@@ -106,6 +123,25 @@ internal static partial class CommandStates
         };
     }
 
+    /// <summary>Whether what <paramref name="action"/> makes is already there, so running it again would fail or duplicate it.</summary>
+    public static bool IsInPlace(CommandAction action, IRegistryReader registry, ICommandRunner runner)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        return Shape(action) == CommandShape.DuplicateScheme
+            && string.Equals(Capture(action, registry, runner), CopyPresent, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Whether the state read now is the captured <paramref name="prior"/> state. An older
+    /// <c>hibernate:off</c> (no file type recorded) matches hibernation off with any file type.
+    /// </summary>
+    public static bool Matches(string? current, string prior)
+    {
+        ArgumentNullException.ThrowIfNull(prior);
+        return string.Equals(current, prior, StringComparison.Ordinal)
+            || (string.Equals(prior, HibernateOff, StringComparison.Ordinal) && current is not null && current.StartsWith(HibernateOff + ":", StringComparison.Ordinal));
+    }
+
     private static CommandShape Shape(CommandAction action)
     {
         IReadOnlyList<string> args = action.Arguments;
@@ -118,6 +154,7 @@ internal static partial class CommandStates
         return action.Executable.ToUpperInvariant() switch
         {
             "POWERCFG.EXE" when string.Equals(verb, "setactive", StringComparison.OrdinalIgnoreCase) => CommandShape.SetActiveScheme,
+            "POWERCFG.EXE" when string.Equals(verb, "duplicatescheme", StringComparison.OrdinalIgnoreCase) && args.Count == 3 => CommandShape.DuplicateScheme,
             "POWERCFG.EXE" when verb.Equals("hibernate", StringComparison.OrdinalIgnoreCase) || verb.Equals("h", StringComparison.OrdinalIgnoreCase) => CommandShape.Hibernate,
             "FSUTIL.EXE" => CommandShape.ShortNames,
             "AUDITPOL.EXE" => CommandShape.Audit,
@@ -142,12 +179,26 @@ internal static partial class CommandStates
             return null;
         }
 
+        bool reduced = Dword(registry, PowerPath, HiberFileTypeValue) == ReducedHiberFile;
         if (enabled == 0)
         {
-            return HibernateOff;
+            return reduced ? HibernateOffReduced : HibernateOffFull;
         }
 
-        return Dword(registry, PowerPath, HiberFileTypeValue) == ReducedHiberFile ? HibernateOnReduced : HibernateOnFull;
+        return reduced ? HibernateOnReduced : HibernateOnFull;
+    }
+
+    private static string? CopyState(CommandAction action, ICommandRunner runner)
+    {
+        CommandResult result = runner.Run("powercfg.exe", ["/list"], ReadTimeout);
+        if (result.TimedOut || result.ExitCode != 0 || !Guid.TryParse(action.Arguments[2], out Guid copy))
+        {
+            return null;
+        }
+
+        return SchemeGuid().Matches(result.StandardOutput).Any(m => Guid.TryParse(m.Value, out Guid listed) && listed == copy)
+            ? CopyPresent
+            : CopyAbsent;
     }
 
     private static string? AuditSetting(CommandAction action, ICommandRunner runner)
@@ -185,6 +236,7 @@ internal static partial class CommandStates
     {
         Other,
         SetActiveScheme,
+        DuplicateScheme,
         Hibernate,
         ShortNames,
         Audit,
