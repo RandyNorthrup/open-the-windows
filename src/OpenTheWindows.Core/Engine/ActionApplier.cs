@@ -393,12 +393,9 @@ public sealed class ActionApplier
     private JournalActionState CaptureRegistry(RegistryAction action, string? userSid)
     {
         RegistryValueSnapshot snapshot = _readers.Registry.Read(action.Hive, HiveSid(action.Hive, userSid), action.Path, action.Name);
-        bool? inLocalPolicy = action is { ValueKind: RegistryValueKind.Policy, Hive: RegistryHive.LocalMachine }
-            ? _readers.Registry.IsInLocalPolicy(action.Path, action.Name)
-            : null;
         return snapshot is { Exists: true }
-            ? new JournalActionState { Exists = true, Type = snapshot.Type, Data = snapshot.Data, InLocalPolicy = inLocalPolicy }
-            : new JournalActionState { Exists = false, InLocalPolicy = inLocalPolicy };
+            ? new JournalActionState { Exists = true, Type = snapshot.Type, Data = snapshot.Data }
+            : new JournalActionState { Exists = false };
     }
 
     private JournalActionState CaptureService(ServiceAction action)
@@ -514,22 +511,15 @@ public sealed class ActionApplier
     private void RestoreRegistry(RegistryAction action, JournalActionState? prior, string? userSid)
     {
         string? sid = HiveSid(action.Hive, userSid);
-        if (prior is not { Exists: true, Type: { } type, Data: { } data, InLocalPolicy: var inLocalPolicy })
+        if (prior is not { Exists: true, Type: { } type, Data: { } data })
         {
             _writers.Registry.Delete(action.Hive, sid, action.Path, action.Name, action.ValueKind);
             return;
         }
 
-        if (inLocalPolicy == false)
-        {
-            // The value was set outside policy (Windows' own default, say): take this product's entry out
-            // of the Local Group Policy store, then put the live value back directly, so the store is left
-            // as it was found instead of now "configuring" the old value.
-            _writers.Registry.Delete(action.Hive, sid, action.Path, action.Name, action.ValueKind);
-            _writers.Registry.Write(action.Hive, sid, action.Path, action.Name, type, data, RegistryValueKind.Preference);
-            return;
-        }
-
+        // A policy value goes back through the Local Group Policy store even when Windows had set it
+        // directly: taking the entry out of the store instead makes Group Policy delete the live value
+        // at its next refresh (seen on Windows 11 25H2), so the old value would not survive.
         _writers.Registry.Write(action.Hive, sid, action.Path, action.Name, type, data, action.ValueKind);
     }
 }

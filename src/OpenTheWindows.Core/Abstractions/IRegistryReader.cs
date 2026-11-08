@@ -15,11 +15,4 @@ public interface IRegistryReader
     /// <param name="path">Key path below the hive, backslash-separated, no leading slash.</param>
     /// <param name="name">Value name; empty string for the key's default value.</param>
     RegistryValueSnapshot Read(RegistryHive hive, string? userSid, string path, string name);
-
-    /// <summary>
-    /// Whether the Local Group Policy store sets the machine value at <paramref name="path"/>/<paramref name="name"/>
-    /// directly; <see langword="null"/> when there is no Local Group Policy store or it cannot be read.
-    /// A revert uses it to leave the store as it found it.
-    /// </summary>
-    bool? IsInLocalPolicy(string path, string name) => null;
 }

@@ -53,10 +53,4 @@ public sealed record JournalActionState
     /// before it was recorded, which revert with the entry's declared revert arguments.
     /// </summary>
     public string? CommandState { get; init; }
-
-    /// <summary>
-    /// Policy registry values: whether the Local Group Policy store set the value before the run
-    /// (absent when unknown, and for preference values).
-    /// </summary>
-    public bool? InLocalPolicy { get; init; }
 }

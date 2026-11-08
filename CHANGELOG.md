@@ -157,9 +157,6 @@ All notable changes to this project are documented here. The format follows
   turned hibernation on where it had been off), the prior 8.3 name setting and the prior active
   power scheme. The state is captured before the command runs and journaled; journals written
   before this keep the fixed revert.
-- Reverting a policy value that Windows had set directly (such as the UAC prompt behaviour)
-  restores the value and takes this product's entry back out of the Local Group Policy store,
-  instead of leaving the old value "configured" there.
 - `apply --only` with an entry that does not apply to this edition no longer applies its
   dependencies on its behalf (Credential Guard on Pro applied virtualization-based security).
 - A rollback or revert of a change that never happened (the write was refused, for example on a
@@ -184,6 +181,11 @@ All notable changes to this project are documented here. The format follows
   re-checked with the new command revert below, with every audit subcategory, the power scheme,
   hibernation and the 8.3 setting compared before and after; "reduced hibernation file" stays
   Draft because on a PC with hibernation off it turns hibernation on.
+- Reverting a policy value that Windows had set directly (such as the UAC prompt behaviour)
+  restores the old value through Local Group Policy, where it then shows as configured. Taking
+  the entry out of Registry.pol instead makes Group Policy delete the live value at its next
+  refresh (seen on Windows 11 Pro 25H2), so the value would not survive; this is now documented
+  in the engine rather than changed.
 - `privacy.defender.never-submit-samples` moved to Paranoid / Advanced risk and now declares a
   conflict with `security.defender.submit-samples-safe`: "never send" also turns off Defender's
   Block at First Sight, which the entry now says plainly.

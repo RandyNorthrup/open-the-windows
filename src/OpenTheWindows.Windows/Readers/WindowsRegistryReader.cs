@@ -36,14 +36,6 @@ public sealed class WindowsRegistryReader : IRegistryReader
         return raw is null ? NotFound : Snapshot(key.GetValueKind(name), raw);
     }
 
-    /// <inheritdoc />
-    public bool? IsInLocalPolicy(string path, string name)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        ArgumentNullException.ThrowIfNull(name);
-        return Writers.LocalGroupPolicy.IsAvailable ? LocalPolicyFile.Sets(LocalPolicyFile.MachinePath, path, name) : null;
-    }
-
     private static RegistryKey? OpenKey(CatalogHive hive, string? userSid, string path)
     {
         if (hive == CatalogHive.LocalMachine)
