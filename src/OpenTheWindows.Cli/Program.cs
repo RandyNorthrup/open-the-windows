@@ -7,6 +7,6 @@ internal static class Program
     private static int Main(string[] args)
     {
         RootCommand root = CommandLineBuilder.Build();
-        return root.Parse(args).Invoke();
+        return CliRunner.Invoke(root.Parse(args));
     }
 }

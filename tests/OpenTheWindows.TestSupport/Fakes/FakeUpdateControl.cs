@@ -35,4 +35,13 @@ public static class FakeUpdateControl
             extendedCeilingDays);
         return (service, harness);
     }
+
+    /// <summary>Builds the feature-update target service over the in-memory machine (Windows 11 Pro 24H2 by default).</summary>
+    public static UpdateTargetService CreateTarget(FakeMachine machine, OperatingSystemFacts? os = null)
+    {
+        ArgumentNullException.ThrowIfNull(machine);
+        OperatingSystemFacts facts = os ?? FakeOperatingSystemInfo.Windows11Pro24H2();
+        ApplyHarness harness = FakeApplyEngine.Create(machine, facts);
+        return new UpdateTargetService(harness.Engine, new FakeOperatingSystemInfo(facts), EndOfServicingCalendar.LoadBuiltIn());
+    }
 }

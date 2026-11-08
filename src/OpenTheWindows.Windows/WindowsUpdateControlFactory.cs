@@ -1,4 +1,5 @@
 using System.Runtime.Versioning;
+using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Updates;
 using OpenTheWindows.Windows.Readers;
 using OpenTheWindows.Windows.Writers;
@@ -19,12 +20,23 @@ public static class WindowsUpdateControlFactory
     /// (tests); leave them null to use the default ProgramData locations.
     /// </summary>
     public static UpdateControlService Create(string? journalDirectory = null, string? auditDirectory = null)
-        => new(
+    {
+        var registry = new WindowsRegistryReader();
+        return new(
             WindowsApplyEngineFactory.Create(journalDirectory, auditDirectory),
-            new WindowsRegistryReader(),
+            registry,
             new WindowsCommandRunner(),
             auditDirectory is null ? new WindowsAuditSink() : new WindowsAuditSink(auditDirectory),
             new WindowsOperatingSystemInfo(),
             EndOfServicingCalendar.LoadBuiltIn(),
-            TimeProvider.System);
+            TimeProvider.System,
+            UpdatePolicy.ExtendedCeilingDays(registry));
+    }
+
+    /// <summary>Builds the feature-update target service over the machine apply engine.</summary>
+    public static UpdateTargetService CreateTarget()
+        => new(WindowsApplyEngineFactory.Create(), new WindowsOperatingSystemInfo(), EndOfServicingCalendar.LoadBuiltIn());
+
+    /// <summary>Builds the supervised Windows Update repair over the machine audit trail.</summary>
+    public static IUpdateRepair CreateRepair() => new WindowsUpdateRepair(new WindowsAuditSink(), TimeProvider.System);
 }

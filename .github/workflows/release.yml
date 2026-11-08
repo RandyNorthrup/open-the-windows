@@ -1,14 +1,19 @@
 # Release pipeline for Open the Windows.
 #
-# Trigger: pushing a tag v* (e.g. v1.2.3), or a manual workflow_dispatch with the
-# version. The job re-runs the correctness gates (restore, build, test, coverage
-# thresholds) on the tagged commit — the full SAST/secret/lint suite already ran
-# on that commit in ci.yml — then packages the release, generates build-provenance
-# attestations for every asset (the compensating control for not code-signing,
-# ADR 0003), and publishes a GitHub Release with the CHANGELOG section as notes.
+# Trigger: pushing a tag v* (e.g. v1.2.3). A manual workflow_dispatch (to retry a
+# run that failed before publishing) must be started from that tag ("Use workflow
+# from"), with the matching version: the release environment admits v* tags only.
+# The job re-runs the correctness gates (restore, build, test, coverage thresholds)
+# on the tagged commit — the full SAST/secret/lint suite already ran on that commit
+# in ci.yml — then signs in to Azure with GitHub OIDC, packages the release with
+# Authenticode signatures (Azure Artifact Signing, build/sign.ps1), generates
+# build-provenance attestations for every asset, and publishes a GitHub Release with
+# the CHANGELOG section as notes.
 #
-# Binaries are NOT code-signed. The SHA-256 sums, the SBOM and these attestations
-# are the provenance. All third-party actions are pinned to a commit SHA.
+# No signing password, certificate or client secret is stored: Azure accepts this
+# repository's OIDC token only from the release environment, and that identity may
+# only sign with one certificate profile. All third-party actions are pinned to a
+# commit SHA.
 name: Release
 
 on:
@@ -24,7 +29,7 @@ on:
 
 permissions:
   contents: write # create the GitHub Release
-  id-token: write # actions/attest-build-provenance
+  id-token: write # azure/login (code signing) and actions/attest-build-provenance
   attestations: write # actions/attest-build-provenance
 
 env:
@@ -35,9 +40,12 @@ env:
 
 jobs:
   release:
-    name: Package and publish release
+    name: Package, sign and publish release
     runs-on: windows-latest
     timeout-minutes: 45
+    # Azure trusts GitHub's OIDC token only from this environment, which only v*
+    # tags can use.
+    environment: release
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -57,6 +65,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           INPUT_VERSION: ${{ inputs.version }}
           REF_NAME: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
         shell: pwsh
         run: |
           # Untrusted context (ref name, dispatch input) is read through env vars,
@@ -69,6 +78,11 @@ jobs:
           }
           # Anchored at both ends: the value is later used in file names and release titles.
           if ($v -notmatch '^\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?$') { throw "Version '$v' is not major.minor.build[-prerelease]." }
+          # The binaries are built and signed from the checked-out tag and the release is
+          # created for tag v<version>: a dispatch must run from that same tag.
+          if ($env:REF_TYPE -ne 'tag' -or $env:REF_NAME -ne "v$v") {
+            throw "Version $v must be released from tag v$v; this run is on $env:REF_TYPE '$env:REF_NAME'."
+          }
           "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           Write-Host "Releasing version $v"
 
@@ -99,11 +113,26 @@ jobs:
           "minimumCoverageThresholds:lineCoverage=90"
           "minimumCoverageThresholds:branchCoverage=80"
 
-      - name: Package (ZIPs + MSIs + SBOM + SHA256SUMS)
+      # Code signing with Azure Artifact Signing under the maintainer's validated
+      # identity (CN=Randy Northrup), certificate profile SAKUtility. Signing in comes
+      # after restore, build and test, and directly before packaging: the GitHub token
+      # azure/login exchanges is short-lived, so package.ps1 -Sign requests the
+      # code-signing token first (build/sign.ps1 -CheckAccess), before it publishes.
+      - name: Sign in to Azure for code signing
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+
+      # Signs otw.exe, OpenTheWindows.exe and the OpenTheWindows assemblies before
+      # they are zipped or packed into an MSI, then the MSIs; each signature is
+      # verified (signtool verify /pa, timestamp, publisher) before the sums are written.
+      - name: Package and sign (ZIPs + MSIs + SBOM + SHA256SUMS)
         env:
           VERSION: ${{ steps.ver.outputs.version }}
         shell: pwsh
-        run: pwsh build/package.ps1 -Version $env:VERSION
+        run: pwsh build/package.ps1 -Version $env:VERSION -Sign
 
       - name: Attest build provenance
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2

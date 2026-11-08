@@ -51,11 +51,15 @@ already have the .NET 10 Desktop Runtime.
 msiexec /i OpenTheWindows-0.2.0-win-x64.msi /qn   # silent, per-machine
 ```
 
-Binaries are not code-signed; every release carries SHA-256 sums, a CycloneDX
-SBOM and GitHub build-provenance attestations you can verify with
-`gh attestation verify` (see [SECURITY.md](SECURITY.md)). The first run of an
-unsigned download shows a SmartScreen prompt (**More info → Run anyway**). To
-build from source, see [CONTRIBUTING.md](CONTRIBUTING.md).
+From the release after v0.2.0 on, the programs, their own DLLs and the MSIs are
+Authenticode-signed with Azure Artifact Signing; the publisher shown by Windows
+is **Randy Northrup**. v0.2.0 itself is not signed, so its first run shows a
+SmartScreen prompt (**More info → Run anyway**), and SmartScreen can still warn
+about a newly signed release until the publisher builds up a reputation. Every
+release carries SHA-256 sums, a CycloneDX SBOM and GitHub build-provenance
+attestations you can verify with `gh attestation verify` (see
+[SECURITY.md](SECURITY.md)). To build from source, see
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## The app
 
@@ -97,8 +101,10 @@ Every command takes `--help` for its full options and exit codes, and most take
 - **`otw revert <runId|last>`** — restore the exact state captured before a prior
   run. It refuses a run that was already reverted, or whose settings a later run
   changed again, unless you pass `--force`; a change that cannot be undone
-  automatically (a removed app) is reported as not reversible. `otw history`
-  lists past apply and revert runs and whether each journal verifies.
+  automatically (a removed app) is reported as not reversible. `--entry <id>`
+  reverts just one entry of a run; `otw revert --all` undoes every change the
+  tool has made, newest first. `otw history` lists past apply and revert runs and
+  whether each journal verifies.
 - **`otw remediate --profile <…>`** — the unattended form of apply, for
   automation: it re-applies only the drifted entries, never prompting and never
   overriding a managed (MDM/GPO) setting.
@@ -113,16 +119,29 @@ Every command takes `--help` for its full options and exit codes, and most take
   0–100 result and a Pass / Fail / Manual verdict per control. Export with
   `--json`, `--csv`, `--html` or `--sarif`.
 - **`otw profile`** — inspect, validate and sign profiles: `list`, `show`,
-  `validate`, and `sign` / `verify` (detached ES256 signatures). A machine can be
+  `validate`, `capture --out <file>` (write a profile of the settings this PC
+  already has, to apply them to others), and `sign` / `verify` (detached ES256
+  signatures). A machine can be
   set by policy to require signed profiles; the policy then also covers the GUI
   and any extra catalogue loaded with `--catalog-dir`.
 - **`otw updates`** — control Windows Update safely and reversibly: `pause --days
   <1-35>` (with an opt-in extended pause; re-pausing counts from the first day of
-  the pause in force, so the limit cannot be stepped around), `resume`, `status` (running version,
-  days to end-of-servicing, and pause state), `hidden`, `hide --kb <id>` and
-  `unhide --kb <id>` (per-update hide through the Windows Update Agent).
+  the pause in force, so the limit cannot be stepped around; administrators can
+  lower the extended limit by policy), `resume`, `status` (running version,
+  days to end-of-servicing, and pause state; `--json` for scripts), `hidden`,
+  `hide --kb <id>` and `unhide --kb <id>` (per-update hide through the Windows
+  Update Agent, verified after the change), `target --version <24H2|25H2|…>` /
+  `target --clear` (hold feature updates at a version while security updates keep
+  installing; Pro, Enterprise and Education), and `repair` (reset a stuck update
+  client: its services are stopped only for the repair and its caches set aside,
+  never deleted).
 - **`otw check-update`** — opt-in query of GitHub Releases for a newer version
   (one HTTPS request; nothing runs on a schedule).
+
+Exit codes are part of the contract and listed by `otw --help`: 0 success
+(compliant), 1 drift, 2 error, 3 unsupported OS, 4 invalid input (including a
+mistyped command line), 5 elevation required, 6 managed by policy (nothing
+changed), 3010 reboot required.
 
 ## Contributing
 

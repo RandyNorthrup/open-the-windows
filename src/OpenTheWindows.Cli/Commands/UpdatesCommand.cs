@@ -28,6 +28,7 @@ internal static class UpdatesCommand
         command.Subcommands.Add(CreateHidden(services));
         command.Subcommands.Add(CreateHide(services));
         command.Subcommands.Add(CreateUnhide(services));
+        UpdatesMaintenanceCommands.AddTo(command, services);
         return command;
     }
 
@@ -55,8 +56,10 @@ internal static class UpdatesCommand
 
     private static Command CreateStatus(CliServices services)
     {
+        var json = new Option<bool>("--json") { Description = "Emit the status as JSON on stdout." };
         var command = new Command("status", "Show the update state: version, days to end-of-servicing, pause and any pin.");
-        command.SetAction(parseResult => ExecuteStatus(parseResult, services));
+        command.Options.Add(json);
+        command.SetAction(parseResult => ExecuteStatus(parseResult, services, json));
         return command;
     }
 
@@ -162,7 +165,7 @@ internal static class UpdatesCommand
         return ExitCodes.Success;
     }
 
-    private static int ExecuteStatus(ParseResult parseResult, CliServices services)
+    private static int ExecuteStatus(ParseResult parseResult, CliServices services, Option<bool> jsonOption)
     {
         TextWriter stdout = parseResult.InvocationConfiguration.Output;
         TextWriter stderr = parseResult.InvocationConfiguration.Error;
@@ -173,6 +176,12 @@ internal static class UpdatesCommand
         }
 
         UpdateStatus status = services.CreateUpdateControl().Status();
+        if (parseResult.GetValue(jsonOption))
+        {
+            stdout.WriteLine(JsonSerializer.Serialize(status, CliJsonContext.Default.UpdateStatus));
+            return ExitCodes.Success;
+        }
+
         stdout.WriteLine(string.Create(CultureInfo.InvariantCulture,
             $"Windows {status.CurrentVersion} ({status.EditionId}, {status.Family} servicing)"));
 

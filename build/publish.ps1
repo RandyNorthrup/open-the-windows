@@ -17,7 +17,8 @@
             artifacts/publish/OpenTheWindows-<version>-<runtime>.zip (portable bundle)
             artifacts/publish/SHA256SUMS.txt
 
-    Binaries are NOT code-signed (ADR 0003). Hashes and SBOM are the provenance.
+    This script does not sign. Release binaries are signed by build/package.ps1 -Sign
+    (build/sign.ps1, Azure Artifact Signing).
 #>
 [CmdletBinding()]
 param(

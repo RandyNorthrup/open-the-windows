@@ -1,4 +1,3 @@
-using System.Buffers;
 using System.Globalization;
 using System.Text.Json;
 using OpenTheWindows.Core.Abstractions;
@@ -31,7 +30,6 @@ public sealed class UpdateControlService
 
     private const string ScanArgument = "StartScan";
     private static readonly TimeSpan ScanTimeout = TimeSpan.FromMinutes(2);
-    private static readonly JsonElement JsonNull = ParseNull();
     private static readonly IReadOnlyList<Uri> PauseSources =
         [new("https://learn.microsoft.com/windows/deployment/update/waas-configure-wufb")];
 
@@ -152,21 +150,7 @@ public sealed class UpdateControlService
             paused, until, target, targetDays, targetWarning);
     }
 
-    private IReadOnlyList<JournalSummary> FindActivePauses()
-    {
-        IReadOnlyList<JournalSummary> history = _engine.History();
-        // Only a revert that completed ends a pause; one that failed leaves it in force, so resume retries it.
-        HashSet<Guid> reverted = [.. history.Where(h => h.RevertOf is not null && h.Result == RunState.Completed).Select(h => h.RevertOf!.Value)];
-        return
-        [
-            .. history
-                .Where(h => string.Equals(h.Profile, PauseProfileName, StringComparison.Ordinal)
-                    && h.Result == RunState.Completed
-                    && h.RevertOf is null
-                    && !reverted.Contains(h.RunId))
-                .OrderByDescending(h => h.StartedAt),
-        ];
-    }
+    private IReadOnlyList<JournalSummary> FindActivePauses() => ActiveRuns.For(_engine.History(), PauseProfileName);
 
     private bool TriggerScan()
     {
@@ -220,8 +204,8 @@ public sealed class UpdateControlService
             WindowsUpdateSettings.UxSettingsPath,
             value.Name,
             RegistryValueType.Sz,
-            JsonString(value.Value),
-            JsonNull,
+            UpdateJson.String(value.Value),
+            UpdateJson.Null,
             RegistryValueKind.Preference))];
 
         IReadOnlyList<string> sideEffects = plan.Extended
@@ -248,23 +232,5 @@ public sealed class UpdateControlService
             PauseSources,
             [],
             ["windows-update", "pause"]);
-    }
-
-    private static JsonElement JsonString(string value)
-    {
-        var buffer = new ArrayBufferWriter<byte>();
-        using (var writer = new Utf8JsonWriter(buffer))
-        {
-            writer.WriteStringValue(value);
-        }
-
-        using var document = JsonDocument.Parse(buffer.WrittenMemory);
-        return document.RootElement.Clone();
-    }
-
-    private static JsonElement ParseNull()
-    {
-        using var document = JsonDocument.Parse("null");
-        return document.RootElement.Clone();
     }
 }

@@ -1015,4 +1015,49 @@ public sealed class ApplyEngineTests
         Assert.Equal(ServiceStartType.Manual, restored.StartType);
         Assert.True(restored.IsRunning);
     }
+
+    [Fact]
+    public void A_per_entry_revert_undoes_only_that_entry_and_a_later_full_revert_finishes_the_rest()
+    {
+        (ApplyHarness h, FakeMachine machine) = SeededAb();
+        ApplyResult applied = h.Engine.Apply([Entry("test.alpha", [Reg("A", 1)]), Entry("test.beta", [Reg("B", 1)])], Opts());
+
+        RevertResult partial = h.Engine.Revert(applied.RunId, new RevertOptions(false, false, EntryIds: ["test.beta"]));
+
+        Assert.Equal(RunState.Completed, partial.State);
+        Assert.Equal(1, ReadDword(machine, "A"));
+        Assert.Equal(0, ReadDword(machine, "B"));
+
+        RevertResult rest = h.Engine.Revert(applied.RunId, new RevertOptions(false, false));
+
+        Assert.Equal(RunState.Completed, rest.State);
+        Assert.Equal("test.alpha", Assert.Single(rest.Entries).Id.Value);
+        Assert.Equal(0, ReadDword(machine, "A"));
+        Assert.True(h.Engine.Revert(applied.RunId, new RevertOptions(false, false)).AlreadyReverted);
+    }
+
+    [Fact]
+    public void A_per_entry_revert_of_an_entry_the_run_did_not_change_changes_nothing()
+    {
+        (ApplyHarness h, FakeMachine machine) = SeededAb();
+        ApplyResult applied = h.Engine.Apply([Entry("test.alpha", [Reg("A", 1)])], Opts());
+        int writes = machine.WriteCount;
+
+        RevertResult result = h.Engine.Revert(applied.RunId, new RevertOptions(false, false, EntryIds: ["test.unknown"]));
+
+        Assert.Equal(RunState.Failed, result.State);
+        Assert.Equal(writes, machine.WriteCount);
+    }
+
+    [Fact]
+    public void Allowing_breaking_entries_does_not_also_require_allowing_advanced_ones()
+    {
+        (ApplyHarness h, FakeMachine machine) = SeededAb();
+
+        ApplyResult result = h.Engine.Apply(
+            [Entry("test.breaking", [Reg("A", 1)], risk: RiskTier.Breaking)], Opts(allowAdvanced: false, allowBreaking: true));
+
+        Assert.Equal(RunState.Completed, result.State);
+        Assert.Equal(1, ReadDword(machine, "A"));
+    }
 }

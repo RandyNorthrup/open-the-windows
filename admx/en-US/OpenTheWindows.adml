@@ -16,7 +16,17 @@ When this policy is Enabled, otw refuses to scan or apply a file profile unless 
 When this policy is Disabled or Not Configured, file profiles are accepted whether or not they are signed.
 
 This policy never restricts the built-in profiles (home, enterprise-workstation, and so on): they ship inside the product itself. Distribute your organisation's public key to the trust store — for example through this same Group Policy object or Intune — so that only profiles your administrators signed are honoured on managed devices.</string>
+      <string id="MaxExtendedPauseDays">Limit extended Windows Update pauses</string>
+      <string id="MaxExtendedPauseDays_Help">Sets the longest Windows Update pause Open the Windows allows when a user opts into an extended pause (otw updates pause --extended, or the extended pause on the Updates page).
+
+A standard pause is always limited to Microsoft's 35 days. An extended pause can go beyond that up to this limit, between 35 and 365 days; it is treated as an Advanced-risk change and writes Event 4002. The limit covers the whole uninterrupted pause, so pausing again before it ends does not extend it past the limit.
+
+When this policy is Disabled or Not Configured, the limit is 365 days. Set it to 35 to disallow extended pauses entirely.</string>
     </stringTable>
-    <presentationTable />
+    <presentationTable>
+      <presentation id="MaxExtendedPauseDays">
+        <decimalTextBox refId="MaxExtendedPauseDaysValue" defaultValue="35">Maximum pause, in days (35-365):</decimalTextBox>
+      </presentation>
+    </presentationTable>
   </resources>
 </policyDefinitionResources>

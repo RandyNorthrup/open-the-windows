@@ -34,4 +34,9 @@ public static class ExitCodes
 
     /// <summary>Changes applied; a reboot is required to complete them (same value Windows Installer uses).</summary>
     public const int RebootRequired = 3010;
+
+    /// <summary>The exit-code contract in one line, for <c>--help</c>.</summary>
+    public const string Summary =
+        "Exit codes: 0 success (scan: compliant), 1 drift found, 2 error, 3 unsupported OS, 4 invalid input, "
+        + "5 elevation required, 6 managed by policy (nothing changed), 3010 reboot required.";
 }

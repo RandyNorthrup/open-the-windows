@@ -7,8 +7,10 @@ namespace OpenTheWindows.Core.Engine;
 /// <param name="RevertedRunId">The id of the run that was reverted.</param>
 /// <param name="State">The revert run's overall state.</param>
 /// <param name="Entries">The per-entry outcomes.</param>
+/// <param name="AlreadyReverted">Set when nothing was done because the run (or the requested entries) had already been reverted.</param>
 public sealed record RevertResult(
     Guid RunId,
     Guid RevertedRunId,
     RunState State,
-    IReadOnlyList<EntryOutcome> Entries);
+    IReadOnlyList<EntryOutcome> Entries,
+    bool AlreadyReverted = false);

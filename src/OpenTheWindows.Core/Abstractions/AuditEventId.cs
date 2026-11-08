@@ -48,6 +48,9 @@ public enum AuditEventId
     /// <summary>One or more Windows updates were unhidden through the Windows Update Agent.</summary>
     UpdateUnhidden = 4004,
 
+    /// <summary>A supervised Windows Update repair ran (services stopped and restarted, caches set aside).</summary>
+    UpdateRepaired = 4005,
+
     /// <summary>An unexpected error.</summary>
     Error = 9000,
 }

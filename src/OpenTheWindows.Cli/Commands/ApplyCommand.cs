@@ -72,18 +72,24 @@ internal static class ApplyCommand
 
         ApplyEngine engine = services.CreateApplyEngine();
 
-        if (!whatIf && !ConfirmBreaking(engine, entries, applyOptions, parseResult.GetValue(options.Yes), stdout, stderr))
+        bool json = parseResult.GetValue(options.Json);
+        if (!whatIf && !ConfirmBreaking(engine, entries, applyOptions, parseResult.GetValue(options.Yes), json, stderr))
         {
             return ExitCodes.InvalidInput;
         }
 
         ApplyResult result = engine.Apply(entries, applyOptions);
         ApplyReporting.RegisterLogonFallback(services, selectedProfile, parseResult.GetValue(options.Common.Profile), applyOptions, result, whatIf, stderr);
-        return Report(result, whatIf, parseResult.GetValue(options.Json), stdout);
+        return Report(result, whatIf, json, stdout);
     }
 
+    /// <summary>
+    /// Asks for the id of every Breaking entry to be typed back. The prompt goes to stderr
+    /// so a report on stdout stays clean; a <c>--json</c> run is non-interactive, so it must
+    /// carry <c>--yes</c> instead of waiting for input nobody will type.
+    /// </summary>
     private static bool ConfirmBreaking(
-        ApplyEngine engine, IReadOnlyList<TweakDefinition> entries, ApplyOptions options, bool assumeYes, TextWriter stdout, TextWriter stderr)
+        ApplyEngine engine, IReadOnlyList<TweakDefinition> entries, ApplyOptions options, bool assumeYes, bool json, TextWriter stderr)
     {
         if (assumeYes || !options.AllowBreaking)
         {
@@ -91,18 +97,20 @@ internal static class ApplyCommand
         }
 
         PlanResult plan = engine.Plan(entries, options);
-        foreach (PlannedEntry entry in plan.WillApply)
+        List<PlannedEntry> breaking = [.. plan.WillApply.Where(e => e.Risk == RiskTier.Breaking)];
+        if (breaking.Count > 0 && json)
         {
-            if (entry.Risk != RiskTier.Breaking)
-            {
-                continue;
-            }
+            stderr.WriteLine("Breaking entries need confirmation; a --json run is non-interactive, so pass --yes to confirm them.");
+            return false;
+        }
 
-            stdout.Write(string.Create(CultureInfo.InvariantCulture, $"Breaking change '{entry.Id.Value}'. Type the id to confirm: "));
+        foreach (string id in breaking.Select(entry => entry.Id.Value))
+        {
+            stderr.Write(string.Create(CultureInfo.InvariantCulture, $"Breaking change '{id}'. Type the id to confirm: "));
             string? typed = Console.In.ReadLine();
-            if (!string.Equals(typed, entry.Id.Value, StringComparison.Ordinal))
+            if (!string.Equals(typed, id, StringComparison.Ordinal))
             {
-                stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Confirmation for '{entry.Id.Value}' did not match; aborting."));
+                stderr.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Confirmation for '{id}' did not match; aborting."));
                 return false;
             }
         }

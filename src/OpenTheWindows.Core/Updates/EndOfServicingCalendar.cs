@@ -56,6 +56,10 @@ public sealed class EndOfServicingCalendar
     public EndOfServicingRelease? Find(string version, EndOfServicingEditionFamily family)
         => _byKey.GetValueOrDefault((version, family));
 
+    /// <summary>Every version the calendar knows for <paramref name="family"/>, oldest build first.</summary>
+    public IReadOnlyList<string> Versions(EndOfServicingEditionFamily family)
+        => [.. _byKey.Values.Where(r => r.Family == family).OrderBy(r => r.Build).Select(r => r.Version)];
+
     /// <summary>
     /// Days from <paramref name="asOf"/> until the version's servicing ends
     /// (negative when already past), or <see langword="null"/> when the version is

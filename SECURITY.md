@@ -51,14 +51,29 @@ reporters in the release notes unless they prefer otherwise.
 - Every apply is journaled first and verified after; failures roll back.
 - No telemetry, no network access unless the user explicitly enables the
   update check.
-- Binaries are **not** code-signed; releases carry SHA-256 sums, a
-  CycloneDX SBOM, and GitHub build-provenance attestations instead. Verify
-  before running:
+- Releases after v0.2.0 are Authenticode-signed with Azure Artifact Signing
+  (formerly Trusted Signing): `otw.exe`, `OpenTheWindows.exe`, the
+  `OpenTheWindows` assemblies and the MSIs, each with an RFC 3161 timestamp.
+  The publisher is **Randy Northrup**
+  (`CN=Randy Northrup, O=Randy Northrup, L=Ventura, S=California, C=US`). The
+  .NET runtime and third-party libraries in the bundles keep their own
+  publishers' signatures. v0.2.0 and earlier are not signed. Every release also
+  carries SHA-256 sums, a CycloneDX SBOM, and GitHub build-provenance
+  attestations. Verify before running:
 
   ```powershell
+  (Get-AuthenticodeSignature .\OpenTheWindows-<version>-win-x64.msi).Status                    # Valid
+  (Get-AuthenticodeSignature .\OpenTheWindows-<version>-win-x64.msi).SignerCertificate.Subject # CN=Randy Northrup, ...
   Get-FileHash .\OpenTheWindows-<version>-win-x64.zip -Algorithm SHA256
   gh attestation verify .\OpenTheWindows-<version>-win-x64.zip --repo randynorthrup/open-the-windows
   ```
+
+  Windows SmartScreen can still warn about a newly signed release until the
+  publisher builds up a reputation.
+- The release workflow stores no signing password, certificate or client
+  secret. Azure accepts its GitHub OIDC token only from the repository's
+  `release` environment, which only `v*` tags can use, and that identity may
+  only sign with the one certificate profile.
 
 - Continuous checks: analyzers at maximum severity, `NuGetAudit` (all,
   low), `gitleaks` on history and working tree, `semgrep`, `jscpd`, and the

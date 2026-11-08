@@ -18,6 +18,9 @@ public sealed class FakeOperatingSystemInfo : IOperatingSystemInfo
     public static OperatingSystemFacts Windows11Pro24H2()
         => new("Windows 11 Pro", "Professional", "24H2", 26100, 4351, "x64", "Client");
 
+    public static OperatingSystemFacts Windows11Home24H2()
+        => new("Windows 11 Home", "Core", "24H2", 26100, 4351, "x64", "Client");
+
     public static OperatingSystemFacts Windows10Pro22H2()
         => new("Windows 10 Pro", "Professional", "22H2", 19045, 5011, "x64", "Client");
 

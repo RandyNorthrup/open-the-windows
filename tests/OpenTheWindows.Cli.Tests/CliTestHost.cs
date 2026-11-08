@@ -30,6 +30,6 @@ internal static class CliTestHost
         var parse = root.Parse(args);
         parse.InvocationConfiguration.Output = stdout;
         parse.InvocationConfiguration.Error = stderr;
-        return parse.Invoke();
+        return CliRunner.Invoke(parse);
     }
 }

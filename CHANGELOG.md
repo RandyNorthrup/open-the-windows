@@ -6,6 +6,35 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Release signing with Azure Artifact Signing (formerly Trusted Signing), publisher Randy
+  Northrup. `build/sign.ps1` signs through `signtool` and the `Microsoft.ArtifactSigning.Client`
+  1.0.146 dlib (pinned by version and SHA-512) with a SHA-256 digest and an RFC 3161 timestamp,
+  refuses files that are already signed, and checks each result with `signtool verify /pa`, the
+  timestamp and the publisher name. `build/package.ps1 -Sign` signs `otw.exe`,
+  `OpenTheWindows.exe` and the `OpenTheWindows` assemblies before they are zipped or packed into
+  an MSI, then the MSIs, before the SBOM and SHA-256 sums; without `-Sign` a build needs no Azure
+  access. The release workflow signs in with GitHub OIDC from a `release` environment that only
+  `v*` tags can use, stores no signing secret, and a manual run must start from the tag it
+  releases. v0.2.0 and earlier remain unsigned.
+- `otw updates target --version <ver>` / `--clear` / `--list`: hold feature updates at a
+  Windows 11 version through the Windows Update for Business target-version policy, journaled
+  and reversible (Pro, Enterprise and Education; Home is refused because it ignores the policy).
+- `otw updates repair`: the supervised reset of a stuck Windows Update client — the update
+  services are stopped for the repair only (start types are never touched), `SoftwareDistribution`
+  and `catroot2` are renamed aside with a timestamp (never deleted), the services are started
+  again, and the run is audited as Event 4005.
+- `otw updates status --json`.
+- `otw revert --entry <id>` reverts one entry of a run; `otw revert --all` undoes every change
+  the tool has made, newest first, skipping runs already reverted.
+- `otw profile capture --out <file>`: writes a profile of the catalogue settings this PC
+  already has (all level dials off, the compliant entries included), schema-validated before
+  it is written, so the configuration can be applied to other PCs.
+- `MaxExtendedPauseDays` policy (ADMX): administrators can lower the extended-pause limit from
+  365 days down to 35.
+- `otw --help` lists the exit codes; exit code 6 (`Managed`) is new.
+
 ### Security
 
 - `%ProgramData%\OpenTheWindows` is now kept owned by Administrators and writable only by
@@ -78,6 +107,13 @@ All notable changes to this project are documented here. The format follows
   completed apply.
 - `scan` with an unknown or refused `--profile` exits with 4 (invalid input), like `apply` and
   `remediate`. `--json` apply reports include pre-flight blocks.
+- A mistyped command line exits with 4 and an unexpected failure with 2; both used to exit with
+  1, which the contract reserves for drift, so an Intune detection script read them as drift.
+- A Breaking entry needed `--allow-advanced` as well as `--allow-breaking`; each flag now covers
+  its own tier. The typed confirmation for Breaking entries is prompted on stderr, and a `--json`
+  run (non-interactive) must pass `--yes` instead of waiting for input.
+- `updates hide`/`unhide` now re-read the Windows Update Agent after the change and report an
+  update that did not take the new state.
 
 ### Changed
 

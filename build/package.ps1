@@ -8,6 +8,7 @@
         pwsh build/package.ps1 -Version 1.2.3     # stamp a release version
         pwsh build/package.ps1 -Runtime win-x64   # one runtime
         pwsh build/package.ps1 -SkipMsi           # ZIPs + SBOM only (no WiX build)
+        pwsh build/package.ps1 -Sign              # Authenticode-sign (Azure Artifact Signing)
 
     For each runtime it publishes the self-contained CLI (single-file otw.exe) and
     the self-contained WPF app, zips them into a portable bundle, and builds a
@@ -27,15 +28,21 @@
     always the numeric major.minor.build (Windows Installer requires that), while
     file names carry the full display version.
 
-    Binaries are NOT code-signed (ADR 0003). The SHA-256 sums, the SBOM and - in
-    CI - the build-provenance attestations are the provenance.
+    Signing: with -Sign, build/sign.ps1 Authenticode-signs our own binaries
+    (otw.exe, OpenTheWindows.exe and the OpenTheWindows assemblies) in each publish
+    folder before it is zipped or packed into an MSI, then signs every MSI, all
+    before the SBOM and SHA256SUMS.txt are written. Runtime and third-party files
+    keep their own publishers' signatures. -Sign checks the Azure sign-in first, so
+    a missing one fails before the long publish. Without -Sign nothing needs Azure
+    and the output is unsigned (local and CI smoke builds).
 #>
 [CmdletBinding()]
 param(
     [ValidateSet('win-x64', 'win-arm64')]
     [string[]] $Runtime = @('win-x64', 'win-arm64'),
     [string] $Version = '',
-    [switch] $SkipMsi
+    [switch] $SkipMsi,
+    [switch] $Sign
 )
 
 Set-StrictMode -Version Latest
@@ -72,6 +79,29 @@ else {
 }
 
 Write-Host "==> version: display=$displayVersion msi=$msiVersion" -ForegroundColor Cyan
+
+# -- Signing -----------------------------------------------------------------
+# Our own binaries in a publish folder: the two entry points and the project
+# assemblies. Everything else there is the .NET runtime or a third-party package.
+$signScript = Join-Path $PSScriptRoot 'sign.ps1'
+$entryPoints = @('otw.exe', 'OpenTheWindows.exe')
+$ownBinaryNames = $entryPoints + @('OpenTheWindows.dll', 'OpenTheWindows.*.dll')
+
+function Invoke-OwnBinarySigning {
+    param([string] $BundleDir)
+    $files = @(Get-ChildItem -LiteralPath $BundleDir -Recurse -File -Include $ownBinaryNames |
+            ForEach-Object { $_.FullName })
+    $names = @($files | ForEach-Object { Split-Path -Leaf $_ })
+    foreach ($entryPoint in $entryPoints) {
+        if ($names -notcontains $entryPoint) { throw "$entryPoint is missing from $BundleDir; nothing was signed." }
+    }
+    & $signScript -Path $files
+}
+
+if ($Sign) {
+    Write-Host '==> signing: check prerequisites and Azure sign-in' -ForegroundColor Cyan
+    & $signScript -CheckAccess
+}
 
 # -- Clean output ------------------------------------------------------------
 $publishRoot = Join-Path $repoRoot 'artifacts/publish'
@@ -121,6 +151,7 @@ foreach ($rid in $Runtime) {
     Write-Host "==> publish self-contained ($rid)" -ForegroundColor Cyan
     $stage = Join-Path $stageRoot $rid
     Publish-Bundle -Rid $rid -SelfContained $true -OutDir $stage
+    if ($Sign) { Invoke-OwnBinarySigning -BundleDir $stage }
 
     $zip = Join-Path $publishRoot "OpenTheWindows-$displayVersion-$rid.zip"
     Write-Host "==> zip $zip" -ForegroundColor Cyan
@@ -148,11 +179,18 @@ foreach ($rid in $Runtime) {
     }
 }
 
+# Outside the try above: a signing failure must fail the run, never skip an MSI.
+if ($Sign -and $builtMsis.Count -gt 0) {
+    Write-Host '==> sign MSIs' -ForegroundColor Cyan
+    & $signScript -Path $builtMsis
+}
+
 # -- Framework-dependent x64 ZIP (needs the .NET 10 Desktop Runtime) ---------
 if ($Runtime -contains 'win-x64') {
     Write-Host '==> publish framework-dependent (win-x64)' -ForegroundColor Cyan
     $fddStage = Join-Path $stageRoot 'win-x64-fdd'
     Publish-Bundle -Rid 'win-x64' -SelfContained $false -OutDir $fddStage
+    if ($Sign) { Invoke-OwnBinarySigning -BundleDir $fddStage }
     $fddZip = Join-Path $publishRoot "OpenTheWindows-$displayVersion-win-x64-fdd.zip"
     Write-Host "==> zip $fddZip" -ForegroundColor Cyan
     Compress-Archive -Path (Join-Path $fddStage '*') -DestinationPath $fddZip -CompressionLevel Optimal

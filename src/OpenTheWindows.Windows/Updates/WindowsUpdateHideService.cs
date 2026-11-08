@@ -7,8 +7,8 @@ namespace OpenTheWindows.Windows.Updates;
 
 /// <summary>
 /// Hides and unhides updates through <see cref="IWindowsUpdateAgent"/> and
-/// writes an audit event before the change. Verification is a re-read of the
-/// hidden list.
+/// writes an audit event before the change. After the change it re-reads the
+/// agent and reports failure when an update did not take the new state.
 /// </summary>
 [SupportedOSPlatform("windows")]
 internal sealed class WindowsUpdateHideService : IUpdateHideService
@@ -81,6 +81,15 @@ internal sealed class WindowsUpdateHideService : IUpdateHideService
         {
             string already = hidden ? "hidden" : "visible";
             return new UpdateHideOutcome(true, normalized, 0, string.Create(CultureInfo.InvariantCulture, $"{formatted} was already {already}."));
+        }
+
+        // Verify by re-reading what the agent now reports for the same updates.
+        HashSet<string> changed = [.. matches.Where(m => m.IsHidden != hidden).Select(m => m.Identity)];
+        int stuck = Find(normalized).Count(u => changed.Contains(u.Identity) && u.IsHidden != hidden);
+        if (stuck > 0)
+        {
+            return new UpdateHideOutcome(false, normalized, affected - stuck, string.Create(CultureInfo.InvariantCulture,
+                $"Windows Update Agent still reports {stuck} update(s) of {formatted} as {(hidden ? "visible" : "hidden")} after the change."));
         }
 
         string verb = hidden ? "Hid" : "Unhid";

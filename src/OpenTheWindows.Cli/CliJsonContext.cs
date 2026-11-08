@@ -24,4 +24,6 @@ namespace OpenTheWindows.Cli;
 [JsonSerializable(typeof(IReadOnlyList<UserProfile>))]
 [JsonSerializable(typeof(IReadOnlyList<DiscoveredUpdate>))]
 [JsonSerializable(typeof(AppReleaseCheckResult))]
+[JsonSerializable(typeof(UpdateRepairResult))]
+[JsonSerializable(typeof(UpdateStatus))]
 internal sealed partial class CliJsonContext : JsonSerializerContext;

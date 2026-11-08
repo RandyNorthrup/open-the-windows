@@ -262,14 +262,24 @@ public sealed class ApplyEngine
         ArgumentNullException.ThrowIfNull(options);
 
         JournalRecord original = _services.Journal.Load(runId);
-        List<JournalEntry> revertable = [.. original.Entries.Where(e => e.Actions.Any(IsRevertable)).Reverse()];
+        List<JournalEntry> requested = [.. original.Entries
+            .Where(e => e.Actions.Any(IsRevertable) && (options.EntryIds is null || options.EntryIds.Contains(e.Id, StringComparer.Ordinal)))
+            .Reverse()];
+        if (options.EntryIds is not null && requested.Count < options.EntryIds.Count)
+        {
+            string missing = string.Join(", ", options.EntryIds.Where(id => requested.TrueForAll(e => !string.Equals(e.Id, id, StringComparison.Ordinal))));
+            return new RevertResult(Guid.Empty, runId, RunState.Failed,
+                [.. options.EntryIds.Select(id => new EntryOutcome(new TweakId(id), ApplyState.NotApplicable, RiskTier.Safe, RestartRequirement.None,
+                    string.Create(CultureInfo.InvariantCulture, $"run {runId} changed nothing to revert for: {missing}")))]);
+        }
 
-        string? refusal = RevertGuard.Check(original, _services.Journal, options.Force) ?? FirstRestoreRefusal(revertable);
+        (string? guarded, bool alreadyReverted, List<JournalEntry> revertable) = RevertGuard.Check(original, requested, _services.Journal, options.Force);
+        string? refusal = guarded ?? FirstRestoreRefusal(revertable);
         if (refusal is not null)
         {
             _journal.Audit(AuditEventId.Refusal, string.Create(CultureInfo.InvariantCulture, $"Revert of {runId} refused: {refusal}"), null, null);
             return new RevertResult(Guid.Empty, runId, RunState.Failed,
-                [.. revertable.Select(e => new EntryOutcome(new TweakId(e.Id), ApplyState.Refused, e.Risk, e.Requires, refusal))]);
+                [.. revertable.Select(e => new EntryOutcome(new TweakId(e.Id), ApplyState.Refused, e.Risk, e.Requires, refusal))], alreadyReverted);
         }
 
         if (options.WhatIf)
@@ -412,7 +422,7 @@ public sealed class ApplyEngine
             return (PlanDisposition.Blocked, "requires --allow-breaking (Breaking risk)");
         }
 
-        if (entry.Risk >= RiskTier.Advanced && !options.AllowAdvanced)
+        if (entry.Risk == RiskTier.Advanced && !options.AllowAdvanced)
         {
             return (PlanDisposition.Blocked, "requires --allow-advanced (Advanced risk)");
         }

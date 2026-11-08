@@ -18,10 +18,12 @@ internal static class CommandLineBuilder
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        var root = new RootCommand($"{AppInfo.Title}: Windows 11 privacy, update, security and performance control.");
+        var root = new RootCommand($"{AppInfo.Title}: Windows 11 privacy, update, security and performance control. {ExitCodes.Summary}");
         root.Subcommands.Add(DoctorCommand.Create(services.Doctor));
         root.Subcommands.Add(CatalogCommand.Create(services.LoadCatalog));
-        root.Subcommands.Add(ProfileCommand.Create(services.LoadCatalog, services.CreateTrustedKeys));
+        Command profile = ProfileCommand.Create(services.LoadCatalog, services.CreateTrustedKeys);
+        profile.Subcommands.Add(ProfileCaptureCommand.Create(services));
+        root.Subcommands.Add(profile);
         root.Subcommands.Add(ScanCommand.Create(services));
         root.Subcommands.Add(AuditCommand.Create(services));
         root.Subcommands.Add(HealthCommand.Create(services.Health));

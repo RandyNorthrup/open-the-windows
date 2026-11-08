@@ -58,4 +58,17 @@ public sealed class WindowsUpdateHideServiceTests
         Assert.Throws<ArgumentNullException>(() => new WindowsUpdateHideService(agent, null!, TimeProvider.System));
         Assert.Throws<ArgumentNullException>(() => new WindowsUpdateHideService(agent, audit, null!));
     }
+
+    [Fact]
+    public void Hide_reports_failure_when_the_agent_does_not_take_the_change()
+    {
+        var agent = new FakeWindowsUpdateAgent { IgnoreChanges = true };
+        agent.NotInstalled.Add(new DiscoveredUpdate("id-1", "Cumulative 2026-08", ["5063878"], false));
+        var service = new WindowsUpdateHideService(agent, new FakeAuditSink(), TimeProvider.System);
+
+        UpdateHideOutcome outcome = service.Hide("KB5063878");
+
+        Assert.False(outcome.Succeeded);
+        Assert.Contains("still reports", outcome.Message, StringComparison.Ordinal);
+    }
 }

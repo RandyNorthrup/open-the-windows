@@ -25,8 +25,16 @@ internal sealed class FakeWindowsUpdateAgent : IWindowsUpdateAgent
         return [];
     }
 
+    /// <summary>When set, <see cref="SetHidden"/> is accepted but ignored (an agent that does not apply the change).</summary>
+    public bool IgnoreChanges { get; set; }
+
     public void SetHidden(string identity, bool hidden)
     {
+        if (IgnoreChanges)
+        {
+            return;
+        }
+
         DiscoveredUpdate? match = NotInstalled.Concat(Hidden).FirstOrDefault(u => string.Equals(u.Identity, identity, StringComparison.OrdinalIgnoreCase));
         if (match is null)
         {

@@ -10,6 +10,8 @@ is the product/user-facing document; everything a developer needs is here.
   PowerShell 7.4+, Git.
 - Optional for the full gate set: Python 3.9+ (semgrep) and gitleaks
   (`winget install Gitleaks.Gitleaks`).
+- Optional for signed builds: the Windows SDK (`signtool.exe`), a .NET 8 or later
+  x64 runtime and the Azure CLI (see [Code signing](#code-signing)).
 - Visual Studio 2022 cannot load SDK 10.0.400 solutions; use the CLI, VS Code
   or Visual Studio 2026.
 
@@ -38,6 +40,64 @@ hashes:
 ```powershell
 pwsh build/publish.ps1 -Runtime win-x64        # or omit -Runtime for x64 + arm64
 ```
+
+Build every release artifact (portable ZIPs, the framework-dependent ZIP, MSIs,
+SBOM, `SHA256SUMS.txt`) into `artifacts/publish/`:
+
+```powershell
+pwsh build/package.ps1 -Runtime win-x64        # unsigned; needs no Azure access
+pwsh build/package.ps1 -Runtime win-x64 -Sign  # Authenticode-signed (see below)
+```
+
+## Code signing
+
+Releases are Authenticode-signed with
+[Azure Artifact Signing](https://learn.microsoft.com/azure/artifact-signing/)
+(formerly Trusted Signing): account `scnetsolutions` (West US,
+`https://wus.codesigning.azure.net/`, resource group `SAK`), public-trust
+certificate profile `SAKUtility`, publisher
+`CN=Randy Northrup, O=Randy Northrup, L=Ventura, S=California, C=US`.
+
+`build/sign.ps1` signs with `signtool.exe` from the Windows SDK (never from
+`PATH`) and the `Microsoft.ArtifactSigning.Client` dlib, pinned by version and by
+the SHA-512 nuget.org records, downloaded once into `artifacts/tools/`. Each file
+gets a SHA-256 digest and an RFC 3161 timestamp from
+`http://timestamp.acs.microsoft.com`, then must pass `signtool verify /pa`, carry
+a timestamp, and name the publisher `Randy Northrup`. The script refuses a file
+that is already signed, so a runtime or third-party DLL is never re-signed.
+`package.ps1 -Sign` signs `otw.exe`, `OpenTheWindows.exe` and the
+`OpenTheWindows` assemblies in each publish folder before it is zipped or packed
+into an MSI, then signs the MSIs, before it writes the SBOM and the sums.
+
+To sign locally you need an account with the **Artifact Signing Certificate
+Profile Signer** role on the `SAKUtility` profile (or on the account). The Azure
+CLI is the only credential the dlib may use:
+
+```powershell
+az login
+pwsh build/sign.ps1 -CheckAccess                  # prerequisites and sign-in only
+pwsh build/package.ps1 -Runtime win-x64 -Sign     # signed release build
+./build/sign.ps1 -Path .\file.exe, .\file.msi    # sign and verify given files (in pwsh)
+```
+
+The release workflow signs the same way, signed in with GitHub OIDC; no
+password, certificate or client secret is stored:
+
+- **Entra app registration** `Open the Windows release signing (GitHub Actions)`,
+  client ID `0a8415be-eb5f-4b1a-8370-501b41cf1e4c`, with no secrets or
+  certificates.
+- **Federated credential** for the subject
+  `repo:RandyNorthrup@122551425/open-the-windows@1336415585:environment:release`.
+  The repository uses GitHub's immutable OIDC subject (owner and repository IDs),
+  so a renamed or re-created repository does not inherit it.
+- **Role** `Artifact Signing Certificate Profile Signer`, scoped to the
+  `SAKUtility` certificate profile only.
+- **GitHub environment** `release`, deployable from `v*` tags only. It holds the
+  `AZURE_CLIENT_ID` and `AZURE_TENANT_ID` secrets, which identify the app but do
+  not authenticate it.
+
+To retry a release run that failed before publishing, start the Release workflow
+from its tag ("Use workflow from") with the matching version.
 
 ## Architecture
 
@@ -121,7 +181,7 @@ tests/OpenTheWindows.TestSupport   shared fakes
 tests/*.Tests                one test project per shipping project
 catalog/                     tweak catalogue (JSON) + schema + profiles + baselines
 admx/                        Group Policy ADMX/ADML templates
-build/                       quality.ps1, publish.ps1, vm.ps1, smoke harnesses
+build/                       quality.ps1, publish.ps1, package.ps1, sign.ps1, vm.ps1, smoke harnesses
 installer/                   WiX MSI project
 ```
 

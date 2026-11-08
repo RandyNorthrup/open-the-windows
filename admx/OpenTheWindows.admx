@@ -43,5 +43,21 @@
       <enabledValue><decimal value="1" /></enabledValue>
       <disabledValue><decimal value="0" /></disabledValue>
     </policy>
+    <!--
+      MaxExtendedPauseDays: the longest Windows Update pause otw allows with
+      the extended-pause option (CLI and GUI). REG_DWORD, 35-365;
+      a value outside that range is clamped. Not configured = 365.
+    -->
+    <policy name="MaxExtendedPauseDays" class="Machine"
+            displayName="$(string.MaxExtendedPauseDays)"
+            explainText="$(string.MaxExtendedPauseDays_Help)"
+            presentation="$(presentation.MaxExtendedPauseDays)"
+            key="SOFTWARE\Policies\OpenTheWindows">
+      <parentCategory ref="OpenTheWindows" />
+      <supportedOn ref="SUPPORTED_OpenTheWindows_1" />
+      <elements>
+        <decimal id="MaxExtendedPauseDaysValue" valueName="MaxExtendedPauseDays" minValue="35" maxValue="365" required="true" />
+      </elements>
+    </policy>
   </policies>
 </policyDefinitions>

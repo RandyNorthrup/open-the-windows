@@ -8,9 +8,10 @@ using OpenTheWindows.Core.Journal;
 namespace OpenTheWindows.Cli.Commands;
 
 /// <summary>
-/// <c>otw revert &lt;runId|last&gt; [--what-if] [--force] [--restart-explorer] [--json]</c>:
-/// restore the machine to the state captured before a prior run, journaling a new
-/// revert run. The journal must verify (signature, hash and owner), and the revert is
+/// <c>otw revert &lt;runId|last&gt; [--entry &lt;id&gt;]... [--what-if] [--force] [--restart-explorer] [--json]</c>
+/// or <c>otw revert --all</c>: restore the machine to the state captured before a prior
+/// run (or only some of its entries), journaling a new revert run; <c>--all</c> undoes
+/// every run this product made, newest first. The journal must verify (signature, hash and owner), and the revert is
 /// refused when the run was already reverted or a later run changed the same settings,
 /// unless <c>--force</c>. Exit codes: 0 reverted, 2 error or refused, 3 unsupported OS,
 /// 4 invalid run id, 5 elevation required.
@@ -20,7 +21,13 @@ internal static class RevertCommand
     public static Command Create(CliServices services)
     {
         ArgumentNullException.ThrowIfNull(services);
-        var runArgument = new Argument<string>("run") { Description = "The run id (GUID) to revert, or 'last' for the most recent run." };
+        var runArgument = new Argument<string>("run")
+        {
+            Description = "The run id (GUID) to revert, or 'last' for the most recent run (omit with --all).",
+            Arity = ArgumentArity.ZeroOrOne,
+        };
+        var entry = new Option<string[]>("--entry") { Description = "Revert only this entry of the run (repeatable).", AllowMultipleArgumentsPerToken = false };
+        var all = new Option<bool>("--all") { Description = "Undo everything: revert every run this product made that is not already reverted, newest first." };
         var whatIf = new Option<bool>("--what-if") { Description = "Plan only; make no changes." };
         var force = new Option<bool>("--force")
         {
@@ -30,11 +37,13 @@ internal static class RevertCommand
         var json = new Option<bool>("--json") { Description = "Emit the result as JSON on stdout (stable schema)." };
         var command = new Command("revert", "Restore the state captured before a prior run (journaled).");
         command.Arguments.Add(runArgument);
+        command.Options.Add(entry);
+        command.Options.Add(all);
         command.Options.Add(whatIf);
         command.Options.Add(force);
         command.Options.Add(restartExplorer);
         command.Options.Add(json);
-        command.SetAction(parseResult => Execute(parseResult, services, runArgument, new RevertFlags(whatIf, force, restartExplorer, json)));
+        command.SetAction(parseResult => Execute(parseResult, services, runArgument, new RevertFlags(whatIf, force, restartExplorer, json, entry, all)));
         return command;
     }
 
@@ -55,7 +64,26 @@ internal static class RevertCommand
         }
 
         ApplyEngine engine = services.CreateApplyEngine();
-        string token = parseResult.GetValue(runArgument) ?? string.Empty;
+        string[] entries = parseResult.GetValue(flags.Entry) ?? [];
+        var options = new RevertOptions(
+            whatIf, parseResult.GetValue(flags.RestartExplorer), parseResult.GetValue(flags.Force), entries.Length == 0 ? null : entries);
+        string? token = parseResult.GetValue(runArgument);
+        if (parseResult.GetValue(flags.All))
+        {
+            if (token is not null || entries.Length > 0)
+            {
+                stderr.WriteLine("--all reverts whole runs; do not combine it with a run id or --entry.");
+                return ExitCodes.InvalidInput;
+            }
+
+            return RevertAll(engine, options, stdout, stderr);
+        }
+
+        return RevertOne(engine, token ?? string.Empty, options, parseResult.GetValue(flags.Json), stdout, stderr);
+    }
+
+    private static int RevertOne(ApplyEngine engine, string token, RevertOptions options, bool json, TextWriter stdout, TextWriter stderr)
+    {
         if (!TryResolveRun(engine, token, out Guid runId, out string error))
         {
             stderr.WriteLine(error);
@@ -65,7 +93,7 @@ internal static class RevertCommand
         RevertResult result;
         try
         {
-            result = engine.Revert(runId, new RevertOptions(whatIf, parseResult.GetValue(flags.RestartExplorer), parseResult.GetValue(flags.Force)));
+            result = engine.Revert(runId, options);
         }
         catch (FileNotFoundException ex)
         {
@@ -78,13 +106,13 @@ internal static class RevertCommand
             return ExitCodes.Error;
         }
 
-        if (parseResult.GetValue(flags.Json))
+        if (json)
         {
             stdout.WriteLine(JsonSerializer.Serialize(ToJson(result), CliJsonContext.Default.ApplyJsonReport));
         }
         else
         {
-            WriteText(result, whatIf, stdout);
+            WriteText(result, options.WhatIf, stdout);
         }
 
         return result.State is RunState.Completed ? ExitCodes.Success : ExitCodes.Error;
@@ -144,5 +172,44 @@ internal static class RevertCommand
             [],
             [.. result.Entries.Select(e => new ApplyJsonEntry(e.Id.Value, e.Result.ToString(), e.Risk.ToString(), e.Requires.ToString(), e.Note))]);
 
-    private sealed record RevertFlags(Option<bool> WhatIf, Option<bool> Force, Option<bool> RestartExplorer, Option<bool> Json);
+    /// <summary>
+    /// Reverts every apply run that is not already fully reverted, newest first, so later
+    /// changes are unwound before the earlier ones they built on. A run already reverted is
+    /// skipped; any other refusal or failure is reported and makes the exit code non-zero.
+    /// </summary>
+    private static int RevertAll(ApplyEngine engine, RevertOptions options, TextWriter stdout, TextWriter stderr)
+    {
+        List<JournalSummary> runs = [.. engine.History().Where(s =>
+            s.Integrity == JournalIntegrity.Verified && s.RevertOf is null && s.Result is RunState.Completed or RunState.Failed)];
+        int problems = 0;
+        foreach (JournalSummary run in runs)
+        {
+            RevertResult result;
+            try
+            {
+                result = engine.Revert(run.RunId, options);
+            }
+            catch (JournalIntegrityException ex)
+            {
+                stderr.WriteLine(ex.Message);
+                problems++;
+                continue;
+            }
+
+            if (result.AlreadyReverted)
+            {
+                continue;
+            }
+
+            stdout.WriteLine(string.Create(CultureInfo.InvariantCulture,
+                $"{(options.WhatIf ? "Would revert" : "Reverted")} {run.RunId} ({run.Profile}): {result.State}."));
+            problems += result.State == RunState.Completed ? 0 : 1;
+        }
+
+        stdout.WriteLine(problems == 0 ? "Every change this product made has been reverted." : string.Create(CultureInfo.InvariantCulture, $"{problems} run(s) could not be reverted; see above."));
+        return problems == 0 ? ExitCodes.Success : ExitCodes.Error;
+    }
+
+    private sealed record RevertFlags(
+        Option<bool> WhatIf, Option<bool> Force, Option<bool> RestartExplorer, Option<bool> Json, Option<string[]> Entry, Option<bool> All);
 }

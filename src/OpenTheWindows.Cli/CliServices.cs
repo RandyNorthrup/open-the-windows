@@ -23,6 +23,8 @@ namespace OpenTheWindows.Cli;
 /// <param name="CreateApplyEngine">Builds the transactional apply engine over the real readers, writers and services.</param>
 /// <param name="CreateUpdateControl">Builds the Windows Update guardrail service over the real apply engine and adapters.</param>
 /// <param name="CreateUpdateHide">Builds the per-update hide/unhide service over the Windows Update Agent.</param>
+/// <param name="CreateUpdateTarget">Builds the feature-update target (hold-at-version) service.</param>
+/// <param name="CreateUpdateRepair">Builds the supervised Windows Update repair.</param>
 /// <param name="CreateReleaseChecker">Builds the opt-in GitHub Releases checker.</param>
 /// <param name="CreateRegistryReader">Builds a read-only registry reader (used to read the machine profile policy).</param>
 /// <param name="CreateTaskInstaller">Builds the scheduled-task installer (drift remediation task).</param>
@@ -40,6 +42,8 @@ internal sealed record CliServices(
     Func<ApplyEngine> CreateApplyEngine,
     Func<UpdateControlService> CreateUpdateControl,
     Func<IUpdateHideService> CreateUpdateHide,
+    Func<UpdateTargetService> CreateUpdateTarget,
+    Func<IUpdateRepair> CreateUpdateRepair,
     Func<IAppReleaseChecker> CreateReleaseChecker,
     Func<IRegistryReader> CreateRegistryReader,
     Func<IScheduledTaskInstaller> CreateTaskInstaller,
@@ -63,6 +67,8 @@ internal sealed record CliServices(
             CreateDefaultApplyEngine,
             static () => WindowsUpdateControlFactory.Create(),
             static () => WindowsUpdateHideFactory.Create(),
+            static () => WindowsUpdateControlFactory.CreateTarget(),
+            static () => WindowsUpdateControlFactory.CreateRepair(),
             static () => GitHubAppReleaseChecker.ForProcess(),
             static () => new WindowsRegistryReader(),
             static () => new WindowsScheduledTaskInstaller(),
