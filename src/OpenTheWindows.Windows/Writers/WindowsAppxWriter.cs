@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Catalog;
@@ -10,13 +11,16 @@ namespace OpenTheWindows.Windows.Writers;
 
 /// <summary>
 /// Removes and reprovisions Appx/MSIX packages through the WinRT
-/// <see cref="PackageManager"/>. Per-user removal cannot be undone by this
-/// product (the package bits are gone); revert of an all-users deprovision
-/// reprovisions the package so new users receive it again.
+/// <see cref="PackageManager"/>. Removal cannot be undone by this product.
+/// Reprovisioning needs the package still staged; after an all-users removal on
+/// Windows 11 24H2/25H2 its files are gone and <see cref="Reprovision"/> fails.
 /// </summary>
 [SupportedOSPlatform("windows10.0.19041.0")]
 public sealed class WindowsAppxWriter : IAppxWriter
 {
+    // HRESULT_FROM_WIN32(ERROR_NOT_FOUND).
+    private const int NotFound = unchecked((int)0x80070490);
+
     /// <inheritdoc />
     public void Remove(string packageFamilyName, string? userSid, AppxRemovalMode mode)
     {
@@ -59,15 +63,27 @@ public sealed class WindowsAppxWriter : IAppxWriter
 #pragma warning disable VSTHRD002
     private static void Await(IAsyncOperationWithProgress<DeploymentResult, DeploymentProgress> operation, bool ignoreMissing)
     {
-        DeploymentResult result = operation.AsTask().GetAwaiter().GetResult();
+        DeploymentResult result;
+        try
+        {
+            result = operation.AsTask().GetAwaiter().GetResult();
+        }
+        catch (COMException ex) when (ignoreMissing && ex.HResult == NotFound)
+        {
+            // The failed operation surfaces as a thrown exception rather than a result. On Windows 11
+            // 24H2/25H2 an all-users removal already deprovisions the package, so the deprovision that
+            // follows it fails this way.
+            return;
+        }
+
         if (result.ExtendedErrorCode is null)
         {
             return;
         }
 
-        // ERROR_NOT_FOUND (0x80070490): the package or its provisioning is already absent — for a
-        // removal or deprovision that is the desired state, so it is not a failure.
-        if (ignoreMissing && result.ExtendedErrorCode.HResult == unchecked((int)0x80070490))
+        // The package or its provisioning is already absent: for a removal or deprovision that is
+        // the desired state, so it is not a failure.
+        if (ignoreMissing && result.ExtendedErrorCode.HResult == NotFound)
         {
             return;
         }

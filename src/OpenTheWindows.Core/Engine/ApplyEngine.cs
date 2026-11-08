@@ -795,7 +795,7 @@ public sealed class ApplyEngine
     {
         if (!ActionApplier.CanRestore(action.Action, action.Desired))
         {
-            // Do what can be done (an all-users app removal is reprovisioned for future users),
+            // Do what can be done (a deprovisioned app still staged is reprovisioned for future users),
             // but never report the change as undone.
             Capture(() => _applier.Restore(action.Action, action.Desired, action.Sid));
             _journal.Audit(AuditEventId.TweakFailed,

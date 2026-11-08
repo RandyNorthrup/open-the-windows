@@ -128,6 +128,16 @@ All notable changes to this project are documented here. The format follows
 - Machine policies that only Group Policy itself may write (the Widgets policy, guarded by
   Windows' User Choice Protection driver) are applied by asking Group Policy to refresh and
   waiting for the value, instead of failing after the Local GPO write.
+- Removing an app for all users no longer fails and rolls back on Windows 11 24H2/25H2. Windows
+  now deprovisions the package as part of the removal, so the deprovision that follows reports
+  "Element not found"; that answer arrives as an exception rather than in the deployment result,
+  and only the result form was treated as "already done". App removals are reported as not
+  reversible on revert; the comments that said a revert reprovisions the app now say it can only
+  do that while Windows still has the package staged, which an all-users removal ends.
+- `debloat.apps.remove-tiktok` and `debloat.apps.remove-disney-plus` named package families that
+  do not exist (wrong publisher IDs), so they never found the apps; they now use
+  `BytedancePte.Ltd.TikTok_6yccndn6064se` and `Disney.37853FC22B2CE_6rarf9sa4v8jt`, the families
+  the Microsoft Store installs.
 - Files an installer or uninstaller queued for deletion from a temporary folder at the next
   restart (`PendingFileRenameOperations`) no longer block every apply as "a reboot is pending
   from earlier servicing". A queued rename, or a deletion outside the Windows, system and user

@@ -10,7 +10,7 @@
       "level": "Basic",
       "risk": "Safe",
       "scope": "Machine",
-      "status": "Draft",
+      "status": "Verified",
       "appliesTo": { "editions": [], "minBuild": null, "maxBuild": null, "architectures": [] },
       "actions": [
         {
@@ -29,7 +29,9 @@
         "https://learn.microsoft.com/windows/application-management/provisioned-apps-windows-client-os",
         "https://learn.microsoft.com/powershell/module/dism/remove-appxprovisionedpackage"
       ],
-      "verifiedOn": [],
+      "verifiedOn": [
+        { "build": 26200, "edition": "Pro", "date": "2026-11-08" }
+      ],
       "tags": ["appx", "games"]
     },
     {
@@ -208,7 +210,7 @@
       "actions": [
         {
           "kind": "Appx",
-          "packageFamilyName": "BytedancePte.Ltd.TikTok_6yccndn93v84r",
+          "packageFamilyName": "BytedancePte.Ltd.TikTok_6yccndn6064se",
           "mode": "AllUsersAndDeprovision",
           "reinstallHint": "Microsoft Store: search for TikTok"
         }
@@ -270,7 +272,7 @@
       "actions": [
         {
           "kind": "Appx",
-          "packageFamilyName": "Disney.37853FC22B2CE_6rarak0p23mb6",
+          "packageFamilyName": "Disney.37853FC22B2CE_6rarf9sa4v8jt",
           "mode": "AllUsersAndDeprovision",
           "reinstallHint": "Microsoft Store: search for Disney+"
         }

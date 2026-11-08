@@ -108,7 +108,7 @@ internal sealed class RunRollback
             // A failed or in-flight write with no restorable prior most likely changed nothing.
             if (wasApplied)
             {
-                // Do what can be done (an all-users app removal is reprovisioned), but report it honestly.
+                // Do what can be done (a deprovisioned app still staged is reprovisioned), but report it honestly.
                 ApplyEngine.Capture(() => _applier.Restore(action.Action, action.Prior, action.Sid));
                 action.Result = ApplyState.NotReversible;
                 _journal.Audit(AuditEventId.Error,

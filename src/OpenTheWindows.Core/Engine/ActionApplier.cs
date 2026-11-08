@@ -284,9 +284,9 @@ public sealed class ActionApplier
                 _writers.Tasks.SetEnabled(t.Path, enabled);
                 break;
             case AppxAction { Mode: AppxRemovalMode.AllUsersAndDeprovision } a when prior is { Deprovisioned: false }:
-                // Reprovisioning restores an all-users deprovision so new users receive the app again.
-                // A per-user removal is not reversible here because the package bits are gone (the catalogue
-                // entry carries a reinstall hint for that case).
+                // Reprovisioning brings a deprovisioned app back for new users while Windows still has the
+                // package staged. After an all-users removal on 24H2 or 25H2 the files are gone and this
+                // fails, so the run reports the entry as not reversible and its reinstall hint applies.
                 _writers.Appx.Reprovision(a.PackageFamilyName);
                 break;
             case OptionalFeatureAction f when prior is { Exists: true, Enabled: { } enabled }:
