@@ -219,6 +219,24 @@ internal class Strings
         }
     }
 
+    /// <summary>Looks up a localized string similar to Startup.</summary>
+    internal static string Nav_Startup
+    {
+        get
+        {
+            return ResourceManager.GetString("Nav_Startup", resourceCulture);
+        }
+    }
+
+    /// <summary>Looks up a localized string similar to App access.</summary>
+    internal static string Nav_Access
+    {
+        get
+        {
+            return ResourceManager.GetString("Nav_Access", resourceCulture);
+        }
+    }
+
     /// <summary>Looks up a localized string similar to History.</summary>
     internal static string Nav_History
     {

@@ -3,8 +3,11 @@ using OpenTheWindows.Core.Catalog;
 using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.Core.Engine;
 using OpenTheWindows.Core.Journal;
+using OpenTheWindows.Core.Persistence;
+using OpenTheWindows.Core.Privacy;
 using OpenTheWindows.Core.Profiles;
 using OpenTheWindows.Core.Releases;
+using OpenTheWindows.Core.Startup;
 using OpenTheWindows.Core.Updates;
 using OpenTheWindows.Windows;
 using OpenTheWindows.Windows.Readers;
@@ -32,6 +35,9 @@ namespace OpenTheWindows.Cli;
 /// <param name="CreateUserHiveEnumerator">Builds the user-hive enumerator (real user profiles an all-users apply targets).</param>
 /// <param name="CreateActiveSetupRegistrar">Builds the Active Setup registrar (per-user logon fallback for an all-users apply).</param>
 /// <param name="CreateEventLogInstaller">Builds the Event Log source installer (the <c>otw eventlog</c> command and MSI custom action).</param>
+/// <param name="CreateStartupApps">Builds the startup-apps service (the <c>otw startup</c> commands).</param>
+/// <param name="CreateCapabilityAccess">Builds the read-only app-access view (the <c>otw access</c> command).</param>
+/// <param name="CreatePersistenceWatch">Builds the persistence watch (the <c>otw watch</c> commands).</param>
 /// <param name="Health">The read-only machine health probe.</param>
 /// <param name="Elevation">The process elevation context.</param>
 /// <param name="Hardening">The safeguards for privileged writes and trust decisions.</param>
@@ -51,6 +57,9 @@ internal sealed record CliServices(
     Func<IUserHiveEnumerator> CreateUserHiveEnumerator,
     Func<IActiveSetupRegistrar> CreateActiveSetupRegistrar,
     Func<IEventLogInstaller> CreateEventLogInstaller,
+    Func<StartupAppsService> CreateStartupApps,
+    Func<CapabilityAccessService> CreateCapabilityAccess,
+    Func<PersistenceWatchService> CreatePersistenceWatch,
     IMachineHealthProbe Health,
     IElevationContext Elevation,
     CliHardening Hardening)
@@ -76,6 +85,9 @@ internal sealed record CliServices(
             static () => new WindowsUserHiveEnumerator(),
             static () => new WindowsActiveSetupRegistrar(),
             static () => new WindowsEventLogInstaller(),
+            static () => WindowsActivityFactory.CreateStartupApps(),
+            static () => WindowsActivityFactory.CreateCapabilityAccess(),
+            static () => WindowsActivityFactory.CreatePersistenceWatch(),
             new WindowsMachineHealthProbe(),
             new WindowsElevationContext(),
             new CliHardening(

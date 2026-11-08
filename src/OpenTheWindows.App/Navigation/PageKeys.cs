@@ -14,6 +14,8 @@ internal static class PageKeys
     public const string Performance = "Performance";
     public const string Debloat = "Debloat";
     public const string Shell = "Shell";
+    public const string Startup = "Startup";
+    public const string Access = "Access";
     public const string Profiles = "Profiles";
     public const string History = "History";
     public const string Settings = "Settings";

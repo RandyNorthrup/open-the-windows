@@ -1,8 +1,11 @@
 using System.Text.Json.Serialization;
+using OpenTheWindows.Cli.Commands;
 using OpenTheWindows.Core.Abstractions;
 using OpenTheWindows.Core.Diagnostics;
 using OpenTheWindows.Core.Journal;
+using OpenTheWindows.Core.Privacy;
 using OpenTheWindows.Core.Releases;
+using OpenTheWindows.Core.Startup;
 using OpenTheWindows.Core.Updates;
 
 namespace OpenTheWindows.Cli;
@@ -26,4 +29,8 @@ namespace OpenTheWindows.Cli;
 [JsonSerializable(typeof(AppReleaseCheckResult))]
 [JsonSerializable(typeof(UpdateRepairResult))]
 [JsonSerializable(typeof(UpdateStatus))]
+[JsonSerializable(typeof(IReadOnlyList<StartupApp>))]
+[JsonSerializable(typeof(IReadOnlyList<CapabilityUse>))]
+[JsonSerializable(typeof(WatchSnapshotJson))]
+[JsonSerializable(typeof(WatchDiffJson))]
 internal sealed partial class CliJsonContext : JsonSerializerContext;

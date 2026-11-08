@@ -50,6 +50,19 @@ All notable changes to this project are documented here. The format follows
 - GUI review-and-apply: the plan is built off the UI thread behind a progress bar, and Advanced
   entries are acknowledged together before applying (Breaking entries still need their id
   typed).
+- Startup apps (`otw startup list|enable|disable` and a GUI **Startup** page): lists the Run-key
+  and Startup-folder apps for all users and the signed-in user, and turns one on or off with the
+  `StartupApproved` switch Task Manager and Settings use. The Run value or shortcut is never
+  touched; each change is a journaled run (profile `startup-apps`) that History and `otw revert`
+  undo, and it takes effect at the next sign-in.
+- App access (`otw access` and a GUI **App access** page): read-only list of which apps used
+  the camera, microphone or location (or, with `--all`, any capability), newest first, with
+  apps using one right now on top, from the per-app last-used times in the
+  CapabilityAccessManager ConsentStore.
+- Persistence watch (`otw watch snapshot|diff` and the **Startup** page): records every
+  service and driver registration, scheduled task, Run/RunOnce value and Startup-folder file
+  as a baseline in the protected `state` folder, then lists what was added, removed or changed
+  since; `diff` exits with 1 on changes. A baseline not owned by an administrator is ignored.
 - An unexpected GUI fault is written to `%LocalAppData%\OpenTheWindows\gui-errors.log` and shown
   in a message instead of closing the window.
 - Accessibility: list items announce their content to screen readers, status lines are live

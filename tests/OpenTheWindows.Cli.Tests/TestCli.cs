@@ -38,7 +38,10 @@ internal static class TestCli
         IUserHiveEnumerator? userHiveEnumerator = null,
         IActiveSetupRegistrar? activeSetupRegistrar = null,
         IEventLogInstaller? eventLogInstaller = null,
-        CliHardening? hardening = null)
+        CliHardening? hardening = null,
+        Core.Startup.StartupAppsService? startupApps = null,
+        Core.Privacy.CapabilityAccessService? capabilityAccess = null,
+        Core.Persistence.PersistenceWatchService? persistenceWatch = null)
     {
         FakeReaders scanReaders = readers ?? new FakeReaders();
         FakeScheduledTaskInstaller defaultInstaller = new();
@@ -63,6 +66,9 @@ internal static class TestCli
             () => userHiveEnumerator ?? defaultUsers,
             () => activeSetupRegistrar ?? defaultRegistrar,
             () => eventLogInstaller ?? defaultEventLog,
+            () => startupApps ?? FakeActivitySources.StartupApps(new FakeStartupSource(), FakeApplyEngine.Create(new FakeMachine()), FixedTime),
+            () => capabilityAccess ?? FakeActivitySources.Access(new FakeConsentStoreSource(), new FakeMachine()),
+            () => persistenceWatch ?? FakeActivitySources.Watch(new FakePersistenceSource(), new FakePersistenceSnapshotStore(), new FakeMachine(), FixedTime),
             health ?? new FakeHealthProbe([]),
             elevation ?? new FakeElevationContext(isElevated: true),
             hardening ?? Hardening(applyEngine));
@@ -123,5 +129,21 @@ internal static class TestCli
             new FakeOperatingSystemInfo(FakeOperatingSystemInfo.Windows11Pro24H2()),
             new FakeElevationContext(isElevated: true));
         return CliTestHost.Host(Services(doctor, _ => CatalogLoader.LoadBuiltIn(), userHiveEnumerator: enumerator));
+    }
+
+    public static (RootCommand Root, StringWriter Out, StringWriter Err) ActivityHost(
+        bool elevated = true, bool supported = true, Core.Startup.StartupAppsService? startupApps = null,
+        Core.Privacy.CapabilityAccessService? capabilityAccess = null, Core.Persistence.PersistenceWatchService? persistenceWatch = null)
+    {
+        var doctor = new DoctorService(
+            new FakeOperatingSystemInfo(supported ? FakeOperatingSystemInfo.Windows11Pro24H2() : FakeOperatingSystemInfo.WindowsServer2025()),
+            new FakeElevationContext(isElevated: true));
+        return CliTestHost.Host(Services(
+            doctor,
+            _ => CatalogLoader.LoadBuiltIn(),
+            elevation: new FakeElevationContext(elevated),
+            startupApps: startupApps,
+            capabilityAccess: capabilityAccess,
+            persistenceWatch: persistenceWatch));
     }
 }

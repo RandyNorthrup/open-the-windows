@@ -117,6 +117,12 @@
   <data name="Nav_Profiles" xml:space="preserve">
     <value>Profiles</value>
   </data>
+  <data name="Nav_Startup" xml:space="preserve">
+    <value>Startup</value>
+  </data>
+  <data name="Nav_Access" xml:space="preserve">
+    <value>App access</value>
+  </data>
   <data name="Nav_History" xml:space="preserve">
     <value>History</value>
   </data>

@@ -26,6 +26,9 @@ public static class WindowsDataPaths
     /// <summary>Profile files copied here for the scheduled task and the per-user logon fallback to read.</summary>
     public static string Profiles { get; } = Path.Combine(Root, "profiles");
 
+    /// <summary>Product state kept between runs (the policy-ownership ledger, the persistence-watch baseline).</summary>
+    public static string State { get; } = Path.Combine(Root, "state");
+
     /// <summary>The name of the folder holding machine secrets (the journal MAC key); administrators and SYSTEM only.</summary>
     public const string KeysFolderName = "keys";
 

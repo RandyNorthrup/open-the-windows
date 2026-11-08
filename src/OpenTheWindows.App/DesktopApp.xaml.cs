@@ -60,6 +60,7 @@ internal sealed partial class DesktopApp : Application, IDisposable
         services.AddSingleton<Func<ApplyEngine>>(_ => static () => WindowsApplyEngineFactory.Create());
         services.AddSingleton<Func<ScanEngine>>(_ => static () => WindowsScanEngineFactory.Create());
         services.AddSingleton<IApplyCoordinator, ApplyCoordinator>();
+        RegisterActivity(services);
         services.AddTransient<ApplyFlowViewModel>();
         services.AddSingleton<Func<ApplyFlowViewModel>>(sp => sp.GetRequiredService<ApplyFlowViewModel>);
         services.AddSingleton<IApplyFlowLauncher, ApplyFlowLauncher>();
@@ -79,7 +80,17 @@ internal sealed partial class DesktopApp : Application, IDisposable
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IReadOnlyList<NavigationItem>>(ShellNavigation.Pages);
 
-        // Page view models (keyed by page so the navigation service resolves them).
+        RegisterPages(services);
+
+        // Shell.
+        services.AddSingleton<MainWindowViewModel>();
+        services.AddSingleton<MainWindow>();
+        return services;
+    }
+
+    // Page view models, keyed by page so the navigation service resolves them.
+    private static void RegisterPages(IServiceCollection services)
+    {
         services.AddSingleton<DoctorViewModel>();
         services.AddKeyedSingleton<IPageViewModel, DashboardViewModel>(PageKeys.Dashboard);
         services.AddKeyedSingleton<IPageViewModel, UpdatesViewModel>(PageKeys.Updates);
@@ -90,15 +101,20 @@ internal sealed partial class DesktopApp : Application, IDisposable
                 (sp, _) => ActivatorUtilities.CreateInstance<CategoryPageViewModel>(sp, category));
         }
 
+        services.AddKeyedSingleton<IPageViewModel, StartupViewModel>(PageKeys.Startup);
+        services.AddKeyedSingleton<IPageViewModel, AccessViewModel>(PageKeys.Access);
         services.AddKeyedSingleton<IPageViewModel, ProfilesViewModel>(PageKeys.Profiles);
         services.AddKeyedSingleton<IPageViewModel, HistoryViewModel>(PageKeys.History);
         services.AddKeyedSingleton<IPageViewModel, SettingsViewModel>(PageKeys.Settings);
         services.AddKeyedSingleton<IPageViewModel, AboutViewModel>(PageKeys.About);
+    }
 
-        // Shell.
-        services.AddSingleton<MainWindowViewModel>();
-        services.AddSingleton<MainWindow>();
-        return services;
+    // Startup apps, the app-access view and the persistence watch, each built lazily by the
+    // coordinator off the DI-validation path.
+    private static void RegisterActivity(IServiceCollection services)
+    {
+        services.AddSingleton<IActivityCoordinator>(_ => new ActivityCoordinator(
+            WindowsActivityFactory.CreateStartupApps, WindowsActivityFactory.CreateCapabilityAccess, WindowsActivityFactory.CreatePersistenceWatch));
     }
 
     // Windows Update control: pause/resume, per-update hide, the feature-update hold and the

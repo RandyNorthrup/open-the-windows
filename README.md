@@ -66,7 +66,8 @@ attestations you can verify with `gh attestation verify` (see
 `OpenTheWindows.exe` is the WPF desktop app over the same engine as the CLI. It
 opens on a **Dashboard** (system health) with a left navigation rail to the
 category pages (**Privacy**, **Updates**, **Security**, **Performance**,
-**Debloat**, **Shell**), **Profiles**, **History**, **Settings** and **About**. A
+**Debloat**, **Shell**), **Startup**, **App access**, **Profiles**, **History**,
+**Settings** and **About**. A
 category page has a level dial (Verified entries, as the named profiles pick
 them), search, risk and "not applied" filters, **Scan** to badge what this PC
 already has, and a per-entry detail pane; **Review & apply…** opens a modal flow
@@ -78,6 +79,8 @@ Update (with an extended pause behind a warning), holds feature updates at a
 release, runs the supervised Windows Update repair, hides/unhides single
 updates, and is read-only when updates are managed by policy. **Profiles**
 applies, imports, exports and captures profiles with their signing state.
+**Startup** turns startup apps on and off and runs the persistence watch;
+**App access** shows recent camera, microphone and location use.
 **About** can check GitHub Releases for a newer version when you ask.
 
 ## Using the CLI (`otw`)
@@ -139,6 +142,17 @@ Every command takes `--help` for its full options and exit codes, and most take
   installing; Pro, Enterprise and Education), and `repair` (reset a stuck update
   client: its services are stopped only for the repair and its caches set aside,
   never deleted).
+- **`otw startup`** — `list` the apps Windows starts at sign-in, and `enable` /
+  `disable <name>` one with the same switch Task Manager uses. The app stays
+  installed; the change is journaled, revertable with `otw revert`, and takes
+  effect at the next sign-in.
+- **`otw access`** — read-only: which apps recently used the camera, microphone or
+  location (`--all` for every capability Windows records), and which are using
+  one right now.
+- **`otw watch snapshot`** / **`otw watch diff`** — record every autostart
+  (services and drivers, scheduled tasks, Run/RunOnce values, Startup-folder
+  files) as a baseline, then list what was added, removed or changed since; `diff`
+  exits with 1 when something changed. Read-only apart from the baseline file.
 - **`otw check-update`** — opt-in query of GitHub Releases for a newer version
   (one HTTPS request; nothing runs on a schedule).
 

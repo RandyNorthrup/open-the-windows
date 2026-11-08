@@ -1,0 +1,104 @@
+<UserControl x:Class="OpenTheWindows.App.Views.StartupView"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:OpenTheWindows.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:StartupViewModel}"
+             d:DesignWidth="900"
+             d:DesignHeight="640">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Startup" Style="{StaticResource PageTitleText}"
+                   AutomationProperties.AutomationId="Startup_Title" />
+
+        <DockPanel Grid.Row="1" Margin="0,16,0,10">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="Re_fresh" Padding="14,5" Margin="0,0,8,0" Command="{Binding RefreshCommand}"
+                        ToolTip="Read the startup apps again."
+                        AutomationProperties.AutomationId="Startup_Refresh" />
+                <Button Content="Turn _on" Padding="14,5" Margin="0,0,8,0" Command="{Binding TurnOnCommand}"
+                        ToolTipService.ShowOnDisabled="True"
+                        ToolTip="Let the selected app start when you sign in again. Select an app that is off first."
+                        AutomationProperties.AutomationId="Startup_TurnOn" />
+                <Button Content="Turn o_ff…" Padding="14,5" Command="{Binding TurnOffCommand}"
+                        ToolTipService.ShowOnDisabled="True"
+                        ToolTip="Stop the selected app starting when you sign in. It stays installed; the change is recorded in History and can be reverted. Select an app that is on first."
+                        AutomationProperties.AutomationId="Startup_TurnOff" />
+            </StackPanel>
+            <TextBlock Text="{Binding Status}" Style="{StaticResource MutedText}" VerticalAlignment="Center" TextWrapping="Wrap"
+                       AutomationProperties.LiveSetting="Polite"
+                       AutomationProperties.AutomationId="Startup_Status" />
+        </DockPanel>
+
+        <ListBox Grid.Row="2"
+                 ItemsSource="{Binding Apps}"
+                 SelectedItem="{Binding SelectedApp, Mode=TwoWay}"
+                 HorizontalContentAlignment="Stretch"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 AutomationProperties.Name="Startup apps"
+                 AutomationProperties.AutomationId="Startup_List">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="48" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding StateLabel}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding LocationLabel}" FontSize="12" Opacity="0.75" />
+                            <TextBlock Text="{Binding Command}" FontSize="11" Opacity="0.6" FontFamily="Consolas" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <TextBlock Grid.Row="3" Text="Persistence watch" FontSize="16" FontWeight="SemiBold" Margin="0,20,0,4" />
+        <DockPanel Grid.Row="4" Margin="0,0,0,8">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="Record _baseline…" Padding="14,5" Margin="0,0,8,0" Command="{Binding TakeSnapshotCommand}"
+                        ToolTip="Record every service, scheduled task, Run entry and Startup-folder item now, to compare with later. Replaces any earlier baseline."
+                        AutomationProperties.AutomationId="Startup_Snapshot" />
+                <Button Content="_Compare" Padding="14,5" Command="{Binding CompareCommand}"
+                        ToolTip="List what was added, removed or changed since the baseline — the places unwanted software hides to survive a restart."
+                        AutomationProperties.AutomationId="Startup_Compare" />
+            </StackPanel>
+            <TextBlock Text="{Binding WatchStatus}" Style="{StaticResource MutedText}" VerticalAlignment="Center" TextWrapping="Wrap"
+                       AutomationProperties.LiveSetting="Polite"
+                       AutomationProperties.AutomationId="Startup_WatchStatus" />
+        </DockPanel>
+
+        <ListBox Grid.Row="5"
+                 ItemsSource="{Binding Changes}"
+                 HorizontalContentAlignment="Stretch"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 AutomationProperties.Name="Changes since the baseline"
+                 AutomationProperties.AutomationId="Startup_Changes">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Margin="0,4">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding ChangeLabel}" FontWeight="SemiBold" MinWidth="70" />
+                            <TextBlock Text="{Binding KindLabel}" Opacity="0.75" MinWidth="110" />
+                            <TextBlock Text="{Binding Key}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <TextBlock Text="{Binding Detail}" FontSize="11" Opacity="0.65" FontFamily="Consolas" TextWrapping="Wrap" Margin="70,2,0,0" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</UserControl>

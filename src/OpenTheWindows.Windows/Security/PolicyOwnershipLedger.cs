@@ -29,7 +29,7 @@ public sealed class PolicyOwnershipLedger
 
     /// <summary>The machine ledger under <c>%ProgramData%\OpenTheWindows\state</c>.</summary>
     public PolicyOwnershipLedger()
-        : this(Path.Combine(WindowsDataPaths.Root, "state"), new WindowsSecureDirectory())
+        : this(WindowsDataPaths.State, new WindowsSecureDirectory())
     {
     }
 
