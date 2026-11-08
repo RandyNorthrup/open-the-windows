@@ -67,6 +67,13 @@ All notable changes to this project are documented here. The format follows
   service and driver registration, scheduled task, Run/RunOnce value and Startup-folder file
   as a baseline in the protected `state` folder, then lists what was added, removed or changed
   since; `diff` exits with 1 on changes. A baseline not owned by an administrator is ignored.
+- A new logo and app icon: one window swung open with a shield on the open sash, replacing the
+  four-pane mark that sat too close to Microsoft's Windows logo. The README, favicons, social
+  preview and the app's window, taskbar and navigation icons all use it, and the README shows
+  screenshots of the app and links the new wiki.
+- GUI: an entry's "What it does" reads as a plain sentence ("Set HKLM\…\AllowRecallEnablement to
+  0 (Dword policy)") instead of a raw record dump; the Updates page's pause presets read "7 days",
+  "14 days" and "35 days"; the Startup page gives the app list most of the height.
 - An unexpected GUI fault is written to `%LocalAppData%\OpenTheWindows\gui-errors.log` and shown
   in a message instead of closing the window.
 - Accessibility: list items announce their content to screen readers, status lines are live

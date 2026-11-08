@@ -1,6 +1,17 @@
 # Open the Windows
 
-![Open the Windows](assets/open-the-windows-logo.svg)
+![Open the Windows](assets/open-the-windows-logo.png#gh-light-mode-only)
+![Open the Windows](assets/open-the-windows-logo-dark.png#gh-dark-mode-only)
+
+**Take back control of Windows 11.** Every change is journaled, verified and reversible.
+
+[![Latest release](https://img.shields.io/github/v/release/RandyNorthrup/open-the-windows?style=flat-square&color=1E88E5)](https://github.com/RandyNorthrup/open-the-windows/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-0C3A78?style=flat-square)](LICENSE)
+[![Windows 11](https://img.shields.io/badge/Windows-11-1E88E5?style=flat-square)](#requirements)
+[![.NET 10](https://img.shields.io/badge/.NET-10-512BD4?style=flat-square)](https://dotnet.microsoft.com/)
+[![Documentation](https://img.shields.io/badge/docs-wiki-4FC3F7?style=flat-square)](https://github.com/RandyNorthrup/open-the-windows/wiki)
+
+![The Privacy page: a scan shows which settings this PC already has, with the selected setting explained on the right](assets/screenshots/privacy.png)
 
 Free, open-source (MIT), enterprise-grade Windows 11 control panel for
 **privacy**, **Windows Update**, **security hardening**, **performance** and
@@ -83,6 +94,19 @@ applies, imports, exports and captures profiles with their signing state.
 **App access** shows recent camera, microphone and location use.
 **About** can check GitHub Releases for a newer version when you ask.
 
+### Screenshots
+
+| | |
+| --- | --- |
+| ![Dashboard: system check and security baselines](assets/screenshots/dashboard.png) | ![Updates: pause, hold a release, repair and hide updates](assets/screenshots/updates.png) |
+| **Dashboard**: the system check and security-baseline scores. | **Updates**: pause presets, extended pause, feature-update hold, repair and per-update hide. |
+| ![Startup: startup apps with their on/off switch and the persistence watch](assets/screenshots/startup.png) | ![App access: recent camera, microphone and location use](assets/screenshots/app-access.png) |
+| **Startup**: turn startup apps on or off and watch for new autostarts. | **App access**: which apps used the camera, microphone or location, and when. |
+| ![Profiles: built-in profiles with what each changes on this PC](assets/screenshots/profiles.png) | ![History: every run with its entries, revert and Undo everything](assets/screenshots/history.png) |
+| **Profiles**: built-in, imported and captured profiles, with what each changes here. | **History**: every run and its entries; revert a run, one entry, or everything. |
+
+The [wiki](https://github.com/RandyNorthrup/open-the-windows/wiki) walks through every page and command.
+
 ## Using the CLI (`otw`)
 
 After install, `otw` is the command-line tool; the GUI drives the same engine.
@@ -161,6 +185,16 @@ Exit codes are part of the contract and listed by `otw --help`: 0 success
 (compliant), 1 drift, 2 error, 3 unsupported OS, 4 invalid input (including a
 mistyped command line), 5 elevation required, 6 managed by policy (nothing
 changed), 3010 reboot required.
+
+## Documentation
+
+The [wiki](https://github.com/RandyNorthrup/open-the-windows/wiki) explains what everything does and how
+to use it: [getting started](https://github.com/RandyNorthrup/open-the-windows/wiki/Getting-Started),
+[the desktop app](https://github.com/RandyNorthrup/open-the-windows/wiki/Desktop-App),
+[every CLI command](https://github.com/RandyNorthrup/open-the-windows/wiki/Command-Line-Reference),
+[levels, risk and verification](https://github.com/RandyNorthrup/open-the-windows/wiki/Levels-Risk-and-Verification),
+[safety and reversibility](https://github.com/RandyNorthrup/open-the-windows/wiki/Safety-and-Reversibility)
+and [enterprise deployment](https://github.com/RandyNorthrup/open-the-windows/wiki/Enterprise-Deployment).
 
 ## Contributing
 

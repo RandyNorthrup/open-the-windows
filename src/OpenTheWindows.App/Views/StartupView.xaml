@@ -13,10 +13,10 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="3*" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="*" MinHeight="90" />
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="Startup" Style="{StaticResource PageTitleText}"

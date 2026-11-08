@@ -52,6 +52,8 @@
     <!-- The .ico is embedded via ApplicationIcon; also expose it as a WPF resource
          so MainWindow can set Icon="Resources/OpenTheWindows.ico" for the window chrome. -->
     <Resource Include="Resources\OpenTheWindows.ico" />
+    <!-- The app mark shown in the navigation rail (BrandArt.xaml). -->
+    <Resource Include="Resources\OpenTheWindowsMark.png" />
   </ItemGroup>
 
   <ItemGroup>

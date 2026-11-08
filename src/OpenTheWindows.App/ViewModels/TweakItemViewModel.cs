@@ -28,7 +28,7 @@ internal sealed partial class TweakItemViewModel : ObservableObject
     {
         ArgumentNullException.ThrowIfNull(entry);
         Definition = entry;
-        ActionSummaries = [.. entry.Actions.Select(a => string.Create(CultureInfo.InvariantCulture, $"{a.Kind}: {a}"))];
+        ActionSummaries = [.. entry.Actions.Select(ActionText.Describe)];
         Sources = [.. entry.Sources.Select(u => u.ToString())];
     }
 

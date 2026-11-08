@@ -80,12 +80,13 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Button Content="{Binding StringFormat={}{0} days}"
-                                    Padding="14,5" Margin="0,0,8,0"
+                            <Button Padding="14,5" Margin="0,0,8,0"
                                     Command="{Binding DataContext.PauseCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                     CommandParameter="{Binding}"
                                     ToolTipService.ShowOnDisabled="True"
-                                    ToolTip="{Binding StringFormat=Pause Windows Update for {0} days. Disabled when updates are managed by your organisation.}" />
+                                    ToolTip="{Binding StringFormat=Pause Windows Update for {0} days. Disabled when updates are managed by your organisation.}">
+                                <TextBlock Text="{Binding StringFormat={}{0} days}" />
+                            </Button>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
